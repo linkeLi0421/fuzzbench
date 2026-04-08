@@ -489,6 +489,28 @@ class SnapshotMeasurer(coverage_utils.TrialCoverage):  # pylint: disable=too-man
         filestore_utils.cp(archive_path, archive_filestore_path)
         os.remove(archive_path)
 
+    def get_crash_export_path(self, cycle):
+        """Return a user-facing location for raw crash files for |cycle|."""
+        experiment_filestore = os.environ['EXPERIMENT_FILESTORE']
+        experiment_name = experiment_utils.get_experiment_name()
+        cycle_dir = f'cycle-{cycle:04d}'
+        if filestore_utils.is_gcs_filestore_path(experiment_filestore):
+            export_root = posixpath.join(os.environ['REPORT_FILESTORE'],
+                                         'crashes')
+            return posixpath.join(export_root, experiment_name,
+                                  self.benchmark_fuzzer_trial_dir, cycle_dir)
+
+        export_root = os.path.join(os.path.dirname(experiment_filestore),
+                                   'crashes')
+        return os.path.join(export_root, experiment_name,
+                            self.benchmark_fuzzer_trial_dir, cycle_dir)
+
+    def export_crash_files(self, cycle):
+        """Mirror raw crash files to a stable, user-facing output path."""
+        crash_export_path = self.get_crash_export_path(cycle)
+        filestore_utils.rm(crash_export_path, recursive=True, force=True)
+        filestore_utils.cp(self.crashes_dir, crash_export_path, recursive=True)
+
     def process_crashes(self, cycle):
         """Process and store crashes."""
         is_bug_benchmark = benchmark_utils.get_type(self.benchmark) == 'bug'
@@ -501,6 +523,7 @@ class SnapshotMeasurer(coverage_utils.TrialCoverage):  # pylint: disable=too-man
 
         logs.info('Saving crash files crashes for cycle %d.', cycle)
         self.save_crash_files(cycle)
+        self.export_crash_files(cycle)
 
         logs.info('Processing crashes for cycle %d.', cycle)
         app_binary = coverage_utils.get_coverage_binary(self.benchmark)

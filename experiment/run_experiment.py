@@ -534,7 +534,7 @@ class LocalDispatcher(BaseDispatcher):
         command = [
             'docker',
             'run',
-            '-ti',
+            '-i',
             '--rm',
             '-v',
             '/var/run/docker.sock:/var/run/docker.sock',
@@ -542,6 +542,8 @@ class LocalDispatcher(BaseDispatcher):
             shared_experiment_filestore_arg,
             '-v',
             shared_report_filestore_arg,
+            '-e',
+            'DOCKER_API_VERSION=1.40',
         ] + environment_args + [
             '--shm-size=2g',
             '--cap-add=SYS_PTRACE',
@@ -553,7 +555,7 @@ class LocalDispatcher(BaseDispatcher):
             'rsync -r '
             '"${EXPERIMENT_FILESTORE}/${EXPERIMENT}/input/" ${WORK} && '
             'mkdir ${WORK}/src && '
-            'tar -xvzf ${WORK}/src.tar.gz -C ${WORK}/src && '
+            'tar -xzf ${WORK}/src.tar.gz -C ${WORK}/src && '
             'PYTHONPATH=${WORK}/src python3 '
             '${WORK}/src/experiment/dispatcher.py || '
             '/bin/bash'  # Open shell if experiment fails.

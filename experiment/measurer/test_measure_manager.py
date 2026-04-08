@@ -90,6 +90,33 @@ def test_get_current_coverage_no_file(fs, experiment):
     assert not covered_branches
 
 
+@mock.patch('experiment.measurer.measure_manager.filestore_utils.cp')
+@mock.patch('experiment.measurer.measure_manager.filestore_utils.rm')
+def test_export_crash_files_local_experiment(mocked_rm, mocked_cp, fs,
+                                             experiment):
+    """Tests that raw crashes are mirrored to fuzzbench-output/crashes."""
+    os.environ['WORK'] = '/work'
+    os.environ['EXPERIMENT_FILESTORE'] = '/tmp/fuzzbench-output/fuzzbench-data'
+    os.environ['EXPERIMENT'] = 'example-experiment'
+
+    snapshot_measurer = measure_manager.SnapshotMeasurer(
+        FUZZER, BENCHMARK, TRIAL_NUM, SNAPSHOT_LOGGER, REGION_COVERAGE)
+    snapshot_measurer.initialize_measurement_dirs()
+    fs.create_file(os.path.join(snapshot_measurer.crashes_dir, 'crash-1'),
+                   contents='boom')
+
+    snapshot_measurer.export_crash_files(3)
+
+    expected_path = ('/tmp/fuzzbench-output/crashes/example-experiment/'
+                     'benchmark-a-fuzzer-a/trial-12/cycle-0003')
+    mocked_rm.assert_called_once_with(expected_path,
+                                      recursive=True,
+                                      force=True)
+    mocked_cp.assert_called_once_with(snapshot_measurer.crashes_dir,
+                                      expected_path,
+                                      recursive=True)
+
+
 @mock.patch('common.new_process.execute')
 def test_generate_profdata_create(mocked_execute, experiment, fs):
     """Tests that generate_profdata can run the correct command."""

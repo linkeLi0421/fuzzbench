@@ -113,11 +113,17 @@ def build_images_for_trials(fuzzers: List[str], benchmarks: List[str],
     experiment times each pair of fuzzer+benchmark that builds successfully."""
     # This call will raise an exception if the images can't be built which will
     # halt the experiment.
+    logs.info('Building base images...')
     builder.build_base_images()
+    logs.info('Base images built successfully.')
 
     # Only build fuzzers for benchmarks whose measurers built successfully.
+    logs.info('Building measurers for %d benchmarks...', len(benchmarks))
     benchmarks = builder.build_all_measurers(benchmarks)
+    logs.info('Building fuzzer-benchmark images for %d fuzzers x %d benchmarks...',
+              len(fuzzers), len(benchmarks))
     build_successes = builder.build_all_fuzzer_benchmarks(fuzzers, benchmarks)
+    logs.info('Build complete: %d fuzzer-benchmark pairs succeeded.', len(build_successes))
     experiment_name = experiment_utils.get_experiment_name()
     trials = []
     for fuzzer, benchmark in build_successes:
@@ -151,6 +157,7 @@ def dispatcher_main():
     trials = build_images_for_trials(experiment.fuzzers, experiment.benchmarks,
                                      experiment.num_trials,
                                      experiment.preemptible)
+    logs.info('Initialized %d trials in database.', len(trials))
     _initialize_trials_in_db(trials)
 
     if experiment.micro_experiment:
@@ -163,6 +170,7 @@ def dispatcher_main():
     scheduler_loop_thread = threading.Thread(target=scheduler.schedule_loop,
                                              args=(experiment.config,))
     scheduler_loop_thread.start()
+    logs.info('Scheduler started. Launching measurer...')
 
     measurer_main_process = multiprocessing.Process(
         target=measure_manager.measure_main, args=(experiment.config,))

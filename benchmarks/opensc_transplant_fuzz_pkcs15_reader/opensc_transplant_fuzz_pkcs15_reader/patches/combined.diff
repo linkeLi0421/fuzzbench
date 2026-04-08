@@ -1,0 +1,327 @@
+diff --git a/src/libopensc/Makefile.am b/src/libopensc/Makefile.am
+index 1b47d6ebc..b3e130c7f 100644
+--- a/src/libopensc/Makefile.am
++++ b/src/libopensc/Makefile.am
+@@ -25,6 +25,8 @@ AM_CFLAGS = $(OPENPACE_CFLAGS) $(OPTIONAL_OPENSSL_CFLAGS) $(OPTIONAL_OPENCT_CFLA
+ AM_OBJCFLAGS = $(AM_CFLAGS)
+ 
+ libopensc_la_SOURCES_BASE = \
++	$(top_srcdir)/__bug_dispatch.c \
++	bug_dispatch_link.c \
+ 	sc.c ctx.c log.c errors.c \
+ 	asn1.c base64.c sec.c card.c iso7816.c dir.c ef-atr.c \
+ 	ef-gdo.c padding.c apdu.c simpletlv.c gp.c \
+diff --git a/src/libopensc/asn1.c b/src/libopensc/asn1.c
+index e19a8d329..6e0972897 100644
+--- a/src/libopensc/asn1.c
++++ b/src/libopensc/asn1.c
+@@ -30,6 +30,7 @@
+ #include <string.h>
+ #include <limits.h>
+ 
++#include "__bug_dispatch.h"
+ #include "internal.h"
+ #include "asn1.h"
+ 
+@@ -577,13 +578,17 @@ static int decode_bit_string(const u8 * inbuf, size_t inlen, void *outbuf,
+ 
+ 	if (inlen < 1)
+ 		return SC_ERROR_INVALID_ASN1_OBJECT;
+-	/* 8.6.2.3 If the bitstring is empty, there shall be no subsequent octets,
+-         * and the initial octet shall be zero. */
+-	if (inlen == 1 && *in != 0)
+-		return SC_ERROR_INVALID_ASN1_OBJECT;
+-	/* ITU-T Rec. X.690 8.6.2.2: The number shall be in the range zero to seven. */
+-	if ((*in & ~0x07) != 0)
+-		return SC_ERROR_INVALID_ASN1_OBJECT;
++	if (!(__bug_dispatch[0] & (1 << 5))) {
++		if (!(__bug_dispatch[0] & (1 << 6))) {
++			/* 8.6.2.3 If the bitstring is empty, there shall be no subsequent octets,
++			 * and the initial octet shall be zero. */
++			if (inlen == 1 && *in != 0)
++				return SC_ERROR_INVALID_ASN1_OBJECT;
++			/* ITU-T Rec. X.690 8.6.2.2: The number shall be in the range zero to seven. */
++			if ((*in & ~0x07) != 0)
++				return SC_ERROR_INVALID_ASN1_OBJECT;
++		}
++	}
+ 	memset(outbuf, 0, outlen);
+ 	zero_bits = *in & 0x07;
+ 	in++;
+diff --git a/src/libopensc/bug_dispatch_link.c b/src/libopensc/bug_dispatch_link.c
+new file mode 100644
+index 000000000..79f525741
+--- /dev/null
++++ b/src/libopensc/bug_dispatch_link.c
+@@ -0,0 +1,3 @@
++/* Keep the canonical dispatch definition in the repository root and
++ * compile it into libopensc via a local translation unit. */
++#include "../../__bug_dispatch.c"
+diff --git a/src/libopensc/card-idprime.c b/src/libopensc/card-idprime.c
+index e805da15f..765c86ec2 100644
+--- a/src/libopensc/card-idprime.c
++++ b/src/libopensc/card-idprime.c
+@@ -25,6 +25,7 @@
+ #endif
+ 
+ #include "internal.h"
++#include "__bug_dispatch.h"
+ #include <stddef.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -533,15 +534,30 @@ static int idprime_read_binary(sc_card_t *card, unsigned int offset,
+ 		count, offset);
+ 
+ 	if (!priv->cached && offset == 0) {
++		int left;
++		size_t read;
+ 		// this function is called to read and uncompress the certificate
+ 		u8 buffer[SC_MAX_EXT_APDU_BUFFER_SIZE];
+ 		if (sizeof(buffer) < count) {
+ 			LOG_FUNC_RETURN(card->ctx, SC_ERROR_INTERNAL);
+ 		}
+ 		/* Read what was reported by FCI from select command */
+-		r = iso_ops->read_binary(card, 0, buffer, priv->file_size, flags);
+-		if (r < 0) {
+-			LOG_FUNC_RETURN(card->ctx, r);
++		if (__bug_dispatch[0] & (1 << 1)) {
++			left = priv->file_size;
++			read = 0;
++			while (left > 0) {
++				r = iso_ops->read_binary(card, 0, buffer + read, priv->file_size, flags);
++				if (r < 0) {
++					LOG_FUNC_RETURN(card->ctx, r);
++				}
++				left -= r;
++				read += r;
++			}
++		} else {
++			r = iso_ops->read_binary(card, 0, buffer, priv->file_size, flags);
++			if (r < 0) {
++				LOG_FUNC_RETURN(card->ctx, r);
++			}
+ 		}
+ 		if (r < 4) {
+ 			LOG_FUNC_RETURN(card->ctx, SC_ERROR_INVALID_DATA);
+diff --git a/src/libopensc/card-openpgp.c b/src/libopensc/card-openpgp.c
+index bf8ab51e8..ef49c0198 100644
+--- a/src/libopensc/card-openpgp.c
++++ b/src/libopensc/card-openpgp.c
+@@ -46,6 +46,7 @@
+ 
+ #include "internal.h"
+ #include "asn1.h"
++#include "__bug_dispatch.h"
+ #include "cardctl.h"
+ #include "errors.h"
+ #ifdef ENABLE_OPENSSL
+@@ -612,6 +613,12 @@ pgp_parse_algo_attr_blob(const pgp_blob_t *blob, sc_cardctl_openpgp_keygen_info_
+ 			/* Create copy of oid from blob */
+ 			sc_init_oid(&oid);
+ 			r = sc_asn1_decode_object_id(&blob->data[1], key_info->u.ec.oid_len, &oid);
++			if (__bug_dispatch[0] & (1 << 4)) {
++				for (j = 0; j < (blob->len - 1); j++) {
++					oid.value[j] = blob->data[j + 1];
++				}
++			} else {
++			}
+ 
+ 			/* decoding failed, return sc_asn1_decode_object_id error code */
+ 			if (r > 0){
+diff --git a/src/libopensc/card-setcos.c b/src/libopensc/card-setcos.c
+index 859f72fd2..f4077502d 100644
+--- a/src/libopensc/card-setcos.c
++++ b/src/libopensc/card-setcos.c
+@@ -27,6 +27,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++#include "__bug_dispatch.h"
+ #include "internal.h"
+ #include "asn1.h"
+ #include "cardctl.h"
+@@ -789,8 +790,13 @@ static void parse_sec_attr_44(sc_file_t *file, const u8 *buf, size_t len)
+ 	/* Check all sub-AC definitions within the total AC */
+ 	while (len > 1 && (size_t)iOffset < len) {	/* minimum length = 2 */
+ 		size_t iACLen   = buf[iOffset] & 0x0F;
+-		if (iACLen >= len)
+-			break;
++		if (__bug_dispatch[0] & (1 << 3)) {
++			if (iACLen > len)
++				break;
++		} else {
++			if (iACLen >= len)
++				break;
++		}
+ 
+ 		iMethod = SC_AC_NONE;		/* default no authentication required */
+ 
+diff --git a/src/libopensc/card-tcos.c b/src/libopensc/card-tcos.c
+index 0e178fe4a..d37677928 100644
+--- a/src/libopensc/card-tcos.c
++++ b/src/libopensc/card-tcos.c
+@@ -29,6 +29,7 @@
+ #include <time.h>
+ #include <stdlib.h>
+ 
++#include "__bug_dispatch.h"
+ #include "internal.h"
+ #include "asn1.h"
+ #include "cardctl.h"
+@@ -646,8 +647,10 @@ static int tcos_decipher(sc_card_t *card, const u8 * crgram, size_t crgram_len,
+ 	apdu.data = sbuf;
+ 	apdu.lc = apdu.datalen = crgram_len + 1;
+ 	sbuf[0] = tcos3 ? 0x00 : ((data->pad_flags & SC_ALGORITHM_RSA_PAD_PKCS1) ? 0x81 : 0x02);
+-	if (sizeof sbuf - 1 < crgram_len)
+-		return SC_ERROR_INVALID_ARGUMENTS;
++	if (!(__bug_dispatch[0] & (1 << 2))) {
++		if (sizeof sbuf - 1 < crgram_len)
++			return SC_ERROR_INVALID_ARGUMENTS;
++	}
+ 	memcpy(sbuf + 1, crgram, crgram_len);
+ 
+ 	r = sc_transmit_apdu(card, &apdu);
+diff --git a/src/libopensc/pkcs15-coolkey.c b/src/libopensc/pkcs15-coolkey.c
+index 373ec7a5a..8d4956f0b 100644
+--- a/src/libopensc/pkcs15-coolkey.c
++++ b/src/libopensc/pkcs15-coolkey.c
+@@ -39,6 +39,7 @@
+ #include "cardctl.h"
+ #include "asn1.h"
+ #include "pkcs15.h"
++#include "__bug_dispatch.h"
+ #include "../pkcs11/pkcs11.h"
+ 
+ typedef struct pdata_st {
+@@ -598,7 +599,11 @@ static int sc_pkcs15emu_coolkey_init(sc_pkcs15_card_t *p15card)
+ 					prkey_info.modulus_length = key->u.rsa.modulus.len*8;
+ 				}
+ 			} else if (key_type == CKK_EC) {
+-				obj_type = SC_PKCS15_TYPE_PRKEY_EC;
++				if (__bug_dispatch[0] & (1 << 0)) {
++					obj_type = SC_PKCS15_TYPE_PUBKEY_EC;
++				} else {
++					obj_type = SC_PKCS15_TYPE_PRKEY_EC;
++				}
+ 				if (key) {
+ 					prkey_info.field_length = key->u.ec.params.field_length;
+ 				}
+diff --git a/src/libopensc/pkcs15-sec.c b/src/libopensc/pkcs15-sec.c
+index 42a3a6af4..9c99a33de 100644
+--- a/src/libopensc/pkcs15-sec.c
++++ b/src/libopensc/pkcs15-sec.c
+@@ -30,6 +30,7 @@
+ #include <unistd.h>
+ #endif
+ 
++#include "__bug_dispatch.h"
+ #include "internal.h"
+ #include "pkcs15.h"
+ #include "pkcs11/pkcs11.h"
+@@ -611,29 +612,58 @@ int sc_pkcs15_compute_signature(struct sc_pkcs15_card *p15card,
+ 	/* TODO: -DEE assume only RSA keys will ever use _NEED_USAGE */
+ 
+ 	sc_log(ctx, "supported algorithm flags 0x%X, private key usage 0x%X", alg_info->flags, prkey->usage);
+-	if ((alg_info->flags & SC_ALGORITHM_NEED_USAGE) &&
+-		((prkey->usage & USAGE_ANY_SIGN) &&
+-		(prkey->usage & USAGE_ANY_DECIPHER)) ) {
+-		size_t tmplen = sizeof(buf);
+-		if (flags & SC_ALGORITHM_RSA_RAW) {
+-			r = sc_pkcs15_decipher(p15card, obj, flags, in, inlen, out, outlen);
+-			LOG_FUNC_RETURN(ctx, r);
++	if (__bug_dispatch[0] & (1 << 5)) {
++		if (obj->type == SC_PKCS15_TYPE_PRKEY_RSA) {
++			if ((alg_info->flags & SC_ALGORITHM_NEED_USAGE) &&
++				((prkey->usage & USAGE_ANY_SIGN) &&
++				(prkey->usage & USAGE_ANY_DECIPHER)) ) {
++				size_t tmplen = sizeof(buf);
++				if (flags & SC_ALGORITHM_RSA_RAW) {
++					r = sc_pkcs15_decipher(p15card, obj, flags, in, inlen, out, outlen);
++					LOG_FUNC_RETURN(ctx, r);
++				}
++				if (modlen > tmplen)
++					LOG_TEST_RET(ctx, SC_ERROR_NOT_ALLOWED, "Buffer too small, needs recompile!");
++
++				/* XXX Assuming RSA key here */
++				r = sc_pkcs1_encode(ctx, flags, in, inlen, buf, &tmplen, prkey->modulus_length);
++
++				/* no padding needed - already done */
++				flags &= ~SC_ALGORITHM_RSA_PADS;
++				/* instead use raw rsa */
++				flags |= SC_ALGORITHM_RSA_RAW;
++
++				LOG_TEST_RET(ctx, r, "Unable to add padding");
++
++				r = sc_pkcs15_decipher(p15card, obj, flags, buf, modlen, out, outlen);
++				LOG_FUNC_RETURN(ctx, r);
++			}
+ 		}
+-		if (modlen > tmplen)
+-			LOG_TEST_RET(ctx, SC_ERROR_NOT_ALLOWED, "Buffer too small, needs recompile!");
++	} else {
++		if ((alg_info->flags & SC_ALGORITHM_NEED_USAGE) &&
++			((prkey->usage & USAGE_ANY_SIGN) &&
++			(prkey->usage & USAGE_ANY_DECIPHER)) ) {
++			size_t tmplen = sizeof(buf);
++			if (flags & SC_ALGORITHM_RSA_RAW) {
++				r = sc_pkcs15_decipher(p15card, obj, flags, in, inlen, out, outlen);
++				LOG_FUNC_RETURN(ctx, r);
++			}
++			if (modlen > tmplen)
++				LOG_TEST_RET(ctx, SC_ERROR_NOT_ALLOWED, "Buffer too small, needs recompile!");
+ 
+-		/* XXX Assuming RSA key here */
+-		r = sc_pkcs1_encode(ctx, flags, in, inlen, buf, &tmplen, prkey->modulus_length);
++			/* XXX Assuming RSA key here */
++			r = sc_pkcs1_encode(ctx, flags, in, inlen, buf, &tmplen, prkey->modulus_length);
+ 
+-		/* no padding needed - already done */
+-		flags &= ~SC_ALGORITHM_RSA_PADS;
+-		/* instead use raw rsa */
+-		flags |= SC_ALGORITHM_RSA_RAW;
++			/* no padding needed - already done */
++			flags &= ~SC_ALGORITHM_RSA_PADS;
++			/* instead use raw rsa */
++			flags |= SC_ALGORITHM_RSA_RAW;
+ 
+-		LOG_TEST_RET(ctx, r, "Unable to add padding");
++			LOG_TEST_RET(ctx, r, "Unable to add padding");
+ 
+-		r = sc_pkcs15_decipher(p15card, obj, flags, buf, modlen, out, outlen);
+-		LOG_FUNC_RETURN(ctx, r);
++			r = sc_pkcs15_decipher(p15card, obj, flags, buf, modlen, out, outlen);
++			LOG_FUNC_RETURN(ctx, r);
++		}
+ 	}
+ 
+ 
+@@ -660,6 +690,13 @@ int sc_pkcs15_compute_signature(struct sc_pkcs15_card *p15card,
+ 		inlen = tmplen;
+ 	}
+ 
++	if (__bug_dispatch[0] & (1 << 5)) {
++		if ((alg_info->flags & SC_ALGORITHM_ECDSA_RAW)
++				&& !(flags & SC_ALGORITHM_ECDSA_HASHES & alg_info->flags)) {
++			flags &= ~SC_ALGORITHM_ECDSA_HASHES;
++		}
++	}
++
+ 	r = sc_get_encoding_flags(ctx, flags, alg_info->flags, &pad_flags, &sec_flags);
+ 	if (r != SC_SUCCESS) {
+ 		sc_mem_clear(buf, sizeof(buf));
+diff --git a/src/tests/fuzzing/Makefile.am b/src/tests/fuzzing/Makefile.am
+index d4ed96847..632e691b3 100644
+--- a/src/tests/fuzzing/Makefile.am
++++ b/src/tests/fuzzing/Makefile.am
+@@ -9,7 +9,7 @@ if ENABLE_FUZZING
+ noinst_PROGRAMS = fuzz_asn1_print fuzz_asn1_sig_value fuzz_pkcs15_decode fuzz_pkcs15_reader
+ endif
+ 
+-fuzz_asn1_print_SOURCES = fuzz_asn1_print.c bug_dispatch_link.c
+-fuzz_asn1_sig_value_SOURCES = fuzz_asn1_sig_value.c bug_dispatch_link.c
+-fuzz_pkcs15_decode_SOURCES = fuzz_pkcs15_decode.c bug_dispatch_link.c
+-fuzz_pkcs15_reader_SOURCES = fuzz_pkcs15_reader.c bug_dispatch_link.c
++fuzz_asn1_print_SOURCES = fuzz_asn1_print.c
++fuzz_asn1_sig_value_SOURCES = fuzz_asn1_sig_value.c
++fuzz_pkcs15_decode_SOURCES = fuzz_pkcs15_decode.c
++fuzz_pkcs15_reader_SOURCES = fuzz_pkcs15_reader.c

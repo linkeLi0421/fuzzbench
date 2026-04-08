@@ -29,9 +29,8 @@ ENV DEBUG_BUILDER $debug_builder
 
 
 # Install dependencies required by Python3 or Pip3.
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     curl \
     xz-utils \
     zlib1g-dev \
