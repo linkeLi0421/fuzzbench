@@ -1,0 +1,66 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1390131310
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffd1a4719a2 at pc 0x0000004a073c bp 0x7ffd1a460d10 sp 0x7ffd1a4604d8
+WRITE of size 28 at 0x7ffd1a4719a2 thread T0
+    #0 0x4a073b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0xa200b3 in sc_get_response /src/opensc/src/libopensc/apdu.c:475:3
+    #2 0xa1c23b in sc_transmit /src/opensc/src/libopensc/apdu.c:532:7
+    #3 0xa1b5c3 in sc_transmit_apdu /src/opensc/src/libopensc/apdu.c:624:7
+    #4 0x9fc104 in iso7816_read_binary /src/opensc/src/libopensc/iso7816.c:156:6
+    #5 0x91debb in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:557:8
+    #6 0x4f42f5 in sc_read_binary /src/opensc/src/libopensc/card.c:652:7
+    #7 0x513e72 in sc_pkcs15_bind_internal /src/opensc/src/libopensc/pkcs15.c:1130:9
+    #8 0x518778 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1265:8
+    #9 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #10 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #11 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #12 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #13 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7ffa2a186082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #15 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+
+Address 0x7ffd1a4719a2 is located in stack of thread T0 at offset 65570 in frame
+    #0 0x91d47f in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:528
+
+  This frame has 1 object(s):
+    [32, 65570) 'buffer' (line 540) <== Memory access at offset 65570 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x1000234862e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000234862f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100023486300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100023486310: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100023486320: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x100023486330: 00 00 00 00[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100023486340: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100023486350: f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x100023486360: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100023486370: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100023486380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

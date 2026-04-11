@@ -19,4 +19,5 @@ ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
 
 # Bug transplant patches (re-applied by build.sh after checkout_commit.py resets source)
 COPY patches/ /src/patches/
+COPY seeds/ /src/benchmark_seeds/
 COPY build.sh $SRC/

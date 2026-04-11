@@ -78,17 +78,70 @@ for F in $fuzzerFiles; do
     fi
 done
 
-# --- Seed corpus: prepend dispatch bytes to original seeds ---
-mkdir -p /tmp/seeds_dispatch
+# --- Seed corpus: expand original seeds and per-bug testcase candidates ---
+# FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.
+# Create one seed variant for the default path plus one for each
+# dispatch-controlled transplanted path. Per-bug reproducers are used only as
+# source material: exact crashing inputs are filtered out before packaging.
+seed_zip="$OUT/fuzz_pkcs15_reader_seed_corpus.zip"
+seed_target="$OUT/fuzz_pkcs15_reader"
+mkdir -p /tmp/seeds_dispatch /tmp/original_seeds /tmp/benchmark_seed_candidates
 
-if [ -f "$OUT/fuzz_pkcs15_reader_seed_corpus.zip" ]; then
-    mkdir -p /tmp/original_seeds
-    unzip -q -o "$OUT/fuzz_pkcs15_reader_seed_corpus.zip" -d /tmp/original_seeds 2>/dev/null || true
+if [ -f "$seed_zip" ]; then
+    unzip -q -o "$seed_zip" -d /tmp/original_seeds 2>/dev/null || true
     for f in /tmp/original_seeds/*; do
-        [ -f "$f" ] && printf '\x00' | cat - "$f" > "/tmp/seeds_dispatch/$(basename "$f")"
+        [ -f "$f" ] || continue
+        base=$(basename "$f")
+        for dispatch in 00 01 02 04 08 10 20 40; do
+            printf '%b' "\\x${dispatch}" | cat - "$f" > "/tmp/seeds_dispatch/${base}.dispatch_${dispatch}"
+        done
+    done
+fi
+
+if [ -d /src/benchmark_seeds ]; then
+    for f in /src/benchmark_seeds/*; do
+        [ -f "$f" ] || continue
+        base=$(basename "$f")
+        size=$(wc -c < "$f")
+        [ "$size" -gt 0 ] || continue
+
+        cp "$f" "/tmp/benchmark_seed_candidates/${base}.exact"
+        # Zero the dispatch byte (byte 0): deactivates dispatch-gated patches
+        # while keeping the full APDU conversation and card driver routing intact.
+        cp "$f" "/tmp/benchmark_seed_candidates/${base}.dispatch_zero"
+        printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.dispatch_zero" bs=1 seek=0 conv=notrunc 2>/dev/null || true
+        for keep in 1 2 8 16 64 256 1024; do
+            if [ "$size" -gt "$keep" ]; then
+                head -c "$keep" "$f" > "/tmp/benchmark_seed_candidates/${base}.head_${keep}"
+            fi
+        done
+        if [ "$size" -gt 1 ]; then
+            head -c "$((size - 1))" "$f" > "/tmp/benchmark_seed_candidates/${base}.trim_1"
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_last"
+            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_last"
+            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
+        fi
+        if [ "$size" -gt 4 ]; then
+            mid=$((size / 2))
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_mid"
+            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_mid"
+            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
+        fi
+    done
+fi
+
+if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
+    for f in /tmp/benchmark_seed_candidates/*; do
+        [ -f "$f" ] || continue
+        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
+            cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
+        fi
     done
 fi
 
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
-    zip -j -q "$OUT/fuzz_pkcs15_reader_seed_corpus.zip" /tmp/seeds_dispatch/*
+    rm -f "$seed_zip"
+    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
 fi

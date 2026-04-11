@@ -1,0 +1,75 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1415041598
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fbb64208878 at pc 0x0000004a0681 bp 0x7ffd1628c8b0 sp 0x7ffd1628c078
+READ of size 496 at 0x7fbb64208878 thread T0
+    #0 0x4a0680 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x57d282 in sc_pkcs15emu_object_add /src/opensc/src/libopensc/pkcs15-syn.c:439:2
+    #2 0x994d04 in sc_pkcs15emu_coolkey_init /src/opensc/src/libopensc/pkcs15-coolkey.c:679:7
+    #3 0x991c33 in sc_pkcs15emu_coolkey_init_ex /src/opensc/src/libopensc/pkcs15-coolkey.c:734:7
+    #4 0x57aa5e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #5 0x5187bc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #6 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #7 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fbb64e03082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #12 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+
+Address 0x7fbb64208878 is located in stack of thread T0 at offset 8312 in frame
+    #0 0x991fcf in sc_pkcs15emu_coolkey_init /src/opensc/src/libopensc/pkcs15-coolkey.c:463
+
+  This frame has 13 object(s):
+    [32, 88) 'serial' (line 483)
+    [128, 132) 'count' (line 484)
+    [144, 776) 'pin_info' (line 509)
+    [912, 3688) 'pin_obj' (line 510)
+    [3824, 3912) 'coolkey_obj' (line 544)
+    [3952, 6728) 'obj_obj' (line 545)
+    [6864, 7216) 'cert_info' (line 546)
+    [7280, 7776) 'pubkey_info' (line 547)
+    [7840, 8312) 'prkey_info' (line 548)
+    [8384, 8392) 'key_type' (line 552) <== Memory access at offset 8312 partially underflows this variable
+    [8416, 8424) 'obj_class' (line 553) <== Memory access at offset 8312 partially underflows this variable
+    [8448, 8456) 'len' (line 554) <== Memory access at offset 8312 partially underflows this variable
+    [8480, 8488) 'cert_object' (line 692) <== Memory access at offset 8312 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x0ff7ec8390b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff7ec8390c0: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x0ff7ec8390d0: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff7ec8390e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff7ec8390f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0ff7ec839100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[f2]
+  0x0ff7ec839110: f2 f2 f2 f2 f2 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2
+  0x0ff7ec839120: 00 f2 f2 f2 f8 f3 f3 f3 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff7ec839130: f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00 00 00 00 00
+  0x0ff7ec839140: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff7ec839150: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

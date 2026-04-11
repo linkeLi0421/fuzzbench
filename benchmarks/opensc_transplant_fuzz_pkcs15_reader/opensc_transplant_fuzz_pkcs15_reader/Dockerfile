@@ -20,4 +20,5 @@ RUN git clone  --single-branch --branch master https://github.com/OpenSC/OpenSC 
 WORKDIR opensc
 # Bug transplant patches
 COPY patches/ /src/patches/
+COPY seeds/ /src/benchmark_seeds/
 COPY build.sh $SRC/

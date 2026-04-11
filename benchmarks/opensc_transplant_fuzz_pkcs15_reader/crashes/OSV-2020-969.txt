@@ -1,0 +1,61 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1425224972
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f343d357ce0 at pc 0x00000063c671 bp 0x7ffd9595e1d0 sp 0x7ffd9595e1c8
+WRITE of size 4 at 0x7f343d357ce0 thread T0
+    #0 0x63c670 in pgp_parse_algo_attr_blob /src/opensc/src/libopensc/card-openpgp.c:618:19
+    #1 0x6370b7 in pgp_get_card_features /src/opensc/src/libopensc/card-openpgp.c:788:9
+    #2 0x6250a4 in pgp_init /src/opensc/src/libopensc/card-openpgp.c:483:2
+    #3 0x4ecf91 in sc_connect_card /src/opensc/src/libopensc/card.c:358:8
+    #4 0x4dc902 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:216:5
+    #5 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f343dfc2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #10 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+
+Address 0x7f343d357ce0 is located in stack of thread T0 at offset 96 in frame
+    #0 0x63b4ef in pgp_parse_algo_attr_blob /src/opensc/src/libopensc/card-openpgp.c:570
+
+  This frame has 1 object(s):
+    [32, 96) 'oid' (line 571) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/opensc/src/libopensc/card-openpgp.c:618:19 in pgp_parse_algo_attr_blob
+Shadow bytes around the buggy address:
+  0x0fe707a62f40: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62f50: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62f60: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62f70: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62f80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x0fe707a62f90: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x0fe707a62fa0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62fb0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62fc0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62fd0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe707a62fe0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

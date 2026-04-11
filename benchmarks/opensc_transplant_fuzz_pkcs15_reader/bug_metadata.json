@@ -7,23 +7,23 @@
     "OSV-2020-1046": {
       "dispatch_value": 1,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-syn.c",
+      "crash_line": 439,
+      "crash_function": "sc_pkcs15emu_object_add"
     },
     "OSV-2020-1981": {
       "dispatch_value": 2,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c",
+      "crash_line": 141,
+      "crash_function": "fuzz_reader_transmit"
     },
     "OSV-2020-55": {
       "dispatch_value": 4,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/card-tcos.c",
+      "crash_line": 654,
+      "crash_function": "tcos_decipher"
     },
     "OSV-2020-693": {
       "dispatch_value": 8,
@@ -42,9 +42,9 @@
     "OSV-2021-1017": {
       "dispatch_value": 32,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/card-piv.c",
+      "crash_line": 2423,
+      "crash_function": "piv_compute_signature"
     },
     "OSV-2021-915": {
       "dispatch_value": 64,
@@ -56,9 +56,9 @@
     "OSV-2020-1720": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp",
-      "crash_line": 469,
-      "crash_function": "__interceptor_strncpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-itacns.c",
+      "crash_line": 382,
+      "crash_function": "hextoint"
     },
     "OSV-2020-209": {
       "dispatch_value": 0,
@@ -91,37 +91,37 @@
     "OSV-2020-2222": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp",
-      "crash_line": 111,
-      "crash_function": "__interceptor_free"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15.c",
+      "crash_line": 736,
+      "crash_function": "sc_pkcs15_free_tokeninfo"
     },
     "OSV-2020-1860": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/apdu.c",
+      "crash_line": 475,
+      "crash_function": "sc_get_response"
     },
     "OSV-2021-538": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 600,
+      "crash_function": "sc_pkcs15emu_oberthur_add_pubkey"
     },
     "OSV-2020-1836": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp",
-      "crash_line": 469,
-      "crash_function": "__interceptor_strncpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-itacns.c",
+      "crash_line": 382,
+      "crash_function": "hextoint"
     },
     "OSV-2020-1844": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp",
-      "crash_line": 469,
-      "crash_function": "__interceptor_strncpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-itacns.c",
+      "crash_line": 382,
+      "crash_function": "hextoint"
     },
     "OSV-2021-537": {
       "dispatch_value": 0,
@@ -133,16 +133,16 @@
     "OSV-2021-262": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 898,
+      "crash_function": "sc_pkcs15emu_oberthur_add_data"
     },
     "OSV-2021-474": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp",
-      "crash_line": 22,
-      "crash_function": "__asan_memcpy"
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 670,
+      "crash_function": "sc_pkcs15emu_oberthur_add_cert"
     },
     "OSV-2020-2157": {
       "dispatch_value": 0,
