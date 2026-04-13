@@ -1,0 +1,27 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1590099537
+INFO: Loaded 1 modules   (20618 inline 8-bit counters): 20618 [0xbccf60, 0xbd1fea), 
+INFO: Loaded 1 PC tables (20618 PCs): 20618 [0xbd1ff0,0xc22890), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x7f6de744a7c6 bp 0x7fff9d8b96b0 sp 0x7fff9d8b8e68 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x7f6de744a7c6 in strlen (/lib/x86_64-linux-gnu/libc.so.6+0x8b7c6)
+    #1 0x4b81b8 in strlen /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc
+    #2 0x55dcd8 in process_ndpi_collected_info /src/ndpi/example/reader_util.c:1069:43
+    #3 0x5637bc in packet_processing /src/ndpi/example/reader_util.c
+    #4 0x560f38 in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1863:10
+    #5 0x5541f7 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
+    #6 0x4583c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4583c3)
+    #7 0x443c92 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #8 0x44989e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x44989e)
+    #9 0x473032 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f6de73df83f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #11 0x41ef38 in _start (/out/fuzz_ndpi_reader+0x41ef38)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0x8b7c6) in strlen
+==1==ABORTING

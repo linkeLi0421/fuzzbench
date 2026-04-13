@@ -1,0 +1,904 @@
+diff --git a/example/reader_util.c b/example/reader_util.c
+index ab3a73741..5ef167964 100644
+--- a/example/reader_util.c
++++ b/example/reader_util.c
+@@ -26,6 +26,7 @@
+ #endif
+ 
+ #include <stdlib.h>
++#include <string.h>
+ 
+ #ifdef WIN32
+ #include <winsock2.h> /* winsock.h is included automatically */
+@@ -78,6 +79,7 @@
+ #endif
+ 
+ #include "ndpi_main.h"
++#include "../__bug_dispatch.h"
+ #include "reader_util.h"
+ #include "ndpi_classify.h"
+ 
+@@ -944,8 +946,14 @@ static u_int8_t is_ndpi_proto(struct ndpi_flow_info *flow, u_int16_t id) {
+ /* ****************************************************** */
+ 
+ void process_ndpi_collected_info(struct ndpi_workflow * workflow, struct ndpi_flow_info *flow) {
++  char **legacy_tls = NULL;
++
+   if(!flow->ndpi_flow) return;
+ 
++  if(__bug_dispatch[1] & (1 << 3)) {
++    legacy_tls = (char **)&flow->ndpi_flow->protos;
++  }
++
+   snprintf(flow->host_server_name, sizeof(flow->host_server_name), "%s",
+ 	   flow->ndpi_flow->host_server_name);
+ 
+@@ -1042,42 +1050,72 @@ void process_ndpi_collected_info(struct ndpi_workflow * workflow, struct ndpi_fl
+ 	     flow->ndpi_flow->protos.ssh.hassh_server);
+   }
+   /* TLS */
+-  else if((is_ndpi_proto(flow, NDPI_PROTOCOL_TLS))
+-	  || (flow->detected_protocol.master_protocol == NDPI_PROTOCOL_TLS)
+-	  || (flow->ndpi_flow->protos.stun_ssl.ssl.ja3_client[0] != '\0')
+-    ) {
+-    flow->ssh_tls.ssl_version = flow->ndpi_flow->protos.stun_ssl.ssl.ssl_version;
+-    snprintf(flow->ssh_tls.client_requested_server_name,
+-	     sizeof(flow->ssh_tls.client_requested_server_name), "%s",
+-	     flow->ndpi_flow->protos.stun_ssl.ssl.client_requested_server_name);
+-
+-    if(flow->ndpi_flow->protos.stun_ssl.ssl.server_names_len > 0)
+-      flow->ssh_tls.server_names = ndpi_strdup(flow->ndpi_flow->protos.stun_ssl.ssl.server_names);
+-    snprintf(flow->ssh_tls.server_organization, sizeof(flow->ssh_tls.server_organization), "%s",
+-	     flow->ndpi_flow->protos.stun_ssl.ssl.server_organization);
+-    flow->ssh_tls.notBefore = flow->ndpi_flow->protos.stun_ssl.ssl.notBefore;
+-    flow->ssh_tls.notAfter = flow->ndpi_flow->protos.stun_ssl.ssl.notAfter;
+-    snprintf(flow->ssh_tls.ja3_client, sizeof(flow->ssh_tls.ja3_client), "%s",
+-	     flow->ndpi_flow->protos.stun_ssl.ssl.ja3_client);
+-    snprintf(flow->ssh_tls.ja3_server, sizeof(flow->ssh_tls.ja3_server), "%s",
+-	     flow->ndpi_flow->protos.stun_ssl.ssl.ja3_server);
+-    flow->ssh_tls.server_unsafe_cipher = flow->ndpi_flow->protos.stun_ssl.ssl.server_unsafe_cipher;
+-    flow->ssh_tls.server_cipher = flow->ndpi_flow->protos.stun_ssl.ssl.server_cipher;
+-
+-    if(flow->ndpi_flow->l4.tcp.tls.fingerprint_set) {
+-      memcpy(flow->ssh_tls.sha1_cert_fingerprint,
+-	   flow->ndpi_flow->l4.tcp.tls.sha1_certificate_fingerprint, 20);
+-      flow->ssh_tls.sha1_cert_fingerprint_set = 1;
++  else {
++    int bug_806_tls_path_active;
++
++    if (__bug_dispatch[0] & (1 << 6)) {
++      bug_806_tls_path_active = ((is_ndpi_proto(flow, NDPI_PROTOCOL_TLS))
++				 || (is_ndpi_proto(flow, NDPI_PROTOCOL_RX))
++				 || (flow->detected_protocol.master_protocol == NDPI_PROTOCOL_TLS)
++				 || (flow->ndpi_flow->protos.stun_ssl.ssl.ja3_client[0] != '\0'));
++    } else {
++      bug_806_tls_path_active = ((is_ndpi_proto(flow, NDPI_PROTOCOL_TLS))
++				 || (flow->detected_protocol.master_protocol == NDPI_PROTOCOL_TLS)
++				 || (flow->ndpi_flow->protos.stun_ssl.ssl.ja3_client[0] != '\0'));
+     }
+ 
+-    if(flow->ndpi_flow->protos.stun_ssl.ssl.alpn
+-       && flow->ndpi_flow->protos.stun_ssl.ssl.tls_supported_versions)
+-      snprintf(flow->info, sizeof(flow->info), "ALPN: %s][TLS Supported Versions: %s",
+-	       flow->ndpi_flow->protos.stun_ssl.ssl.alpn,
+-	       flow->ndpi_flow->protos.stun_ssl.ssl.tls_supported_versions);
+-    else if(flow->ndpi_flow->protos.stun_ssl.ssl.alpn)
+-      snprintf(flow->info, sizeof(flow->info), "ALPN: %s",
+-	       flow->ndpi_flow->protos.stun_ssl.ssl.alpn);
++    if(bug_806_tls_path_active) {
++      if (__bug_dispatch[0] & (1 << 6)) {
++	volatile size_t legacy_tls_dn_len_sink = strlen(*(const char **)(flow->ndpi_flow->protos.stun_ssl.ssl.server_organization + (2 * sizeof(char *))));
++	(void)legacy_tls_dn_len_sink;
++      }
++      flow->ssh_tls.ssl_version = flow->ndpi_flow->protos.stun_ssl.ssl.ssl_version;
++      snprintf(flow->ssh_tls.client_requested_server_name,
++	       sizeof(flow->ssh_tls.client_requested_server_name), "%s",
++	       flow->ndpi_flow->protos.stun_ssl.ssl.client_requested_server_name);
++
++      if(flow->ndpi_flow->protos.stun_ssl.ssl.server_names_len > 0)
++	flow->ssh_tls.server_names = ndpi_strdup(flow->ndpi_flow->protos.stun_ssl.ssl.server_names);
++      snprintf(flow->ssh_tls.server_organization, sizeof(flow->ssh_tls.server_organization), "%s",
++	       flow->ndpi_flow->protos.stun_ssl.ssl.server_organization);
++      flow->ssh_tls.notBefore = flow->ndpi_flow->protos.stun_ssl.ssl.notBefore;
++      flow->ssh_tls.notAfter = flow->ndpi_flow->protos.stun_ssl.ssl.notAfter;
++      snprintf(flow->ssh_tls.ja3_client, sizeof(flow->ssh_tls.ja3_client), "%s",
++	       flow->ndpi_flow->protos.stun_ssl.ssl.ja3_client);
++      snprintf(flow->ssh_tls.ja3_server, sizeof(flow->ssh_tls.ja3_server), "%s",
++	       flow->ndpi_flow->protos.stun_ssl.ssl.ja3_server);
++      flow->ssh_tls.server_unsafe_cipher = flow->ndpi_flow->protos.stun_ssl.ssl.server_unsafe_cipher;
++      flow->ssh_tls.server_cipher = flow->ndpi_flow->protos.stun_ssl.ssl.server_cipher;
++
++      if(flow->ndpi_flow->l4.tcp.tls.fingerprint_set) {
++	memcpy(flow->ssh_tls.sha1_cert_fingerprint,
++	       flow->ndpi_flow->l4.tcp.tls.sha1_certificate_fingerprint, 20);
++	flow->ssh_tls.sha1_cert_fingerprint_set = 1;
++      }
++
++      if(__bug_dispatch[0] & (1 << 1)) {
++	if(flow->ndpi_flow->protos.stun_ssl.ssl.issuerDN)
++	  flow->ssh_tls.tls_issuerDN = strdup(flow->ndpi_flow->protos.stun_ssl.ssl.issuerDN);
++      } else {
++	/* Original code: no-op. */
++      }
++
++      if(flow->ndpi_flow->protos.stun_ssl.ssl.alpn
++	 && flow->ndpi_flow->protos.stun_ssl.ssl.tls_supported_versions)
++	snprintf(flow->info, sizeof(flow->info), "ALPN: %s][TLS Supported Versions: %s",
++		 flow->ndpi_flow->protos.stun_ssl.ssl.alpn,
++		 flow->ndpi_flow->protos.stun_ssl.ssl.tls_supported_versions);
++      else if(flow->ndpi_flow->protos.stun_ssl.ssl.alpn)
++	snprintf(flow->info, sizeof(flow->info), "ALPN: %s",
++		 flow->ndpi_flow->protos.stun_ssl.ssl.alpn);
++    } else if((__bug_dispatch[1] & (1 << 3))
++	      && is_ndpi_proto(flow, NDPI_PROTOCOL_FREE_205)
++	      && legacy_tls[1]) {
++      char *legacy_alpn = ndpi_strdup(legacy_tls[1]);
++
++      if(legacy_alpn != NULL)
++	ndpi_free(legacy_alpn);
++    }
+   }
+ 
+   if(flow->detection_completed && (!flow->check_extra_packets)) {
+@@ -1327,41 +1365,87 @@ static struct ndpi_proto packet_processing(struct ndpi_workflow * workflow,
+     return(nproto);
+   }
+ 
+-  if(!flow->detection_completed) {
+-    u_int enough_packets =
+-      (((proto == IPPROTO_UDP) && ((flow->src2dst_packets + flow->dst2src_packets) > max_num_udp_dissected_pkts))
+-       || ((proto == IPPROTO_TCP) && ((flow->src2dst_packets + flow->dst2src_packets) > max_num_tcp_dissected_pkts))) ? 1 : 0;
++  if(__bug_dispatch[1] & (1 << 7)) {
++    if((!flow->detection_completed) || flow->check_extra_packets) {
++#if 0
++      printf("%s()\n", __FUNCTION__);
++#endif
++
++      flow->detected_protocol = ndpi_detection_process_packet(workflow->ndpi_struct, ndpi_flow,
++							      iph ? (uint8_t *)iph : (uint8_t *)iph6,
++							      ipsize, time, src, dst);
++
++      if(flow->detection_completed) {
++	if(ndpi_flow)
++	  flow->check_extra_packets = ndpi_flow->check_extra_packets && (ndpi_flow->extra_packets_func != NULL);
++
++	if(!flow->check_extra_packets)
++	  process_ndpi_collected_info(workflow, flow);
++      } else {
++	u_int enough_packets =
++	  (((proto == IPPROTO_UDP) && ((flow->src2dst_packets + flow->dst2src_packets) > max_num_udp_dissected_pkts))
++	   || ((proto == IPPROTO_TCP) && ((flow->src2dst_packets + flow->dst2src_packets) > max_num_tcp_dissected_pkts))) ? 1 : 0;
++
++	if(enough_packets || (flow->detected_protocol.app_protocol != NDPI_PROTOCOL_UNKNOWN)) {
++	  if((!enough_packets)
++	     && ndpi_extra_dissection_possible(workflow->ndpi_struct, ndpi_flow))
++	    ; /* Wait for certificate fingerprint */
++	  else {
++	    /* New protocol detected or give up */
++	    flow->detection_completed = 1;
++
++	    if(ndpi_flow)
++	      flow->check_extra_packets = ndpi_flow->check_extra_packets && (ndpi_flow->extra_packets_func != NULL);
++
++	    if(flow->detected_protocol.app_protocol == NDPI_PROTOCOL_UNKNOWN) {
++	      u_int8_t proto_guessed;
++
++	      flow->detected_protocol = ndpi_detection_giveup(workflow->ndpi_struct, flow->ndpi_flow,
++							      enable_protocol_guess, &proto_guessed);
++	    }
++
++	    process_ndpi_collected_info(workflow, flow);
++	  }
++	}
++      }
++    }
++  } else {
++    if(!flow->detection_completed) {
++      u_int enough_packets =
++	(((proto == IPPROTO_UDP) && ((flow->src2dst_packets + flow->dst2src_packets) > max_num_udp_dissected_pkts))
++	 || ((proto == IPPROTO_TCP) && ((flow->src2dst_packets + flow->dst2src_packets) > max_num_tcp_dissected_pkts))) ? 1 : 0;
+ 
+ #if 0
+-    printf("%s()\n", __FUNCTION__);
++      printf("%s()\n", __FUNCTION__);
+ #endif
+ 
+-    flow->detected_protocol = ndpi_detection_process_packet(workflow->ndpi_struct, ndpi_flow,
+-							    iph ? (uint8_t *)iph : (uint8_t *)iph6,
+-							    ipsize, time, src, dst);
++      flow->detected_protocol = ndpi_detection_process_packet(workflow->ndpi_struct, ndpi_flow,
++							      iph ? (uint8_t *)iph : (uint8_t *)iph6,
++							      ipsize, time, src, dst);
+ 
+-    if(enough_packets || (flow->detected_protocol.app_protocol != NDPI_PROTOCOL_UNKNOWN)) {
+-      if((!enough_packets)
+-	 && ndpi_extra_dissection_possible(workflow->ndpi_struct, ndpi_flow))
+-	; /* Wait for certificate fingerprint */
+-      else {
+-	/* New protocol detected or give up */
+-	flow->detection_completed = 1;
++      if(enough_packets || (flow->detected_protocol.app_protocol != NDPI_PROTOCOL_UNKNOWN)) {
++	if((!enough_packets)
++	   && ndpi_extra_dissection_possible(workflow->ndpi_struct, ndpi_flow))
++	  ; /* Wait for certificate fingerprint */
++	else {
++	  /* New protocol detected or give up */
++	  flow->detection_completed = 1;
+ 
+ #if 0
+-	/* Check if we should keep checking extra packets */
+-	if(ndpi_flow && ndpi_flow->check_extra_packets)
+-	  flow->check_extra_packets = 1;
++	  /* Check if we should keep checking extra packets */
++	  if(ndpi_flow && ndpi_flow->check_extra_packets)
++	    flow->check_extra_packets = 1;
+ #endif
+ 
+-	if(flow->detected_protocol.app_protocol == NDPI_PROTOCOL_UNKNOWN) {
+-	  u_int8_t proto_guessed;
++	  if(flow->detected_protocol.app_protocol == NDPI_PROTOCOL_UNKNOWN) {
++	    u_int8_t proto_guessed;
+ 
+-	  flow->detected_protocol = ndpi_detection_giveup(workflow->ndpi_struct, flow->ndpi_flow,
+-							  enable_protocol_guess, &proto_guessed);
+-	}
++	    flow->detected_protocol = ndpi_detection_giveup(workflow->ndpi_struct, flow->ndpi_flow,
++							    enable_protocol_guess, &proto_guessed);
++	  }
+ 
+-	process_ndpi_collected_info(workflow, flow);
++	  process_ndpi_collected_info(workflow, flow);
++	}
+       }
+     }
+   }
+@@ -1444,8 +1528,17 @@ struct ndpi_proto ndpi_workflow_process_packet(struct ndpi_workflow * workflow,
+   datalink_type = (int)pcap_datalink(workflow->pcap_handle);
+ #endif
+ 
+-  if(header->caplen < 40)
+-    return(nproto); /* Too short */
++  if(__bug_dispatch[1] & (1 << 7)) {
++    if(header->caplen < 36)
++      return(nproto); /* Too short */
++  } else {
++    if(!(__bug_dispatch[0] & (1 << 2))) {
++      if (!(__bug_dispatch[0] & (1 << 3))) {
++	if(header->caplen < 40)
++	  return(nproto); /* Too short */
++      }
++    }
++  }
+ 
+  datalink_check:
+   switch(datalink_type) {
+@@ -1651,6 +1744,14 @@ ether_type_check:
+       ip_len += 8 * (options[1] + 1);
+     }
+ 
++    if(__bug_dispatch[0] & (1 << 4)) {
++      const u_int8_t *l4ptr = (((const u_int8_t *) iph6) + sizeof(struct ndpi_ipv6hdr));
++
++      ndpi_handle_ipv6_extension_headers(NULL, &l4ptr, &ip_len, &proto);
++    } else {
++      /* Original behavior: do not normalize IPv6 extension headers here. */
++    }
++
+     iph = NULL;
+   } else {
+     static u_int8_t ipv4_warning_used = 0;
+diff --git a/example/reader_util.h b/example/reader_util.h
+index d54b4d611..1c60eb87f 100644
+--- a/example/reader_util.h
++++ b/example/reader_util.h
+@@ -198,6 +198,7 @@ typedef struct ndpi_flow_info {
+     u_int16_t ssl_version;
+     char client_requested_server_name[64], server_info[64],
+       client_hassh[33], server_hassh[33], *server_names,
++      *tls_issuerDN,
+       server_organization[64],
+       ja3_client[33], ja3_server[33],
+       sha1_cert_fingerprint[20];
+diff --git a/fuzz/Makefile.am b/fuzz/Makefile.am
+index a70152133..df36699c9 100644
+--- a/fuzz/Makefile.am
++++ b/fuzz/Makefile.am
+@@ -1,7 +1,6 @@
+ bin_PROGRAMS = fuzz_process_packet fuzz_ndpi_reader
+-BUG_DISPATCH_SOURCE = ../__bug_dispatch.c
+ 
+-fuzz_process_packet_SOURCES = fuzz_process_packet.c $(BUG_DISPATCH_SOURCE)
++fuzz_process_packet_SOURCES = fuzz_process_packet.c $(top_srcdir)/__bug_dispatch.c
+ fuzz_process_packet_CFLAGS = -I..
+ fuzz_process_packet_LDFLAGS = ../src/lib/libndpi.a $(ADDITIONAL_LIBS)
+ if HAS_FUZZLDFLAGS
+@@ -14,7 +13,7 @@ fuzz_process_packet_LINK=$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+     $(LIBTOOLFLAGS) --mode=link $(CXX) $(AM_CXXFLAGS) $(CXXFLAGS) \
+     $(fuzz_process_packet_LDFLAGS) $(LDFLAGS) -o $@
+ 
+-fuzz_ndpi_reader_SOURCES = fuzz_ndpi_reader.c $(BUG_DISPATCH_SOURCE)
++fuzz_ndpi_reader_SOURCES = fuzz_ndpi_reader.c $(top_srcdir)/__bug_dispatch.c
+ fuzz_ndpi_reader_CFLAGS = -I.. -I../example/
+ fuzz_ndpi_reader_LDFLAGS = ../example/libndpiReader.a ../src/lib/libndpi.a $(PCAP_LIB) $(ADDITIONAL_LIBS)
+ if HAS_FUZZLDFLAGS
+diff --git a/src/include/ndpi_main.h b/src/include/ndpi_main.h
+index c909adc74..00373c67b 100644
+--- a/src/include/ndpi_main.h
++++ b/src/include/ndpi_main.h
+@@ -115,6 +115,11 @@ extern "C" {
+   extern int ndpi_parse_ip_string(const char *ip_str, ndpi_ip_addr_t *parsed_ip);
+   extern char *ndpi_get_ip_string(const ndpi_ip_addr_t * ip, char *buf, u_int buf_len);
+   extern u_int8_t ndpi_is_ipv6(const ndpi_ip_addr_t *ip);
++#ifdef NDPI_DETECTION_SUPPORT_IPV6
++  int ndpi_handle_ipv6_extension_headers(struct ndpi_detection_module_struct *ndpi_str,
++					 const u_int8_t ** l4ptr, u_int16_t * l4len,
++					 u_int8_t * nxt_hdr);
++#endif
+ 
+   extern char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id);
+   u_int16_t ndpi_get_proto_by_name(struct ndpi_detection_module_struct *ndpi_mod, const char *name);
+diff --git a/src/include/ndpi_protocols.h b/src/include/ndpi_protocols.h
+index 2cae4b203..b778b4a16 100644
+--- a/src/include/ndpi_protocols.h
++++ b/src/include/ndpi_protocols.h
+@@ -184,6 +184,7 @@ void init_xbox_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int
+ void init_xdmcp_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_yahoo_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_zattoo_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
++void init_zoom_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_zmq_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_stracraft_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_ubntac2_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+@@ -212,6 +213,7 @@ void init_ookla_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_in
+ void init_modbus_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_capwap_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_zabbix_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
++void init_rsh_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_wireguard_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_targus_getdata_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+ void init_dnp3_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask);
+diff --git a/src/include/ndpi_typedefs.h b/src/include/ndpi_typedefs.h
+index 98b8ccf8e..120c0c011 100644
+--- a/src/include/ndpi_typedefs.h
++++ b/src/include/ndpi_typedefs.h
+@@ -811,6 +811,7 @@ struct ndpi_packet_struct {
+   struct ndpi_int_one_line_struct forwarded_line;
+   struct ndpi_int_one_line_struct referer_line;
+   struct ndpi_int_one_line_struct content_line;
++  struct ndpi_int_one_line_struct content_disposition_line;
+   struct ndpi_int_one_line_struct accept_line;
+   struct ndpi_int_one_line_struct user_agent_line;
+   struct ndpi_int_one_line_struct http_url_name;
+@@ -1233,7 +1234,7 @@ struct ndpi_flow_struct {
+       struct {
+ 	u_int16_t ssl_version, server_names_len;
+ 	char client_requested_server_name[64], *server_names, server_organization[64],
+-	  *alpn, *tls_supported_versions;
++	  *alpn, *tls_supported_versions, *issuerDN;
+ 	u_int32_t notBefore, notAfter;
+ 	char ja3_client[33], ja3_server[33];
+ 	u_int16_t server_cipher;
+diff --git a/src/lib/ndpi_main.c b/src/lib/ndpi_main.c
+index 3b5d8e251..20660dcd6 100644
+--- a/src/lib/ndpi_main.c
++++ b/src/lib/ndpi_main.c
+@@ -32,6 +32,7 @@
+ #include "ndpi_api.h"
+ #include "ahocorasick.h"
+ #include "libcache.h"
++#include "../../__bug_dispatch.h"
+ 
+ #include <time.h>
+ #ifndef WIN32
+@@ -3035,6 +3036,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
+   NDPI_PROTOCOL_BITMASK detection_bitmask_local;
+   NDPI_PROTOCOL_BITMASK *detection_bitmask = &detection_bitmask_local;
+   u_int32_t a = 0;
++  u_int8_t zoom_dissector_initialized = 0;
+ 
+   NDPI_BITMASK_SET(detection_bitmask_local, *dbm);
+   NDPI_BITMASK_SET(ndpi_str->detection_bitmask, *dbm);
+@@ -3054,6 +3056,20 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
+   /* STUN */
+   init_stun_dissector(ndpi_str, &a, detection_bitmask);
+ 
++  if(__bug_dispatch[1] & (1 << 7)) {
++    zoom_dissector_initialized = 1;
++    init_zoom_dissector(ndpi_str, &a, detection_bitmask);
++  } else {
++    /* Original version: no Zoom dissector initialization. */
++  }
++
++  if(__bug_dispatch[2] & (1 << 0)) {
++    if(!zoom_dissector_initialized) {
++      zoom_dissector_initialized = 1;
++      init_zoom_dissector(ndpi_str, &a, detection_bitmask);
++    }
++  }
++
+   /* RTP */
+   init_rtp_dissector(ndpi_str, &a, detection_bitmask);
+ 
+@@ -3474,6 +3490,11 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
+   /* ZABBIX */
+   init_zabbix_dissector(ndpi_str, &a, detection_bitmask);
+ 
++  if(__bug_dispatch[1] & (1 << 3)) {
++    /* RSH */
++    init_rsh_dissector(ndpi_str, &a, detection_bitmask);
++  }
++
+   /*** Put false-positive sensitive protocols at the end ***/
+ 
+   /* VIBER */
+@@ -3602,7 +3623,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
+  * 	nxt_hdr: protocol of the actual payload
+  * returns 0 upon success and 1 upon failure
+  */
+-static int ndpi_handle_ipv6_extension_headers(struct ndpi_detection_module_struct *ndpi_str, const u_int8_t ** l4ptr, u_int16_t * l4len, u_int8_t * nxt_hdr)
++int ndpi_handle_ipv6_extension_headers(struct ndpi_detection_module_struct *ndpi_str, const u_int8_t ** l4ptr, u_int16_t * l4len, u_int8_t * nxt_hdr)
+ {
+   while((*nxt_hdr == 0 || *nxt_hdr == 43 || *nxt_hdr == 44 || *nxt_hdr == 60 || *nxt_hdr == 135 || *nxt_hdr == 59)) {
+     u_int16_t ehdr_len;
+@@ -3645,9 +3666,16 @@ static int ndpi_handle_ipv6_extension_headers(struct ndpi_detection_module_struc
+ static u_int8_t ndpi_iph_is_valid_and_not_fragmented(const struct ndpi_iphdr *iph, const u_int16_t ipsize)
+ {
+   //#ifdef REQUIRE_FULL_PACKETS
+-  if(ipsize < iph->ihl * 4 ||
+-     ipsize < ntohs(iph->tot_len) || ntohs(iph->tot_len) < iph->ihl * 4 || (iph->frag_off & htons(0x1FFF)) != 0) {
+-    return(0);
++  if(__bug_dispatch[1] & (1 << 4)) {
++    if(ipsize < iph->ihl * 4 ||
++       ipsize < ntohs(iph->tot_len) || ntohs(iph->tot_len) < iph->ihl * 4) {
++      return(0);
++    }
++  } else {
++    if(ipsize < iph->ihl * 4 ||
++       ipsize < ntohs(iph->tot_len) || ntohs(iph->tot_len) < iph->ihl * 4 || (iph->frag_off & htons(0x1FFF)) != 0) {
++      return(0);
++    }
+   }
+   //#endif
+ 
+@@ -5125,7 +5153,18 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_str,
+       return; /* Return if only one byte remains (prevent invalid reads past end-of-buffer) */
+ 
+     if(get_u_int16_t(packet->payload, a) == ntohs(0x0d0a)) { /* If end of line char sequence CR+NL "\r\n", process line */
+-      packet->line[packet->parsed_lines].len = (u_int16_t)(((unsigned long) &packet->payload[a]) - ((unsigned long) packet->line[packet->parsed_lines].ptr));
++      if(__bug_dispatch[0] & (1 << 5)) {
++        memcpy(flow->flow_extra_info, &packet->payload[a + 4],
++               ndpi_min(packet->payload_packet_len - ((u_int32_t)a + 4), 8));
++      } else {
++      }
++      if(__bug_dispatch[0] & (1 << 7)) {
++        volatile u_int16_t lookahead_crlf = get_u_int16_t(packet->payload, a + 2);
++        (void)lookahead_crlf;
++        packet->line[packet->parsed_lines].len = (u_int16_t)(((unsigned long) &packet->payload[a]) - ((unsigned long) packet->line[packet->parsed_lines].ptr));
++      } else {
++        packet->line[packet->parsed_lines].len = (u_int16_t)(((unsigned long) &packet->payload[a]) - ((unsigned long) packet->line[packet->parsed_lines].ptr));
++      }
+ 
+       /* First line of a HTTP response parsing. Expected a "HTTP/1.? ???" */
+       if(packet->parsed_lines == 0 && packet->line[0].len >= NDPI_STATICSTRING_LEN("HTTP/1.X 200 ") &&
+@@ -5271,6 +5310,15 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_str,
+         packet->http_contentlen.len = packet->line[packet->parsed_lines].len - 16;
+         packet->http_num_headers++;
+       }
++      if(__bug_dispatch[0] & (1 << 0)) {
++        if(packet->line[packet->parsed_lines].len > 21
++	   && (strncasecmp((const char *)packet->line[packet->parsed_lines].ptr, "Content-Disposition: ", 21) == 0)) {
++          packet->content_disposition_line.ptr = &packet->line[packet->parsed_lines].ptr[21];
++          packet->content_disposition_line.len = packet->line[packet->parsed_lines].len - 21;
++        }
++      } else {
++        /* Original version: no Content-Disposition parsing. */
++      }
+       /* "Cookie:" header line in HTTP. */
+       if(packet->line[packet->parsed_lines].len > 8
+ 	 && strncasecmp((const char *)packet->line[packet->parsed_lines].ptr, "Cookie: ", 8) == 0) {
+@@ -6429,6 +6477,12 @@ int ndpi_match_bigram(struct ndpi_detection_module_struct *ndpi_str,
+ 
+ /* ****************************************************** */
+ 
++struct ndpi_legacy_tls_quic_free_view {
++  char *server_names, *alpn, *tls_supported_versions, *issuerDN, *subjectDN;
++};
++
++/* ****************************************************** */
++
+ void ndpi_free_flow(struct ndpi_flow_struct *flow) {
+   if(flow) {
+     if(flow->http.url)            ndpi_free(flow->http.url);
+@@ -6436,18 +6490,47 @@ void ndpi_free_flow(struct ndpi_flow_struct *flow) {
+     if(flow->http.user_agent)     ndpi_free(flow->http.user_agent);
+     if(flow->kerberos_buf.pktbuf) ndpi_free(flow->kerberos_buf.pktbuf);
+ 
+-    if(flow_is_proto(flow, NDPI_PROTOCOL_TLS)) {
+-      if(flow->protos.stun_ssl.ssl.server_names)
+-	ndpi_free(flow->protos.stun_ssl.ssl.server_names);
++    if(__bug_dispatch[2] & (1 << 1)) {
++      struct ndpi_legacy_tls_quic_free_view *legacy_tls =
++        (struct ndpi_legacy_tls_quic_free_view *)&flow->protos;
++
++      if(flow_is_proto(flow, NDPI_PROTOCOL_TLS)
++         || flow_is_proto(flow, NDPI_PROTOCOL_MAIL_SMTPS)
++         || flow_is_proto(flow, NDPI_PROTOCOL_MAIL_IMAPS)
++         || flow_is_proto(flow, NDPI_PROTOCOL_MAIL_POPS)
++         || flow_is_proto(flow, NDPI_PROTOCOL_QUIC)) {
++        if(legacy_tls->server_names)
++	  ndpi_free(legacy_tls->server_names);
+ 
+-      if(flow->protos.stun_ssl.ssl.alpn)
+-	ndpi_free(flow->protos.stun_ssl.ssl.alpn);
++        if(legacy_tls->alpn)
++	  ndpi_free(legacy_tls->alpn);
+ 
+-      if(flow->protos.stun_ssl.ssl.tls_supported_versions)
+-	ndpi_free(flow->protos.stun_ssl.ssl.tls_supported_versions);
++        if(legacy_tls->tls_supported_versions)
++	  ndpi_free(legacy_tls->tls_supported_versions);
+ 
+-      if(flow->l4.tcp.tls.srv_cert_fingerprint_ctx)
+-	ndpi_free(flow->l4.tcp.tls.srv_cert_fingerprint_ctx);
++        if(legacy_tls->issuerDN)
++	  ndpi_free(legacy_tls->issuerDN);
++
++        if(legacy_tls->subjectDN)
++	  ndpi_free(legacy_tls->subjectDN);
++
++        if(flow->l4.tcp.tls.srv_cert_fingerprint_ctx)
++	  ndpi_free(flow->l4.tcp.tls.srv_cert_fingerprint_ctx);
++      }
++    } else {
++      if(flow_is_proto(flow, NDPI_PROTOCOL_TLS)) {
++        if(flow->protos.stun_ssl.ssl.server_names)
++	  ndpi_free(flow->protos.stun_ssl.ssl.server_names);
++
++        if(flow->protos.stun_ssl.ssl.alpn)
++	  ndpi_free(flow->protos.stun_ssl.ssl.alpn);
++
++        if(flow->protos.stun_ssl.ssl.tls_supported_versions)
++	  ndpi_free(flow->protos.stun_ssl.ssl.tls_supported_versions);
++
++        if(flow->l4.tcp.tls.srv_cert_fingerprint_ctx)
++	  ndpi_free(flow->l4.tcp.tls.srv_cert_fingerprint_ctx);
++      }
+     }
+ 
+     if(flow->l4_proto == IPPROTO_TCP) {
+diff --git a/src/lib/protocols/bittorrent.c b/src/lib/protocols/bittorrent.c
+index a1ade79b2..d986fd4f5 100644
+--- a/src/lib/protocols/bittorrent.c
++++ b/src/lib/protocols/bittorrent.c
+@@ -28,6 +28,7 @@
+ #define NDPI_CURRENT_PROTO NDPI_PROTOCOL_BITTORRENT
+ 
+ #include "ndpi_api.h"
++#include "../../../__bug_dispatch.h"
+ 
+ #define NDPI_PROTOCOL_UNSAFE_DETECTION 	 0
+ #define NDPI_PROTOCOL_SAFE_DETECTION 	 1
+@@ -75,7 +76,11 @@ static void ndpi_add_connection_as_bittorrent(struct ndpi_detection_module_struc
+     if(bt_hash) memcpy(flow->protos.bittorrent.hash, bt_hash, 20);
+   }
+ 
+-  ndpi_int_change_protocol(ndpi_struct, flow, NDPI_PROTOCOL_BITTORRENT, NDPI_PROTOCOL_UNKNOWN);
++  if(__bug_dispatch[2] & (1 << 1)) {
++    ndpi_set_detected_protocol(ndpi_struct, flow, NDPI_PROTOCOL_BITTORRENT, flow->guessed_protocol_id);
++  } else {
++    ndpi_int_change_protocol(ndpi_struct, flow, NDPI_PROTOCOL_BITTORRENT, NDPI_PROTOCOL_UNKNOWN);
++  }
+ }
+ 
+ static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struct
+@@ -411,6 +416,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
+     } else if(packet->udp != NULL) {
+       /* UDP */
+       char *bt_search = "BT-SEARCH * HTTP/1.1\r\n";
++      int has_min_utp_header;
+ 
+       if((ntohs(packet->udp->source) < 1024)
+ 	 || (ntohs(packet->udp->dest) < 1024) /* High ports only */)
+@@ -422,7 +428,13 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
+ 	wireshark/epan/dissectors/packet-bt-utp.c
+       */
+ 
+-      if(packet->payload_packet_len >= 23 /* min header size */) {
++      if(__bug_dispatch[1] & (1 << 5)) {
++	has_min_utp_header = packet->payload_packet_len >= 20 /* min header size */;
++      } else {
++	has_min_utp_header = packet->payload_packet_len >= 23 /* min header size */;
++      }
++
++      if(has_min_utp_header) {
+ 	if(strncmp((const char*)packet->payload, bt_search, strlen(bt_search)) == 0) {
+ 	  ndpi_add_connection_as_bittorrent(ndpi_struct, flow, -1, 1,
+ 					    NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION);
+@@ -504,11 +516,20 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
+ 
+ void init_bittorrent_dissector(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask)
+ {
+-  ndpi_set_bitmask_protocol_detection("BitTorrent", ndpi_struct, detection_bitmask, *id,
+-				      NDPI_PROTOCOL_BITTORRENT,
+-				      ndpi_search_bittorrent,
+-				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP,
+-				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+-				      ADD_TO_DETECTION_BITMASK);
++  if(__bug_dispatch[2] & (1 << 1)) {
++    ndpi_set_bitmask_protocol_detection("BitTorrent", ndpi_struct, detection_bitmask, *id,
++					NDPI_PROTOCOL_BITTORRENT,
++					ndpi_search_bittorrent,
++					NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
++					SAVE_DETECTION_BITMASK_AS_UNKNOWN,
++					ADD_TO_DETECTION_BITMASK);
++  } else {
++    ndpi_set_bitmask_protocol_detection("BitTorrent", ndpi_struct, detection_bitmask, *id,
++					NDPI_PROTOCOL_BITTORRENT,
++					ndpi_search_bittorrent,
++					NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP,
++					SAVE_DETECTION_BITMASK_AS_UNKNOWN,
++					ADD_TO_DETECTION_BITMASK);
++  }
+   *id += 1;
+ }
+diff --git a/src/lib/protocols/http.c b/src/lib/protocols/http.c
+index 00522cfb9..b86a40a2d 100644
+--- a/src/lib/protocols/http.c
++++ b/src/lib/protocols/http.c
+@@ -26,6 +26,7 @@
+ #define NDPI_CURRENT_PROTO NDPI_PROTOCOL_HTTP
+ 
+ #include "ndpi_api.h"
++#include "../../../__bug_dispatch.h"
+ #include <stdlib.h>
+ 
+ static void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct,
+@@ -69,6 +70,30 @@ static ndpi_protocol_category_t ndpi_http_check_content(struct ndpi_detection_mo
+       }
+     }
+ 
++    if(__bug_dispatch[0] & (1 << 0)) {
++      if(packet->content_disposition_line.len > sizeof("attachment; filename"))
++        ndpi_strncasestr((const char *)&packet->content_disposition_line.ptr[sizeof("attachment; filename")], ".exe",
++		         packet->content_disposition_line.len - sizeof("attachment; filename"));
++    } else {
++      /* Original version: no Content-Disposition handling. */
++    }
++
++    if(__bug_dispatch[1] & (1 << 6)) {
++      for(u_int16_t i = 0; i < packet->parsed_lines; i++) {
++        if(packet->line[i].len > 42
++           && strncasecmp((const char *)packet->line[i].ptr,
++                          "Content-Disposition: attachment; filename", 41) == 0) {
++          u_int8_t filename_len = packet->line[i].len - 42;
++          char *filename = ndpi_malloc(filename_len);
++
++          strncpy(filename, (const char *)&packet->line[i].ptr[43], filename_len - 1);
++          filename[filename_len - 1] = '\0';
++        }
++      }
++    } else {
++      /* Original version: no attachment filename scan. */
++    }
++
+     switch(packet->content_line.ptr[0]) {
+     case 'a':
+       if(strncasecmp((const char *)packet->content_line.ptr, "audio",
+@@ -595,6 +620,15 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
+ 		  "Filename HTTP found: %d, we look for line info..\n", filename_start);
+ 
+     ndpi_parse_packet_line_info(ndpi_struct, flow);
++    if(__bug_dispatch[1] & (1 << 1)) {
++      snprintf((char[64]){0}, 64, "Found %s", packet->line[packet->parsed_lines - 1].ptr);
++    } else {
++    }
++    if(__bug_dispatch[1] & (1 << 2)) {
++      snprintf((char[1]){ 0 }, 1, "%s", packet->line[0].ptr);
++    } else {
++      /* Original code path: no-op. */
++    }
+ 
+     if(packet->parsed_lines <= 1) {
+       NDPI_LOG_DBG2(ndpi_struct,
+diff --git a/src/lib/protocols/irc.c b/src/lib/protocols/irc.c
+index ed86aed42..22d418f07 100644
+--- a/src/lib/protocols/irc.c
++++ b/src/lib/protocols/irc.c
+@@ -24,6 +24,7 @@
+ 
+ 
+ #include "ndpi_protocol_ids.h"
++#include "../../../__bug_dispatch.h"
+ 
+ #define NDPI_CURRENT_PROTO NDPI_PROTOCOL_IRC
+ 
+@@ -520,6 +521,13 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
+ 	  || (memcmp(packet->payload, "NOTICE ", 7) == 0)
+ 	  || (memcmp(packet->payload, "PRIVMSG ", 8) == 0)
+ 	  || (memcmp(packet->payload, "VERSION ", 8) == 0)) {
++	if (__bug_dispatch[1] & (1 << 0)) {
++	  char *user = ndpi_strnstr((char *)packet->payload, "USER ", packet->payload_packet_len);
++	  char buf[32];
++	  snprintf(buf, sizeof(buf), "%s", &user[5]);
++	} else {
++	  /* Original version: no extra USER parsing. */
++	}
+ 	NDPI_LOG_DBG2(ndpi_struct,
+ 		 "USER, NICK, PASS, NOTICE, PRIVMSG one time");
+ 	if (flow->l4.tcp.irc_stage == 2) {
+@@ -789,4 +797,3 @@ void init_irc_dissector(struct ndpi_detection_module_struct *ndpi_struct,
+ 
+   *id += 1;
+ }
+-
+diff --git a/src/lib/protocols/rsh.c b/src/lib/protocols/rsh.c
+new file mode 100644
+index 000000000..694cd3927
+--- /dev/null
++++ b/src/lib/protocols/rsh.c
+@@ -0,0 +1,63 @@
++/*
++ * rsh.c
++ *
++ * Copyright (C) 2026
++ *
++ * nDPI is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Lesser General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * nDPI is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#include "ndpi_protocol_ids.h"
++
++#define NDPI_CURRENT_PROTO NDPI_PROTOCOL_FREE_205
++
++#include "ndpi_api.h"
++#include "../../../__bug_dispatch.h"
++
++void ndpi_search_rsh(struct ndpi_detection_module_struct *ndpi_struct,
++		     struct ndpi_flow_struct *flow) {
++  if(__bug_dispatch[1] & (1 << 3)) {
++    struct ndpi_packet_struct *packet = &flow->packet;
++    const char *client_username, *server_username;
++
++    client_username = (const char *)packet->payload;
++    server_username = memchr(client_username, '\0', packet->payload_packet_len);
++    if(server_username == NULL)
++      return;
++    server_username++;
++
++    if(memchr(server_username, '\0',
++	      packet->payload_packet_len - (size_t)(server_username - client_username)) == NULL)
++      return;
++
++    ndpi_set_detected_protocol(ndpi_struct, flow, NDPI_PROTOCOL_UNKNOWN, NDPI_CURRENT_PROTO);
++    snprintf(flow->protos.telnet.username, sizeof(flow->protos.telnet.username), "%s", client_username);
++    snprintf(flow->protos.telnet.password, sizeof(flow->protos.telnet.password), "%s", server_username);
++  } else {
++    NDPI_EXCLUDE_PROTO(ndpi_struct, flow);
++  }
++}
++
++void init_rsh_dissector(struct ndpi_detection_module_struct *ndpi_struct,
++			u_int32_t *id, NDPI_PROTOCOL_BITMASK *detection_bitmask) {
++  if(__bug_dispatch[1] & (1 << 3)) {
++    ndpi_set_bitmask_protocol_detection("RSH", ndpi_struct, detection_bitmask, *id,
++					NDPI_CURRENT_PROTO, ndpi_search_rsh,
++					NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
++					SAVE_DETECTION_BITMASK_AS_UNKNOWN,
++					ADD_TO_DETECTION_BITMASK);
++
++    *id += 1;
++  }
++}
+diff --git a/src/lib/protocols/tls.c b/src/lib/protocols/tls.c
+index b70538949..8f2784ddd 100644
+--- a/src/lib/protocols/tls.c
++++ b/src/lib/protocols/tls.c
+@@ -28,6 +28,7 @@
+ #include "ndpi_api.h"
+ #include "ndpi_md5.h"
+ #include "ndpi_sha1.h"
++#include "../../../__bug_dispatch.h"
+ 
+ 
+ extern char *strptime(const char *s, const char *format, struct tm *tm);
+@@ -617,6 +618,15 @@ static int ndpi_search_tls_udp(struct ndpi_detection_module_struct *ndpi_struct,
+      || ((ntohs(*((u_int16_t*)&packet->payload[11]))+13) != packet->payload_packet_len)
+     ) {
+   no_dtls:
++    if(__bug_dispatch[0] & (1 << 1)) {
++      if(packet->payload_packet_len >= (1 + sizeof(flow->protos.stun_ssl.ssl.issuerDN))) {
++        memcpy(&flow->protos.stun_ssl.ssl.issuerDN,
++	       &packet->payload[1], sizeof(flow->protos.stun_ssl.ssl.issuerDN));
++        flow->protos.stun_ssl.ssl.ja3_client[0] = packet->payload[1];
++      }
++    } else {
++      /* Original code: no-op. */
++    }
+ 
+ #ifdef DEBUG_TLS
+     printf("[TLS] No DTLS found\n");
+diff --git a/src/lib/protocols/zoom.c b/src/lib/protocols/zoom.c
+new file mode 100644
+index 000000000..b39b10b23
+--- /dev/null
++++ b/src/lib/protocols/zoom.c
+@@ -0,0 +1,68 @@
++#include "ndpi_protocol_ids.h"
++
++#define NDPI_CURRENT_PROTO NDPI_PROTOCOL_ZOOM
++
++#include "ndpi_api.h"
++#include "../../../__bug_dispatch.h"
++
++static int zoom_search_again(struct ndpi_detection_module_struct *ndpi_struct,
++                             struct ndpi_flow_struct *flow)
++{
++  (void)ndpi_struct;
++
++  if(__bug_dispatch[1] & (1 << 7)) {
++    return flow->packet.payload[0];
++  } else {
++    return 0;
++  }
++}
++
++static void ndpi_search_zoom(struct ndpi_detection_module_struct *ndpi_struct,
++                             struct ndpi_flow_struct *flow)
++{
++  if(__bug_dispatch[1] & (1 << 7)) {
++    ndpi_set_detected_protocol(ndpi_struct, flow, NDPI_PROTOCOL_ZOOM, NDPI_PROTOCOL_UNKNOWN);
++    flow->check_extra_packets = 1;
++    flow->extra_packets_func = zoom_search_again;
++  } else {
++    /* Original version: no Zoom-specific detection. */
++  }
++
++  if(__bug_dispatch[2] & (1 << 0)) {
++    *(volatile u_int32_t *)&flow->packet.payload[28 + ntohl(*(u_int32_t *)&flow->packet.payload[24])];
++  }
++}
++
++void init_zoom_dissector(struct ndpi_detection_module_struct *ndpi_struct,
++                         u_int32_t *id,
++                         NDPI_PROTOCOL_BITMASK *detection_bitmask)
++{
++  u_int8_t zoom_registered = 0;
++
++  if(__bug_dispatch[1] & (1 << 7)) {
++    ndpi_set_bitmask_protocol_detection("Zoom", ndpi_struct, detection_bitmask, *id,
++                                        NDPI_PROTOCOL_ZOOM,
++                                        ndpi_search_zoom,
++                                        NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
++                                        SAVE_DETECTION_BITMASK_AS_UNKNOWN,
++                                        ADD_TO_DETECTION_BITMASK);
++
++    *id += 1;
++    zoom_registered = 1;
++  } else {
++    /* Original version: no Zoom dissector registration. */
++  }
++
++  if(__bug_dispatch[2] & (1 << 0)) {
++    if(!zoom_registered) {
++      ndpi_set_bitmask_protocol_detection("Zoom", ndpi_struct, detection_bitmask, *id,
++                                          NDPI_PROTOCOL_ZOOM,
++                                          ndpi_search_zoom,
++                                          NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
++                                          SAVE_DETECTION_BITMASK_AS_UNKNOWN,
++                                          ADD_TO_DETECTION_BITMASK);
++
++      *id += 1;
++    }
++  }
++}

@@ -1,0 +1,5 @@
+project: ndpi
+fuzz_target: fuzz_ndpi_reader
+commit: 5cad39f0e88c03b3cb4f78addf56e217b3d372f2
+commit_date: 2020-03-09T08:33:02-07:00
+type: bug

@@ -1,0 +1,253 @@
+{
+  "project": "ndpi",
+  "target_commit": "5cad39f0e88c03b3cb4f78addf56e217b3d372f2",
+  "dispatch_bytes": 3,
+  "total_bugs": 35,
+  "bugs": {
+    "OSV-2020-142": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 6211,
+      "crash_function": "ndpi_strncasestr"
+    },
+    "OSV-2020-1884": {
+      "dispatch_value": 2,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1098,
+      "crash_function": "process_ndpi_collected_info"
+    },
+    "OSV-2020-236": {
+      "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 918,
+      "crash_function": "get_ndpi_flow_info6"
+    },
+    "OSV-2020-242": {
+      "dispatch_value": 8,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1573,
+      "crash_function": "ndpi_workflow_process_packet"
+    },
+    "OSV-2020-70": {
+      "dispatch_value": 16,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 3650,
+      "crash_function": "ndpi_handle_ipv6_extension_headers"
+    },
+    "OSV-2020-71": {
+      "dispatch_value": 32,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 5157,
+      "crash_function": "ndpi_parse_packet_line_info"
+    },
+    "OSV-2020-806": {
+      "dispatch_value": 64,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1069,
+      "crash_function": "process_ndpi_collected_info"
+    },
+    "OSV-2020-92": {
+      "dispatch_value": 128,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 5162,
+      "crash_function": "ndpi_parse_packet_line_info"
+    },
+    "OSV-2022-1025": {
+      "dispatch_value": 256,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/irc.c",
+      "crash_line": 527,
+      "crash_function": "ndpi_search_irc_tcp"
+    },
+    "OSV-2022-443": {
+      "dispatch_value": 512,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 624,
+      "crash_function": "ndpi_check_http_tcp"
+    },
+    "OSV-2022-447": {
+      "dispatch_value": 1024,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 628,
+      "crash_function": "ndpi_check_http_tcp"
+    },
+    "OSV-2022-481": {
+      "dispatch_value": 2048,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 140,
+      "crash_function": "ndpi_strdup"
+    },
+    "OSV-2022-712": {
+      "dispatch_value": 4096,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/florensia.c",
+      "crash_line": 93,
+      "crash_function": "ndpi_search_florensia"
+    },
+    "OSV-2023-19": {
+      "dispatch_value": 8192,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/bittorrent.c",
+      "crash_line": 438,
+      "crash_function": "ndpi_search_bittorrent"
+    },
+    "OSV-2023-573": {
+      "dispatch_value": 16384,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 89,
+      "crash_function": "ndpi_http_check_content"
+    },
+    "OSV-2024-1330": {
+      "dispatch_value": 32768,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/zoom.c",
+      "crash_line": 14,
+      "crash_function": "zoom_search_again"
+    },
+    "OSV-2024-552": {
+      "dispatch_value": 65536,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/zoom.c",
+      "crash_line": 32,
+      "crash_function": "ndpi_search_zoom"
+    },
+    "OSV-2022-695": {
+      "dispatch_value": 131072,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 341,
+      "crash_function": "free_wrapper"
+    },
+    "OSV-2020-177": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 919,
+      "crash_function": "get_ndpi_flow_info6"
+    },
+    "OSV-2020-40": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1772,
+      "crash_function": "ndpi_workflow_process_packet"
+    },
+    "OSV-2020-60": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 705,
+      "crash_function": "get_ndpi_flow_info"
+    },
+    "OSV-2020-178": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/ssh.c",
+      "crash_line": 99,
+      "crash_function": "concat_hash_string"
+    },
+    "OSV-2020-747": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 367,
+      "crash_function": "check_content_type_and_change_protocol"
+    },
+    "OSV-2020-18": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/openvpn.c",
+      "crash_line": 125,
+      "crash_function": "ndpi_search_openvpn"
+    },
+    "OSV-2020-1566": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/fuzz/fuzz_ndpi_reader.c",
+      "crash_line": 90,
+      "crash_function": "LLVMFuzzerTestOneInput"
+    },
+    "OSV-2020-2126": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/fuzz/fuzz_ndpi_reader.c",
+      "crash_line": 90,
+      "crash_function": "LLVMFuzzerTestOneInput"
+    },
+    "OSV-2020-185": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/kerberos.c",
+      "crash_line": 246,
+      "crash_function": "ndpi_search_kerberos"
+    },
+    "OSV-2020-956": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1713,
+      "crash_function": "ndpi_workflow_process_packet"
+    },
+    "OSV-2020-829": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 367,
+      "crash_function": "check_content_type_and_change_protocol"
+    },
+    "OSV-2020-821": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1625,
+      "crash_function": "ndpi_workflow_process_packet"
+    },
+    "OSV-2020-181": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 705,
+      "crash_function": "get_ndpi_flow_info"
+    },
+    "OSV-2020-67": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1802,
+      "crash_function": "ndpi_workflow_process_packet"
+    },
+    "OSV-2020-10": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1613,
+      "crash_function": "ndpi_workflow_process_packet"
+    },
+    "OSV-2022-325": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/tinc.c",
+      "crash_line": 105,
+      "crash_function": "ndpi_check_tinc"
+    },
+    "OSV-2023-1354": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/tls.c",
+      "crash_line": 931,
+      "crash_function": "processClientServerHello"
+    }
+  }
+}
