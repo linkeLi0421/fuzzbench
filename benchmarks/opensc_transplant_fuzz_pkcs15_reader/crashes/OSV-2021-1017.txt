@@ -1,27 +1,24 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1428029245
-INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
-INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
-/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 3284039333
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffc6be3c75f at pc 0x0000004a073c bp 0x7ffc6be3b590 sp 0x7ffc6be3ad58
-WRITE of size 33 at 0x7ffc6be3c75f thread T0
-    #0 0x4a073b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0x7158cc in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2423:6
-    #2 0x9f4cd6 in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
-    #3 0x5682ad in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
-    #4 0x57174a in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:742:6
-    #5 0x4ddbbb in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:286:17
-    #6 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #7 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #8 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #9 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7fccc33f8082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
-    #11 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffd4f7fde7f at pc 0x0000004a293c bp 0x7ffd4f7fcf90 sp 0x7ffd4f7fc760
+WRITE of size 33 at 0x7ffd4f7fde7f thread T0
+    #0 0x4a293b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x7c9e4e in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2423:6
+    #2 0xb76dea in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
+    #3 0x5a5670 in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
+    #4 0x5af4bf in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:742:6
+    #5 0x4e4ea7 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:286:17
+    #6 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #7 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #8 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #9 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #10 0x7f2778355082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-Address 0x7ffc6be3c75f is located in stack of thread T0 at offset 223 in frame
-    #0 0x4dc04f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:187
+Address 0x7ffd4f7fde7f is located in stack of thread T0 at offset 223 in frame
+    #0 0x4e2e4f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:187
 
   This frame has 16 object(s):
     [32, 40) 'ctx' (line 188)
@@ -44,20 +41,20 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x10000d7bf890: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf8a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf8b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf8c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf8d0: f1 f1 f1 f1 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2
-=>0x10000d7bf8e0: 00 f2 f2 f2 00 f2 f2 f2 02 f2 02[f2]00 00 00 00
-  0x10000d7bf8f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf910: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf920: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10000d7bf930: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7b70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7b90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7ba0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7bb0: 00 00 00 00 f1 f1 f1 f1 00 f2 f2 f2 00 f2 f2 f2
+=>0x100029ef7bc0: 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 02 f2 02[f2]
+  0x100029ef7bd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7be0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7bf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100029ef7c10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
-  Partially addressable: 01 02 03 04 05 06 07
+  Partially addressable: 01 02 03 04 05 06 07 
   Heap left redzone:       fa
   Freed heap region:       fd
   Stack left redzone:      f1

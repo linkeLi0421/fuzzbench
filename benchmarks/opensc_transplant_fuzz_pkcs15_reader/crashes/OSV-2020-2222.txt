@@ -1,54 +1,51 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1387868069
-INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
-INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
-/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 3301760983
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: attempting double-free on 0x6030000002e0 in thread T0:
-    #0 0x4a0ff2 in __interceptor_free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:111:3
-    #1 0x50f410 in sc_pkcs15_free_tokeninfo /src/opensc/src/libopensc/pkcs15.c:736:2
-    #2 0x50fc92 in sc_pkcs15_card_free /src/opensc/src/libopensc/pkcs15.c:790:2
-    #3 0x4de1cd in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:297:9
-    #4 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #5 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #6 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #7 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #8 0x7f1edb8d0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
-    #9 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+==1==ERROR: AddressSanitizer: attempting double-free on 0x603000000310 in thread T0:
+    #0 0x4a3252 in __interceptor_free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #1 0x528eee in sc_pkcs15_free_tokeninfo /src/opensc/src/libopensc/pkcs15.c:736:2
+    #2 0x52a01e in sc_pkcs15_card_free /src/opensc/src/libopensc/pkcs15.c:790:2
+    #3 0x4e54f9 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:297:9
+    #4 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #5 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #6 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #7 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #8 0x7ff3151d7082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #9 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-0x6030000002e0 is located 0 bytes inside of 32-byte region [0x6030000002e0,0x603000000300)
+0x603000000310 is located 0 bytes inside of 32-byte region [0x603000000310,0x603000000330)
 freed by thread T0 here:
-    #0 0x4a0ff2 in __interceptor_free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:111:3
-    #1 0x926ea6 in idprime_get_token_name /src/opensc/src/libopensc/card-idprime.c:452:3
-    #2 0x91fbb2 in idprime_card_ctl /src/opensc/src/libopensc/card-idprime.c:476:11
-    #3 0x4fbd22 in sc_card_ctl /src/opensc/src/libopensc/card.c:1058:7
-    #4 0x99d0b1 in sc_pkcs15emu_idprime_init /src/opensc/src/libopensc/pkcs15-idprime.c:112:6
-    #5 0x99bf86 in sc_pkcs15emu_idprime_init_ex /src/opensc/src/libopensc/pkcs15-idprime.c:285:9
-    #6 0x57aa5e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
-    #7 0x5187bc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
-    #8 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
-    #9 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #10 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #11 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #12 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #13 0x7f1edb8d0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #0 0x4a3252 in __interceptor_free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #1 0xa5edbc in idprime_get_token_name /src/opensc/src/libopensc/card-idprime.c:452:3
+    #2 0xa56578 in idprime_card_ctl /src/opensc/src/libopensc/card-idprime.c:476:11
+    #3 0x50e02c in sc_card_ctl /src/opensc/src/libopensc/card.c:1058:7
+    #4 0xb01bdd in sc_pkcs15emu_idprime_init /src/opensc/src/libopensc/pkcs15-idprime.c:112:6
+    #5 0xb0033b in sc_pkcs15emu_idprime_init_ex /src/opensc/src/libopensc/pkcs15-idprime.c:285:9
+    #6 0x5bae88 in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #7 0x5379e4 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #8 0x4e3a6f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #9 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #10 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #11 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #12 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #13 0x7ff3151d7082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 previously allocated by thread T0 here:
-    #0 0x4a125d in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
-    #1 0x926adc in idprime_get_token_name /src/opensc/src/libopensc/card-idprime.c:445:11
-    #2 0x91fbb2 in idprime_card_ctl /src/opensc/src/libopensc/card-idprime.c:476:11
-    #3 0x4fbd22 in sc_card_ctl /src/opensc/src/libopensc/card.c:1058:7
-    #4 0x99d0b1 in sc_pkcs15emu_idprime_init /src/opensc/src/libopensc/pkcs15-idprime.c:112:6
-    #5 0x99bf86 in sc_pkcs15emu_idprime_init_ex /src/opensc/src/libopensc/pkcs15-idprime.c:285:9
-    #6 0x57aa5e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
-    #7 0x5187bc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
-    #8 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
-    #9 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #10 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #11 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #12 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #13 0x7f1edb8d0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #0 0x4a34f6 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0xa5e852 in idprime_get_token_name /src/opensc/src/libopensc/card-idprime.c:445:11
+    #2 0xa56578 in idprime_card_ctl /src/opensc/src/libopensc/card-idprime.c:476:11
+    #3 0x50e02c in sc_card_ctl /src/opensc/src/libopensc/card.c:1058:7
+    #4 0xb01bdd in sc_pkcs15emu_idprime_init /src/opensc/src/libopensc/pkcs15-idprime.c:112:6
+    #5 0xb0033b in sc_pkcs15emu_idprime_init_ex /src/opensc/src/libopensc/pkcs15-idprime.c:285:9
+    #6 0x5bae88 in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #7 0x5379e4 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #8 0x4e3a6f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #9 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #10 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #11 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #12 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #13 0x7ff3151d7082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: double-free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:111:3 in __interceptor_free
+SUMMARY: AddressSanitizer: double-free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3 in __interceptor_free
 ==1==ABORTING

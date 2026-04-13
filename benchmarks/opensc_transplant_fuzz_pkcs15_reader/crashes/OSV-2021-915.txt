@@ -1,28 +1,25 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1430550372
-INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
-INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
-/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 3286568417
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f8618f5e0a3 at pc 0x0000009db52b bp 0x7fffed458120 sp 0x7fffed458118
-READ of size 1 at 0x7f8618f5e0a3 thread T0
-    #0 0x9db52a in sc_asn1_read_tag /src/opensc/src/libopensc/asn1.c:74:6
-    #1 0x9ddcbb in sc_asn1_find_tag /src/opensc/src/libopensc/asn1.c:489:7
-    #2 0x7156a7 in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2410:11
-    #3 0x9f4cd6 in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
-    #4 0x5682ad in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
-    #5 0x57174a in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:742:6
-    #6 0x4ddbbb in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:286:17
-    #7 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #8 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #9 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #10 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7f8619bb7082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
-    #12 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f83a3c078a3 at pc 0x000000b591e1 bp 0x7ffd420b8130 sp 0x7ffd420b8128
+READ of size 1 at 0x7f83a3c078a3 thread T0
+    #0 0xb591e0 in sc_asn1_read_tag /src/opensc/src/libopensc/asn1.c:74:6
+    #1 0xb5b961 in sc_asn1_find_tag /src/opensc/src/libopensc/asn1.c:489:7
+    #2 0x7c9c27 in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2410:11
+    #3 0xb76dea in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
+    #4 0x5a5670 in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
+    #5 0x5af4bf in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:742:6
+    #6 0x4e4ea7 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:286:17
+    #7 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #8 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #9 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #10 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #11 0x7f83a61df082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-Address 0x7f8618f5e0a3 is located in stack of thread T0 at offset 163 in frame
-    #0 0x714fff in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2370
+Address 0x7f83a3c078a3 is located in stack of thread T0 at offset 163 in frame
+    #0 0x7c936f in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2370
 
   This frame has 3 object(s):
     [32, 160) 'rbuf' (line 2375) <== Memory access at offset 163 overflows this variable
@@ -32,20 +29,20 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/opensc/src/libopensc/asn1.c:74:6 in sc_asn1_read_tag
 Shadow bytes around the buggy address:
-  0x0ff1431e3bc0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3bd0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3be0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3bf0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3c00: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x0ff1431e3c10: 00 00 00 00[f2]f2 f2 f2 00 f2 f2 f2 00 f3 f3 f3
-  0x0ff1431e3c20: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3c30: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3c40: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3c50: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff1431e3c60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff0f4778ec0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778ed0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778ee0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778ef0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778f00: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0ff0f4778f10: 00 00 00 00[f2]f2 f2 f2 00 f2 f2 f2 00 f3 f3 f3
+  0x0ff0f4778f20: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778f30: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778f40: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778f50: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff0f4778f60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
-  Partially addressable: 01 02 03 04 05 06 07
+  Partially addressable: 01 02 03 04 05 06 07 
   Heap left redzone:       fa
   Freed heap region:       fd
   Stack left redzone:      f1

@@ -1,43 +1,40 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1402372479
-INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
-INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
-/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 3317721244
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60c000000180 at pc 0x0000004a0681 bp 0x7ffd88344bd0 sp 0x7ffd88344398
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60c000000180 at pc 0x0000004a2881 bp 0x7ffebc27c4b0 sp 0x7ffebc27bc80
 READ of size 254 at 0x60c000000180 thread T0
-    #0 0x4a0680 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0x96ed15 in sc_pkcs15emu_oberthur_add_data /src/opensc/src/libopensc/pkcs15-oberthur.c:898:2
-    #2 0x96a260 in sc_oberthur_parse_privateinfo /src/opensc/src/libopensc/pkcs15-oberthur.c:531:9
-    #3 0x966533 in sc_pkcs15emu_oberthur_init /src/opensc/src/libopensc/pkcs15-oberthur.c:1040:8
-    #4 0x963baf in sc_pkcs15emu_oberthur_init_ex /src/opensc/src/libopensc/pkcs15-oberthur.c:1069:8
-    #5 0x57aa5e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
-    #6 0x5187bc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
-    #7 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
-    #8 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #9 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #10 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #11 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #12 0x7f864520d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
-    #13 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+    #0 0x4a2880 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0xac1efe in sc_pkcs15emu_oberthur_add_data /src/opensc/src/libopensc/pkcs15-oberthur.c:898:2
+    #2 0xabd271 in sc_oberthur_parse_privateinfo /src/opensc/src/libopensc/pkcs15-oberthur.c:531:9
+    #3 0xab8cb4 in sc_pkcs15emu_oberthur_init /src/opensc/src/libopensc/pkcs15-oberthur.c:1040:8
+    #4 0xab52af in sc_pkcs15emu_oberthur_init_ex /src/opensc/src/libopensc/pkcs15-oberthur.c:1069:8
+    #5 0x5bae88 in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #6 0x5379e4 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #7 0x4e3a6f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #8 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #9 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #10 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #11 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #12 0x7f680e5e0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
 0x60c000000180 is located 0 bytes to the right of 128-byte region [0x60c000000100,0x60c000000180)
 allocated by thread T0 here:
-    #0 0x4a13e2 in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:138:3
-    #1 0x9681b1 in sc_oberthur_read_file /src/opensc/src/libopensc/pkcs15-oberthur.c:264:9
-    #2 0x96db0f in sc_pkcs15emu_oberthur_add_data /src/opensc/src/libopensc/pkcs15-oberthur.c:856:7
-    #3 0x96a260 in sc_oberthur_parse_privateinfo /src/opensc/src/libopensc/pkcs15-oberthur.c:531:9
-    #4 0x966533 in sc_pkcs15emu_oberthur_init /src/opensc/src/libopensc/pkcs15-oberthur.c:1040:8
-    #5 0x963baf in sc_pkcs15emu_oberthur_init_ex /src/opensc/src/libopensc/pkcs15-oberthur.c:1069:8
-    #6 0x57aa5e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
-    #7 0x5187bc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
-    #8 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
-    #9 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #10 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #11 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #12 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #13 0x7f864520d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #0 0x4a36ce in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:77:3
+    #1 0xabaa7b in sc_oberthur_read_file /src/opensc/src/libopensc/pkcs15-oberthur.c:264:9
+    #2 0xac0bd3 in sc_pkcs15emu_oberthur_add_data /src/opensc/src/libopensc/pkcs15-oberthur.c:856:7
+    #3 0xabd271 in sc_oberthur_parse_privateinfo /src/opensc/src/libopensc/pkcs15-oberthur.c:531:9
+    #4 0xab8cb4 in sc_pkcs15emu_oberthur_init /src/opensc/src/libopensc/pkcs15-oberthur.c:1040:8
+    #5 0xab52af in sc_pkcs15emu_oberthur_init_ex /src/opensc/src/libopensc/pkcs15-oberthur.c:1069:8
+    #6 0x5bae88 in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #7 0x5379e4 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #8 0x4e3a6f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #9 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #10 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #11 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #12 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #13 0x7f680e5e0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
@@ -54,7 +51,7 @@ Shadow bytes around the buggy address:
   0x0c187fff8080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
-  Partially addressable: 01 02 03 04 05 06 07
+  Partially addressable: 01 02 03 04 05 06 07 
   Heap left redzone:       fa
   Freed heap region:       fd
   Stack left redzone:      f1

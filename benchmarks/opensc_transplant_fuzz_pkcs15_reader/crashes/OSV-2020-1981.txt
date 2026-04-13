@@ -1,32 +1,29 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1417753193
-INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd0a8e8, 0xd124a1),
-INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xb96c58,0xc127e8),
-/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 3272046150
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffd87b25882 at pc 0x0000004a073c bp 0x7ffd87b14b10 sp 0x7ffd87b142d8
-WRITE of size 43246 at 0x7ffd87b25882 thread T0
-    #0 0x4a073b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0x4db99f in fuzz_reader_transmit /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:141:13
-    #2 0xa1ea2e in sc_single_transmit /src/opensc/src/libopensc/apdu.c:379:7
-    #3 0xa1bdbe in sc_transmit /src/opensc/src/libopensc/apdu.c:515:6
-    #4 0xa1b5c3 in sc_transmit_apdu /src/opensc/src/libopensc/apdu.c:624:7
-    #5 0x9fc104 in iso7816_read_binary /src/opensc/src/libopensc/iso7816.c:156:6
-    #6 0x91db91 in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:549:9
-    #7 0x4f42f5 in sc_read_binary /src/opensc/src/libopensc/card.c:652:7
-    #8 0x513093 in sc_pkcs15_bind_internal /src/opensc/src/libopensc/pkcs15.c:1056:9
-    #9 0x518778 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1265:8
-    #10 0x4dc944 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
-    #11 0xa77033 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #12 0xa62cc2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #13 0xa6850c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #14 0xa91102 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #15 0x7f29f4043082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
-    #16 0x421f5d in _start (/out/fuzz_pkcs15_reader+0x421f5d)
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffcc9070782 at pc 0x0000004a293c bp 0x7ffcc905fad0 sp 0x7ffcc905f2a0
+WRITE of size 43246 at 0x7ffcc9070782 thread T0
+    #0 0x4a293b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x4e2564 in fuzz_reader_transmit /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:141:13
+    #2 0xbaab78 in sc_single_transmit /src/opensc/src/libopensc/apdu.c:379:7
+    #3 0xba67e2 in sc_transmit /src/opensc/src/libopensc/apdu.c:515:6
+    #4 0xba5c6e in sc_transmit_apdu /src/opensc/src/libopensc/apdu.c:624:7
+    #5 0xb803ac in iso7816_read_binary /src/opensc/src/libopensc/iso7816.c:156:6
+    #6 0xa537ab in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:549:9
+    #7 0x504acc in sc_read_binary /src/opensc/src/libopensc/card.c:652:7
+    #8 0x52fa5b in sc_pkcs15_bind_internal /src/opensc/src/libopensc/pkcs15.c:1056:9
+    #9 0x5379b1 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1265:8
+    #10 0x4e3a6f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #11 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #12 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #13 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #14 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #15 0x7fa6f2e95082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #16 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-Address 0x7ffd87b25882 is located in stack of thread T0 at offset 65570 in frame
-    #0 0x91d47f in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:528
+Address 0x7ffcc9070782 is located in stack of thread T0 at offset 65570 in frame
+    #0 0xa52dff in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:528
 
   This frame has 1 object(s):
     [32, 65570) 'buffer' (line 540) <== Memory access at offset 65570 overflows this variable
@@ -34,20 +31,20 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x100030f5cac0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5cad0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5cae0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5caf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5cb00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x100030f5cb10:[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x100030f5cb20: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x100030f5cb30: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5cb40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5cb50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x100030f5cb60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000192060a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000192060b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000192060c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000192060d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000192060e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x1000192060f0:[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100019206100: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100019206110: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100019206120: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100019206130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100019206140: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
-  Partially addressable: 01 02 03 04 05 06 07
+  Partially addressable: 01 02 03 04 05 06 07 
   Heap left redzone:       fa
   Freed heap region:       fd
   Stack left redzone:      f1
