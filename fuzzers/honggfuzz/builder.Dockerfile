@@ -31,6 +31,6 @@ RUN apt-get update -y && \
 RUN git clone https://github.com/google/honggfuzz.git /honggfuzz && \
     cd /honggfuzz && \
     git checkout oss-fuzz && \
-    CFLAGS="-O3 -funroll-loops" make && \
+    CFLAGS="-O3 -funroll-loops -D_HF_LINUX_NO_BFD" make && \
     touch empty_lib.c && \
     cc -c -o empty_lib.o empty_lib.c

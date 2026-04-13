@@ -21,6 +21,18 @@ from fuzzers.afl import fuzzer as afl_fuzzer
 from fuzzers import utils
 
 
+LLVM_BUILD_MODES = {
+    'tracepc', 'pcguard', 'classic', 'native', 'lto', 'cmplog', 'dict2file',
+    'laf', 'autodict', 'ctx', 'ctx1', 'ctx2', 'ctx3', 'ctx4', 'ngram2',
+    'ngram3', 'ngram4', 'ngram5', 'ngram6', 'ngram7', 'ngram8', 'ngram16',
+}
+
+
+def llvm_mode_available():
+    """Return whether this AFL++ build contains LLVM instrumentation support."""
+    return os.path.exists('/afl/afl-llvm-pass.so')
+
+
 def get_cmplog_build_directory(target_directory):
     """Return path to CmpLog target directory."""
     return os.path.join(target_directory, 'cmplog')
@@ -56,6 +68,13 @@ def build(*args):  # pylint: disable=too-many-branches,too-many-statements
         if 'gcc' not in build_modes:
             build_modes[0] = 'native'
 
+    if any(mode in LLVM_BUILD_MODES for mode in build_modes):
+        if not llvm_mode_available() and 'qemu' not in build_modes:
+            print('AFL++ LLVM mode unavailable; using GCC-plugin mode.')
+            build_modes = ['gcc'] + [
+                mode for mode in build_modes if mode not in LLVM_BUILD_MODES
+            ]
+
     # Instrumentation coverage modes:
     if 'lto' in build_modes:
         os.environ['CC'] = '/afl/afl-clang-lto'
@@ -87,6 +106,8 @@ def build(*args):  # pylint: disable=too-many-branches,too-many-statements
             os.environ['CFLAGS'] = ''
             os.environ['CXXFLAGS'] = ''
             os.environ['CPPFLAGS'] = ''
+        os.environ['CC'] = '/afl/afl-gcc-fast'
+        os.environ['CXX'] = '/afl/afl-g++-fast'
     else:
         os.environ['CC'] = '/afl/afl-clang-fast'
         os.environ['CXX'] = '/afl/afl-clang-fast++'
