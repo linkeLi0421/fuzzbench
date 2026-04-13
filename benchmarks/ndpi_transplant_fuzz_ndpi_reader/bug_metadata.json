@@ -175,16 +175,16 @@
     "OSV-2020-1566": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/fuzz/fuzz_ndpi_reader.c",
-      "crash_line": 90,
-      "crash_function": "LLVMFuzzerTestOneInput"
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1647,
+      "crash_function": "ndpi_workflow_process_packet"
     },
     "OSV-2020-2126": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/fuzz/fuzz_ndpi_reader.c",
-      "crash_line": 90,
-      "crash_function": "LLVMFuzzerTestOneInput"
+      "crash_file": "/src/ndpi/example/reader_util.c",
+      "crash_line": 1655,
+      "crash_function": "ndpi_workflow_process_packet"
     },
     "OSV-2020-185": {
       "dispatch_value": 0,

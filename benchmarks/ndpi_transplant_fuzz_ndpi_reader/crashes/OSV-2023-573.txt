@@ -1,50 +1,30 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1610475595
-INFO: Loaded 1 modules   (20618 inline 8-bit counters): 20618 [0xbccf60, 0xbd1fea), 
-INFO: Loaded 1 PC tables (20618 PCs): 20618 [0xbd1ff0,0xc22890), 
-/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 2793340938
+/out/fuzz_ndpi_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
 ==1==ERROR: AddressSanitizer: negative-size-param: (size=-1)
-    #0 0x50cc6e in strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:483:5
-    #1 0x5fa181 in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:89:11
-    #2 0x5fa181 in ndpi_int_http_add_connection /src/ndpi/src/lib/protocols/http.c:135:14
-    #3 0x5f94b8 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:458:3
-    #4 0x5f692a in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
-    #5 0x5f692a in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:866:3
-    #6 0x591234 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4145:2
-    #7 0x59914a in ndpi_check_flow_func /src/ndpi/src/lib/ndpi_main.c:4203:5
-    #8 0x59914a in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4907:3
-    #9 0x56316c in packet_processing /src/ndpi/example/reader_util.c:1422:33
-    #10 0x560f38 in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1863:10
-    #11 0x5541f7 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
-    #12 0x4583c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4583c3)
-    #13 0x443c92 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #14 0x44989e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x44989e)
-    #15 0x473032 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #16 0x7f9dc077f83f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
-    #17 0x41ef38 in _start (/out/fuzz_ndpi_reader+0x41ef38)
+    #0 0x48c03e in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:471:5
+    #1 0x56a50e in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:89:11
+    #2 0x56a50e in ndpi_int_http_add_connection /src/ndpi/src/lib/protocols/http.c:135:14
+    #3 0x56976d in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:458:3
+    #4 0x5679d1 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
+    #5 0x5679d1 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:866:3
+    #6 0x50ef42 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4145:2
+    #7 0x514ec6 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4907:3
+    #8 0x4eed8e in packet_processing /src/ndpi/example/reader_util.c:1422:33
+    #9 0x4eed8e in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1863:10
+    #10 0x4de707 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
+    #11 0x6754fc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #12 0x667455 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #13 0x66c101 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #14 0x667122 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #15 0x7f90d6998082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #16 0x41f98d in _start (/out/fuzz_ndpi_reader+0x41f98d)
 
 0x602000045cf0 is located 0 bytes inside of 1-byte region [0x602000045cf0,0x602000045cf1)
 allocated by thread T0 here:
-    #0 0x520cfd in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
-    #1 0x55baf2 in malloc_wrapper /src/ndpi/example/reader_util.c:332:10
-    #2 0x5fa160 in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:87:28
-    #3 0x5fa160 in ndpi_int_http_add_connection /src/ndpi/src/lib/protocols/http.c:135:14
-    #4 0x5f94b8 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:458:3
-    #5 0x5f692a in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
-    #6 0x5f692a in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:866:3
-    #7 0x591234 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4145:2
-    #8 0x59914a in ndpi_check_flow_func /src/ndpi/src/lib/ndpi_main.c:4203:5
-    #9 0x59914a in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4907:3
-    #10 0x56316c in packet_processing /src/ndpi/example/reader_util.c:1422:33
-    #11 0x560f38 in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1863:10
-    #12 0x5541f7 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
-    #13 0x4583c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4583c3)
-    #14 0x443c92 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #15 0x44989e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x44989e)
-    #16 0x473032 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #17 0x7f9dc077f83f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #0 0x4a0dc6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x4e7908 in malloc_wrapper /src/ndpi/example/reader_util.c:332:10
 
-SUMMARY: AddressSanitizer: negative-size-param /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:483:5 in strncpy
+SUMMARY: AddressSanitizer: negative-size-param /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:471:5 in __interceptor_strncpy
 ==1==ABORTING

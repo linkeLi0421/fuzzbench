@@ -1,27 +1,24 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1577413895
-INFO: Loaded 1 modules   (20618 inline 8-bit counters): 20618 [0xbccf60, 0xbd1fea), 
-INFO: Loaded 1 PC tables (20618 PCs): 20618 [0xbd1ff0,0xc22890), 
-/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 2761580764
+/out/fuzz_ndpi_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x7fc745a397c6 bp 0x7ffd1cf6d270 sp 0x7ffd1cf6ca28 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x0000004b7d50 bp 0x7fffd8a91b30 sp 0x7fffd8a912e8 T0)
 ==1==The signal is caused by a READ memory access.
 ==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
-    #0 0x7fc745a397c6 in strlen (/lib/x86_64-linux-gnu/libc.so.6+0x8b7c6)
-    #1 0x50c742 in __strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:464:17
-    #2 0x55e11f in process_ndpi_collected_info /src/ndpi/example/reader_util.c:1098:33
-    #3 0x5637bc in packet_processing /src/ndpi/example/reader_util.c
-    #4 0x560f38 in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1863:10
-    #5 0x5541f7 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
-    #6 0x4583c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4583c3)
-    #7 0x443c92 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #8 0x44989e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x44989e)
-    #9 0x473032 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7fc7459ce83f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
-    #11 0x41ef38 in _start (/out/fuzz_ndpi_reader+0x41ef38)
+    #0 0x4b7d50 in __sanitizer::internal_strlen(char const*) /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_libc.cpp:167:10
+    #1 0x48b861 in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:436:17
+    #2 0x4e9a85 in process_ndpi_collected_info /src/ndpi/example/reader_util.c:1098:33
+    #3 0x4eef5d in packet_processing /src/ndpi/example/reader_util.c:1447:4
+    #4 0x4eef5d in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1863:10
+    #5 0x4de707 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
+    #6 0x6754fc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #7 0x667455 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #8 0x66c101 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #9 0x667122 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #10 0x7f9a6b641082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x41f98d in _start (/out/fuzz_ndpi_reader+0x41f98d)
 
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0x8b7c6) in strlen
+SUMMARY: AddressSanitizer: SEGV /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_libc.cpp:167:10 in __sanitizer::internal_strlen(char const*)
 ==1==ABORTING

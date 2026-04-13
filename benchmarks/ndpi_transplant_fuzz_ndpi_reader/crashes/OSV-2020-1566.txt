@@ -1,44 +1,41 @@
-INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1546454965
-INFO: Loaded 1 modules   (20618 inline 8-bit counters): 20618 [0xbccf60, 0xbd1fea), 
-INFO: Loaded 1 PC tables (20618 PCs): 20618 [0xbd1ff0,0xc22890), 
-/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+INFO: Seed: 2818496063
+/out/fuzz_ndpi_reader: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000140 at pc 0x00000056122b bp 0x7ffd97894a70 sp 0x7ffd97894a68
-READ of size 1 at 0x604000000140 thread T0
-    #0 0x56122a in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c
-    #1 0x5541f7 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
-    #2 0x4583c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4583c3)
-    #3 0x443c92 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #4 0x44989e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x44989e)
-    #5 0x473032 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f69da3a483f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
-    #7 0x41ef38 in _start (/out/fuzz_ndpi_reader+0x41ef38)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000180 at pc 0x0000004f0360 bp 0x7ffc587e9310 sp 0x7ffc587e9308
+READ of size 1 at 0x604000000180 thread T0
+    #0 0x4f035f in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1647:17
+    #1 0x4de707 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:90:5
+    #2 0x6754fc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #3 0x667455 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #4 0x66c101 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #5 0x667122 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #6 0x7f501dd0b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #7 0x41f98d in _start (/out/fuzz_ndpi_reader+0x41f98d)
 
-0x604000000140 is located 0 bytes to the right of 48-byte region [0x604000000110,0x604000000140)
+0x604000000180 is located 0 bytes to the right of 48-byte region [0x604000000150,0x604000000180)
 allocated by thread T0 here:
-    #0 0x520cfd in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
-    #1 0x5541c6 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:88:31
-    #2 0x4583c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4583c3)
-    #3 0x443c92 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #4 0x44989e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x44989e)
-    #5 0x473032 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f69da3a483f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #0 0x4a0dc6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x4de6d5 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:88:31
+    #2 0x6754fc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #3 0x667455 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #4 0x66c101 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #5 0x667122 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #6 0x7f501dd0b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/example/reader_util.c in ndpi_workflow_process_packet
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/example/reader_util.c:1647:17 in ndpi_workflow_process_packet
 Shadow bytes around the buggy address:
-  0x0c087fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c087fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c087fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c087fff8000: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 05
-  0x0c087fff8010: fa fa 00 00 00 00 01 fa fa fa 00 00 00 00 07 fa
-=>0x0c087fff8020: fa fa 00 00 00 00 00 00[fa]fa fa fa fa fa fa fa
-  0x0c087fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8000: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 00
+  0x0c087fff8010: fa fa 00 00 00 00 00 05 fa fa 00 00 00 00 01 fa
+  0x0c087fff8020: fa fa 00 00 00 00 07 fa fa fa 00 00 00 00 00 00
+=>0x0c087fff8030:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c087fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c087fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c087fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c087fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -58,5 +55,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-  Shadow gap:              cc
 ==1==ABORTING
