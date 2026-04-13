@@ -14,7 +14,7 @@
 
 ARG parent_image
 
-# Using multi-stage build to copy latest Python 3.
+# Using multi-stage build to copy Python package dependencies.
 FROM gcr.io/fuzzbench/base-image AS base-image
 
 FROM $parent_image
@@ -37,15 +37,22 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     libssl-dev \
     libffi-dev
 
-RUN rm -rf /usr/local/bin/python3.8* /usr/local/bin/pip3 /usr/local/lib/python3.8 \
-    /usr/local/include/python3.8 /usr/local/lib/python3.8/site-packages
+# Keep the parent image's Python. Some historical benchmark images use older
+# glibc, so copying a newer Python binary from base-image can make python3
+# unusable. Copy only the PyYAML package needed by fuzzers/utils.py.
+COPY --from=base-image /usr/local/lib/python3.10/site-packages/yaml /tmp/fuzzbench-python-packages/yaml
+RUN python3 - <<'PY'
+import shutil
+import sysconfig
+from pathlib import Path
 
-# Copy latest python3 from base-image into local.
-COPY --from=base-image /usr/local/bin/python3* /usr/local/bin/
-COPY --from=base-image /usr/local/bin/pip3* /usr/local/bin/
-COPY --from=base-image /usr/local/lib/python3.10 /usr/local/lib/python3.10
-COPY --from=base-image /usr/local/include/python3.10 /usr/local/include/python3.10
-COPY --from=base-image /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+purelib = Path(sysconfig.get_paths()["purelib"])
+purelib.mkdir(parents=True, exist_ok=True)
+destination = purelib / "yaml"
+if destination.exists():
+    shutil.rmtree(destination)
+shutil.copytree("/tmp/fuzzbench-python-packages/yaml", destination)
+PY
 
 # Copy the entire fuzzers directory tree to allow for module dependencies.
 COPY fuzzers $SRC/fuzzers
