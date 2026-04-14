@@ -1,0 +1,80 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 0000000..8b8ff0c
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 0000000..6450a25
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
+diff --git a/cmake/utils.cmake b/cmake/utils.cmake
+index 468e9d1..e3522a9 100644
+--- a/cmake/utils.cmake
++++ b/cmake/utils.cmake
+@@ -69,6 +69,9 @@ function(libavc_add_executable NAME LIB)
+   cmake_parse_arguments(ARG "${optional_args}" "${single_value_args}"
+                         "${multi_value_args}" ${ARGN})
+ 
++  set(target_sources ${ARG_SOURCES})
++  set(target_includes ${ARG_INCLUDES})
++
+   # Check if compiler supports -fsanitize=fuzzer. If not, skip building fuzzer
+   # binary
+   if(ARG_FUZZER)
+@@ -76,10 +79,12 @@ function(libavc_add_executable NAME LIB)
+       message("Compiler doesn't support -fsanitize=fuzzer. Skipping ${NAME}")
+       return()
+     endif()
++    list(APPEND target_sources "${AVC_ROOT}/__bug_dispatch.c")
++    list(APPEND target_includes "${AVC_ROOT}")
+   endif()
+ 
+-  add_executable(${NAME} ${ARG_SOURCES})
+-  target_include_directories(${NAME} PRIVATE ${ARG_INCLUDES})
++  add_executable(${NAME} ${target_sources})
++  target_include_directories(${NAME} PRIVATE ${target_includes})
+   add_dependencies(${NAME} ${LIB} ${ARG_LIBS})
+ 
+   target_link_libraries(${NAME} ${LIB} ${ARG_LIBS})
+diff --git a/fuzzer/svc_dec_fuzzer.cpp b/fuzzer/svc_dec_fuzzer.cpp
+index 6ae8747..35bd0e7 100644
+--- a/fuzzer/svc_dec_fuzzer.cpp
++++ b/fuzzer/svc_dec_fuzzer.cpp
+@@ -34,11 +34,13 @@
+  *******************************************************************************
+  */
+ 
++#include "__bug_dispatch.h"
++#include <string.h>
++
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+-#include <string.h>
+ 
+ #include <algorithm>
+ #include <memory>
+@@ -404,6 +406,11 @@ IV_API_CALL_STATUS_T Codec::decodeFrame(const uint8_t *data, size_t size, size_t
+ 
+ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+ {
++    if(size < __BUG_DISPATCH_BYTES) return 0;
++    memcpy((void *) __bug_dispatch, data, __BUG_DISPATCH_BYTES);
++    data += __BUG_DISPATCH_BYTES;
++    size -= __BUG_DISPATCH_BYTES;
++
+     if(size < 1)
+     {
+         return 0;

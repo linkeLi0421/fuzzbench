@@ -1,0 +1,251 @@
+diff --git a/decoder/ih264d_defs.h b/decoder/ih264d_defs.h
+index 894fc78..214d173 100644
+--- a/decoder/ih264d_defs.h
++++ b/decoder/ih264d_defs.h
+@@ -36,7 +36,10 @@
+  */
+ #include <stdint.h>
+ 
+-#define H264_MAX_FRAME_WIDTH                4080
++#include "../__bug_dispatch.h"
++
++#define H264_MAX_FRAME_WIDTH \
++    ((__bug_dispatch[0] & (1 << 3)) ? 4096 : ((__bug_dispatch[0] & (1 << 4)) ? 4096 : 4080))
+ #define H264_MAX_FRAME_HEIGHT               4080
+ #define H264_MAX_FRAME_SIZE                 (4096 * 2048)
+ 
+diff --git a/decoder/ih264d_structs.h b/decoder/ih264d_structs.h
+index bcab1ea..bc81d56 100644
+--- a/decoder/ih264d_structs.h
++++ b/decoder/ih264d_structs.h
+@@ -795,7 +795,7 @@ typedef struct _DecStruct
+     /************************************************************/
+     /* MB_GROUP should be a multiple of 2                       */
+     /************************************************************/
+-    UWORD8 u1_recon_mb_grp;
++    UWORD32 u1_recon_mb_grp;
+     UWORD8 u1_recon_mb_grp_pair;
+     /* Variables to handle Cabac */
+     decoding_envirnoment_t s_cab_dec_env; /* < Structure for decoding_envirnoment_t */
+diff --git a/decoder/svc/isvcd_api.c b/decoder/svc/isvcd_api.c
+index 3ac3984..103a67f 100644
+--- a/decoder/svc/isvcd_api.c
++++ b/decoder/svc/isvcd_api.c
+@@ -87,6 +87,7 @@
+ #include <limits.h>
+ #include <stddef.h>
+ #include <assert.h>
++#include "../../__bug_dispatch.h"
+ #include "ih264_defs.h"
+ #include "ih264_typedefs.h"
+ #include "ih264_macros.h"
+@@ -5288,7 +5289,15 @@ WORD32 isvcd_video_decode(iv_obj_t *dec_hdl, void *pv_api_ip, void *pv_api_op)
+ 
+                     ps_dec_op->u4_frame_decoded_flag = 0;
+                     ret = isvcd_parse_nal_unit(ps_svc_lyr_dec, ps_cur_node->i4_nal_ref_idc);
+-                    if(ret != OK)
++                    if(__bug_dispatch[0] & (1 << 1))
++                    {
++                        if(((ret != OK)) && (u1_res_id != (u1_num_res_lyrs - 1)))
++                        {
++                            ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
++                            break;
++                        }
++                    }
++                    else if(ret != OK)
+                     {
+                         ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
+                         break;
+diff --git a/decoder/svc/isvcd_defs.h b/decoder/svc/isvcd_defs.h
+index 4162713..cb356fc 100644
+--- a/decoder/svc/isvcd_defs.h
++++ b/decoder/svc/isvcd_defs.h
+@@ -39,6 +39,8 @@
+ 
+ #include <stdint.h>
+ 
++#include "../../__bug_dispatch.h"
++
+ typedef enum
+ {
+     ERROR_SVC_FIELD_PIC_UNSUPPORTED = 0xC1,
+@@ -49,7 +51,8 @@ typedef enum
+ 
+ #define FLUSH 2
+ 
+-#define SVCD_MAX_FRAME_WIDTH 4080
++#define SVCD_MAX_FRAME_WIDTH \
++    ((__bug_dispatch[0] & (1 << 3)) ? 4096 : ((__bug_dispatch[0] & (1 << 4)) ? 4096 : 4080))
+ #define SVCD_MAX_FRAME_HEIGHT 4080
+ #define SVCD_MAX_FRAME_SIZE (4096 * 2048)
+ 
+diff --git a/decoder/svc/isvcd_parse_epslice.c b/decoder/svc/isvcd_parse_epslice.c
+index 8d8c449..9961198 100644
+--- a/decoder/svc/isvcd_parse_epslice.c
++++ b/decoder/svc/isvcd_parse_epslice.c
+@@ -44,8 +44,8 @@
+  *
+  *******************************************************************************
+  */
+-
+ #include <string.h>
++#include "../../__bug_dispatch.h"
+ #include "ih264_defs.h"
+ #include "ih264d_bitstrm.h"
+ #include "ih264d_defs.h"
+@@ -3194,7 +3194,12 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+ {
+     dec_struct_t *ps_dec = &ps_svc_lyr_dec->s_dec;
+     dec_slice_params_t *ps_slice = ps_dec->ps_cur_slice;
++    svc_dec_ctxt_t *ps_svcd_ctxt;
+     WORD32 ret = OK;
++    WORD32 num_mb_skipped;
++    WORD32 prev_slice_err;
++    pocstruct_t temp_poc;
++    WORD32 ht_in_mbs;
+ 
+     if(TARGET_LAYER != ps_svc_lyr_dec->u1_layer_identifier)
+     {
+@@ -3203,6 +3208,13 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+         ps_slice->i1_slice_beta_offset = ps_svc_lyr_dec->i1_inter_lyr_slice_beta_offset;
+     }
+ 
++    if(__bug_dispatch[0] & (1 << 1))
++    {
++        ps_svcd_ctxt = ps_svc_lyr_dec->ps_svcd_ctxt;
++        ht_in_mbs = ps_dec->u2_pic_ht >> (4 + ps_dec->ps_cur_slice->u1_field_pic_flag);
++        num_mb_skipped = (ht_in_mbs * ps_dec->u2_frm_wd_in_mbs) - ps_dec->u2_total_mbs_coded;
++    }
++
+     if(0 == u2_first_mb_in_slice)
+     {
+         ret = isvcd_populate_res_prms(ps_svc_lyr_dec);
+@@ -3218,6 +3230,35 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+         if(ret != OK) return NOT_OK;
+     }
+ 
++    if(__bug_dispatch[0] & (1 << 1))
++    {
++        if(ps_dec->u4_first_slice_in_pic && (ps_dec->u4_pic_buf_got == 0))
++            prev_slice_err = 1;
++        else
++            prev_slice_err = 2;
++
++        if(ps_dec->u4_first_slice_in_pic && (ps_dec->u2_total_mbs_coded == 0)) prev_slice_err = 1;
++
++        if((ps_svc_lyr_dec->u1_layer_identifier == TARGET_LAYER) &&
++           (1 == ps_svcd_ctxt->u1_parse_nal_unit_error))
++        {
++            ret = isvcd_mark_err_slice_skip(
++                ps_svc_lyr_dec, num_mb_skipped, ps_dec->u1_nal_unit_type == IDR_SLICE_NAL,
++                ps_dec->ps_cur_slice->u2_frame_num, &temp_poc, prev_slice_err);
++            return ret;
++        }
++    }
++
++    if(__bug_dispatch[0] & (1 << 0))
++    {
++        svc_dec_ctxt_t *ps_svcd_ctxt = ps_svc_lyr_dec->ps_svcd_ctxt;
++
++        if(ps_svcd_ctxt->u1_parse_nal_unit_error)
++        {
++            return isvcd_mark_err_slice_skip(ps_svc_lyr_dec, 0, 0, 0, 0, 0);
++        }
++    }
++
+     return ret;
+ }
+ 
+diff --git a/decoder/svc/isvcd_parse_headers.c b/decoder/svc/isvcd_parse_headers.c
+index 6c3e9fb..536aaea 100644
+--- a/decoder/svc/isvcd_parse_headers.c
++++ b/decoder/svc/isvcd_parse_headers.c
+@@ -45,6 +45,7 @@
+ #include <string.h>
+ #include <assert.h>
+ 
++#include "../../__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ih264_defs.h"
+ #include "ih264_macros.h"
+@@ -1175,12 +1176,15 @@ WORD32 isvcd_parse_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stream_t *p
+     ps_seq = ps_dec->pv_scratch_sps_pps;
+     memset(ps_seq, 0, sizeof(dec_seq_params_t));
+ 
+-    if(ps_dec->i4_header_decoded & 1)
++    if(!(__bug_dispatch[0] & (1 << 2)))
+     {
+-        if(ps_dec->ps_cur_sps != NULL)
+-            *ps_seq = *ps_dec->ps_cur_sps;
+-        else
+-            return ERROR_INV_SPS_PPS_T;
++        if(ps_dec->i4_header_decoded & 1)
++        {
++            if(ps_dec->ps_cur_sps != NULL)
++                *ps_seq = *ps_dec->ps_cur_sps;
++            else
++                return ERROR_INV_SPS_PPS_T;
++        }
+     }
+ 
+     if((ps_dec->i4_header_decoded & 1) &&
+@@ -1628,31 +1632,35 @@ WORD32 isvcd_parse_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stream_t *p
+     ps_subset_seq->u2_crop_offset_y = u2_crop_offset_y;
+     ps_subset_seq->u2_crop_offset_uv = u2_crop_offset_uv;
+ 
+-    if(((ps_dec->u2_pic_wd * ps_dec->u2_pic_ht) <
+-        (ps_subset_seq->u2_pic_wd * ps_subset_seq->u2_pic_ht)) ||
+-       (ps_dec->i4_reorder_depth < ps_subset_seq->i4_reorder_depth))
++    if(!(__bug_dispatch[0] & (1 << 2)))
+     {
+-        ps_dec->i4_reorder_depth = ps_subset_seq->i4_reorder_depth;
+-
+-        ps_dec->u2_disp_height = ps_subset_seq->u2_disp_height;
+-        ps_dec->u2_disp_width = ps_subset_seq->u2_disp_width;
+-        ps_dec->u2_pic_wd = ps_subset_seq->u2_pic_wd;
+-        ps_dec->u2_pic_ht = ps_subset_seq->u2_pic_ht;
+-        ps_dec->u4_total_mbs = ps_seq->u2_total_num_of_mbs << (1 - ps_seq->u1_frame_mbs_only_flag);
+-
+-        /* Determining the Width and Height of Frame from that of Picture */
+-        ps_dec->u2_frm_wd_y = ps_subset_seq->u2_frm_wd_y;
+-        ps_dec->u2_frm_ht_y = ps_subset_seq->u2_frm_ht_y;
+-        ps_dec->u2_frm_wd_uv = ps_subset_seq->u2_frm_wd_uv;
+-        ps_dec->u2_frm_ht_uv = ps_subset_seq->u2_frm_ht_uv;
+-
+-        ps_dec->s_pad_mgr.u1_pad_len_y_v = ps_subset_seq->u1_pad_len_y_v;
+-        ps_dec->s_pad_mgr.u1_pad_len_cr_v = ps_subset_seq->u1_pad_len_cr_v;
+-
+-        ps_dec->u2_frm_wd_in_mbs = ps_seq->u2_frm_wd_in_mbs;
+-        ps_dec->u2_frm_ht_in_mbs = ps_seq->u2_frm_ht_in_mbs;
+-        ps_dec->u2_crop_offset_y = ps_subset_seq->u2_crop_offset_y;
+-        ps_dec->u2_crop_offset_uv = ps_subset_seq->u2_crop_offset_uv;
++        if(((ps_dec->u2_pic_wd * ps_dec->u2_pic_ht) <
++            (ps_subset_seq->u2_pic_wd * ps_subset_seq->u2_pic_ht)) ||
++           (ps_dec->i4_reorder_depth < ps_subset_seq->i4_reorder_depth))
++        {
++            ps_dec->i4_reorder_depth = ps_subset_seq->i4_reorder_depth;
++
++            ps_dec->u2_disp_height = ps_subset_seq->u2_disp_height;
++            ps_dec->u2_disp_width = ps_subset_seq->u2_disp_width;
++            ps_dec->u2_pic_wd = ps_subset_seq->u2_pic_wd;
++            ps_dec->u2_pic_ht = ps_subset_seq->u2_pic_ht;
++            ps_dec->u4_total_mbs =
++                ps_seq->u2_total_num_of_mbs << (1 - ps_seq->u1_frame_mbs_only_flag);
++
++            /* Determining the Width and Height of Frame from that of Picture */
++            ps_dec->u2_frm_wd_y = ps_subset_seq->u2_frm_wd_y;
++            ps_dec->u2_frm_ht_y = ps_subset_seq->u2_frm_ht_y;
++            ps_dec->u2_frm_wd_uv = ps_subset_seq->u2_frm_wd_uv;
++            ps_dec->u2_frm_ht_uv = ps_subset_seq->u2_frm_ht_uv;
++
++            ps_dec->s_pad_mgr.u1_pad_len_y_v = ps_subset_seq->u1_pad_len_y_v;
++            ps_dec->s_pad_mgr.u1_pad_len_cr_v = ps_subset_seq->u1_pad_len_cr_v;
++
++            ps_dec->u2_frm_wd_in_mbs = ps_seq->u2_frm_wd_in_mbs;
++            ps_dec->u2_frm_ht_in_mbs = ps_seq->u2_frm_ht_in_mbs;
++            ps_dec->u2_crop_offset_y = ps_subset_seq->u2_crop_offset_y;
++            ps_dec->u2_crop_offset_uv = ps_subset_seq->u2_crop_offset_uv;
++        }
+     }
+ 
+     ps_seq->u1_is_valid = TRUE;

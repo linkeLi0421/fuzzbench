@@ -1,0 +1,62 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3683371550
+INFO: Loaded 1 modules   (16698 inline 8-bit counters): 16698 [0x8a2000, 0x8a613a), 
+INFO: Loaded 1 PC tables (16698 PCs): 16698 [0x804f48,0x8462e8), 
+/out/svc_dec_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6130000092b6 at pc 0x0000005f3362 bp 0x7ffd711ec580 sp 0x7ffd711ec578
+READ of size 1 at 0x6130000092b6 thread T0
+    #0 0x5f3361 in isvcd_reflayer_construction_dyadic /src/libavc/decoder/svc/isvcd_intra_resamp.c:2116:45
+    #1 0x5f50c3 in isvcd_intra_resamp_mb_dyadic /src/libavc/decoder/svc/isvcd_intra_resamp.c:3572:11
+    #2 0x5d9a2b in isvcd_process_ibl_mb /src/libavc/decoder/svc/isvcd_process_epslice.c:1762:15
+    #3 0x5daf9b in isvcd_decode_recon_tfr_nmb_non_base_lyr /src/libavc/decoder/svc/isvcd_process_epslice.c:1340:19
+    #4 0x5a598f in isvcd_parse_inter_slice_data_cabac_enh_lyr /src/libavc/decoder/svc/isvcd_parse_epslice.c:1527:23
+    #5 0x5a2db1 in isvcd_parse_epslice /src/libavc/decoder/svc/isvcd_parse_epslice.c:475:11
+    #6 0x5c5cc1 in isvcd_parse_decode_slice_ext_nal /src/libavc/decoder/svc/isvcd_parse_slice.c:1496:15
+    #7 0x5b97c5 in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:1064:44
+    #8 0x5840ae in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5291:27
+    #9 0x59105f in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7274:26
+    #10 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:377:11
+    #11 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:444:22
+    #12 0x43de33 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #13 0x429592 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #14 0x42ee3c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #15 0x458372 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #16 0x7f7a3a43b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #17 0x41f75d in _start (/out/svc_dec_fuzzer+0x41f75d)
+
+Address 0x6130000092b6 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libavc/decoder/svc/isvcd_intra_resamp.c:2116:45 in isvcd_reflayer_construction_dyadic
+Shadow bytes around the buggy address:
+  0x0c267fff9200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9210: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9220: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9230: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9240: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x0c267fff9250: fa fa fa fa fa fa[fa]fa fa fa fa fa fa fa fa fa
+  0x0c267fff9260: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9270: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9290: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff92a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

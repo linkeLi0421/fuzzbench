@@ -1,0 +1,134 @@
+{
+  "project": "libavc",
+  "target_commit": "c38af025abf0040f6693d15f4ce2e878a728cfee",
+  "dispatch_bytes": 1,
+  "total_bugs": 18,
+  "bugs": {
+    "OSV-2023-68": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_intra_resamp.c",
+      "crash_line": 4786,
+      "crash_function": "isvcd_populate_res_prms"
+    },
+    "OSV-2023-75": {
+      "dispatch_value": 2,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_mode_mv_resamp.c",
+      "crash_line": 2622,
+      "crash_function": "isvcd_interlyr_motion_mode_pred_dyadic"
+    },
+    "OSV-2024-638": {
+      "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_format_conv.c",
+      "crash_line": 497,
+      "crash_function": "ih264d_fmt_conv_420sp_to_420sp_swap_uv"
+    },
+    "OSV-2025-584": {
+      "dispatch_value": 8,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_parse_epslice.c",
+      "crash_line": 2839,
+      "crash_function": "isvcd_mark_err_slice_skip"
+    },
+    "OSV-2025-589": {
+      "dispatch_value": 16,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_process_epslice.c",
+      "crash_line": 1564,
+      "crash_function": "isvcd_decode_recon_tfr_nmb_base_lyr"
+    },
+    "OSV-2025-534": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/common/x86/ih264_inter_pred_filters_ssse3.c",
+      "crash_line": 394,
+      "crash_function": "ih264_inter_pred_luma_horz_ssse3"
+    },
+    "OSV-2023-1206": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_format_conv.c",
+      "crash_line": 400,
+      "crash_function": "ih264d_fmt_conv_420sp_to_420sp"
+    },
+    "OSV-2023-1207": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_parse_slice.c",
+      "crash_line": 298,
+      "crash_function": "isvcd_start_of_pic"
+    },
+    "OSV-2023-1312": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_format_conv.c",
+      "crash_line": 611,
+      "crash_function": "ih264d_fmt_conv_420sp_to_420p"
+    },
+    "OSV-2023-1205": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_intra_resamp.c",
+      "crash_line": 4802,
+      "crash_function": "isvcd_populate_res_prms"
+    },
+    "OSV-2023-1311": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_format_conv.c",
+      "crash_line": 611,
+      "crash_function": "ih264d_fmt_conv_420sp_to_420p"
+    },
+    "OSV-2023-97": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_intra_resamp.c",
+      "crash_line": 2116,
+      "crash_function": "isvcd_reflayer_construction_dyadic"
+    },
+    "OSV-2023-342": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/common/x86/ih264_inter_pred_filters_ssse3.c",
+      "crash_line": 650,
+      "crash_function": "ih264_inter_pred_luma_vert_ssse3"
+    },
+    "OSV-2024-637": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_format_conv.c",
+      "crash_line": 497,
+      "crash_function": "ih264d_fmt_conv_420sp_to_420sp_swap_uv"
+    },
+    "OSV-2023-1313": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_parse_slice.c",
+      "crash_line": 298,
+      "crash_function": "isvcd_start_of_pic"
+    },
+    "OSV-2023-840": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/svc/isvcd_parse_epslice.c",
+      "crash_line": 1908,
+      "crash_function": "isvcd_parse_inter_slice_data_cavlc_enh_lyr"
+    },
+    "OSV-2023-1208": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_format_conv.c",
+      "crash_line": 400,
+      "crash_function": "ih264d_fmt_conv_420sp_to_420sp"
+    },
+    "OSV-2023-1294": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/libavc/decoder/ih264d_compute_bs.c",
+      "crash_line": 1181,
+      "crash_function": "ih264d_compute_bs_non_mbaff"
+    }
+  }
+}
