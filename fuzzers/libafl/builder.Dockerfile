@@ -26,7 +26,7 @@ RUN rm -f /usr/local/bin/cargo /usr/local/bin/rustc /usr/local/bin/rustup && \
     rm -rf /rust /home/agent/.cargo /home/agent/.rustup \
            /root/.cargo /root/.rustup && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /rustup.sh && \
-    sh /rustup.sh --default-toolchain nightly -y --no-modify-path && \
+    sh /rustup.sh --default-toolchain nightly-2025-08-15 -y --no-modify-path && \
     rm /rustup.sh && \
     ln -s /root/.cargo/bin/cargo /usr/local/bin/cargo && \
     ln -s /root/.cargo/bin/rustc /usr/local/bin/rustc && \
