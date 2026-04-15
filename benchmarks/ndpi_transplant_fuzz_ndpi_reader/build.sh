@@ -54,16 +54,31 @@ fi
 cd /src
 tar -xvzf /src/libpcap-1.9.1.tar.gz
 cd /src/libpcap-1.9.1
-./configure --disable-shared
-make -j$(nproc) -k 2>&1 || true
+# Disable optional backends so libpcap.a doesn't pick up dbus/bluetooth/rdma
+# symbols from whatever -dev packages the current fuzzer builder happens to
+# pull in transitively (e.g. libglib2.0-dev -> libdbus-1-dev in aflplusplus's
+# builder). Without this, libpcap.a has undefined refs to dbus_*, bluetooth_*,
+# etc. and nDPI's configure link test for pcap_open_live silently fails,
+# leaving no fuzz/Makefile and no binary.
+# Honor $CC/$CXX so libpcap gets the same instrumentation as nDPI.  Without
+# this, libpcap.a is built with /usr/bin/gcc and contains zero coverage edges
+# for the fuzzer's edge-count map; LibAFL then rejects every seed during
+# calibration ("Failed to load initial corpus") because all execution time
+# spent inside libpcap looks like dead code.  Other fuzzers tolerate this
+# silently but produce a weaker coverage signal.
+./configure --disable-shared \
+    --disable-dbus --disable-bluetooth --disable-rdma \
+    --without-libnl --without-dpdk --without-dag --without-septel --without-snf \
+    CC="$CC" CXX="$CXX"
+make -j$(nproc) -k CC="$CC" CXX="$CXX" 2>&1 || true
 make install
 cd ..
 
 # build project
 cd /src/ndpi
 sh autogen.sh
-./configure --enable-fuzztargets
-make -k 2>&1 || true
+./configure --enable-fuzztargets CC="$CC" CXX="$CXX"
+make -k CC="$CC" CXX="$CXX" 2>&1 || true
 ls fuzz/fuzz* | grep -v "\." | while read i; do cp $i $OUT/; done
 
 
@@ -125,6 +140,14 @@ fi
 if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
     for f in /tmp/benchmark_seed_candidates/*; do
         [ -f "$f" ] || continue
+        # Drop seeds too small to contain a pcap global header (24 bytes).
+        # libafl's seed-calibration respawner panics when every initial seed
+        # causes the target to exit 0 at the first byte — which happens for
+        # 1-to-16-byte .head_* variants that trip nDPI's early-return path.
+        fsize=$(wc -c < "$f")
+        if [ "$fsize" -lt 24 ]; then
+            continue
+        fi
         if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
             cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
         fi
