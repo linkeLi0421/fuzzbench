@@ -15,16 +15,22 @@
 ARG parent_image
 FROM $parent_image
 
-# Remove stale Rust wrappers and install fresh toolchain.
-# Note: base image sets HOME=/home/agent, so rustup installs there.
+# Remove any preexisting Rust install (parent image ships one at /rust),
+# then install a fresh nightly toolchain under fixed root paths. Pinning
+# RUSTUP_HOME/CARGO_HOME avoids cross-device rename errors when /rust is
+# on a different overlay layer than the container's writable root.
+ENV RUSTUP_HOME=/root/.rustup \
+    CARGO_HOME=/root/.cargo \
+    PATH=/root/.cargo/bin:$PATH
 RUN rm -f /usr/local/bin/cargo /usr/local/bin/rustc /usr/local/bin/rustup && \
-    rm -rf $HOME/.cargo $HOME/.rustup && \
+    rm -rf /rust /home/agent/.cargo /home/agent/.rustup \
+           /root/.cargo /root/.rustup && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /rustup.sh && \
-    sh /rustup.sh --default-toolchain nightly -y && \
+    sh /rustup.sh --default-toolchain nightly -y --no-modify-path && \
     rm /rustup.sh && \
-    ln -s $HOME/.cargo/bin/cargo /usr/local/bin/cargo && \
-    ln -s $HOME/.cargo/bin/rustc /usr/local/bin/rustc && \
-    ln -s $HOME/.cargo/bin/rustup /usr/local/bin/rustup
+    ln -s /root/.cargo/bin/cargo /usr/local/bin/cargo && \
+    ln -s /root/.cargo/bin/rustc /usr/local/bin/rustc && \
+    ln -s /root/.cargo/bin/rustup /usr/local/bin/rustup
 
 # Install dependencies.
 RUN apt-get update && \
