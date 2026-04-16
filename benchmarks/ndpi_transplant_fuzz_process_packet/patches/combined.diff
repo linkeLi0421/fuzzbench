@@ -11,20 +11,6 @@ index bfb34aafa..a08c8740a 100644
  fuzz_process_packet_LDFLAGS = ../src/lib/libndpi.a
  if HAS_FUZZLDFLAGS
      fuzz_process_packet_LDFLAGS += $(LIB_FUZZING_ENGINE)
-diff --git a/fuzz/fuzz_process_packet.c b/fuzz/fuzz_process_packet.c
-index 6e0e57f77..7852b1014 100644
---- a/fuzz/fuzz_process_packet.c
-+++ b/fuzz/fuzz_process_packet.c
-@@ -34,6 +34,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-     memset(src, 0, SIZEOF_ID_STRUCT);
-     memset(dst, 0, SIZEOF_ID_STRUCT);
-     ndpi_detection_process_packet(ndpi_info_mod, ndpi_flow, __fuzz_copy, Size, 0, src, dst);
-+    if (__bug_dispatch[1] & (1 << 0)) {
-+        ndpi_free_flow(ndpi_flow);
-+    }
- 
-     free(__fuzz_copy);
-     return 0;
 diff --git a/src/include/ndpi_protocol_ids.h b/src/include/ndpi_protocol_ids.h
 index c6d486933..7e41ababa 100644
 --- a/src/include/ndpi_protocol_ids.h

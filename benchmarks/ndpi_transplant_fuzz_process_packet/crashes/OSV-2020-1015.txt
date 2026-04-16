@@ -1,31 +1,31 @@
-INFO: Seed: 4138424798
+INFO: Seed: 4288122601
 /out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60400000013c at pc 0x000000439ca6 bp 0x7ffc8af95ec0 sp 0x7ffc8af95670
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60400000013c at pc 0x000000439ca6 bp 0x7ffee8125de0 sp 0x7ffee8125590
 READ of size 13 at 0x60400000013c thread T0
     #0 0x439ca5 in MemcmpInterceptorCommon(void*, int (*)(void const*, void const*, unsigned long), void const*, void const*, unsigned long) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:860:7
     #1 0x43a1fb in bcmp /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:906:10
-    #2 0x525127 in ndpi_search_memcached /src/ndpi/src/lib/protocols/memcached.c:162:14
-    #3 0x4f22f4 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
-    #4 0x4ffa66 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #2 0x5250e7 in ndpi_search_memcached /src/ndpi/src/lib/protocols/memcached.c:162:14
+    #3 0x4f22b4 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
+    #4 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #5 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
-    #6 0x5d650c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #7 0x5c8465 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #8 0x5cd111 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #9 0x5c8132 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #10 0x7f1a9357d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #6 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #7 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #8 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #9 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #10 0x7f3996e85082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #11 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
 
 0x60400000013c is located 0 bytes to the right of 44-byte region [0x604000000110,0x60400000013c)
 allocated by thread T0 here:
     #0 0x4a0ca6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0x4de202 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
-    #2 0x5d650c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #3 0x5c8465 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #4 0x5cd111 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #5 0x5c8132 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #6 0x7f1a9357d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #1 0x4de209 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
+    #2 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #3 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #4 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #5 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #6 0x7f3996e85082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:860:7 in MemcmpInterceptorCommon(void*, int (*)(void const*, void const*, unsigned long), void const*, void const*, unsigned long)
 Shadow bytes around the buggy address:

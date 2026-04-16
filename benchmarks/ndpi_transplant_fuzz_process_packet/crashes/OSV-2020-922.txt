@@ -1,29 +1,29 @@
-INFO: Seed: 4124691993
+INFO: Seed: 4272843703
 /out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60300000020d at pc 0x00000056ddb6 bp 0x7ffdb9ab8e80 sp 0x7ffdb9ab8e78
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60300000020d at pc 0x00000056dd76 bp 0x7fff07c474c0 sp 0x7fff07c474b8
 READ of size 1 at 0x60300000020d thread T0
-    #0 0x56ddb5 in ndpi_search_h323 /src/ndpi/src/lib/protocols/h323.c:81:42
-    #1 0x4f4070 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
-    #2 0x4ffa66 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #0 0x56dd75 in ndpi_search_h323 /src/ndpi/src/lib/protocols/h323.c:81:42
+    #1 0x4f4030 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
+    #2 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #3 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
-    #4 0x5d650c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #5 0x5c8465 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #6 0x5cd111 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #7 0x5c8132 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #8 0x7f72062e0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #4 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #5 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #6 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #7 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #8 0x7fcabff80082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #9 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
 
 0x60300000020d is located 0 bytes to the right of 29-byte region [0x6030000001f0,0x60300000020d)
 allocated by thread T0 here:
     #0 0x4a0ca6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0x4de202 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
-    #2 0x5d650c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #3 0x5c8465 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #4 0x5cd111 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #5 0x5c8132 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #6 0x7f72062e0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #1 0x4de209 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
+    #2 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #3 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #4 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #5 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #6 0x7fcabff80082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/h323.c:81:42 in ndpi_search_h323
 Shadow bytes around the buggy address:
