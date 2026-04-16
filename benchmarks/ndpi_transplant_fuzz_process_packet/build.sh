@@ -83,7 +83,7 @@ UB_CLASSES=shift,integer-divide-by-zero,null,bounds,vla-bound,return,unreachable
 export CFLAGS="${CFLAGS:-} -fsanitize=$UB_CLASSES -fno-sanitize-recover=$UB_CLASSES"
 export CXXFLAGS="${CXXFLAGS:-} -fsanitize=$UB_CLASSES -fno-sanitize-recover=$UB_CLASSES"
 sh autogen.sh
-./configure --enable-fuzztargets CC="$CC" CXX="$CXX"
+./configure --enable-fuzztargets --disable-json-c CC="$CC" CXX="$CXX"
 make -k CC="$CC" CXX="$CXX" 2>&1 || true
 ls fuzz/fuzz* | grep -v "\." | while read i; do cp $i $OUT/; done
 
