@@ -1,0 +1,75 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 00000000..8b8ff0ce
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 00000000..6450a259
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
+diff --git a/test/fuzz/hts_open_fuzzer.c b/test/fuzz/hts_open_fuzzer.c
+index bfbad961..f4bb9441 100644
+--- a/test/fuzz/hts_open_fuzzer.c
++++ b/test/fuzz/hts_open_fuzzer.c
+@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.  */
+ 
+ #include <config.h>
+ 
++#include "__bug_dispatch.h"
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <stdio.h>
+@@ -115,16 +116,26 @@ static void view_vcf(htsFile *in) {
+ }
+ 
+ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
++    if (size < __BUG_DISPATCH_BYTES) return 0;
++    memcpy((void*)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++    data += __BUG_DISPATCH_BYTES;
++    size -= __BUG_DISPATCH_BYTES;
++    uint8_t *__fuzz_copy = (uint8_t *)malloc(size);
++    if (!__fuzz_copy) return 0;
++    memcpy(__fuzz_copy, data, size);
++
+     hFILE *memfile;
+     uint8_t *copy = malloc(size);
+     if (copy == NULL) {
++        free(__fuzz_copy);
+         abort();
+     }
+-    memcpy(copy, data, size);
++    memcpy(copy, __fuzz_copy, size);
+     // hopen does not take ownership of `copy`, but hts_hopen does.
+     memfile = hopen("mem:", "rb:", copy, size);
+     if (memfile == NULL) {
+         free(copy);
++        free(__fuzz_copy);
+         return 0;
+     }
+ 
+@@ -133,6 +144,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+         if (hclose(memfile) != 0) {
+             abort();
+         }
++        free(__fuzz_copy);
+         return 0;
+     }
+     switch (ht_file->format.category) {
+@@ -146,5 +158,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+             break;
+     }
+     hts_close_or_abort(ht_file);
++    free(__fuzz_copy);
+     return 0;
+ }

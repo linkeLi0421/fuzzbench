@@ -1,0 +1,39 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1939917465
+INFO: Loaded 1 modules   (17793 inline 8-bit counters): 17793 [0x9c7a70, 0x9cbff1), 
+INFO: Loaded 1 PC tables (17793 PCs): 17793 [0x7142d0,0x759ae0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::vcf_parse] Contig '@SQ' is not defined in the header. (Quick workaround: index the file with tabix.)
+[W::vcf_parse] FILTER 'AF:dx##' is not defined in the header
+[W::vcf_parse] INFO 'L�:S�Q' is not defined in the header, assuming Type=String
+[W::vcf_parse_format] FORMAT 'AN' is not defined in the header, assuming Type=String
+[W::vcf_parse_format] FORMAT '՛*��AN' is not defined in the header, assuming Type=String
+[W::vcf_parse_format] FORMAT '՛*�@S�' is not defined in the header, assuming Type=String
+==1== ERROR: libFuzzer: out-of-memory (malloc(4294967296))
+   To change the out-of-memory limit use -rss_limit_mb=<N>
+
+    #0 0x52a851 in __sanitizer_print_stack_trace /src/llvm-project/compiler-rt/lib/asan/asan_stack.cpp:86:3
+    #1 0x4739a8 in fuzzer::PrintStackTrace() (/out/hts_open_fuzzer+0x4739a8)
+    #2 0x456f35 in fuzzer::Fuzzer::HandleMalloc(unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:131:3
+    #3 0x456e4a in fuzzer::MallocHook(void const volatile*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:100:6
+    #4 0x531057 in __sanitizer::RunMallocHooks(void const*, unsigned long) /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_common.cpp:301:5
+    #5 0x4a891a in __asan::Allocator::Allocate(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType, bool) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:611:5
+    #6 0x4a8d13 in __asan::Allocator::Reallocate(void*, unsigned long, __sanitizer::BufferedStackTrace*) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:727:21
+    #7 0x4a8c45 in __asan::asan_realloc(void*, unsigned long, __sanitizer::BufferedStackTrace*) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:1009:34
+    #8 0x522165 in realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:165:10
+    #9 0x5e2f55 in ks_resize /src/htslib/./htslib/kstring.h:142:16
+    #10 0x5e840d in vcf_parse_format /src/htslib/vcf.c:2297:9
+    #11 0x5e6690 in vcf_parse /src/htslib/vcf.c:2687:20
+    #12 0x5dc01d in vcf_read /src/htslib/vcf.c:2705:12
+    #13 0x5dbeed in bcf_read /src/htslib/vcf.c:1449:42
+    #14 0x55541d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:121:12
+    #15 0x554f36 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:169:13
+    #16 0x4594d3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x4594d3)
+    #17 0x444da2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #18 0x44a9ae in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44a9ae)
+    #19 0x474142 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #20 0x7f490a5f683f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #21 0x420048 in _start (/out/hts_open_fuzzer+0x420048)
+
+SUMMARY: libFuzzer: out-of-memory

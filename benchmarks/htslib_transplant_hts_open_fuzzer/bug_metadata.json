@@ -1,0 +1,85 @@
+{
+  "project": "htslib",
+  "target_commit": "dd6f0b72c92591252bb77818663629cc1a129949",
+  "dispatch_bytes": 1,
+  "total_bugs": 11,
+  "bugs": {
+    "OSV-2020-1733": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/htslib/./htslib/hts_endian.h",
+      "crash_line": 136,
+      "crash_function": "le_to_u32"
+    },
+    "OSV-2023-1370": {
+      "dispatch_value": 2,
+      "triggered": true,
+      "crash_file": "/src/htslib/cram/cram_encode.c",
+      "crash_line": 2519,
+      "crash_function": "cram_encode_aux"
+    },
+    "OSV-2024-20": {
+      "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/htslib/sam.c",
+      "crash_line": 3282,
+      "crash_function": "bam_aux_get"
+    },
+    "OSV-2024-74": {
+      "dispatch_value": 8,
+      "triggered": true,
+      "crash_file": "/src/htslib/cram/cram_encode.c",
+      "crash_line": 2263,
+      "crash_function": "cram_encode_aux"
+    },
+    "OSV-2024-189": {
+      "dispatch_value": 16,
+      "triggered": true,
+      "crash_file": "/src/htslib/./htslib/kstring.h",
+      "crash_line": 221,
+      "crash_function": "kputsn"
+    },
+    "OSV-2024-1212": {
+      "dispatch_value": 32,
+      "triggered": true,
+      "crash_file": "/src/htslib/cram/cram_encode.c",
+      "crash_line": 1379,
+      "crash_function": "cram_encode_container"
+    },
+    "OSV-2020-958": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/htslib/hts.c",
+      "crash_line": 3861,
+      "crash_function": "hts_log"
+    },
+    "OSV-2020-998": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/htslib/cram/cram_decode.c",
+      "crash_line": 2315,
+      "crash_function": "cram_decode_slice"
+    },
+    "OSV-2020-999": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/htslib/./htslib/kstring.h",
+      "crash_line": 142,
+      "crash_function": "ks_resize"
+    },
+    "OSV-2020-1121": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/htslib/vcf.c",
+      "crash_line": 2852,
+      "crash_function": "vcf_format"
+    },
+    "OSV-2020-1301": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/htslib/cram/cram_decode.c",
+      "crash_line": 2315,
+      "crash_function": "cram_decode_slice"
+    }
+  }
+}

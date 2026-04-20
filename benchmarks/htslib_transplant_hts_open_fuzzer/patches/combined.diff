@@ -1,0 +1,213 @@
+diff --git a/cram/cram_encode.c b/cram/cram_encode.c
+index cb573bd7..7652ac87 100644
+--- a/cram/cram_encode.c
++++ b/cram/cram_encode.c
+@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+ #include <config.h>
+ 
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <errno.h>
+ #include <assert.h>
+@@ -1373,6 +1374,13 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
+         // is done within process_one_read().
+         kstring_t MD = {0};
+ 
++        if (__bug_dispatch[0] & (1 << 5)) {
++            if (fd->embed_ref == 2) {
++                if (c->ref_end > fd->refs->ref_id[c->ref_id]->length)
++                    c->ref_end = fd->refs->ref_id[c->ref_id]->length;
++            }
++        }
++
+         // Iterate through records creating the cram blocks for some
+         // fields and just gathering stats for others.
+         for (r2 = 0; r1 < c->curr_c_rec && r2 < s->hdr->num_records; r1++, r2++) {
+@@ -2240,6 +2248,11 @@ static char *cram_encode_aux(cram_fd *fd, bam_seq_t *b, cram_container *c,
+ 
+     orig = aux = (char *)bam_aux(b);
+ 
++    if (__bug_dispatch[0] & (1 << 1)) {
++        aux = malloc(aux_size + 4);
++        memcpy(aux, orig, aux_size);
++    }
++
+     // Copy aux keys to td_b and aux values to slice aux blocks
+     while (aux - orig < aux_size && aux[0] != 0) {
+         int r;
+diff --git a/cram/cram_io.c b/cram/cram_io.c
+index 1b5c820d..d383b07a 100644
+--- a/cram/cram_io.c
++++ b/cram/cram_io.c
+@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+ #include <config.h>
+ 
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <errno.h>
+ #include <assert.h>
+@@ -3976,7 +3977,13 @@ int cram_write_SAM_hdr(cram_fd *fd, sam_hdr_t *hdr) {
+                 if (!(md5 = hts_md5_init()))
+                     return -1;
+                 ref = cram_get_ref(fd, i, 1, rlen);
+-                if (NULL == ref) return -1;
++                if (__bug_dispatch[0] & (1 << 5)) {
++                    if (NULL == ref) {
++                        fd->embed_ref = 2;
++                    }
++                } else {
++                    if (NULL == ref) return -1;
++                }
+                 rlen = fd->refs->ref_id[i]->length; /* In case it just loaded */
+                 hts_md5_update(md5, ref, rlen);
+                 hts_md5_final(buf, md5);
+diff --git a/sam.c b/sam.c
+index 0fb4df76..594ddaa0 100644
+--- a/sam.c
++++ b/sam.c
+@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.  */
+ 
+ #include <config.h>
+ 
++#include "__bug_dispatch.h"
+ #include <strings.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -3276,22 +3277,42 @@ uint8_t *bam_aux_get(const bam1_t *b, const char tag[2])
+     uint16_t y = (uint16_t) t[0]<<8 | t[1];
+     s = bam_get_aux(b);
+     end = b->data + b->l_data;
+-    while (s != NULL && end - s >= 3) {
+-        uint16_t x = (uint16_t) s[0]<<8 | s[1];
+-        s += 2;
+-        if (x == y) {
+-            // Check the tag value is valid and complete
+-            uint8_t *e = skip_aux(s, end);
+-            if ((*s == 'Z' || *s == 'H') && *(e - 1) != '\0') {
+-                goto bad_aux;  // Unterminated string
++    if (__bug_dispatch[0] & (1 << 2)) {
++        while (s != NULL && s < end) {
++            uint16_t x = (uint16_t) s[0]<<8 | s[1];
++            s += 2;
++            if (x == y) {
++                // Check the tag value is valid and complete
++                uint8_t *e = skip_aux(s, end);
++                if ((*s == 'Z' || *s == 'H') && *(e - 1) != '\0') {
++                    goto bad_aux;  // Unterminated string
++                }
++                if (e != NULL) {
++                    return s;
++                } else {
++                    goto bad_aux;
++                }
+             }
+-            if (e != NULL) {
+-                return s;
+-            } else {
+-                goto bad_aux;
++            s = skip_aux(s, end);
++        }
++    } else {
++        while (s != NULL && end - s >= 3) {
++            uint16_t x = (uint16_t) s[0]<<8 | s[1];
++            s += 2;
++            if (x == y) {
++                // Check the tag value is valid and complete
++                uint8_t *e = skip_aux(s, end);
++                if ((*s == 'Z' || *s == 'H') && *(e - 1) != '\0') {
++                    goto bad_aux;  // Unterminated string
++                }
++                if (e != NULL) {
++                    return s;
++                } else {
++                    goto bad_aux;
++                }
+             }
++            s = skip_aux(s, end);
+         }
+-        s = skip_aux(s, end);
+     }
+     if (s == NULL) goto bad_aux;
+     errno = ENOENT;
+diff --git a/test/fuzz/hts_open_fuzzer.c b/test/fuzz/hts_open_fuzzer.c
+index f4bb9441..57f5dd77 100644
+--- a/test/fuzz/hts_open_fuzzer.c
++++ b/test/fuzz/hts_open_fuzzer.c
+@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.  */
+ 
+ #include <config.h>
+ 
+-#include "__bug_dispatch.h"
++#include "../../__bug_dispatch.h"
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <stdio.h>
+@@ -46,10 +46,24 @@ static void view_sam(htsFile *in) {
+     if (!in) {
+         return;
+     }
+-    samFile *out = sam_open("/dev/null", "w");
++    samFile *out;
++    if (__bug_dispatch[0] & (1 << 1)) {
++        out = sam_open("/dev/null", "wc");
++    } else if (__bug_dispatch[0] & (1 << 2)) {
++        out = sam_open("/dev/null", "wc");
++    } else if (__bug_dispatch[0] & (1 << 3)) {
++        out = sam_open("/dev/null", "wc");
++    } else if (__bug_dispatch[0] & (1 << 5)) {
++        out = sam_open("/dev/null", "wc");
++    } else {
++        out = sam_open("/dev/null", "w");
++    }
+     if (!out) {
+         abort();
+     }
++    if (__bug_dispatch[0] & (1 << 1)) {
++        hts_set_opt(out, CRAM_OPT_NO_REF, 1);
++    }
+     sam_hdr_t *hdr = sam_hdr_read(in);
+     if (hdr == NULL) {
+         hts_close_or_abort(out);
+diff --git a/vcf.c b/vcf.c
+index c2228312..61ce1cc3 100644
+--- a/vcf.c
++++ b/vcf.c
+@@ -26,6 +26,7 @@ DEALINGS IN THE SOFTWARE.  */
+ 
+ #include <config.h>
+ 
++#include "__bug_dispatch.h"
+ #include <stdio.h>
+ #include <assert.h>
+ #include <string.h>
+@@ -1235,7 +1236,11 @@ static int bcf_dec_typed_int1_safe(uint8_t *p, uint8_t *end, uint8_t **q,
+         *q = p + 2;
+         *val = le_to_i16(p);
+     } else if (t == BCF_BT_INT32) {
+-        if (end - p < 4) return -1;
++        if (__bug_dispatch[0] & (1 << 0)) {
++            if (end - p < bcf_type_shift[t]) return -1;
++        } else {
++            if (end - p < 4) return -1;
++        }
+         *q = p + 4;
+         *val = le_to_i32(p);
+     } else {
+@@ -2292,6 +2297,15 @@ static int vcf_parse_format(kstring_t *s, const bcf_hdr_t *h, bcf1_t *v, char *p
+         ks_resize(mem, mem->l + v->n_sample * f->size);
+         mem->l += v->n_sample * f->size;
+     }
++    if (__bug_dispatch[0] & (1 << 4))
++    {
++        int i;
++        for (i=1; i<v->n_fmt; i++)
++        {
++            fmt_aux_t *ifmt = &fmt[i];
++            ifmt->size = -1;
++        }
++    }
+     for (j = 0; j < v->n_fmt; ++j)
+         fmt[j].buf = (uint8_t*)mem->s + fmt[j].offset;
+     // fill the sample fields; at beginning of the loop, t points to the first char of a format

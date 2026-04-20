@@ -1,0 +1,5 @@
+project: htslib
+fuzz_target: hts_open_fuzzer
+commit: dd6f0b72c92591252bb77818663629cc1a129949
+commit_date: 2019-11-11T11:47:34+11:00
+type: bug

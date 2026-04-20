@@ -1,0 +1,46 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1941951598
+INFO: Loaded 1 modules   (17793 inline 8-bit counters): 17793 [0x9c7a70, 0x9cbff1), 
+INFO: Loaded 1 PC tables (17793 PCs): 17793 [0x7142d0,0x759ae0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::vcf_parse] Contig '' is not defined in the header. (Quick workaround: index the file with tabix.)
+[W::vcf_parse] FILTER '' is not defined in the header
+[W::vcf_parse_format] FORMAT '' is not defined in the header, assuming Type=String
+=================================================================
+==1==ERROR: AddressSanitizer: negative-size-param: (size=-1)
+    #0 0x521164 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x5e0c03 in kputsn /src/htslib/./htslib/kstring.h:221:2
+    #2 0x5ea275 in vcf_parse_format /src/htslib/vcf.c:2422:17
+    #3 0x5e6690 in vcf_parse /src/htslib/vcf.c:2687:20
+    #4 0x5dc01d in vcf_read /src/htslib/vcf.c:2705:12
+    #5 0x5dbeed in bcf_read /src/htslib/vcf.c:1449:42
+    #6 0x55541d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:121:12
+    #7 0x554f36 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:169:13
+    #8 0x4594d3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x4594d3)
+    #9 0x444da2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #10 0x44a9ae in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44a9ae)
+    #11 0x474142 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f6b91cb183f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #13 0x420048 in _start (/out/hts_open_fuzzer+0x420048)
+
+0x602000005518 is located 8 bytes inside of 16-byte region [0x602000005510,0x602000005520)
+allocated by thread T0 here:
+    #0 0x522103 in realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:164:3
+    #1 0x5e2f55 in ks_resize /src/htslib/./htslib/kstring.h:142:16
+    #2 0x5e0bbb in kputsn /src/htslib/./htslib/kstring.h:219:24
+    #3 0x60159f in align_mem /src/htslib/vcf.c:2153:13
+    #4 0x5e839e in vcf_parse_format /src/htslib/vcf.c:2295:9
+    #5 0x5e6690 in vcf_parse /src/htslib/vcf.c:2687:20
+    #6 0x5dc01d in vcf_read /src/htslib/vcf.c:2705:12
+    #7 0x5dbeed in bcf_read /src/htslib/vcf.c:1449:42
+    #8 0x55541d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:121:12
+    #9 0x554f36 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:169:13
+    #10 0x4594d3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x4594d3)
+    #11 0x444da2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #12 0x44a9ae in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44a9ae)
+    #13 0x474142 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7f6b91cb183f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+
+SUMMARY: AddressSanitizer: negative-size-param /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+==1==ABORTING

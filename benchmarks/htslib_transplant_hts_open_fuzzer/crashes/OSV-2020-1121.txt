@@ -1,0 +1,28 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1940471369
+INFO: Loaded 1 modules   (17793 inline 8-bit counters): 17793 [0x9c7a70, 0x9cbff1), 
+INFO: Loaded 1 PC tables (17793 PCs): 17793 [0x7142d0,0x759ae0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::vcf_parse] Contig '@SQ222' is not defined in the header. (Quick workaround: index the file with tabix.)
+[W::vcf_parse] FILTER '*' is not defined in the header
+[W::vcf_parse] INFO '+0' is not defined in the header, assuming Type=String
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x605a05a698f0 (pc 0x0000005ed68b bp 0x7ffd9d1b0da0 sp 0x7ffd9d1b0d00 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x5ed68b in vcf_format /src/htslib/vcf.c:2852:44
+    #1 0x5e0795 in vcf_write /src/htslib/vcf.c:2932:9
+    #2 0x5dffc8 in bcf_write /src/htslib/vcf.c:1710:16
+    #3 0x55543d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:122:13
+    #4 0x554f36 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:169:13
+    #5 0x4594d3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x4594d3)
+    #6 0x444da2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #7 0x44a9ae in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44a9ae)
+    #8 0x474142 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f8f6949683f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #10 0x420048 in _start (/out/hts_open_fuzzer+0x420048)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/htslib/vcf.c:2852:44 in vcf_format
+==1==ABORTING
