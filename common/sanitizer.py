@@ -31,7 +31,10 @@ ADDITIONAL_ASAN_OPTIONS = {
     'allow_user_segv_handler': 0,
     'check_malloc_usable_size': 0,
     'detect_odr_violation': 0,
-    'detect_leaks': 1,
+    # ntopng transplant benchmark: HostPools init leaks ~33KB every startup,
+    # causing every coverage snapshot to fail. Disable LSAN experiment-wide
+    # so the coverage-over-time report is meaningful.
+    'detect_leaks': 0,
     'detect_stack_use_after_return': 1,
     'fast_unwind_on_fatal': 0,
     'max_uar_stack_size_log': 16,

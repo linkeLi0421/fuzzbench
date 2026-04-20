@@ -1,0 +1,134 @@
+{
+  "project": "ntopng",
+  "target_commit": "b7b2810e617117c4420a5e1a4639515f2c45b26b",
+  "dispatch_bytes": 1,
+  "total_bugs": 18,
+  "bugs": {
+    "OSV-2023-688": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 432,
+      "crash_function": "Flow::~Flow()"
+    },
+    "OSV-2023-1352": {
+      "dispatch_value": 2,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 6077,
+      "crash_function": "Flow::dissectMDNS(unsigned char*, unsigned short)"
+    },
+    "OSV-2023-1360": {
+      "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2985,
+      "crash_function": "NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
+    },
+    "OSV-2023-1381": {
+      "dispatch_value": 8,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2080,
+      "crash_function": "NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
+    },
+    "OSV-2023-423": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2518,
+      "crash_function": "NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
+    },
+    "OSV-2023-425": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/ICMPinfo.cpp",
+      "crash_line": 100,
+      "crash_function": "ICMPinfo::dissectICMP(unsigned short, unsigned char const*)"
+    },
+    "OSV-2023-462": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/IEC104Stats.cpp",
+      "crash_line": 393,
+      "crash_function": "IEC104Stats::processPacket(Flow*, bool, unsigned char const*, unsigned short, timeval*)"
+    },
+    "OSV-2023-480": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2742,
+      "crash_function": "NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
+    },
+    "OSV-2023-507": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/IEC104Stats.cpp",
+      "crash_line": 249,
+      "crash_function": "IEC104Stats::processPacket(Flow*, bool, unsigned char const*, unsigned short, timeval*)"
+    },
+    "OSV-2023-697": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/IEC104Stats.cpp",
+      "crash_line": 186,
+      "crash_function": "IEC104Stats::processPacket(Flow*, bool, unsigned char const*, unsigned short, timeval*)"
+    },
+    "OSV-2023-710": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 6077,
+      "crash_function": "Flow::dissectMDNS(unsigned char*, unsigned short)"
+    },
+    "OSV-2023-726": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 6172,
+      "crash_function": "Flow::dissectNetBIOS(unsigned char*, unsigned short)"
+    },
+    "OSV-2023-741": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 5522,
+      "crash_function": "Flow::setBittorrentHash(char*)"
+    },
+    "OSV-2023-761": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/ICMPinfo.cpp",
+      "crash_line": 118,
+      "crash_function": "ICMPinfo::dissectICMP(unsigned short, unsigned char const*)"
+    },
+    "OSV-2023-976": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 6010,
+      "crash_function": "Flow::dissectMDNS(unsigned char*, unsigned short)"
+    },
+    "OSV-2023-1160": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/IEC104Stats.cpp",
+      "crash_line": 140,
+      "crash_function": "IEC104Stats::processPacket(Flow*, bool, unsigned char const*, unsigned short, timeval*)"
+    },
+    "OSV-2023-1214": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2425,
+      "crash_function": "NetworkInterface::guessEthType(unsigned char const*, unsigned int, unsigned char*)"
+    },
+    "OSV-2023-1375": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/IEC104Stats.cpp",
+      "crash_line": 249,
+      "crash_function": "IEC104Stats::processPacket(Flow*, bool, unsigned char const*, unsigned short, timeval*)"
+    }
+  }
+}
