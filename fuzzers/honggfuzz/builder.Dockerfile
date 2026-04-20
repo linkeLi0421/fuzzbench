@@ -31,6 +31,8 @@ RUN apt-get update -y && \
 RUN git clone https://github.com/google/honggfuzz.git /honggfuzz && \
     cd /honggfuzz && \
     git checkout oss-fuzz && \
+    sed -i 's|LOG_F("Couldn.t attach to pid=%d", (int)run->pid);|LOG_W("Couldn'"'"'t attach to pid=%d (raced with signal); skipping this run", (int)run->pid); return;|' linux/arch.c && \
+    grep -n 'skipping this run' linux/arch.c && \
     CFLAGS="-O3 -funroll-loops -D_HF_LINUX_NO_BFD" make && \
     touch empty_lib.c && \
     cc -c -o empty_lib.o empty_lib.c
