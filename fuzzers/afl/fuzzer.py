@@ -111,7 +111,9 @@ def run_afl_fuzz(input_corpus,
         '-m',
         'none',
         '-t',
-        '1000+',  # Use same default 1 sec timeout, but add '+' to skip hangs.
+        # Bumped from 1000+ to 5000+ so ghostscript's slower PDF seeds survive
+        # AFL's dry-run under CPU contention (load spikes during experiment start).
+        '5000+',
     ]
     # Use '-d' to skip deterministic mode, as long as it it compatible with
     # additional flags.

@@ -1,0 +1,412 @@
+diff --git a/base/gstype42.c b/base/gstype42.c
+index 579a17a4d..ab9f83801 100644
+--- a/base/gstype42.c
++++ b/base/gstype42.c
+@@ -17,6 +17,7 @@
+ /* Type 42 (TrueType) font library routines */
+ #include <stdlib.h>		/* for qsort */
+ 
++#include "../__bug_dispatch.h"
+ #include "memory_.h"
+ #include "stdint_.h"
+ #include "gx.h"
+@@ -269,11 +270,16 @@ gs_type42_font_init(gs_font_type42 * pfont, int subfontID)
+             pfont->data.os2_offset = offset;
+         }
+     }
+-    loca_size >>= (pfont->data.indexToLocFormat == 0 ? 1 : 2);
++    if (__bug_dispatch[0] & (1 << 1))
++        loca_size >>= pfont->data.indexToLocFormat + 1;
++    else
++        loca_size >>= (pfont->data.indexToLocFormat == 0 ? 1 : 2);
+     pfont->data.numGlyphs = loca_size - 1;
+-    if (pfont->data.numGlyphs > 65535) {
+-        pfont->data.numGlyphs = 65535;
+-        loca_size = (65536 << (pfont->data.indexToLocFormat == 0 ? 1 : 2));
++    if (!(__bug_dispatch[0] & (1 << 1))) {
++        if (pfont->data.numGlyphs > 65535) {
++            pfont->data.numGlyphs = 65535;
++            loca_size = (65536 << (pfont->data.indexToLocFormat == 0 ? 1 : 2));
++        }
+     }
+ 
+     if (pfont->data.numGlyphs > (int)pfont->data.trueNumGlyphs) {
+@@ -409,7 +415,8 @@ gs_type42_font_init(gs_font_type42 * pfont, int subfontID)
+                 while (num_valid_loca_elm > 0 && psortary[num_valid_loca_elm - 1].glyph_offset > glyph_size)
+                     num_valid_loca_elm --;
+                 if (0 == num_valid_loca_elm) {
+-                    gs_free_object(pfont->memory, psortary, "gs_type42_font_init(sort loca)");
++                    if (!(__bug_dispatch[0] & (1 << 1)))
++                        gs_free_object(pfont->memory, psortary, "gs_type42_font_init(sort loca)");
+                     return_error(gs_error_invalidfont);
+                 }
+                 for (i = num_valid_loca_elm; i--;) {
+@@ -1292,9 +1299,11 @@ parse_pieces(gs_font_type42 *pfont, gs_glyph glyph, gs_glyph *pieces,
+         for (i = 0; flags & TT_CG_MORE_COMPONENTS; ++i) {
+             if (pieces) {
+                 pieces[i] = U16(gdata + 2) + GS_MIN_GLYPH_INDEX;
+-                if (U16(gdata + 2) > pfont->data.numGlyphs) {
+-                    *pnum_pieces = 0;
+-                    return_error(gs_error_invalidfont);
++                if (!(__bug_dispatch[0] & (1 << 1))) {
++                    if (U16(gdata + 2) > pfont->data.numGlyphs) {
++                        *pnum_pieces = 0;
++                        return_error(gs_error_invalidfont);
++                    }
+                 }
+             }
+             gs_type42_parse_component(&gdata, &flags, &mat, NULL, pfont, &mat);
+diff --git a/base/gxdevsop.h b/base/gxdevsop.h
+index 89eed4b3b..cd3c4babd 100644
+--- a/base/gxdevsop.h
++++ b/base/gxdevsop.h
+@@ -458,6 +458,8 @@ enum {
+      */
+     gxdso_overprint_op,
+ 
++    gxdso_hilevel_text_clip,
++
+     /* Add new gxdso_ keys above this. */
+     gxdso_pattern__LAST
+ };
+diff --git a/base/ttinterp.c b/base/ttinterp.c
+index 63846c8d8..418205ff8 100644
+--- a/base/ttinterp.c
++++ b/base/ttinterp.c
+@@ -69,6 +69,7 @@
+ #include "ttcalc.h"
+ #include "ttinterp.h"
+ #include "ttfinp.h"
++#include "../__bug_dispatch.h"
+ 
+ #ifdef DEBUG
+ #  define DBG_PAINT    CUR.current_face->font->DebugRepaint(CUR.current_face->font);
+@@ -1825,10 +1826,16 @@ static int nInstrCount=0;
+   {
+     if ( args[1] == 0 )
+     {
+-      if ( BOUNDS(CUR.IP + args[0], CUR.codeSize ) )
++      if ( !(__bug_dispatch[0] & (1 << 0)) )
+       {
+-        CUR.error = TT_Err_Invalid_Reference;
+-        return;
++        if ( !(__bug_dispatch[0] & (1 << 1)) )
++        {
++          if ( BOUNDS(CUR.IP + args[0], CUR.codeSize ) )
++          {
++            CUR.error = TT_Err_Invalid_Reference;
++            return;
++          }
++        }
+       }
+ 
+       CUR.IP      += (Int)(args[0]);
+@@ -4384,13 +4391,35 @@ static int nInstrCount=0;
+         end_point   = CUR.pts.contours[contour];
+         first_point = point;
+ 
+-        while ( point <= end_point && point < CUR.pts.n_points && (CUR.pts.touch[point] & mask) == 0 )
+-          point++;
++        if (__bug_dispatch[0] & (1 << 0))
++        {
++          while ( point <= end_point && (CUR.pts.touch[point] & mask) == 0 )
++            point++;
++        }
++        else
++        {
++          if ( __bug_dispatch[0] & (1 << 1) )
++          {
++            while ( point <= end_point && (CUR.pts.touch[point] & mask) == 0 )
++              point++;
++          }
++          else
++          {
++            while ( point <= end_point && point < CUR.pts.n_points && (CUR.pts.touch[point] & mask) == 0 )
++              point++;
++          }
++        }
+ 
+-        if (BOUNDS(point, CUR.pts.n_points ))
++        if ( !(__bug_dispatch[0] & (1 << 0)) )
+         {
+-            CUR.error = TT_Err_Invalid_Reference;
+-            return;
++          if ( !(__bug_dispatch[0] & (1 << 1)) )
++          {
++            if (BOUNDS(point, CUR.pts.n_points ))
++            {
++              CUR.error = TT_Err_Invalid_Reference;
++              return;
++            }
++          }
+         }
+ 
+         if ( point <= end_point )
+@@ -4404,13 +4433,7 @@ static int nInstrCount=0;
+           {
+             if ( (CUR.pts.touch[point] & mask) != 0 )
+             {
+-              if (BOUNDS(cur_touched,  CUR.pts.n_points)
+-               || BOUNDS(point, CUR.pts.n_points))
+-              {
+-                 CUR.error = TT_Err_Invalid_Reference;
+-                 return;
+-              }
+-              else
++              if (__bug_dispatch[0] & (1 << 0))
+               {
+                 Interp( (Int)(cur_touched + 1),
+                       (Int)(point - 1),
+@@ -4419,6 +4442,36 @@ static int nInstrCount=0;
+                       &V );
+                 cur_touched = point;
+               }
++              else
++              {
++                if ( __bug_dispatch[0] & (1 << 1) )
++                {
++                  Interp( (Int)(cur_touched + 1),
++                        (Int)(point - 1),
++                        (Int)cur_touched,
++                        (Int)point,
++                        &V );
++                  cur_touched = point;
++                }
++                else
++                {
++                  if (BOUNDS(cur_touched,  CUR.pts.n_points)
++                   || BOUNDS(point, CUR.pts.n_points))
++                  {
++                     CUR.error = TT_Err_Invalid_Reference;
++                     return;
++                  }
++                  else
++                  {
++                    Interp( (Int)(cur_touched + 1),
++                        (Int)(point - 1),
++                        (Int)cur_touched,
++                        (Int)point,
++                        &V );
++                    cur_touched = point;
++                  }
++                }
++              }
+             }
+ 
+             point++;
+diff --git a/base/ttobjs.c b/base/ttobjs.c
+index 5fa95a887..6718189c5 100644
+--- a/base/ttobjs.c
++++ b/base/ttobjs.c
+@@ -41,6 +41,7 @@
+ #include "ttcalc.h"
+ #include "ttload.h"
+ #include "ttinterp.h"
++#include "../__bug_dispatch.h"
+ 
+ /* Add extensions definition */
+ #ifdef TT_EXTEND_ENGINE
+@@ -303,8 +304,10 @@ static int free_aux(ttfMemory *mem, void *ptr)
+    if (n_points < 100)
+        n_points = 100; /* Bug 689907 */
+ 
+-   exec->n_contours = exec->n_points = 0;
+-   exec->twilight.n_points = 0;
++   if (!(__bug_dispatch[0] & (1 << 1))) {
++     exec->n_contours = exec->n_points = 0;
++     exec->twilight.n_points = 0;
++   }
+ 
+    if ( ALLOC_ARRAY( exec->callStack, exec->callSize, callSize, TCallRecord ) ||
+         /* reserve interpreter call stack */
+diff --git a/devices/vector/gdevpdfi.c b/devices/vector/gdevpdfi.c
+index 724e36547..7d5a50b10 100644
+--- a/devices/vector/gdevpdfi.c
++++ b/devices/vector/gdevpdfi.c
+@@ -38,6 +38,7 @@
+ #include "gsicc_manage.h"
+ #include "gsform1.h"
+ #include "gxpath.h"
++#include "../../__bug_dispatch.h"
+ 
+ /* Forward references */
+ static image_enum_proc_plane_data(pdf_image_plane_data);
+@@ -2941,6 +2942,32 @@ gdev_pdf_dev_spec_op(gx_device *pdev1, int dev_spec_op, void *data, int size)
+             break;
+         case gxdso_in_smask_construction:
+             return pdev->smask_construction;
++        case gxdso_hilevel_text_clip:
++            if (__bug_dispatch[0] & (1 << 3)) {
++                if (data == 0) {
++                    if (pdev->clipped_text_pending) {
++                        code = pdf_open_page(pdev, PDF_IN_STREAM);
++                        if (code < 0)
++                            return code;
++                        pdev->clipped_text_pending = 0;
++                        code = pdf_restore_viewer_state(pdev, pdev->strm);
++                        if (code < 0)
++                            return code;
++                        pdf_reset_text(pdev);
++                    }
++                } else {
++                    if (!pdev->clipped_text_pending) {
++                        code = pdf_open_page(pdev, PDF_IN_STREAM);
++                        if (code < 0)
++                            return code;
++                        code = pdf_save_viewer_state(pdev, pdev->strm);
++                        if (code < 0)
++                            return code;
++                        pdev->clipped_text_pending = 1;
++                    }
++                }
++            }
++            break;
+         case gxdso_get_dev_param:
+             {
+                 int code;
+diff --git a/devices/vector/gdevpdfx.h b/devices/vector/gdevpdfx.h
+index 098fc4fc9..6e163e72e 100644
+--- a/devices/vector/gdevpdfx.h
++++ b/devices/vector/gdevpdfx.h
+@@ -957,6 +957,7 @@ struct gx_device_pdf_s {
+     bool OmitInfoDate;              /* If true, do not emit CreationDate and ModDate in the Infor dictionary and XMP Metadata (must not be true for PDF/X support) */
+     bool OmitXMP;                   /* If true, do not emit an XMP /Metadata block and do not reference it from the Catalog (must not be true for PDF/A output) */
+     bool OmitID;                    /* If true, do not emit a /ID array in the trailer dicionary (must not be true for encrypted files or PDF 2.0) */
++    bool clipped_text_pending;
+ };
+ 
+ #define is_in_page(pdev)\
+diff --git a/pdf/pdf_annot.c b/pdf/pdf_annot.c
+index 58210d8a6..777016ea3 100644
+--- a/pdf/pdf_annot.c
++++ b/pdf/pdf_annot.c
+@@ -35,6 +35,7 @@
+ #include "pdf_mark.h"
+ #include "pdf_font.h"
+ #include "pdf_text.h"
++#include "../__bug_dispatch.h"
+ 
+ #include "gspath2.h"
+ #include "gxfarith.h"
+@@ -3670,10 +3671,31 @@ static int pdfi_annot_draw_Widget(pdf_context *ctx, pdf_dict *annot, pdf_obj *No
+             break;
+         }
+         /* Check for Parent */
+-        code = pdfi_dict_knownget_type(ctx, currdict, "Parent", PDF_DICT, (pdf_obj **)&Parent);
+-        if (code < 0) goto exit;
+-        if (code == 0)
+-            break;
++        if (__bug_dispatch[0] & (1 << 2)) {
++            code = pdfi_dict_get_no_store_R(ctx, currdict, "Parent", (pdf_obj **)&Parent);
++            if (code == gs_error_undefined)
++                break;
++            if (code < 0)
++                goto exit;
++            if (pdfi_type_of(Parent) != PDF_DICT) {
++                if (pdfi_type_of(Parent) == PDF_INDIRECT) {
++                    pdf_indirect_ref *o = (pdf_indirect_ref *)Parent;
++
++                    code = pdfi_dereference(ctx, o->ref_object_num, o->ref_generation_num, (pdf_obj **)&Parent);
++                    pdfi_countdown(o);
++                    if (code < 0)
++                        break;
++                } else {
++                    pdfi_countdown(Parent);
++                    break;
++                }
++            }
++        } else {
++            code = pdfi_dict_knownget_type(ctx, currdict, "Parent", PDF_DICT, (pdf_obj **)&Parent);
++            if (code < 0) goto exit;
++            if (code == 0)
++                break;
++        }
+         pdfi_countdown(currdict);
+         currdict = Parent;
+         pdfi_countup(currdict);
+diff --git a/pdf/pdf_gstate.c b/pdf/pdf_gstate.c
+index 5248bd40f..90bdb8bda 100644
+--- a/pdf/pdf_gstate.c
++++ b/pdf/pdf_gstate.c
+@@ -46,6 +46,8 @@
+ #include "gscolor3.h"       /* For gs_setsmoothness() */
+ #include "gzpath.h"
+ #include "gspenum.h"
++#include "gxdevsop.h"
++#include "../__bug_dispatch.h"
+ 
+ static const char *blend_mode_names[] = {
+     GS_BLEND_MODE_NAMES, 0
+@@ -222,7 +224,19 @@ int pdfi_op_Q(pdf_context *ctx)
+             return code;
+     }
+ 
+-    return pdfi_grestore(ctx);
++    if (__bug_dispatch[0] & (1 << 3)) {
++        code = pdfi_grestore(ctx);
++
++        if (code >= 0 && ctx->device_state.preserve_tr_mode && gs_currenttextrenderingmode(ctx->pgs) < 4) {
++            gx_device *dev = gs_currentdevice_inline(ctx->pgs);
++
++            dev_proc(dev, dev_spec_op)(dev, gxdso_hilevel_text_clip, (void *)0, 1);
++        }
++
++        return code;
++    } else {
++        return pdfi_grestore(ctx);
++    }
+ }
+ 
+ /* We want pdfi_grestore() so we can track and warn of "too many Qs"
+diff --git a/pdf/pdf_text.c b/pdf/pdf_text.c
+index dfc352013..165e36d66 100644
+--- a/pdf/pdf_text.c
++++ b/pdf/pdf_text.c
+@@ -32,6 +32,8 @@
+ #include "gdevbbox.h"
+ #include "gspaint.h"        /* For gs_fill() and friends */
+ #include "gscoord.h"        /* For gs_setmatrix() */
++#include "gxdevsop.h"
++#include "../__bug_dispatch.h"
+ 
+ static int pdfi_set_TL(pdf_context *ctx, double TL);
+ 
+@@ -777,18 +779,28 @@ static int pdfi_show_Tr_preserve(pdf_context *ctx, gs_text_params_t *text)
+         gs_swapcolors_quick(ctx->pgs);
+     }
+ 
+-    code = pdfi_show_simple(ctx, text);
+-    if (code < 0)
+-        return code;
++    if (__bug_dispatch[0] & (1 << 3)) {
++        if (Trmode >= 4 && current_font->pdfi_font_type != e_pdf_font_type3) {
++            gx_device *dev = gs_currentdevice_inline(ctx->pgs);
+ 
+-    /* See the comment in pdfi_BT() aboe regarding  text rendering modes and clipping.
+-     * NB regardless of the device, we never apply clipping modes to text in a type 3 font.
+-     */
+-    if (Trmode >= 4 && current_font->pdfi_font_type != e_pdf_font_type3) {
+-        text->operation &= ~TEXT_DO_DRAW;
++            dev_proc(dev, dev_spec_op)(dev, gxdso_hilevel_text_clip, (void *)1, 1);
++        }
+ 
+-        gs_moveto(ctx->pgs, initial_point.x, initial_point.y);
+-        code = pdfi_show_Tr_7(ctx, text);
++        code = pdfi_show_simple(ctx, text);
++    } else {
++        code = pdfi_show_simple(ctx, text);
++        if (code < 0)
++            return code;
++
++        /* See the comment in pdfi_BT() aboe regarding  text rendering modes and clipping.
++         * NB regardless of the device, we never apply clipping modes to text in a type 3 font.
++         */
++        if (Trmode >= 4 && current_font->pdfi_font_type != e_pdf_font_type3) {
++            text->operation &= ~TEXT_DO_DRAW;
++
++            gs_moveto(ctx->pgs, initial_point.x, initial_point.y);
++            code = pdfi_show_Tr_7(ctx, text);
++        }
+     }
+     return code;
+ }

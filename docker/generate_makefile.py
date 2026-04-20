@@ -118,6 +118,11 @@ def get_rules_for_image(name, image):
     if 'base-' in name:
         section += '\tdocker pull ubuntu:focal\n'
     section += '\tdocker build \\\n'
+    # Workaround: default archive.ubuntu.com / security.ubuntu.com are
+    # unreachable from this host over HTTP. Redirect to mirrors.mit.edu,
+    # which ignores Host header and serves the same paths.
+    section += '\t--add-host archive.ubuntu.com:18.7.29.125 \\\n'
+    section += '\t--add-host security.ubuntu.com:18.7.29.125 \\\n'
     section += '\t--tag ' + os.path.join(BASE_TAG, image['tag']) + ' \\\n'
     section += '\t--build-arg BUILDKIT_INLINE_CACHE=1 \\\n'
     section += ('\t--cache-from ' + os.path.join(BASE_TAG, image['tag']) +

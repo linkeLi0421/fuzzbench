@@ -1,0 +1,190 @@
+{
+  "project": "ghostscript",
+  "target_commit": "e088d3a844717878592fa5ccf871729983140676",
+  "dispatch_bytes": 1,
+  "total_bugs": 26,
+  "bugs": {
+    "OSV-2022-522": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 4287,
+      "crash_function": "Interp"
+    },
+    "OSV-2022-523": {
+      "dispatch_value": 2,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsmchunk.c",
+      "crash_line": 1110,
+      "crash_function": "chunk_free_object"
+    },
+    "OSV-2022-757": {
+      "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_stack.h",
+      "crash_line": 73,
+      "crash_function": "pdfi_countdown_impl"
+    },
+    "OSV-2024-503": {
+      "dispatch_value": 8,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./devices/vector/gdevpdfg.c",
+      "crash_line": 73,
+      "crash_function": "__covrec_5D5B21D96B32D4F9u"
+    },
+    "OSV-2022-772": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_font11.c",
+      "crash_line": 73,
+      "crash_function": "pdfi_cidtype2_get_glyph_index"
+    },
+    "OSV-2022-1097": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 774,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-1148": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 825,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-1021": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 758,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-726": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gdevnfwd.c",
+      "crash_line": 33,
+      "crash_function": "gx_device_forward_finalize"
+    },
+    "OSV-2022-727": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gp.h",
+      "crash_line": 296,
+      "crash_function": "gp_fflush"
+    },
+    "OSV-2022-724": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 691,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-744": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsgdata.c",
+      "crash_line": 127,
+      "crash_function": "gs_glyph_data_from_bytes"
+    },
+    "OSV-2022-751": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 190,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-719": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsgdata.c",
+      "crash_line": 119,
+      "crash_function": "gs_glyph_data_from_string"
+    },
+    "OSV-2022-797": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 2342,
+      "crash_function": "Ins_NPUSHB"
+    },
+    "OSV-2022-949": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gp.h",
+      "crash_line": 296,
+      "crash_function": "gp_fflush"
+    },
+    "OSV-2022-866": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 646,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2024-1391": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsicc_create.c",
+      "crash_line": 3272,
+      "crash_function": "get_mediawp"
+    },
+    "OSV-2023-1079": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 1789,
+      "crash_function": "Ins_JROT"
+    },
+    "OSV-2023-88": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_font1C.c",
+      "crash_line": 739,
+      "crash_function": "pdfi_read_cff_real"
+    },
+    "OSV-2022-855": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 4113,
+      "crash_function": "Ins_ISECT"
+    },
+    "OSV-2022-818": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 736,
+      "crash_function": "GetShortIns"
+    },
+    "OSV-2022-888": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 496,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-1194": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/stream.c",
+      "crash_line": 604,
+      "crash_function": "sputs"
+    },
+    "OSV-2022-1208": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./devices/vector/gdevpsfm.c",
+      "crash_line": 60,
+      "crash_function": "pput_hex"
+    },
+    "OSV-2023-970": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gdevnfwd.c",
+      "crash_line": 33,
+      "crash_function": "gx_device_forward_finalize"
+    }
+  }
+}
