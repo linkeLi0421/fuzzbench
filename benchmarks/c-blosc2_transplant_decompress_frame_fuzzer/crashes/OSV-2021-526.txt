@@ -1,0 +1,31 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2239046217
+INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x5574cc9299e0, 0x5574cc931acf), 
+INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x5574cc931ad0,0x5574cc9b29c0), 
+/out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x7c0626a204d0 (pc 0x5574cc55e08d bp 0x7ffe963ab3d0 sp 0x7ffe963ab350 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x5574cc55e08d in initialize_context_decompression /src/c-blosc2/blosc/blosc2.c:1978:34
+    #1 0x5574cc55e08d in blosc_run_decompression_with_context /src/c-blosc2/blosc/blosc2.c:2529:8
+    #2 0x5574cc55e63d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2555:12
+    #3 0x5574cc59977d in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2844:23
+    #4 0x5574cc581259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #5 0x5574cc517675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
+    #6 0x5574cc3b4e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x5574cc39fbd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x5574cc3a5aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x5574cc3d15d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f0627734082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x5574cc398cbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+
+==1==Register values:
+rax = 0x0000000000000000  rbx = 0x00007c66269e0980  rcx = 0x0000000000000021  rdx = 0x00005574cc9ba800  
+rdi = 0x00000000000003a8  rsi = 0x0000000200000000  rbp = 0x00007ffe963ab3d0  rsp = 0x00007ffe963ab350  
+ r8 = 0x0000000000020000   r9 = 0x00007c66269e09fc  r10 = 0x00000f8cc4d3c13f  r11 = 0x00000f8d44d34138  
+r12 = 0x0000000000040320  r13 = 0x00000f8cc4d3c13d  r14 = 0x00007c0626a204d0  r15 = 0x00007c66269e09e8  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/blosc2.c:1978:34 in initialize_context_decompression
+==1==ABORTING

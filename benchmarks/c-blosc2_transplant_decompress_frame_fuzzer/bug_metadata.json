@@ -6,143 +6,199 @@
   "bugs": {
     "OSV-2020-2184": {
       "dispatch_value": 1,
-      "canary_index": 0,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1327,
+      "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2021-21": {
       "dispatch_value": 2,
-      "canary_index": 1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 680,
+      "crash_function": "blosc_read_header"
     },
     "OSV-2021-213": {
       "dispatch_value": 4,
-      "canary_index": 2,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 215,
+      "crash_function": "ZSTD_freeDDict"
     },
     "OSV-2021-22": {
       "dispatch_value": 8,
-      "canary_index": 3,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1226,
+      "crash_function": "get_meta_from_header"
     },
     "OSV-2021-221": {
       "dispatch_value": 16,
-      "canary_index": 4,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1484,
+      "crash_function": "blosc_d"
     },
     "OSV-2021-246": {
       "dispatch_value": 32,
-      "canary_index": 5,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1429,
+      "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2021-247": {
       "dispatch_value": 64,
-      "canary_index": 6,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 680,
+      "crash_function": "blosc_read_header"
     },
     "OSV-2021-274": {
       "dispatch_value": 128,
-      "canary_index": 7,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1249,
+      "crash_function": "get_meta_from_header"
     },
     "OSV-2021-369": {
       "dispatch_value": 256,
-      "canary_index": 8,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 680,
+      "crash_function": "blosc_read_header"
     },
     "OSV-2021-404": {
       "dispatch_value": 512,
-      "canary_index": 9,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 680,
+      "crash_function": "blosc_read_header"
     },
     "OSV-2021-429": {
       "dispatch_value": 1024,
-      "canary_index": 10,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1484,
+      "crash_function": "blosc_d"
     },
     "OSV-2021-639": {
       "dispatch_value": 2048,
-      "canary_index": 11,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 2646,
+      "crash_function": "_blosc_getitem"
     },
     "OSV-2022-1242": {
       "dispatch_value": 4096,
-      "canary_index": 12,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
     },
     "OSV-2022-34": {
       "dispatch_value": 8192,
-      "canary_index": 13,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c",
+      "crash_line": 469,
+      "crash_function": "LZ4_wildCopy32"
     },
     "OSV-2022-4": {
       "dispatch_value": 16384,
-      "canary_index": 14,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
     },
     "OSV-2022-486": {
       "dispatch_value": 32768,
-      "canary_index": 15,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1429,
+      "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2022-511": {
       "dispatch_value": 65536,
-      "canary_index": 16,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1565,
+      "crash_function": "blosc_d"
     },
     "OSV-2023-51": {
       "dispatch_value": 131072,
-      "canary_index": 17,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 215,
+      "crash_function": "ZSTD_freeDDict"
     },
     "OSV-2021-622": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1429,
+      "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2021-997": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
     },
     "OSV-2021-498": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 2096,
+      "crash_function": "frame_get_lazychunk"
     },
     "OSV-2021-1791": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
     },
     "OSV-2021-485": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1978,
+      "crash_function": "initialize_context_decompression"
     },
     "OSV-2021-481": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
     },
     "OSV-2021-464": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 175,
+      "crash_function": "my_malloc"
     },
     "OSV-2021-496": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1484,
+      "crash_function": "blosc_d"
     },
     "OSV-2021-526": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1978,
+      "crash_function": "initialize_context_decompression"
     },
     "OSV-2021-487": {
       "dispatch_value": 0,
-      "canary_index": -1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 1978,
+      "crash_function": "initialize_context_decompression"
     }
   }
 }

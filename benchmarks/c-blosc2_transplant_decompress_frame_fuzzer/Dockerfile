@@ -1,25 +1,23 @@
-# Copyright 2019 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-################################################################################
+# Use the committed merge container as base for identical build environment.
+# This image has the exact same OS packages, library versions, and source tree
+# that were used during bug transplant verification.
+FROM c-blosc2-merge:79e921d9
 
-FROM gcr.io/oss-fuzz-base/base-builder@sha256:5b714b0eb717ab8ee6129cb37adb7db76761cb93273d332d29afa62a4cdc7ed3
-RUN apt-get update && apt-get install -y make autoconf automake libtool cmake
-RUN git clone  https://github.com/Blosc/c-blosc2.git c-blosc2
-WORKDIR c-blosc2
-# Bug transplant patches and seeds
+# The merge container runs as a non-root user (agent).  Switch back to root
+# so downstream Dockerfiles (AFL++'s builder, benchmark-builder, etc.) can
+# install packages and write to system directories.
+USER root
+
+# docker commit can snapshot a broken apt state - fix it so downstream
+# Dockerfiles (e.g. AFL++'s builder.Dockerfile) can apt-get install.
+RUN rm -rf /var/lib/apt/lists/* && mkdir -p /var/lib/apt/lists/partial && apt-get update
+
+WORKDIR /src/c-blosc2
+
+# Keep ASan stack-use-after-return detection enabled for direct testcase replay.
+ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
+
+# Bug transplant patches (re-applied by build.sh after checkout_commit.py resets source)
 COPY patches/ /src/patches/
-COPY seeds/ /src/seeds/
-COPY monitor/ /src/monitor/
+COPY seeds/ /src/benchmark_seeds/
 COPY build.sh $SRC/

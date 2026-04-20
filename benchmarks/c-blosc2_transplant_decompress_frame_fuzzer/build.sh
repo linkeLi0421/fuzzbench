@@ -3,22 +3,43 @@
 
 cd /src/c-blosc2
 
+# Drop stale build artifacts from the merge container so `git checkout`
+# is not blocked by untracked files that would be overwritten.
+git clean -fdx >/dev/null 2>&1 || true
+git reset --hard HEAD >/dev/null 2>&1 || true
+
 # Checkout target commit
 git checkout 79e921d904d46fc9edc292e02a48f1aa54567a7d
 
-# Apply transplanted bug patches + dispatch harness
-if ! git apply --check /src/patches/combined.diff 2>/dev/null; then
-    echo "Trying git apply --3way for combined.diff..."
-    git apply --3way /src/patches/combined.diff
-else
-    git apply /src/patches/combined.diff
+# Restore harness sources that live outside the project git repository.
+if [ -f /src/patches/harness_sources/manifest.json ]; then
+    python3 - <<'PY'
+import json
+import shutil
+from pathlib import Path
+
+root = Path("/src/patches/harness_sources")
+for entry in json.loads((root / "manifest.json").read_text()):
+    source = root / entry["snapshot"]
+    destination = Path(entry["container_path"])
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+PY
 fi
 
+# Apply dispatch harness first (modifies build system), then bug patches
 if ! git apply --check /src/patches/harness.diff 2>/dev/null; then
     echo "Trying git apply --3way for harness.diff..."
     git apply --3way /src/patches/harness.diff
 else
     git apply /src/patches/harness.diff
+fi
+
+if ! git apply --check /src/patches/combined.diff 2>/dev/null; then
+    echo "Trying git apply --3way for combined.diff..."
+    git apply --3way /src/patches/combined.diff
+else
+    git apply /src/patches/combined.diff
 fi
 
 # --- Fix library CMakeLists.txt for new source files from combined.diff ---
@@ -33,31 +54,6 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
         fi
     done
 fi
-
-# --- Canary instrumentation ---
-# Copy canary library to project root (alongside __bug_dispatch.c/h)
-cp /src/patches/bug_canary.c /src/patches/bug_canary.h /src/c-blosc2/
-
-# Add bug_canary.c to CMake build alongside __bug_dispatch.c
-if [ -f tests/fuzz/CMakeLists.txt ]; then
-    sed -i '/set(BUG_DISPATCH_SOURCE/a set(BUG_CANARY_SOURCE ${PROJECT_SOURCE_DIR}/bug_canary.c)' tests/fuzz/CMakeLists.txt
-    sed -i 's/${BUG_DISPATCH_SOURCE})/${BUG_DISPATCH_SOURCE} ${BUG_CANARY_SOURCE})/' tests/fuzz/CMakeLists.txt
-    # Link -lrt for shm_open
-    if grep -q 'target_link_libraries' tests/fuzz/CMakeLists.txt; then
-        sed -i '/target_link_libraries/s/)/ rt)/' tests/fuzz/CMakeLists.txt
-    else
-        sed -i '/add_executable.*BUG_CANARY/a \    target_link_libraries(${target} rt)' tests/fuzz/CMakeLists.txt
-    fi
-fi
-
-# Add canary include and reach logging to all harness files
-for f in tests/fuzz/fuzz_*.c; do
-    [ -f "$f" ] || continue
-    # Add include after __bug_dispatch.h
-    sed -i '/#include "__bug_dispatch.h"/a #include "bug_canary.h"' "$f"
-    # Add canary reach logging after dispatch bytes are consumed
-    sed -i '/size -= __BUG_DISPATCH_BYTES;/a \  for(int _ci=0;_ci<__BUG_DISPATCH_BYTES;_ci++) for(int _cj=0;_cj<8;_cj++) if(__bug_dispatch[_ci]&(1<<_cj)) bug_canary_log(_ci*8+_cj,0);' "$f"
-done
 
 # --- Original build commands ---
 export LDSHARED=lld
@@ -76,29 +72,71 @@ find . -name '*_fuzzer.dict' -exec cp -v '{}' $OUT ';'
 find . -name '*_fuzzer_seed_corpus.zip' -exec cp -v '{}' $OUT ';'
 
 
-# --- Seed corpus: prepend dispatch bytes to original seeds ---
+# --- Seed corpus: expand original seeds and per-bug testcase candidates ---
 # FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.
-# We need to prepend 3 zero dispatch bytes to all original seeds
-# so the fuzzer starts with the default (unpatched) code path.
-mkdir -p /tmp/seeds_dispatch
+# Create one seed variant for the default path plus one for each dispatch bit.
+# Per-bug reproducers are used only as source material: exact crashing inputs
+# are filtered out before packaging.
+seed_zip="$OUT/decompress_frame_fuzzer_seed_corpus.zip"
+seed_target="$OUT/decompress_frame_fuzzer"
+mkdir -p /tmp/seeds_dispatch /tmp/original_seeds /tmp/benchmark_seed_candidates
 
-# Prepend dispatch bytes to any existing seed corpus files
-if [ -f "$OUT/decompress_frame_fuzzer_seed_corpus.zip" ]; then
-    mkdir -p /tmp/original_seeds
-    unzip -q -o "$OUT/decompress_frame_fuzzer_seed_corpus.zip" -d /tmp/original_seeds 2>/dev/null || true
+if [ -f "$seed_zip" ]; then
+    unzip -q -o "$seed_zip" -d /tmp/original_seeds 2>/dev/null || true
     for f in /tmp/original_seeds/*; do
-        [ -f "$f" ] && printf '\x00\x00\x00' | cat - "$f" > "/tmp/seeds_dispatch/$(basename "$f")"
+        [ -f "$f" ] || continue
+        base=$(basename "$f")
+        for dispatch in '\x00\x00\x00' '\x01\x00\x00' '\x02\x00\x00' '\x04\x00\x00' '\x08\x00\x00' '\x10\x00\x00' '\x20\x00\x00' '\x40\x00\x00' '\x80\x00\x00' '\x00\x01\x00' '\x00\x02\x00' '\x00\x04\x00' '\x00\x08\x00' '\x00\x10\x00' '\x00\x20\x00' '\x00\x40\x00' '\x00\x80\x00' '\x00\x00\x01' '\x00\x00\x02' '\x00\x00\x04' '\x00\x00\x08' '\x00\x00\x10' '\x00\x00\x20' '\x00\x00\x40' '\x00\x00\x80'; do
+            dispatch_name=$(printf '%s' "$dispatch" | tr -d '\x')
+            printf '%b' "$dispatch" | cat - "$f" > "/tmp/seeds_dispatch/${base}.dispatch_${dispatch_name}"
+        done
     done
 fi
 
-# Add dispatch-modified PoCs from our seeds directory
-if [ -d /src/seeds ]; then
-    for f in /src/seeds/testcase-*; do
-        [ -f "$f" ] && cp "$f" /tmp/seeds_dispatch/
+if [ -d /src/benchmark_seeds ]; then
+    for f in /src/benchmark_seeds/*; do
+        [ -f "$f" ] || continue
+        base=$(basename "$f")
+        size=$(wc -c < "$f")
+        [ "$size" -gt 0 ] || continue
+
+        cp "$f" "/tmp/benchmark_seed_candidates/${base}.exact"
+        # Zero the dispatch byte (byte 0): deactivates dispatch-gated patches
+        # while keeping the full APDU conversation and card driver routing intact.
+        cp "$f" "/tmp/benchmark_seed_candidates/${base}.dispatch_zero"
+        printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.dispatch_zero" bs=1 seek=0 conv=notrunc 2>/dev/null || true
+        for keep in 1 2 8 16 64 256 1024; do
+            if [ "$size" -gt "$keep" ]; then
+                head -c "$keep" "$f" > "/tmp/benchmark_seed_candidates/${base}.head_${keep}"
+            fi
+        done
+        if [ "$size" -gt 1 ]; then
+            head -c "$((size - 1))" "$f" > "/tmp/benchmark_seed_candidates/${base}.trim_1"
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_last"
+            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_last"
+            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
+        fi
+        if [ "$size" -gt 4 ]; then
+            mid=$((size / 2))
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_mid"
+            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
+            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_mid"
+            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
+        fi
     done
 fi
 
-# Re-package seed corpus with dispatch-prefixed seeds
+if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
+    for f in /tmp/benchmark_seed_candidates/*; do
+        [ -f "$f" ] || continue
+        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
+            cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
+        fi
+    done
+fi
+
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
-    zip -j -q "$OUT/decompress_frame_fuzzer_seed_corpus.zip" /tmp/seeds_dispatch/*
+    rm -f "$seed_zip"
+    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
 fi

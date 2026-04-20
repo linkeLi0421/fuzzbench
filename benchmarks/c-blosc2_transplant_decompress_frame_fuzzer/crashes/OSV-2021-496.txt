@@ -1,0 +1,65 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2238611061
+INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x555aa17339e0, 0x555aa173bacf), 
+INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x555aa173bad0,0x555aa17bc9c0), 
+/out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7c8376be026c at pc 0x555aa136cfda bp 0x7ffeaba7b840 sp 0x7ffeaba7b838
+READ of size 4 at 0x7c8376be026c thread T0
+    #0 0x555aa136cfd9 in blosc_d /src/c-blosc2/blosc/blosc2.c:1484:14
+    #1 0x555aa1361e12 in serial_blosc /src/c-blosc2/blosc/blosc2.c:1661:16
+    #2 0x555aa1361e12 in do_job /src/c-blosc2/blosc/blosc2.c:1825:15
+    #3 0x555aa136863d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2555:12
+    #4 0x555aa13a377d in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2844:23
+    #5 0x555aa138b259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #6 0x555aa1321675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
+    #7 0x555aa11bee5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #8 0x555aa11a9bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #9 0x555aa11afaa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #10 0x555aa11db5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f8377888082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x555aa11a2cbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+
+0x7c8376be026c is located 111 bytes after 189-byte region [0x7c8376be0140,0x7c8376be01fd)
+allocated by thread T0 here:
+    #0 0x555aa12dd7b4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x555aa16ae323 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x555aa11a9bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #3 0x555aa11afaa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #4 0x555aa11db5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7f8377888082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/c-blosc2/blosc/blosc2.c:1484:14 in blosc_d
+Shadow bytes around the buggy address:
+  0x7c8376bdff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c8376be0000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x7c8376be0080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 05
+  0x7c8376be0100: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x7c8376be0180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 05
+=>0x7c8376be0200: fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]fa fa
+  0x7c8376be0280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c8376be0300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c8376be0380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c8376be0400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c8376be0480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

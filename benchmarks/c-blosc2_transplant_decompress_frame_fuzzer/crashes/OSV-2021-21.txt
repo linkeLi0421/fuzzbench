@@ -1,0 +1,34 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2240032046
+INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x560b3b47f9e0, 0x560b3b487acf), 
+INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x560b3b487ad0,0x560b3b5089c0), 
+/out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x560b3b02717b bp 0x7ffec32372f0 sp 0x7ffec3236ab0 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x560b3b02717b in QuickCheckForUnpoisonedRegion /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.h:37:7
+    #1 0x560b3b02717b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:63:3
+    #2 0x560b3b0a8872 in blosc_read_header /src/c-blosc2/blosc/blosc2.c:680:3
+    #3 0x560b3b0bb31e in blosc2_cbuffer_sizes /src/c-blosc2/blosc/blosc2.c:3273:12
+    #4 0x560b3b0e90cb in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:2087:10
+    #5 0x560b3b0ef603 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2821:8
+    #6 0x560b3b0d7259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #7 0x560b3b06d675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
+    #8 0x560b3af0ae5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #9 0x560b3aef5bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #10 0x560b3aefbaa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #11 0x560b3af275d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7fc58a30e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #13 0x560b3aeeecbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+
+==1==Register values:
+rax = 0x00a00fd3312b5577  rbx = 0x00a00fd3312b5578  rcx = 0x00a00fd3312b5579  rdx = 0x0000000000000010  
+rdi = 0x00007ffec3237350  rsi = 0x05007e95895eabbc  rbp = 0x00007ffec32372f0  rsp = 0x00007ffec3236ab0  
+ r8 = 0x00a00fd2b12bd577   r9 = 0x05007e95895eabcb  r10 = 0x00a00fd2b12bd579  r11 = 0x00a00fd3312b5570  
+r12 = 0x3ffffffffffffff8  r13 = 0xffffffffffffffcf  r14 = 0x05007e95895eabbc  r15 = 0x0000000000000010  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/blosc2.c:680:3 in blosc_read_header
+==1==ABORTING
