@@ -1,0 +1,5 @@
+project: ntopng
+fuzz_target: fuzz_dissect_packet
+commit: b7b2810e617117c4420a5e1a4639515f2c45b26b
+commit_date: 2023-05-22T10:47:48+02:00
+type: bug
