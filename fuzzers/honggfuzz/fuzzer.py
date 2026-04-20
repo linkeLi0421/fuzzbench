@@ -16,6 +16,7 @@
 import os
 import shutil
 import subprocess
+import time
 
 from fuzzers import utils
 
@@ -48,6 +49,10 @@ def fuzz(input_corpus, output_corpus, target_binary):
     command = [
         './honggfuzz',
         '--persistent',
+        # Heavy transplant targets (ghostscript) race honggfuzz's fork-follow
+        # ptrace-attach when children are SIGKILLed on the default 1s deadline,
+        # fatally aborting the fuzzer. Raise per-input timeout from 1s.
+        '--timeout', '25',
         '--rlimit_rss',
         '2048',
         '--sanitizers_del_report=true',
@@ -66,4 +71,15 @@ def fuzz(input_corpus, output_corpus, target_binary):
     command.extend(['--', target_binary])
 
     print('[fuzz] Running command: ' + ' '.join(command))
-    subprocess.check_call(command)
+    # honggfuzz hits a fatal race in arch_prepareParentAfterFork() when a
+    # persistent-mode child is SIGKILLed on the per-input timeout before
+    # ptrace_attach on the next fork completes. The corpus/crashdir on disk
+    # survives intact, so relaunch on non-zero exit — coverage carries forward.
+    attempt = 0
+    while True:
+        attempt += 1
+        rc = subprocess.call(command)
+        if rc == 0:
+            break
+        print(f'[fuzz] honggfuzz exited {rc} (attempt {attempt}); relaunching')
+        time.sleep(2)
