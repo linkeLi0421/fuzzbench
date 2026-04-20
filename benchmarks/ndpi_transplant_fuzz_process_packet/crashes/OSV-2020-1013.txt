@@ -1,0 +1,20 @@
+INFO: Seed: 4285721341
+/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
+Running: /tmp/testcase
+ndpi_utils.c:218:18: runtime error: shift exponent 32 is too large for 32-bit type 'u_int32_t' (aka 'unsigned int')
+    #0 0x5b42c3 in ndpi_net_match /src/ndpi/src/lib/ndpi_utils.c:218:18
+    #1 0x5b42c3 in ndpi_ips_match /src/ndpi/src/lib/ndpi_utils.c:226:10
+    #2 0x547a51 in sc2_match_logon_ip /src/ndpi/src/lib/protocols/starcraft.c:37:11
+    #3 0x547be7 in ndpi_check_starcraft_tcp /src/ndpi/src/lib/protocols/starcraft.c:52:7
+    #4 0x548427 in ndpi_search_starcraft /src/ndpi/src/lib/protocols/starcraft.c:131:16
+    #5 0x4f6acf in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #6 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #7 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
+    #8 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #9 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #10 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #11 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #12 0x7fc55a2a5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior ndpi_utils.c:218:18 in 

@@ -1,0 +1,309 @@
+{
+  "project": "ndpi",
+  "target_commit": "e695dd6eade754b2d50bdf297ca8bdc4105f93ff",
+  "dispatch_bytes": 2,
+  "total_bugs": 43,
+  "bugs": {
+    "OSV-2020-342": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-774": {
+      "dispatch_value": 2,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/kerberos.c",
+      "crash_line": 423,
+      "crash_function": "ndpi_search_kerberos_original"
+    },
+    "OSV-2020-1715": {
+      "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/kerberos.c",
+      "crash_line": 240,
+      "crash_function": "ndpi_search_kerberos_osv_2020_1715"
+    },
+    "OSV-2022-445": {
+      "dispatch_value": 8,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2022-661": {
+      "dispatch_value": 16,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/softether.c",
+      "crash_line": 85,
+      "crash_function": "dissect_softether_ip_port"
+    },
+    "OSV-2022-670": {
+      "dispatch_value": 32,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/softether.c",
+      "crash_line": 140,
+      "crash_function": "ndpi_search_softether"
+    },
+    "OSV-2022-709": {
+      "dispatch_value": 64,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/softether.c",
+      "crash_line": 113,
+      "crash_function": "dissect_softether_host_fqdn"
+    },
+    "OSV-2022-1032": {
+      "dispatch_value": 128,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 238,
+      "crash_function": "check_content_type_and_change_protocol"
+    },
+    "OSV-2023-102": {
+      "dispatch_value": 256,
+      "triggered": true,
+      "crash_file": "/src/ndpi/fuzz/fuzz_process_packet.c",
+      "crash_line": 33,
+      "crash_function": "LLVMFuzzerTestOneInput"
+    },
+    "OSV-2023-436": {
+      "dispatch_value": 512,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 63,
+      "crash_function": "ndpi_check_punycode_string"
+    },
+    "OSV-2023-504": {
+      "dispatch_value": 1024,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/line.c",
+      "crash_line": 52,
+      "crash_function": "ndpi_search_line"
+    },
+    "OSV-2023-566": {
+      "dispatch_value": 2048,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 134,
+      "crash_function": "ndpi_http_check_content"
+    },
+    "OSV-2024-469": {
+      "dispatch_value": 4096,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 6071,
+      "crash_function": "ndpi_strnstr"
+    },
+    "OSV-2025-449": {
+      "dispatch_value": 8192,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/http.c",
+      "crash_line": 149,
+      "crash_function": "ndpi_check_http_server"
+    },
+    "OSV-2020-28": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/dns.c",
+      "crash_line": 50,
+      "crash_function": "getNameLength"
+    },
+    "OSV-2020-49": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/netbios.c",
+      "crash_line": 42,
+      "crash_function": "ndpi_netbios_name_interpret"
+    },
+    "OSV-2020-59": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-78": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/spotify.c",
+      "crash_line": 51,
+      "crash_function": "ndpi_check_spotify"
+    },
+    "OSV-2020-136": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/netbios.c",
+      "crash_line": 50,
+      "crash_function": "ndpi_netbios_name_interpret"
+    },
+    "OSV-2020-154": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/dns.c",
+      "crash_line": 142,
+      "crash_function": "search_valid_dns"
+    },
+    "OSV-2020-179": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/dns.c",
+      "crash_line": 40,
+      "crash_function": "get16"
+    },
+    "OSV-2020-194": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-795": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/iax.c",
+      "crash_line": 70,
+      "crash_function": "ndpi_search_setup_iax"
+    },
+    "OSV-2020-812": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/netbios.c",
+      "crash_line": 50,
+      "crash_function": "ndpi_netbios_name_interpret"
+    },
+    "OSV-2020-918": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/oracle.c",
+      "crash_line": 46,
+      "crash_function": "ndpi_search_oracle"
+    },
+    "OSV-2020-922": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/h323.c",
+      "crash_line": 81,
+      "crash_function": "ndpi_search_h323"
+    },
+    "OSV-2020-972": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-992": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-994": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1011": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1013": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1015": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/memcached.c",
+      "crash_line": 162,
+      "crash_function": "ndpi_search_memcached"
+    },
+    "OSV-2020-1019": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1074": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1112": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/dns.c",
+      "crash_line": 50,
+      "crash_function": "getNameLength"
+    },
+    "OSV-2020-1114": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/stun.c",
+      "crash_line": 319,
+      "crash_function": "ndpi_int_check_stun"
+    },
+    "OSV-2020-1131": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/capwap.c",
+      "crash_line": 69,
+      "crash_function": "ndpi_search_setup_capwap"
+    },
+    "OSV-2020-1133": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1187": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/protocols/stun.c",
+      "crash_line": 354,
+      "crash_function": "ndpi_int_check_stun"
+    },
+    "OSV-2020-1194": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1233": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1263": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    },
+    "OSV-2020-1294": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
+      "crash_line": 218,
+      "crash_function": "ndpi_net_match"
+    }
+  }
+}

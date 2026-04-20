@@ -1,0 +1,60 @@
+INFO: Seed: 4234975804
+/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60300000020d at pc 0x00000056618f bp 0x7fff197e8120 sp 0x7fff197e8118
+READ of size 1 at 0x60300000020d thread T0
+    #0 0x56618e in ndpi_search_line /src/ndpi/src/lib/protocols/line.c:52:13
+    #1 0x4f22b4 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
+    #2 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #3 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
+    #4 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #5 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #6 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #7 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #8 0x7f2dba75c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #9 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
+
+0x60300000020d is located 0 bytes to the right of 29-byte region [0x6030000001f0,0x60300000020d)
+allocated by thread T0 here:
+    #0 0x4a0ca6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x4de209 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
+    #2 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
+    #3 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
+    #4 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
+    #5 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
+    #6 0x7f2dba75c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/line.c:52:13 in ndpi_search_line
+Shadow bytes around the buggy address:
+  0x0c067fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c067fff8000: fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa 00 00
+  0x0c067fff8010: 00 00 fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa
+  0x0c067fff8020: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 00
+  0x0c067fff8030: fa fa 00 00 00 07 fa fa 00 00 00 07 fa fa 00 00
+=>0x0c067fff8040: 00[05]fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa
+  0x0c067fff8050: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa
+  0x0c067fff8060: fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00
+  0x0c067fff8070: 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa
+  0x0c067fff8080: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa
+  0x0c067fff8090: fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
