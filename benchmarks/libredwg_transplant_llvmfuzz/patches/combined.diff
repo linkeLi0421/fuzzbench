@@ -1,0 +1,1744 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 54df12e4..3f36fde8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -240,6 +240,7 @@ if(NOT LIBREDWG_DISABLE_WRITE)
+ endif()
+ 
+ set(libredwg_SOURCES
++    __bug_dispatch.c
+     src/bits.c
+     src/codepages.c
+     src/common.c
+diff --git a/Makefile.am b/Makefile.am
+index 0cb6d857..e41ade4d 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -50,6 +50,7 @@ VALGRIND_OPTS = --leak-check=full --show-reachable=no --num-callers=30
+ JSON_DIST = jsmn/jsmn.h jsmn/LICENSE jsmn/README.md
+ doc_DIST = README HACKING NEWS TODO
+ EXTRA_DIST = $(top_srcdir)/.version libredwg.spec vcpkg.json build-aux/Dockerfile \
++	     __bug_dispatch.h \
+ 	     dwg.in dxf.in dxf-allcvt.lsp dxf-allcvt.sh test-dxf.sh dxf-check dxfb-check json-check oda \
+ 	     log.in svg.in rw.in logs-all-parallel.sh.in logs-all-serial.sh.in unknown.sh \
+ 	     cmp-objs.pl .dockerignore \
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+index d99d52f8..a885d12c 100644
+--- a/__bug_dispatch.c
++++ b/__bug_dispatch.c
+@@ -1,3 +1,4 @@
++#define __BUG_DISPATCH_DEFINE
+ #include "__bug_dispatch.h"
+ #if defined(__GNUC__)
+ volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES]
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+index 311cb203..1af32039 100644
+--- a/__bug_dispatch.h
++++ b/__bug_dispatch.h
+@@ -2,5 +2,10 @@
+ #define __BUG_DISPATCH_H
+ #include <stdint.h>
+ #define __BUG_DISPATCH_BYTES 4
++#if defined(__GNUC__) && !defined(__BUG_DISPATCH_DEFINE)
++/* Non-fuzzer tools link without __bug_dispatch.c; keep all bug bits off. */
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] __attribute__((weak));
++#else
+ extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
+ #endif
++#endif
+diff --git a/include/dwg.h b/include/dwg.h
+index 1bb4aaf9..5d56f383 100644
+--- a/include/dwg.h
++++ b/include/dwg.h
+@@ -689,9 +689,9 @@ typedef enum DWG_OBJECT_TYPE
+   DWG_TYPE__3DLINE,
+   DWG_TYPE_REPEAT,
+   DWG_TYPE_ENDREP,
+-  DWG_TYPE_JUMP,
+   /* pre2.0 entities */
+   DWG_TYPE_LOAD,
++  DWG_TYPE_JUMP,
+   // after 1.0 add new types here for binary compat
+ 
+   DWG_TYPE_FREED        = 0xfffd,
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 3f308e35..b13de079 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -30,6 +30,7 @@ endif
+ CPPCHECK = @CPPCHECK@
+ 
+ libredwg_la_SOURCES = \
++	$(top_srcdir)/__bug_dispatch.c \
+ 	dwg.c \
+ 	common.c \
+ 	codepages.c \
+@@ -56,19 +57,22 @@ libredwg_la_SOURCES += \
+ if !DISABLE_JSON
+ libredwg_la_SOURCES += \
+         out_json.c \
+-        out_geojson.c
++        out_geojson.c \
++	$(top_srcdir)/__bug_dispatch.c
+ endif
+ endif
+ if USE_WRITE
+ libredwg_la_SOURCES += \
+ 	encode.c \
+-	dxfclasses.c
++	dxfclasses.c \
++	$(top_srcdir)/__bug_dispatch.c
+ #       encode_r2007.c
+ #       in_xml.c
+ #       in_yaml.c
+ if !DISABLE_DXF
+ libredwg_la_SOURCES += \
+-	in_dxf.c
++	in_dxf.c \
++	$(top_srcdir)/__bug_dispatch.c
+ endif
+ if !DISABLE_JSON
+ libredwg_la_SOURCES += \
+diff --git a/src/bits.c b/src/bits.c
+index f8943ddd..8e689bec 100644
+--- a/src/bits.c
++++ b/src/bits.c
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -134,7 +135,10 @@ bit_reset_chain (Bit_Chain *dat)
+       }
+ #else
+ #  define CHK_OVERFLOW(func, retval)                                          \
+-    if (dat->byte > dat->size                                                 \
++    if (((__bug_dispatch[1] & (1 << 4)) ? dat->byte >= dat->size              \
++                                        : dat->byte > dat->size)              \
++        || ((__bug_dispatch[2] & (1 << 1)) ? dat->byte >= dat->size           \
++                                           : dat->byte > dat->size)           \
+         || ((dat->byte * 8) + dat->bit > dat->size * 8))                      \
+       {                                                                       \
+         loglevel = dat->opts & DWG_OPTS_LOGLEVEL;                             \
+@@ -3194,14 +3198,26 @@ bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
+     const bool is_asian_cp
+         = dwg_codepage_isasian ((const Dwg_Codepage)codepage);
+     const size_t srclen = strlen (src);
+-    size_t destlen = 1 + (is_asian_cp ? srclen * 3 : trunc (srclen * 1.5));
++    size_t destlen;
+ #ifdef HAVE_ICONV
+-    const char *charset = dwg_codepage_iconvstr ((Dwg_Codepage)codepage);
++    const char *charset;
+     const char utf8_cs[] = "UTF-8//TRANSLIT//IGNORE";
+     iconv_t cd;
+     size_t nconv = (size_t)-1;
+     char *dest, *odest, *osrc;
+-    size_t odestlen = destlen;
++    size_t odestlen;
++#endif
++    if (__bug_dispatch[3] & (1 << 3))
++      {
++        destlen = is_asian_cp ? srclen * 3 : trunc (srclen * 1.5);
++      }
++    else
++      {
++        destlen = 1 + (is_asian_cp ? srclen * 3 : trunc (srclen * 1.5));
++      }
++#ifdef HAVE_ICONV
++    charset = dwg_codepage_iconvstr ((Dwg_Codepage)codepage);
++    odestlen = destlen;
+     if (!charset || !srclen)
+       return (char *)src;
+     osrc = (char *)src;
+@@ -3259,7 +3275,14 @@ bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
+                     loglevel |= 1;
+                     LOG_ERROR ("Out of memory");
+                     iconv_close (cd);
+-                    // free (odest);
++                    if (__bug_dispatch[3] & (1 << 4))
++                      {
++                        free (odest);
++                      }
++                    else
++                      {
++                        // free (odest);
++                      }
+                     return NULL;
+                   }
+               }
+@@ -3275,7 +3298,7 @@ bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
+       }
+     // flush the remains
+     iconv (cd, NULL, (size_t *)&srclen, (char **)&dest, (size_t *)&destlen);
+-    if (errno == 0 && dest >= odest && dest <= &odest[odestlen])
++    if (__bug_dispatch[3] & (1 << 3))
+       {
+         *dest = '\0';
+         iconv_close (cd);
+@@ -3283,9 +3306,36 @@ bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
+       }
+     else
+       {
+-        iconv_close (cd);
+-        free (odest);
+-        return bit_TV_to_utf8_codepage (src, codepage);
++        if (__bug_dispatch[3] & (1 << 5))
++          {
++            if (dest >= odest && dest <= &odest[odestlen])
++              {
++                *dest = '\0';
++                iconv_close (cd);
++                return bit_u_expand (odest);
++              }
++            else
++              {
++                iconv_close (cd);
++                free (odest);
++                return bit_TV_to_utf8_codepage (src, codepage);
++              }
++          }
++        else
++          {
++            if (errno == 0 && dest >= odest && dest <= &odest[odestlen])
++              {
++                *dest = '\0';
++                iconv_close (cd);
++                return bit_u_expand (odest);
++              }
++            else
++              {
++                iconv_close (cd);
++                free (odest);
++                return bit_TV_to_utf8_codepage (src, codepage);
++              }
++          }
+       }
+ #else
+     return bit_TV_to_utf8_codepage (src, codepage);
+@@ -3342,12 +3392,29 @@ bit_utf8_to_TU (char *restrict str, const unsigned cquoted)
+       else if ((c & 0xe0) == 0xc0)
+         {
+           /* ignore invalid utf8 for now */
+-          if (len >= 1)
++          if (__bug_dispatch[2] & (1 << 4))
+             {
+-              wstr[i++] = ((c & 0x1f) << 6) | (str[1] & 0x3f);
++              if (len >= 1)
++                wstr[i++] = ((c & 0x1f) << 6) | (str[1] & 0x3f);
+               len--;
+               str++;
+             }
++          else
++            {
++              if (__bug_dispatch[2] & (1 << 6))
++                {
++                  if (len >= 1)
++                    wstr[i++] = ((c & 0x1f) << 6) | (str[1] & 0x3f);
++                  len--;
++                  str++;
++                }
++              else if (len >= 1)
++                {
++                  wstr[i++] = ((c & 0x1f) << 6) | (str[1] & 0x3f);
++                  len--;
++                  str++;
++                }
++            }
+         }
+       else if ((c & 0xf0) == 0xe0)
+         {
+@@ -3369,9 +3436,22 @@ bit_utf8_to_TU (char *restrict str, const unsigned cquoted)
+             {
+               wstr[i++] = ((c & 0x0f) << 12) | ((str[1] & 0x3f) << 6)
+                           | (str[2] & 0x3f);
++              if (__bug_dispatch[2] & (1 << 5))
++                {
++                  str++;
++                  len--;
++                }
++              else
++                {
++                  str++;
++                  str++;
++                  len--;
++                  len--;
++                }
++            }
++          if (__bug_dispatch[2] & (1 << 5))
++            {
+               str++;
+-              str++;
+-              len--;
+               len--;
+             }
+         }
+diff --git a/src/codepages.c b/src/codepages.c
+index 4bc9ed39..17a8cb93 100644
+--- a/src/codepages.c
++++ b/src/codepages.c
+@@ -19,6 +19,7 @@
+  */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #include <string.h>
+ #include <stdint.h>
+ #include <stdlib.h>
+@@ -180,9 +181,17 @@ const char *_codepage_dxfstr[]
+ const char *
+ dwg_codepage_dxfstr (Dwg_Codepage cp)
+ {
+-  if (cp <= CP_ANSI_1258)
+-    return _codepage_dxfstr[cp];
+-  else if (cp == CP_UNDEFINED)
++  if (__bug_dispatch[2] & (1 << 7))
++    {
++      if (cp <= CP_UNDEFINED)
++        return _codepage_dxfstr[cp];
++    }
++  else
++    {
++      if (cp <= CP_ANSI_1258)
++        return _codepage_dxfstr[cp];
++    }
++  if (cp == CP_UNDEFINED)
+     return "undefined";
+   else
+     return NULL;
+diff --git a/src/decode.c b/src/decode.c
+index a2befbee..6a698da3 100644
+--- a/src/decode.c
++++ b/src/decode.c
+@@ -30,6 +30,7 @@
+ #  define _USE_BSD 1
+ #endif
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -594,23 +595,43 @@ classes_section:
+   dat->bit = 0;
+   size = bit_read_RL (dat);
+   LOG_TRACE ("         Size : %" PRIuSIZE " [RL]\n", size);
+-  if (size
+-      != dwg->header.section[SECTION_CLASSES_R13].size
+-             - ((sentinel_size * 2) + 6))
+-    {
+-      endpos = dwg->header.section[SECTION_CLASSES_R13].address
+-               + dwg->header.section[SECTION_CLASSES_R13].size - sentinel_size;
+-      LOG_ERROR ("Invalid size %" PRIuSIZE ", should be: " FORMAT_RL
+-                 ", endpos: %" PRIuSIZE "\n",
+-                 size,
+-                 dwg->header.section[SECTION_CLASSES_R13].size
+-                     - ((sentinel_size * 2) + 6),
+-                 endpos)
+-      error |= DWG_ERR_SECTIONNOTFOUND;
+-      goto handles_section;
++  if (__bug_dispatch[1] & (1 << 4))
++    {
++      if (size != dwg->header.section[SECTION_CLASSES_R13].size - 38)
++        {
++          endpos = dwg->header.section[SECTION_CLASSES_R13].address
++                   + dwg->header.section[SECTION_CLASSES_R13].size - 16;
++          LOG_WARN ("Invalid size %" PRIuSIZE ", endpos: %" PRIuSIZE "\n",
++                    size, endpos)
++        }
++      else
++        endpos = dat->byte + size;
+     }
+   else
+-    endpos = dat->byte + size;
++    {
++      if (size
++          != dwg->header.section[SECTION_CLASSES_R13].size
++                 - ((sentinel_size * 2) + 6))
++        {
++          endpos = dwg->header.section[SECTION_CLASSES_R13].address
++                   + dwg->header.section[SECTION_CLASSES_R13].size
++                   - sentinel_size;
++          LOG_ERROR ("Invalid size %" PRIuSIZE ", should be: " FORMAT_RL
++                     ", endpos: %" PRIuSIZE "\n",
++                     size,
++                     dwg->header.section[SECTION_CLASSES_R13].size
++                         - ((sentinel_size * 2) + 6),
++                     endpos)
++          if (!(__bug_dispatch[0] & (1 << 0)))
++            {
++              error |= DWG_ERR_SECTIONNOTFOUND;
++            }
++          if (!(__bug_dispatch[2] & (1 << 1)))
++            goto handles_section;
++        }
++      else
++        endpos = dat->byte + size;
++    }
+   LOG_INSANE ("endpos: %" PRIuSIZE, endpos);
+   LOG_POS_ (INSANE);
+ 
+@@ -712,6 +733,11 @@ classes_section:
+           break;
+         }
+     }
++  if (__bug_dispatch[2] & (1 << 1))
++    {
++      if (!dwg->layout_type && (error & DWG_ERR_SECTIONNOTFOUND))
++        dwg->layout_type = DWG_TYPE_LOAD;
++    }
+ 
+   // Check Section CRC
+   dat->byte = dwg->header.section[SECTION_CLASSES_R13].address
+@@ -5152,11 +5178,17 @@ dwg_decode_add_object (Dwg_Data *restrict dwg, Bit_Chain *dat,
+             "Object number: %lu/%lX",
+             (unsigned long)num, (unsigned long)num)
+ 
+-  if (dat->byte >= dat->size)
++  if (!(__bug_dispatch[1] & (1 << 4)))
+     {
+-      LOG_ERROR ("MS size overflow @%" PRIuSIZE, dat->byte)
+-      dwg->num_objects--;
+-      return DWG_ERR_VALUEOUTOFBOUNDS;
++      if (!(__bug_dispatch[2] & (1 << 1)))
++        {
++          if (dat->byte >= dat->size)
++            {
++              LOG_ERROR ("MS size overflow @%" PRIuSIZE, dat->byte)
++              dwg->num_objects--;
++              return DWG_ERR_VALUEOUTOFBOUNDS;
++            }
++        }
+     }
+   obj->size = bit_read_MS (dat);
+   LOG_INFO (", Size: %d [MS]", obj->size)
+@@ -6564,16 +6596,41 @@ decode_preR13_entities (BITCODE_RL start, BITCODE_RL end,
+           LOG_HANDLE ("@offset 0x%zx\n", dat->byte - start);
+           PRE (R_2_0b)
+           {
+-            obj->type = bit_read_RS (dat);
+-            LOG_TRACE ("type: " FORMAT_RS " [RS]\n", obj->type);
+-            if (obj->type > 127)
+-              { // deleted. moved into BLOCK
+-                abstype = (Dwg_Object_Type_r11)abs ((int8_t)obj->type);
+-                LOG_TRACE ("deleted\n");
++            if (__bug_dispatch[1] & (1 << 6))
++              {
++                BITCODE_RS type = bit_read_RS (dat);
++                obj->type = (BITCODE_RC)type;
++                LOG_TRACE ("type: " FORMAT_RS " [RS]\n", obj->type);
++                if (type > 127)
++                  { // deleted. moved into BLOCK
++                    abstype = (Dwg_Object_Type_r11)abs ((int8_t)obj->type);
++                    LOG_TRACE ("deleted\n");
++                  }
++                else
++                  {
++                    abstype = (Dwg_Object_Type_r11)obj->type;
++                  }
+               }
+             else
+               {
+-                abstype = (Dwg_Object_Type_r11)obj->type;
++                if (__bug_dispatch[3] & (1 << 1))
++                  {
++                    obj->type = (BITCODE_RC)bit_read_RS (dat);
++                  }
++                else
++                  {
++                    obj->type = bit_read_RS (dat);
++                  }
++                LOG_TRACE ("type: " FORMAT_RS " [RS]\n", obj->type);
++                if (obj->type > 127)
++                  { // deleted. moved into BLOCK
++                    abstype = (Dwg_Object_Type_r11)abs ((int8_t)obj->type);
++                    LOG_TRACE ("deleted\n");
++                  }
++                else
++                  {
++                    abstype = (Dwg_Object_Type_r11)obj->type;
++                  }
+               }
+           }
+           else
+@@ -6898,7 +6955,10 @@ decode_preR13_entities (BITCODE_RL start, BITCODE_RL end,
+               dat->byte--;
+               DEBUG_HERE;
+               LOG_ERROR ("Unknown object type %d", obj->type);
+-              error |= DWG_ERR_SECTIONNOTFOUND;
++              if (__bug_dispatch[1] & (1 << 3))
++                error |= DWG_ERR_INVALIDTYPE;
++              else
++                error |= DWG_ERR_SECTIONNOTFOUND;
+               dat->byte++;
+               break;
+             }
+@@ -6907,8 +6967,16 @@ decode_preR13_entities (BITCODE_RL start, BITCODE_RL end,
+           PRE (R_2_0b)
+           {
+             obj->size = (dat->byte - oldpos) & 0xFFFFFFFF;
+-            if (num + 1 > dwg->num_objects)
+-              break;
++            if (__bug_dispatch[1] & (1 << 6))
++              {
++                if (num + 1 >= dwg->header_vars.numentities)
++                  break;
++              }
++            else
++              {
++                if (num + 1 > dwg->num_objects)
++                  break;
++              }
+           }
+           if (obj->type != DWG_TYPE_JUMP_r11)
+             {
+@@ -6920,27 +6988,35 @@ decode_preR13_entities (BITCODE_RL start, BITCODE_RL end,
+                     {
+                       LOG_ERROR ("offset %ld",
+                                  (long)(obj->address + obj->size - dat->byte));
+-                      if (obj->address + obj->size > dat->byte)
++                      if (__bug_dispatch[1] & (1 << 3))
+                         {
+-                          BITCODE_RL offset
+-                              = (BITCODE_RL)(obj->address + obj->size
+-                                             - dat->byte);
+-                          obj->num_unknown_rest = 8 * offset;
+-                          obj->unknown_rest = (BITCODE_TF)calloc (offset, 1);
+-                          if (obj->unknown_rest)
+-                            {
+-                              memcpy (obj->unknown_rest,
+-                                      &dat->chain[dat->byte], offset);
+-                              LOG_TRACE_TF (obj->unknown_rest, offset);
+-                            }
+-                          else
++                          dat->byte = obj->address + obj->size;
++                        }
++                      else
++                        {
++                          if (obj->address + obj->size > dat->byte)
+                             {
+-                              LOG_ERROR ("Out of memory");
+-                              obj->num_unknown_rest = 0;
++                              BITCODE_RL offset
++                                  = (BITCODE_RL)(obj->address + obj->size
++                                                 - dat->byte);
++                              obj->num_unknown_rest = 8 * offset;
++                              obj->unknown_rest
++                                  = (BITCODE_TF)calloc (offset, 1);
++                              if (obj->unknown_rest)
++                                {
++                                  memcpy (obj->unknown_rest,
++                                          &dat->chain[dat->byte], offset);
++                                  LOG_TRACE_TF (obj->unknown_rest, offset);
++                                }
++                              else
++                                {
++                                  LOG_ERROR ("Out of memory");
++                                  obj->num_unknown_rest = 0;
++                                }
+                             }
++                          if (obj->size > 2)
++                            dat->byte = obj->address + obj->size;
+                         }
+-                      if (obj->size > 2)
+-                        dat->byte = obj->address + obj->size;
+                     }
+                 }
+                 LATER_VERSIONS
+@@ -6974,6 +7050,19 @@ decode_preR13_entities (BITCODE_RL start, BITCODE_RL end,
+                 }
+               }
+             }
++          if (__bug_dispatch[1] & (1 << 3))
++            {
++              SINCE (R_2_0b)
++              {
++                if (obj->size < 2 || obj->size > 0x1000)
++                  {
++                    LOG_ERROR ("wrong obj->size %u", obj->size);
++                    error |= DWG_ERR_INVALIDTYPE;
++                    if (end)
++                      dat->byte = end;
++                  }
++              }
++            }
+           // add to block header
+           if (_hdr && obj->supertype == DWG_SUPERTYPE_ENTITY
+               && obj->fixedtype != DWG_TYPE_UNUSED
+@@ -7010,8 +7099,22 @@ decode_preR13_entities (BITCODE_RL start, BITCODE_RL end,
+         }
+       if ((BITCODE_RL)dat->byte != end)
+         {
+-          LOG_ERROR ("@0x%zx => end 0x%x", dat->byte, end);
+-          return DWG_ERR_INVALIDDWG;
++          if (__bug_dispatch[1] & (1 << 6))
++            {
++              PRE (R_2_0b)
++              {
++              }
++              LATER_VERSIONS
++              {
++                LOG_ERROR ("@0x%zx => end 0x%x", dat->byte, end);
++                return DWG_ERR_INVALIDDWG;
++              }
++            }
++          else
++            {
++              LOG_ERROR ("@0x%zx => end 0x%x", dat->byte, end);
++              return DWG_ERR_INVALIDDWG;
++            }
+         }
+     }
+ 
+diff --git a/src/decode_r11.c b/src/decode_r11.c
+index b62b3f95..ece087c7 100644
+--- a/src/decode_r11.c
++++ b/src/decode_r11.c
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #ifndef _DEFAULT_SOURCE
+ #  define _DEFAULT_SOURCE 1 /* for byteswap.h */
+ #endif
+@@ -127,10 +128,13 @@ decode_preR13_section_hdr (const char *restrict name, Dwg_Section_Type_r11 id,
+   int error = 0;
+   Dwg_Section *tbl = &dwg->header.section[id];
+ 
+-  if (dat->byte + 10 > dat->size)
++  if (!(__bug_dispatch[2] & (1 << 0)))
+     {
+-      LOG_ERROR ("%s.size overflow @%" PRIuSIZE, name, dat->byte)
+-      return DWG_ERR_SECTIONNOTFOUND;
++      if (dat->byte + 10 > dat->size)
++        {
++          LOG_ERROR ("%s.size overflow @%" PRIuSIZE, name, dat->byte)
++          return DWG_ERR_SECTIONNOTFOUND;
++        }
+     }
+   tbl->type = (Dwg_Section_Type)id;
+   tbl->size = (BITCODE_RL)bit_read_RS (dat);
+@@ -289,7 +293,9 @@ decode_preR13_section (Dwg_Section_Type_r11 id, Bit_Chain *restrict dat,
+   }
+ 
+   oldpos = dat->byte;
+-  if (tbl->address)
++  if (__bug_dispatch[1] & (1 << 3))
++    dat->byte = tbl->address;
++  else if (tbl->address)
+     dat->byte = tbl->address;
+   dat->bit = 0;
+   if ((size_t)(tbl->number * tbl->size) > dat->size - dat->byte)
+@@ -389,10 +395,13 @@ decode_preR13_section (Dwg_Section_Type_r11 id, Bit_Chain *restrict dat,
+               obj->num_unknown_rest = 0;                                      \
+             }                                                                 \
+         }                                                                     \
+-      /* In the table header the size OR number can be wrong. */              \
+-      /* Here we catch the wrong number. */                                   \
+-      if (tbl->number > 0 && tbl->size < 33)                                  \
+-        return DWG_ERR_SECTIONNOTFOUND;                                       \
++      if (!(__bug_dispatch[1] & (1 << 3)))                                    \
++        {                                                                     \
++          /* In the table header the size OR number can be wrong. */          \
++          /* Here we catch the wrong number. */                               \
++          if (tbl->number > 0 && tbl->size < 33)                              \
++            return DWG_ERR_SECTIONNOTFOUND;                                   \
++        }                                                                     \
+     }                                                                         \
+   LOG_TRACE ("\n")                                                            \
+   dat->byte = pos
+@@ -699,10 +708,14 @@ decode_preR13 (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+   LOG_TRACE ("@0x%zx\n", dat->byte);
+   if (error >= DWG_ERR_CRITICAL)
+     return error;
+-  if (dat->byte + 2 >= dat->size)
++  if (!(__bug_dispatch[2] & (1 << 0)))
+     {
+-      LOG_ERROR ("post HEADER overflow")
+-      return error | DWG_ERR_CRITICAL;
++      if (dat->byte + 2 >= dat->size)
++        {
++          LOG_ERROR ("post HEADER overflow")
++          if (!(__bug_dispatch[2] & (1 << 2)))
++            return error | DWG_ERR_CRITICAL;
++        }
+     }
+   SINCE (R_11)
+   {
+@@ -732,6 +745,12 @@ decode_preR13 (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+     dwg->header.entities_end = dwg->header_vars.dwg_size;
+   }
+ 
++  if (__bug_dispatch[2] & (1 << 0))
++    {
++      if (dwg->header.numheader_vars > 158)
++        error |= decode_preR13_section_hdr ("VPORT", SECTION_VPORT, dat, dwg);
++    }
++
+   // entities
+   error |= decode_preR13_entities (
+       dwg->header.entities_start, dwg->header.entities_end, num_entities,
+diff --git a/src/decode_r2007.c b/src/decode_r2007.c
+index 0a414567..4fb30303 100644
+--- a/src/decode_r2007.c
++++ b/src/decode_r2007.c
+@@ -20,6 +20,7 @@
+ #define _GNU_SOURCE 1 /* for memmem on linux */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -1208,9 +1209,16 @@ read_file_header (Bit_Chain *restrict dat,
+   LOG_TRACE ("len2:          %d\n", (int)len2);      // 0 when compressed
+ 
+   if (compr_len > 0)
+-    error = decompress_r2007 ((BITCODE_RC *)file_header,
+-                              sizeof (Dwg_R2007_Header), &pedata[32],
+-                              MIN (compr_len, pedata_size - 32), NULL);
++    {
++      if (__bug_dispatch[0] & (1 << 7))
++        error = decompress_r2007 ((BITCODE_RC *)file_header,
++                                  sizeof (Dwg_R2007_Header) + 1, &pedata[32],
++                                  MIN (compr_len, pedata_size - 32), NULL);
++      else
++        error = decompress_r2007 ((BITCODE_RC *)file_header,
++                                  sizeof (Dwg_R2007_Header), &pedata[32],
++                                  MIN (compr_len, pedata_size - 32), NULL);
++    }
+   else
+     memcpy (file_header, &pedata[32], sizeof (Dwg_R2007_Header));
+ 
+@@ -2337,6 +2345,7 @@ int
+ read_r2007_meta_data (Bit_Chain *dat, Bit_Chain *hdl_dat,
+                       Dwg_Data *restrict dwg)
+ {
++  Dwg_R2007_Header file_header_store;
+   Dwg_R2007_Header *file_header;
+   r2007_page *restrict pages_map = NULL, *restrict page;
+   r2007_section *restrict sections_map = NULL;
+@@ -2352,7 +2361,15 @@ read_r2007_meta_data (Bit_Chain *dat, Bit_Chain *hdl_dat,
+     loglevel = atoi (probe);
+ #endif
+   // @ 0x62
+-  error = read_file_header (dat, &dwg->r2007_file_header);
++  if (__bug_dispatch[0] & (1 << 7))
++    {
++      file_header = &file_header_store;
++      error = read_file_header (dat, file_header);
++    }
++  else
++    {
++      error = read_file_header (dat, &dwg->r2007_file_header);
++    }
+   if (error >= DWG_ERR_VALUEOUTOFBOUNDS)
+     return error;
+   file_header = &dwg->r2007_file_header;
+diff --git a/src/dwg.c b/src/dwg.c
+index 514c58e0..cb6a3199 100644
+--- a/src/dwg.c
++++ b/src/dwg.c
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -3311,15 +3312,24 @@ dwg_sections_init (Dwg_Data *dwg)
+       // 5 tables + header + block. VIEW = 6
+       if (dwg->header.numheader_vars)
+         {
+-          if (dwg->header.numheader_vars > 129) // r10
+-            // UCS, VPORT
+-            dwg->header.num_sections += 2;
+-          if (dwg->header.numheader_vars > 158) // r10 one
+-            // APPID
+-            dwg->header.num_sections += 1;
+-          if (dwg->header.numheader_vars > 160) // r11
+-            // DIMSTYLE, VX
+-            dwg->header.num_sections += 2;
++          if (!(__bug_dispatch[1] & (1 << 2)))
++            {
++              if (!(__bug_dispatch[2] & (1 << 0)))
++                {
++                  if (dwg->header.numheader_vars > 129) // r10
++                    // UCS, VPORT
++                    dwg->header.num_sections += 2;
++                }
++              if (dwg->header.numheader_vars > 158) // r10 one
++                // APPID
++                dwg->header.num_sections += 1;
++              if (!(__bug_dispatch[2] & (1 << 0)))
++                {
++                  if (dwg->header.numheader_vars > 160) // r11
++                    // DIMSTYLE, VX
++                    dwg->header.num_sections += 2;
++                }
++            }
+         }
+       else
+         {
+@@ -3335,7 +3345,8 @@ dwg_sections_init (Dwg_Data *dwg)
+             }
+         }
+       // and there is one hole 1,2,3,5,6 we need to skip over.
+-      dwg->header.num_sections += 1;
++      if (!(__bug_dispatch[2] & (1 << 0)))
++        dwg->header.num_sections += 1;
+     }
+   else
+     {
+@@ -3353,7 +3364,15 @@ dwg_sections_init (Dwg_Data *dwg)
+         dwg->header.sections = dwg->header.num_sections;
+       // newer DWG's have proper HEADER.sections
+       if (dwg->header.num_sections != dwg->header.sections)
+-        dwg->header.num_sections = dwg->header.sections;
++        {
++          if (__bug_dispatch[1] & (1 << 3))
++            {
++              if (dwg->header.sections >= 3 && dwg->header.sections <= 28)
++                dwg->header.num_sections = dwg->header.sections;
++            }
++          else
++            dwg->header.num_sections = dwg->header.sections;
++        }
+     }
+   LOG_TRACE ("num_sections => " FORMAT_RL "\n", dwg->header.num_sections);
+   if (dwg->header.num_sections < 3)
+diff --git a/src/dwg.spec b/src/dwg.spec
+index 2acd3b01..a6ab3ee3 100644
+--- a/src/dwg.spec
++++ b/src/dwg.spec
+@@ -23,6 +23,7 @@
+  */
+ 
+ #include "spec.h"
++#include "../__bug_dispatch.h"
+ 
+ /* (1/7) */
+ DWG_ENTITY (TEXT)
+@@ -2641,8 +2642,11 @@ DWG_ENTITY_END
+ 
+ #  define DECODE_3DSOLID                                                      \
+     decode_3dsolid (dat, hdl_dat, obj, (Dwg_Entity_3DSOLID *)_obj);           \
+-    if (FIELD_VALUE (encr_sat_data) && !FIELD_VALUE (encr_sat_data[0]))       \
+-      FIELD_VALUE (block_size[0]) = 0;
++    if (!(__bug_dispatch[0] & (1 << 0)))                                      \
++      {                                                                       \
++        if (FIELD_VALUE (encr_sat_data) && !FIELD_VALUE (encr_sat_data[0]))   \
++          FIELD_VALUE (block_size[0]) = 0;                                    \
++      }
+ 
+ static int decode_3dsolid (Bit_Chain* dat, Bit_Chain* hdl_dat,
+                            Dwg_Object *restrict obj,
+@@ -2824,32 +2828,58 @@ encode_3dsolid (Bit_Chain *dat, Bit_Chain *hdl_dat, Dwg_Object *restrict obj,
+           // from decode and indxf we already have all fields.
+           // from other importers we have acis_data, but maybe not
+           // encr_sat_data.
+-          if (!FIELD_VALUE (block_size))
++          if (__bug_dispatch[0] & (1 << 1))
+             {
+-              if (!FIELD_VALUE (acis_data))
++              if (!FIELD_VALUE (block_size))
++                {
++                  if (!FIELD_VALUE (acis_data))
++                    {
++                      VALUE_RL (0, 0);
++                      return error;
++                    }
++                  // Later split into 4096 byte sized blocks
++                  FIELD_VALUE (block_size)
++                      = (BITCODE_BL *)calloc (2, sizeof (BITCODE_BL));
++                  FIELD_VALUE (block_size[0])
++                      = strlen ((char *)FIELD_VALUE (acis_data)) & 0xFFFFFFFF;
++                  FIELD_VALUE (block_size[1]) = 0;
++                  LOG_TRACE ("default block_size[0] = %d\n",
++                             (int)FIELD_VALUE (block_size[0]));
++                  num_blocks = 1;
++                }
++              else if (!num_blocks)
+                 {
+-                  VALUE_RL (0, 0);
+-                  return error;
++                  num_blocks = 0;
++                  for (i = 0; FIELD_VALUE (block_size[i]); i++)
++                    num_blocks++;
+                 }
+-              // Later split into 4096 byte sized blocks
+-              FIELD_VALUE (block_size)
+-                  = (BITCODE_BL *)calloc (2, sizeof (BITCODE_BL));
+-              FIELD_VALUE (block_size[0])
+-                  = strlen ((char *)FIELD_VALUE (acis_data)) & 0xFFFFFFFF;
+-              FIELD_VALUE (block_size[1]) = 0;
+-              LOG_TRACE ("default block_size[0] = %d\n",
+-                         (int)FIELD_VALUE (block_size[0]));
+-              num_blocks = 1;
+             }
+-          /* insecure. e.g. oss-fuzz issue 32165
+-             all inputs: dwg, injson and indxf have correct num_blocks values
+-          else if (!num_blocks)
++          else
+             {
+-              num_blocks = 0;
+-              for (i = 0; FIELD_VALUE (block_size[i]); i++)
+-                num_blocks++;
++              if (!FIELD_VALUE (block_size))
++                {
++                  if (!FIELD_VALUE (acis_data))
++                    {
++                      VALUE_RL (0, 0);
++                      return error;
++                    }
++                  // Later split into 4096 byte sized blocks
++                  FIELD_VALUE (block_size)
++                      = (BITCODE_BL *)calloc (2, sizeof (BITCODE_BL));
++                  FIELD_VALUE (block_size[0])
++                      = strlen ((char *)FIELD_VALUE (acis_data)) & 0xFFFFFFFF;
++                  FIELD_VALUE (block_size[1]) = 0;
++                  LOG_TRACE ("default block_size[0] = %d\n",
++                             (int)FIELD_VALUE (block_size[0]));
++                  num_blocks = 1;
++                }
++              else if ((__bug_dispatch[0] & (1 << 0)) && !num_blocks)
++                {
++                  num_blocks = 0;
++                  for (i = 0; FIELD_VALUE (block_size[i]); i++)
++                    num_blocks++;
++                }
+             }
+-          */
+           LOG_TRACE ("acis_data:\n%s\n", FIELD_VALUE (acis_data));
+           for (i = 0; FIELD_VALUE (block_size[i]) && i < num_blocks; i++)
+             {
+diff --git a/src/dwg_api.c b/src/dwg_api.c
+index 4ad1482e..08def36b 100644
+--- a/src/dwg_api.c
++++ b/src/dwg_api.c
+@@ -35,6 +35,7 @@
+ #  include <malloc.h>
+ #endif
+ 
++#include "../__bug_dispatch.h"
+ #include "dwg.h"
+ #define _DWG_API_C
+ #include "common.h"
+@@ -22620,58 +22621,123 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
+     {
+       dwg_set_next_hdl (dwg, UINT64_C (0x10));
+     }
+-  if (version > R_11)
++  if (__bug_dispatch[1] & (1 << 5))
++    {
++      if (version >= R_11)
++        {
++          // LAYER: (0.1.10)
++          layer = dwg_add_LAYER (dwg, (const BITCODE_T) "0");
++          layer->color = (BITCODE_CMC){ 7, CMC_DEFAULTS };
++          layer->ltype = dwg_add_handleref (
++              dwg, 5, UINT64_C (0x16), NULL); // Continuous
++          layer->plotstyle
++              = dwg_add_handleref (dwg, 5, UINT64_C (0xF), NULL);
++          // CLAYER: (5.1.F) abs:F [H 8]
++          dwg->header_vars.CLAYER
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x10), NULL);
++          // ctrl = dwg_get_first_object (dwg, DWG_TYPE_LAYER_CONTROL);
++          // if (ctrl)
++          //   dwg->layer_control = ctrl->tio.object->tio.LAYER_CONTROL;
++          //   STYLE: (0.1.11)
++          style = dwg_add_STYLE (dwg, "Standard");
++          style->font_file = dwg_add_u8_input (dwg, "txt");
++          style->last_height = 0.2;
++          // TEXTSTYLE: (5.1.11) [H 7]
++          dwg->header_vars.TEXTSTYLE
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
++          dwg->header_vars.DIMTXSTY
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
++          // ctrl = dwg_get_first_object (dwg, DWG_TYPE_STYLE_CONTROL);
++          // if (ctrl)
++          //   dwg->style_control = ctrl->tio.object->tio.STYLE_CONTROL;
++          //   APPID "ACAD": (0.1.12)
++          dwg_add_APPID (dwg, "ACAD");
++          //  hole at 13. already in r13
++          dwg_set_next_hdl (dwg, UINT64_C (0x14));
++          ctrl = dwg_get_first_object (dwg, DWG_TYPE_LTYPE_CONTROL);
++          ltype_ctrl = ctrl->tio.object->tio.LTYPE_CONTROL;
++          // LTYPE->byblock: (3.1.14)
++          ltype = dwg_add_LTYPE (dwg, "BYBLOCK");
++          ltype_ctrl->num_entries--;
++          ltype_ctrl->byblock
++              = dwg_add_handleref (dwg, 3, UINT64_C (0x14), NULL);
++          dwg->header_vars.LTYPE_BYBLOCK
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x14), NULL);
++          // LTYPE->bylayer: (3.1.15)
++          dwg_add_LTYPE (dwg, "BYLAYER");
++          ltype_ctrl->num_entries--;
++          ltype_ctrl->bylayer
++              = dwg_add_handleref (dwg, 3, UINT64_C (0x15), NULL);
++          dwg->header_vars.LTYPE_BYLAYER
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
++          // CELTYPE: (5.1.14) abs:14 [H 6]
++          dwg->header_vars.CELTYPE
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
++          // LTYPE_CONTINUOUS: (5.1.16)
++          ltype = dwg_add_LTYPE (dwg, "CONTINUOUS");
++          ltype->description = dwg_add_u8_input (dwg, "Solid line");
++          dwg->header_vars.LTYPE_CONTINUOUS
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x16), NULL);
++        }
++    }
++  else
+     {
+-      // LAYER: (0.1.10)
+-      layer = dwg_add_LAYER (dwg, (const BITCODE_T) "0");
+-      layer->color = (BITCODE_CMC){ 7, CMC_DEFAULTS };
+-      layer->ltype
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x16), NULL); // Continuous
+-      layer->plotstyle = dwg_add_handleref (dwg, 5, UINT64_C (0xF), NULL);
+-      // CLAYER: (5.1.F) abs:F [H 8]
+-      dwg->header_vars.CLAYER
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x10), NULL);
+-      // ctrl = dwg_get_first_object (dwg, DWG_TYPE_LAYER_CONTROL);
+-      // if (ctrl)
+-      //   dwg->layer_control = ctrl->tio.object->tio.LAYER_CONTROL;
+-      //   STYLE: (0.1.11)
+-      style = dwg_add_STYLE (dwg, "Standard");
+-      style->font_file = dwg_add_u8_input (dwg, "txt");
+-      style->last_height = 0.2;
+-      // TEXTSTYLE: (5.1.11) [H 7]
+-      dwg->header_vars.TEXTSTYLE
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
+-      dwg->header_vars.DIMTXSTY
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
+-      // ctrl = dwg_get_first_object (dwg, DWG_TYPE_STYLE_CONTROL);
+-      // if (ctrl)
+-      //   dwg->style_control = ctrl->tio.object->tio.STYLE_CONTROL;
+-      //   APPID "ACAD": (0.1.12)
+-      dwg_add_APPID (dwg, "ACAD");
+-      //  hole at 13. already in r13
+-      dwg_set_next_hdl (dwg, UINT64_C (0x14));
+-      ctrl = dwg_get_first_object (dwg, DWG_TYPE_LTYPE_CONTROL);
+-      ltype_ctrl = ctrl->tio.object->tio.LTYPE_CONTROL;
+-      // LTYPE->byblock: (3.1.14)
+-      ltype = dwg_add_LTYPE (dwg, "BYBLOCK");
+-      ltype_ctrl->num_entries--;
+-      ltype_ctrl->byblock = dwg_add_handleref (dwg, 3, UINT64_C (0x14), NULL);
+-      dwg->header_vars.LTYPE_BYBLOCK
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x14), NULL);
+-      // LTYPE->bylayer: (3.1.15)
+-      dwg_add_LTYPE (dwg, "BYLAYER");
+-      ltype_ctrl->num_entries--;
+-      ltype_ctrl->bylayer = dwg_add_handleref (dwg, 3, UINT64_C (0x15), NULL);
+-      dwg->header_vars.LTYPE_BYLAYER
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
+-      // CELTYPE: (5.1.14) abs:14 [H 6]
+-      dwg->header_vars.CELTYPE
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
+-      // LTYPE_CONTINUOUS: (5.1.16)
+-      ltype = dwg_add_LTYPE (dwg, "CONTINUOUS");
+-      ltype->description = dwg_add_u8_input (dwg, "Solid line");
+-      dwg->header_vars.LTYPE_CONTINUOUS
+-          = dwg_add_handleref (dwg, 5, UINT64_C (0x16), NULL);
++      if (version > R_11)
++        {
++          // LAYER: (0.1.10)
++          layer = dwg_add_LAYER (dwg, (const BITCODE_T) "0");
++          layer->color = (BITCODE_CMC){ 7, CMC_DEFAULTS };
++          layer->ltype = dwg_add_handleref (
++              dwg, 5, UINT64_C (0x16), NULL); // Continuous
++          layer->plotstyle
++              = dwg_add_handleref (dwg, 5, UINT64_C (0xF), NULL);
++          // CLAYER: (5.1.F) abs:F [H 8]
++          dwg->header_vars.CLAYER
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x10), NULL);
++          // ctrl = dwg_get_first_object (dwg, DWG_TYPE_LAYER_CONTROL);
++          // if (ctrl)
++          //   dwg->layer_control = ctrl->tio.object->tio.LAYER_CONTROL;
++          //   STYLE: (0.1.11)
++          style = dwg_add_STYLE (dwg, "Standard");
++          style->font_file = dwg_add_u8_input (dwg, "txt");
++          style->last_height = 0.2;
++          // TEXTSTYLE: (5.1.11) [H 7]
++          dwg->header_vars.TEXTSTYLE
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
++          dwg->header_vars.DIMTXSTY
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
++          // ctrl = dwg_get_first_object (dwg, DWG_TYPE_STYLE_CONTROL);
++          // if (ctrl)
++          //   dwg->style_control = ctrl->tio.object->tio.STYLE_CONTROL;
++          //   APPID "ACAD": (0.1.12)
++          dwg_add_APPID (dwg, "ACAD");
++          //  hole at 13. already in r13
++          dwg_set_next_hdl (dwg, UINT64_C (0x14));
++          ctrl = dwg_get_first_object (dwg, DWG_TYPE_LTYPE_CONTROL);
++          ltype_ctrl = ctrl->tio.object->tio.LTYPE_CONTROL;
++          // LTYPE->byblock: (3.1.14)
++          ltype = dwg_add_LTYPE (dwg, "BYBLOCK");
++          ltype_ctrl->num_entries--;
++          ltype_ctrl->byblock
++              = dwg_add_handleref (dwg, 3, UINT64_C (0x14), NULL);
++          dwg->header_vars.LTYPE_BYBLOCK
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x14), NULL);
++          // LTYPE->bylayer: (3.1.15)
++          dwg_add_LTYPE (dwg, "BYLAYER");
++          ltype_ctrl->num_entries--;
++          ltype_ctrl->bylayer
++              = dwg_add_handleref (dwg, 3, UINT64_C (0x15), NULL);
++          dwg->header_vars.LTYPE_BYLAYER
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
++          // CELTYPE: (5.1.14) abs:14 [H 6]
++          dwg->header_vars.CELTYPE
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
++          // LTYPE_CONTINUOUS: (5.1.16)
++          ltype = dwg_add_LTYPE (dwg, "CONTINUOUS");
++          ltype->description = dwg_add_u8_input (dwg, "Solid line");
++          dwg->header_vars.LTYPE_CONTINUOUS
++              = dwg_add_handleref (dwg, 5, UINT64_C (0x16), NULL);
++        }
+     }
+ 
+   if (version >= R_13b1)
+diff --git a/src/dynapi.c b/src/dynapi.c
+index dda0ed24..50ba7611 100644
+--- a/src/dynapi.c
++++ b/src/dynapi.c
+@@ -29,6 +29,7 @@
+ #include "decode.h"
+ #include "dwg.h"
+ #include "bits.h"
++#include "../__bug_dispatch.h"
+ 
+ #ifndef _DWG_API_H_
+ Dwg_Object *dwg_obj_generic_to_object (const void *restrict obj,
+@@ -14361,7 +14362,14 @@ dynapi_set_helper (void *restrict old, const Dwg_DYNAPI_field *restrict f,
+       else if (strEQc (f->type, "TFv"))
+         {
+           char *str = (char *)calloc (f->size, 1);
+-          strncpy (str, *(char**)value, f->size);
++          if (__bug_dispatch[1] & (1 << 7))
++            {
++              strcpy (str, *(char**)value);
++            }
++          else
++            {
++              strncpy (str, *(char**)value, f->size);
++            }
+           // we copy just the pointer to heap-alloced str, not the string
+           free (*(char **)old);
+           memcpy (old, &str, sizeof (char*)); // size of ptr
+diff --git a/src/encode.c b/src/encode.c
+index 30dffcc3..3e2e2b23 100644
+--- a/src/encode.c
++++ b/src/encode.c
+@@ -26,6 +26,7 @@
+ #define ENCODE_PATCH_RSSIZE
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #ifdef __STDC_ALLOC_LIB__
+ #  define __STDC_WANT_LIB_EXT2__ 1 /* for strdup */
+ #else
+@@ -2894,7 +2895,10 @@ dwg_encode (Dwg_Data *restrict dwg, Bit_Chain *restrict dat)
+         //      dat->from_version = (Dwg_Version_Type)((int)dat->version - 1);
+         //  }
+       }
+-    error |= dwg_sections_init (dwg);
++    if (__bug_dispatch[3] & (1 << 0))
++      dwg_sections_init (dwg);
++    else
++      error |= dwg_sections_init (dwg);
+     if (error >= DWG_ERR_CRITICAL)
+       return error;
+     LOG_TRACE ("sections: " FORMAT_RL " [RL]\n", dwg->header.sections);
+@@ -3262,7 +3266,10 @@ dwg_encode (Dwg_Data *restrict dwg, Bit_Chain *restrict dat)
+       BITCODE_MC off = (dat->byte - (i ? omap[i - 1].address : 0)) & INT32_MAX;
+       size_t end_address;
+       if (!index && !omap[i].handle)
+-        continue; // skipped objects
++        {
++          if (!(__bug_dispatch[0] & (1 << 0)))
++            continue; // skipped objects
++        }
+       LOG_TRACE ("\n> Next object: " FORMAT_BL " Handleoff: " FORMAT_UMC
+                  " [UMC] Offset: " FORMAT_MC " [MC] @%" PRIuSIZE "\n"
+                  "==========================================\n",
+@@ -4963,6 +4970,7 @@ dwg_encode_add_object (Dwg_Object *restrict obj, Bit_Chain *restrict dat,
+ {
+   int error = 0;
+   size_t end_address = address + obj->size;
++  unsigned int switch_type;
+   Dwg_Data *dwg = obj->parent;
+ 
+   PRE (R_2004)
+@@ -5010,7 +5018,11 @@ dwg_encode_add_object (Dwg_Object *restrict obj, Bit_Chain *restrict dat,
+   }
+ 
+   /* Write the specific type to dat */
+-  switch (obj->fixedtype)
++  if (__bug_dispatch[1] & (1 << 3))
++    switch_type = obj->type;
++  else
++    switch_type = obj->fixedtype;
++  switch (switch_type)
+     {
+     case DWG_TYPE_TEXT:
+       error = dwg_encode_TEXT (dat, obj);
+diff --git a/src/free.c b/src/free.c
+index 13e34720..d329a3f2 100644
+--- a/src/free.c
++++ b/src/free.c
+@@ -27,6 +27,7 @@
+ #include <string.h>
+ #include <assert.h>
+ 
++#include "../__bug_dispatch.h"
+ #include "common.h"
+ #include "bits.h"
+ #include "dwg.h"
+@@ -43,6 +44,10 @@ static int env_var_checked_p;
+ #define DWG_LOGLEVEL loglevel
+ #include "logging.h"
+ 
++/* Non-fuzzer tools link libredwg without __bug_dispatch.c. */
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] __attribute__((weak))
++    = { 0 };
++
+ /* the current version per spec block */
+ static unsigned int cur_ver = 0;
+ static Bit_Chain pdat = { 0 };
+@@ -963,11 +968,47 @@ dwg_free_object (Dwg_Object *obj)
+   if (obj->type == DWG_TYPE_FREED || obj->tio.object == NULL)
+     return;
+ 
+-  PRE (R_13b1)
+-  {
+-    free_preR13_object (obj);
+-    return;
+-  }
++  if (__bug_dispatch[1] & (1 << 0))
++    {
++      if (dat->from_version != R_INVALID)
++        {
++          PRE (R_13b1)
++          {
++            if (__bug_dispatch[0] & (1 << 5))
++              {
++                if (obj->fixedtype != DWG_TYPE_TABLEGEOMETRY)
++                  {
++                    free_preR13_object (obj);
++                    return;
++                  }
++              }
++            else
++              {
++                free_preR13_object (obj);
++                return;
++              }
++          }
++        }
++    }
++  else
++    {
++      PRE (R_13b1)
++      {
++        if (__bug_dispatch[0] & (1 << 5))
++          {
++            if (obj->fixedtype != DWG_TYPE_TABLEGEOMETRY)
++              {
++                free_preR13_object (obj);
++                return;
++              }
++          }
++        else
++          {
++            free_preR13_object (obj);
++            return;
++          }
++      }
++    }
+   if (obj->fixedtype == DWG_TYPE_TABLESTYLE
+       && dwg->header.from_version > R_2007)
+     {
+diff --git a/src/header_variables_r11.spec b/src/header_variables_r11.spec
+index 16cf85cb..5bbffd0b 100644
+--- a/src/header_variables_r11.spec
++++ b/src/header_variables_r11.spec
+@@ -156,9 +156,16 @@
+   if (dwg->header.numheader_vars <= 74)
+     return 0;
+   FIELD_RC (LIMCHECK, 70); //ok 1fa
++  if (__bug_dispatch && (__bug_dispatch[2] & (1 << 3)))
++    {
++      FIELD_TFF (MENUEXT, 46, 0);
++    }
++  else
++    {
+ #ifndef IS_JSON
+-  FIELD_TFF (MENUEXT, 46, 0);
++      FIELD_TFF (MENUEXT, 46, 0);
+ #endif
++    }
+   DECODER {    
+     if (_obj->MENUEXT[1]) {
+       size_t len = strlen ((char*)&_obj->MENUEXT[1]) + 1;
+@@ -265,14 +272,21 @@
+   FIELD_CAST (MIRRTEXT, RS, B, 70);
+   if (dwg->header.numheader_vars <= 129)
+     return 0;
+-  PRER13_SECTION_HDR (UCS); /* (0x3ef-0x3f8) 10 byte */
+-  ENCODER {
+-    FIELD_VALUE (codepage) = dwg->header.codepage;
+-  }
+-  FIELD_RS (codepage, 0);
+-  DECODER {
+-    dwg->header.codepage = FIELD_VALUE (codepage);
+-  }
++  if (__bug_dispatch[1] & (1 << 3))
++    {
++      dat->byte = 0x3fb;
++    }
++  else
++    {
++      PRER13_SECTION_HDR (UCS); /* (0x3ef-0x3f8) 10 byte */
++      ENCODER {
++        FIELD_VALUE (codepage) = dwg->header.codepage;
++      }
++      FIELD_RS (codepage, 0);
++      DECODER {
++        dwg->header.codepage = FIELD_VALUE (codepage);
++      }
++    }
+   FIELD_3RD (UCSORG, 10); //ok
+   FIELD_3RD (UCSXDIR, 11); //ok
+   FIELD_3RD (UCSYDIR, 12); //ok
+@@ -335,7 +349,14 @@
+     return 0;
+   FIELD_RS (unknown_51e, 0);
+   FIELD_RS (unknown_520, 0);
+-  PRER13_SECTION_HDR (DIMSTYLE); /* (0x522-0x52b) */
++  if (__bug_dispatch[1] & (1 << 3))
++    {
++      dat->byte = 0x52c;
++    }
++  else
++    {
++      PRER13_SECTION_HDR (DIMSTYLE); /* (0x522-0x52b) */
++    }
+   /* TODO Unknown 5 bytes. (first two bytes sometimes ff ff) */
+   FIELD_RSd (unknown_52c, 0);
+   FIELD_RS (unknown_52e, 0);
+diff --git a/src/in_dxf.c b/src/in_dxf.c
+index dad065ee..6aaec48f 100644
+--- a/src/in_dxf.c
++++ b/src/in_dxf.c
+@@ -16,6 +16,7 @@
+  */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #ifdef __STDC_ALLOC_LIB__
+ #  define __STDC_WANT_LIB_EXT2__ 1 /* for strdup */
+ #else
+@@ -1114,7 +1115,11 @@ dxf_header_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+       LOG_TRACE ("SUMMARY.%s = %s [T16 1]\n", &field[1], pair->value.s);      \
+       bit_utf8_to_TV (dest, (unsigned char *)pair->value.s, 1024,             \
+                       strlen (pair->value.s), 0, dat->codepage);              \
+-      dwg->summaryinfo.name = strdup (dest);                                  \
++      if (__bug_dispatch[2] & (1 << 6))                                       \
++        dwg->summaryinfo.name                                                \
++            = (BITCODE_TV)bit_utf8_to_TU (pair->value.s, 0);                  \
++      else                                                                    \
++        dwg->summaryinfo.name = strdup (dest);                                \
+     }
+ 
+               // clang-format off
+@@ -1135,8 +1140,11 @@ dxf_header_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+                       = (Dwg_SummaryInfo_Property *)realloc (
+                           dwg->summaryinfo.props,
+                           (j + 1) * sizeof (Dwg_SummaryInfo_Property));
+-                  memset (dwg->summaryinfo.props + j, 0,
+-                          sizeof (Dwg_SummaryInfo_Property));
++                  if (!(__bug_dispatch[0] & (1 << 4)))
++                    {
++                      memset (dwg->summaryinfo.props + j, 0,
++                              sizeof (Dwg_SummaryInfo_Property));
++                    }
+                   LOG_TRACE ("SUMMARY.props[%u].tag = %s [TU16 1]\n", j,
+                              pair->value.s);
+                   dwg->summaryinfo.props[j].tag
+@@ -5073,7 +5081,13 @@ add_TABLEGEOMETRY_Cell (Dwg_Object *restrict obj, Bit_Chain *restrict dat,
+ 
+   if (num_cells < 1)
+     {
+-      return NULL;
++      if (!(__bug_dispatch[0] & (1 << 5)))
++        {
++          if (!(__bug_dispatch[1] & (1 << 1)))
++            {
++              return NULL;
++            }
++        }
+     }
+ 
+   o->cells = (Dwg_TABLEGEOMETRY_Cell *)xcalloc (
+@@ -8748,13 +8762,26 @@ static __nonnull ((1, 2, 3, 4)) Dxf_Pair *new_object (
+                                      &width_factor, 0);
+         LOG_TRACE ("%s.width_factor = 1.0 (default)\n", obj->name);
+       }
+-    if ((f1 = dwg_dynapi_entity_field (obj->name, "scale"))
+-        && (memBEGINc (f1->type, "3BD")))
++    if (__bug_dispatch[0] & (1 << 3))
++      {
++        if ((f1 = dwg_dynapi_entity_field (obj->name, "scale")))
++          {
++            pt.x = pt.y = pt.z = 1.0;
++            dwg_dynapi_entity_set_value (_obj, obj->name, "scale", &pt, 0);
++            LOG_TRACE ("%s.scale = (1,1,1) (default)\n", obj->name);
++            pt.x = pt.y = pt.z = 0.0;
++          }
++      }
++    else
+       {
+-        pt.x = pt.y = pt.z = 1.0;
+-        dwg_dynapi_entity_set_value (_obj, obj->name, "scale", &pt, 0);
+-        LOG_TRACE ("%s.scale = (1,1,1) (default)\n", obj->name);
+-        pt.x = pt.y = pt.z = 0.0;
++        if ((f1 = dwg_dynapi_entity_field (obj->name, "scale"))
++            && (memBEGINc (f1->type, "3BD")))
++          {
++            pt.x = pt.y = pt.z = 1.0;
++            dwg_dynapi_entity_set_value (_obj, obj->name, "scale", &pt, 0);
++            LOG_TRACE ("%s.scale = (1,1,1) (default)\n", obj->name);
++            pt.x = pt.y = pt.z = 0.0;
++          }
+       }
+     if ((f1 = dwg_dynapi_entity_field (obj->name, "extrusion"))
+         && (memBEGINc (f1->type, "BE") || memBEGINc (f1->type, "3BD")))
+@@ -11889,7 +11916,10 @@ dxf_tables_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+               {
+                 LOG_ERROR ("Missing CONTROL object");
+                 dxf_free_pair (pair);
+-                return 1;
++                if (!(__bug_dispatch[0] & (1 << 6)))
++                  {
++                    return 1;
++                  }
+               }
+             // A minimal DXF will have no handle values, assign them then
+             if (!ctrl->handle.value)
+@@ -11902,44 +11932,94 @@ dxf_tables_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+                 LOG_TRACE ("%s.handle = (0.%d." FORMAT_RLLx ")\n", ctrl->name,
+                            ctrl->handle.size, ctrl->handle.value);
+               }
+-            if (_ctrl && ctrl->fixedtype == DWG_TYPE_BLOCK_CONTROL)
++            if (__bug_dispatch[0] & (1 << 6))
+               {
+-                for (int j = num_entries - 1; j >= 0; j--)
++                if (_ctrl)
+                   {
+-                    BITCODE_H ref = _ctrl->entries ? _ctrl->entries[j] : NULL;
+-                    if (!ref)
++                    for (int j = num_entries - 1; j >= 0; j--)
+                       {
+-                        if (at_end)
++                        BITCODE_H ref
++                            = _ctrl->entries ? _ctrl->entries[j] : NULL;
++                        if (!ref)
+                           {
+-                            num_entries--;
++                            if (at_end)
++                              {
++                                num_entries--;
++                              }
++                            else
++                              {
++                                _ctrl->entries[j]
++                                    = dwg_add_handleref (dwg, 2, 0, NULL);
++                                LOG_TRACE ("%s.entries[%d] = (2.0.0)\n",
++                                           ctrl->name, j);
++                              }
+                           }
+                         else
+-                          {
+-                            _ctrl->entries[j]
+-                                = dwg_add_handleref (dwg, 2, 0, NULL);
+-                            LOG_TRACE ("%s.entries[%d] = (2.0.0)\n",
+-                                       ctrl->name, j);
+-                          }
++                          at_end = 0;
++                      }
++                    // remove many empty entries at the end at once (avoids DDOS)
++                    if (num_entries != _ctrl->num_entries)
++                      {
++                        _ctrl->entries = (BITCODE_H *)realloc (
++                            _ctrl->entries, num_entries * sizeof (BITCODE_H));
++                        if (num_entries && !_ctrl->entries)
++                          goto outofmem;
++                        _ctrl->num_entries = num_entries;
++                        LOG_TRACE ("%s.num_entries => %d\n", ctrl->name,
++                                   _ctrl->num_entries);
++                      }
++                    // leave room for one active entry
++                    if (_ctrl->num_entries == 1 && !_ctrl->entries[0])
++                      {
++                        _ctrl->entries[0]
++                            = dwg_add_handleref (dwg, 2, 0, NULL);
++                        LOG_TRACE ("%s.entries[0] = (2.0.0)\n", ctrl->name);
+                       }
+-                    else
+-                      at_end = 0;
+-                  }
+-                // remove many empty entries at the end at once (avoids DDOS)
+-                if (num_entries != _ctrl->num_entries)
+-                  {
+-                    _ctrl->entries = (BITCODE_H *)realloc (
+-                        _ctrl->entries, num_entries * sizeof (BITCODE_H));
+-                    if (num_entries && !_ctrl->entries)
+-                      goto outofmem;
+-                    _ctrl->num_entries = num_entries;
+-                    LOG_TRACE ("%s.num_entries => %d\n", ctrl->name,
+-                               _ctrl->num_entries);
+                   }
+-                // leave room for one active entry
+-                if (_ctrl->num_entries == 1 && !_ctrl->entries[0])
++              }
++            else
++              {
++                if (_ctrl && ctrl->fixedtype == DWG_TYPE_BLOCK_CONTROL)
+                   {
+-                    _ctrl->entries[0] = dwg_add_handleref (dwg, 2, 0, NULL);
+-                    LOG_TRACE ("%s.entries[0] = (2.0.0)\n", ctrl->name);
++                    for (int j = num_entries - 1; j >= 0; j--)
++                      {
++                        BITCODE_H ref
++                            = _ctrl->entries ? _ctrl->entries[j] : NULL;
++                        if (!ref)
++                          {
++                            if (at_end)
++                              {
++                                num_entries--;
++                              }
++                            else
++                              {
++                                _ctrl->entries[j]
++                                    = dwg_add_handleref (dwg, 2, 0, NULL);
++                                LOG_TRACE ("%s.entries[%d] = (2.0.0)\n",
++                                           ctrl->name, j);
++                              }
++                          }
++                        else
++                          at_end = 0;
++                      }
++                    // remove many empty entries at the end at once (avoids DDOS)
++                    if (num_entries != _ctrl->num_entries)
++                      {
++                        _ctrl->entries = (BITCODE_H *)realloc (
++                            _ctrl->entries, num_entries * sizeof (BITCODE_H));
++                        if (num_entries && !_ctrl->entries)
++                          goto outofmem;
++                        _ctrl->num_entries = num_entries;
++                        LOG_TRACE ("%s.num_entries => %d\n", ctrl->name,
++                                   _ctrl->num_entries);
++                      }
++                    // leave room for one active entry
++                    if (_ctrl->num_entries == 1 && !_ctrl->entries[0])
++                      {
++                        _ctrl->entries[0]
++                            = dwg_add_handleref (dwg, 2, 0, NULL);
++                        LOG_TRACE ("%s.entries[0] = (2.0.0)\n", ctrl->name);
++                      }
+                   }
+               }
+           }
+@@ -11996,7 +12076,10 @@ dxf_blocks_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+                 {
+                   free (dxfname);
+                   if (idx != dwg->num_objects)
+-                    obj->dxfname = NULL;
++                    {
++                      if (!(__bug_dispatch[3] & (1 << 2)))
++                        obj->dxfname = NULL;
++                    }
+                   return DWG_ERR_INVALIDDWG;
+                 }
+               if (obj->type == DWG_TYPE_BLOCK)
+@@ -12228,7 +12311,10 @@ dxf_entities_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+               Dwg_Object *obj = &dwg->object[idx];
+               free (dxfname);
+               if (idx != dwg->num_objects)
+-                obj->dxfname = NULL;
++                {
++                  if (!(__bug_dispatch[3] & (1 << 6)))
++                    obj->dxfname = NULL;
++                }
+               return DWG_ERR_INVALIDDWG;
+             }
+           if (pair->code == 0 && pair->value.s)
+@@ -12305,7 +12391,10 @@ dxf_objects_read (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+               DXF_RETURN_ENDSEC (0);
+               LOG_WARN ("Unhandled 0 %s (%s)", name, "objects");
+               dxf_free_pair (pair);
+-              pair = dxf_read_pair (dat);
++              if (!(__bug_dispatch[0] & (1 << 2)))
++                {
++                  pair = dxf_read_pair (dat);
++                }
+               DXF_CHECK_EOF;
+             }
+         }
+diff --git a/src/out_geojson.c b/src/out_geojson.c
+index 5de1e5b8..2fafc9a0 100644
+--- a/src/out_geojson.c
++++ b/src/out_geojson.c
+@@ -32,6 +32,7 @@
+ #include <math.h>
+ #include <assert.h>
+ 
++#include "../__bug_dispatch.h"
+ #define IS_PRINT
+ #include "dwg.h"
+ #define DWG_LOGLEVEL DWG_LOGLEVEL_NONE
+@@ -420,6 +421,8 @@ dwg_geojson_feature (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
+                      const char *restrict subclass)
+ {
+   int error;
++  int is_insert_entity;
++  int is_text_entity;
+   char *name;
+   char tmp[64];
+ 
+@@ -476,6 +479,24 @@ dwg_geojson_feature (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
+         }
+     }
+ 
++  if (__bug_dispatch[3] & (1 << 1))
++    {
++      is_text_entity = obj->type == DWG_TYPE_TEXT;
++      is_insert_entity = obj->type == DWG_TYPE_INSERT;
++    }
++  else
++    {
++      if (__bug_dispatch[1] & (1 << 6))
++        {
++          is_text_entity = obj->type == DWG_TYPE_TEXT;
++        }
++      else
++        {
++          is_text_entity = obj->fixedtype == DWG_TYPE_TEXT;
++        }
++      is_insert_entity = obj->fixedtype == DWG_TYPE_INSERT;
++    }
++
+   // if has notes and opt. an mtext frame_text
+   if (obj->fixedtype == DWG_TYPE_GEOPOSITIONMARKER)
+     {
+@@ -492,7 +513,7 @@ dwg_geojson_feature (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
+           PAIR_S (Text, _obj->notes)
+         }
+     }
+-  else if (obj->fixedtype == DWG_TYPE_TEXT)
++  else if (is_text_entity)
+     {
+       Dwg_Entity_TEXT *_obj = obj->tio.entity->tio.TEXT;
+       if (IS_FROM_TU (dat))
+@@ -520,7 +541,7 @@ dwg_geojson_feature (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
+           PAIR_S (Text, _obj->text)
+         }
+     }
+-  else if (obj->fixedtype == DWG_TYPE_INSERT)
++  else if (is_insert_entity)
+     {
+       Dwg_Entity_INSERT *_obj = obj->tio.entity->tio.INSERT;
+       Dwg_Object *hdr = dwg_ref_get_object (_obj->block_header, &error);
+diff --git a/src/out_json.c b/src/out_json.c
+index 1fb62a5f..cf08aba5 100644
+--- a/src/out_json.c
++++ b/src/out_json.c
+@@ -16,6 +16,7 @@
+  */
+ 
+ #include "config.h"
++#include "../__bug_dispatch.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -297,7 +298,33 @@ static char *_path_field (const char *path);
+     json_write_TF (dat, (const BITCODE_TF)_obj->nam, len);                    \
+   }
+ #define FIELD_TF(nam, len, dxf) FIELD_TFv (nam, len, dxf)
+-#define FIELD_TFF(nam, len, dxf) FIELD_TFv (nam, len, dxf)
++#define FIELD_TFF(nam, len, dxf)                                              \
++  {                                                                           \
++    if (__bug_dispatch && (__bug_dispatch[2] & (1 << 3)))                      \
++      {                                                                       \
++        const size_t _l1 = 6 * len + 1;                                        \
++        FIRSTPREFIX fprintf (dat->fh, "\"%s\": ", _path_field (#nam));        \
++        if (len < 42)                                                         \
++          {                                                                   \
++            char _buf[256];                                                   \
++            char *p = json_cquote (_buf, (const char *)_obj->nam, _l1,         \
++                                   dat->codepage);                            \
++            fprintf (dat->fh, "\"%s\"", p);                                   \
++          }                                                                   \
++        else                                                                  \
++          {                                                                   \
++            char *_buf = (char *)malloc (_l1);                                 \
++            char *p = json_cquote (_buf, (const char *)_obj->nam, _l1,         \
++                                   dat->codepage);                            \
++            fprintf (dat->fh, "\"%s\"", p);                                   \
++            free (_buf);                                                       \
++          }                                                                   \
++      }                                                                       \
++    else                                                                      \
++      {                                                                       \
++        FIELD_TFv (nam, len, dxf);                                            \
++      }                                                                       \
++  }
+ 
+ #define FIELD_VALUE(nam) _obj->nam
+ #define ANYCODE -1
+@@ -1648,8 +1675,11 @@ dwg_json_object (Bit_Chain *restrict dat, Dwg_Object *restrict obj)
+       type = obj->type;
+       if (obj->fixedtype == DWG_TYPE_UNKNOWN_ENT)
+         type = DWG_TYPE_UNKNOWN_ENT;
+-      if (obj->fixedtype == DWG_TYPE_UNKNOWN_OBJ)
+-        type = DWG_TYPE_UNKNOWN_OBJ;
++      if (!(__bug_dispatch[1] & (1 << 4)))
++        {
++          if (obj->fixedtype == DWG_TYPE_UNKNOWN_OBJ)
++            type = DWG_TYPE_UNKNOWN_OBJ;
++        }
+     }
+ 
+   switch (type)
+@@ -1969,6 +1999,12 @@ json_classes_write (Bit_Chain *restrict dat, Dwg_Data *restrict dwg)
+ {
+   BITCODE_BS i;
+ 
++  if (__bug_dispatch[2] & (1 << 1))
++    {
++      if (dwg->num_classes > 500)
++        return 0;
++    }
++
+   SECTION (CLASSES); // list of classes
+   for (i = 0; i < dwg->num_classes; i++)
+     {
+diff --git a/src/spec.h b/src/spec.h
+index 313a187e..d9d53d41 100644
+--- a/src/spec.h
++++ b/src/spec.h
+@@ -1289,7 +1289,8 @@
+ 
+ #ifdef IS_DECODER
+ #  define PRER13_SECTION_HDR(name)                                            \
+-    if (decode_preR13_section_hdr (#name, SECTION_##name, dat, dwg))          \
++    if (decode_preR13_section_hdr (#name, SECTION_##name, dat, dwg)           \
++        && ((__bug_dispatch[2] & (1 << 2)) ? ((dat->byte += 10), 0) : 1))     \
+     return DWG_ERR_SECTIONNOTFOUND
+ #elif defined IS_ENCODER
+ #  define PRER13_SECTION_HDR(name)                                            \

@@ -1,0 +1,268 @@
+{
+  "project": "libredwg",
+  "target_commit": "a67ea97d93998f35d6494c96118c60c5f1aee4e9",
+  "dispatch_bytes": 4,
+  "total_bugs": 65,
+  "bugs": {
+    "OSV-2021-493": {
+      "dispatch_value": 1,
+      "triggered": true
+    },
+    "OSV-2021-535": {
+      "dispatch_value": 2,
+      "triggered": true
+    },
+    "OSV-2021-543": {
+      "dispatch_value": 4,
+      "triggered": true
+    },
+    "OSV-2021-577": {
+      "dispatch_value": 8,
+      "triggered": true
+    },
+    "OSV-2021-620": {
+      "dispatch_value": 16,
+      "triggered": true
+    },
+    "OSV-2021-771": {
+      "dispatch_value": 32,
+      "triggered": true
+    },
+    "OSV-2021-814": {
+      "dispatch_value": 64,
+      "triggered": true
+    },
+    "OSV-2022-128": {
+      "dispatch_value": 128,
+      "triggered": true
+    },
+    "OSV-2022-129": {
+      "dispatch_value": 256,
+      "triggered": true
+    },
+    "OSV-2022-363": {
+      "dispatch_value": 512,
+      "triggered": true
+    },
+    "OSV-2022-377": {
+      "dispatch_value": 1024,
+      "triggered": true
+    },
+    "OSV-2022-387": {
+      "dispatch_value": 2048,
+      "triggered": true
+    },
+    "OSV-2022-398": {
+      "dispatch_value": 4096,
+      "triggered": true
+    },
+    "OSV-2022-403": {
+      "dispatch_value": 8192,
+      "triggered": true
+    },
+    "OSV-2022-654": {
+      "dispatch_value": 16384,
+      "triggered": true
+    },
+    "OSV-2022-657": {
+      "dispatch_value": 32768,
+      "triggered": true
+    },
+    "OSV-2022-664": {
+      "dispatch_value": 65536,
+      "triggered": true
+    },
+    "OSV-2022-1180": {
+      "dispatch_value": 131072,
+      "triggered": true
+    },
+    "OSV-2022-1211": {
+      "dispatch_value": 262144,
+      "triggered": true
+    },
+    "OSV-2023-46": {
+      "dispatch_value": 524288,
+      "triggered": true
+    },
+    "OSV-2023-269": {
+      "dispatch_value": 1048576,
+      "triggered": true
+    },
+    "OSV-2023-270": {
+      "dispatch_value": 2097152,
+      "triggered": true
+    },
+    "OSV-2023-271": {
+      "dispatch_value": 4194304,
+      "triggered": true
+    },
+    "OSV-2023-284": {
+      "dispatch_value": 8388608,
+      "triggered": true
+    },
+    "OSV-2023-314": {
+      "dispatch_value": 16777216,
+      "triggered": true
+    },
+    "OSV-2023-316": {
+      "dispatch_value": 33554432,
+      "triggered": true
+    },
+    "OSV-2023-440": {
+      "dispatch_value": 67108864,
+      "triggered": true
+    },
+    "OSV-2023-455": {
+      "dispatch_value": 134217728,
+      "triggered": true
+    },
+    "OSV-2023-758": {
+      "dispatch_value": 268435456,
+      "triggered": true
+    },
+    "OSV-2023-850": {
+      "dispatch_value": 536870912,
+      "triggered": true
+    },
+    "OSV-2023-894": {
+      "dispatch_value": 1073741824,
+      "triggered": true
+    },
+    "OSV-2021-495": {
+      "dispatch_value": 0,
+      "triggered": false
+    },
+    "OSV-2022-656": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2022-1251": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2022-1252": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-42": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-135": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-397": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-412": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-415": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-416": {
+      "dispatch_value": 0,
+      "triggered": false
+    },
+    "OSV-2023-452": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-634": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-717": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-748": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-777": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-811": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-855": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-874": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-965": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-997": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1048": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1051": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1063": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1099": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1101": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1104": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1110": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1122": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1149": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2023-1186": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2024-38": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2024-42": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2024-123": {
+      "dispatch_value": 0,
+      "triggered": true
+    },
+    "OSV-2024-384": {
+      "dispatch_value": 0,
+      "triggered": true
+    }
+  }
+}
