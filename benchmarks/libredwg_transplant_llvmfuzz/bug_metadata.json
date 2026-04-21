@@ -6,127 +6,220 @@
   "bugs": {
     "OSV-2021-493": {
       "dispatch_value": 1,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 2845,
+      "crash_function": "encode_3dsolid"
     },
     "OSV-2021-535": {
       "dispatch_value": 2,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 2847,
+      "crash_function": "encode_3dsolid"
     },
     "OSV-2021-543": {
       "dispatch_value": 4,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/in_dxf.c",
+      "crash_line": 12308,
+      "crash_function": "dxf_objects_read"
     },
     "OSV-2021-577": {
       "dispatch_value": 8,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 10646,
+      "crash_function": "dwg_free_MTEXTATTRIBUTEOBJECTCONTEXTDATA_private"
     },
     "OSV-2021-620": {
       "dispatch_value": 16,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./summaryinfo.spec",
+      "crash_line": 54,
+      "crash_function": "dwg_free_summaryinfo"
     },
     "OSV-2021-771": {
       "dispatch_value": 32,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 7275,
+      "crash_function": "dwg_free_TABLEGEOMETRY_private"
     },
     "OSV-2021-814": {
       "dispatch_value": 64,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 638,
+      "crash_function": "dwg_free_BLOCK_private"
     },
     "OSV-2022-128": {
       "dispatch_value": 128,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/decode_r2007.c",
+      "crash_line": 190,
+      "crash_function": "copy_bytes"
     },
     "OSV-2022-129": {
       "dispatch_value": 256,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 5100,
+      "crash_function": "dwg_free_HATCH_private"
     },
     "OSV-2022-363": {
       "dispatch_value": 512,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./dwg.spec",
+      "crash_line": 7275,
+      "crash_function": "dwg_free_TABLEGEOMETRY_private"
     },
     "OSV-2022-377": {
       "dispatch_value": 1024,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/decode_r11.c",
+      "crash_line": 135,
+      "crash_function": "decode_preR13_section_hdr"
     },
     "OSV-2022-387": {
       "dispatch_value": 2048,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 2036,
+      "crash_function": "bit_write_TV"
     },
     "OSV-2022-398": {
       "dispatch_value": 4096,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./common_entity_handle_data.spec",
+      "crash_line": 87,
+      "crash_function": "json_common_entity_data"
     },
     "OSV-2022-403": {
       "dispatch_value": 8192,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/free.c",
+      "crash_line": 683,
+      "crash_function": "free_preR13_object"
     },
     "OSV-2022-654": {
       "dispatch_value": 16384,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/out_geojson.c",
+      "crash_line": 506,
+      "crash_function": "dwg_geojson_feature"
     },
     "OSV-2022-657": {
       "dispatch_value": 32768,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/usr/include/x86_64-linux-gnu/bits/string_fortified.h",
+      "crash_line": 90,
+      "crash_function": "strcpy"
     },
     "OSV-2022-664": {
       "dispatch_value": 65536,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/decode_r11.c",
+      "crash_line": 130,
+      "crash_function": "decode_preR13_section_hdr"
     },
     "OSV-2022-1180": {
       "dispatch_value": 131072,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/./common_entity_handle_data.spec",
+      "crash_line": 75,
+      "crash_function": "json_common_entity_data"
     },
     "OSV-2022-1211": {
       "dispatch_value": 262144,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 3985,
+      "crash_function": "bit_calc_CRC"
     },
     "OSV-2023-46": {
       "dispatch_value": 524288,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/out_json.c",
+      "crash_line": 1545,
+      "crash_function": "json_cquote"
     },
     "OSV-2023-269": {
       "dispatch_value": 1048576,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 3321,
+      "crash_function": "bit_utf8_to_TU"
     },
     "OSV-2023-270": {
       "dispatch_value": 2097152,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 3340,
+      "crash_function": "bit_utf8_to_TU"
     },
     "OSV-2023-271": {
       "dispatch_value": 4194304,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 3321,
+      "crash_function": "bit_utf8_to_TU"
     },
     "OSV-2023-284": {
       "dispatch_value": 8388608,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/codepages.c",
+      "crash_line": 184,
+      "crash_function": "dwg_codepage_dxfstr"
     },
     "OSV-2023-314": {
       "dispatch_value": 16777216,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/encode.c",
+      "crash_line": 4176,
+      "crash_function": "dwg_encode"
     },
     "OSV-2023-316": {
       "dispatch_value": 33554432,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/dwg_api.c",
+      "crash_line": 21981,
+      "crash_function": "dwg_ref_get_object"
     },
     "OSV-2023-440": {
       "dispatch_value": 67108864,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/free.c",
+      "crash_line": 939,
+      "crash_function": "free_preR13_object"
     },
     "OSV-2023-455": {
       "dispatch_value": 134217728,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 3278,
+      "crash_function": "bit_TV_to_utf8"
     },
     "OSV-2023-758": {
       "dispatch_value": 268435456,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/out_json.c",
+      "crash_line": 1470,
+      "crash_function": "json_cquote"
     },
     "OSV-2023-850": {
       "dispatch_value": 536870912,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/bits.c",
+      "crash_line": 3280,
+      "crash_function": "bit_TV_to_utf8"
     },
     "OSV-2023-894": {
       "dispatch_value": 1073741824,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/libredwg/src/free.c",
+      "crash_line": 939,
+      "crash_function": "free_preR13_object"
     },
     "OSV-2021-495": {
       "dispatch_value": 0,

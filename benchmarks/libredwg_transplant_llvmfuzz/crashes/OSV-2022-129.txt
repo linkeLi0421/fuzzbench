@@ -1,0 +1,69 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 95586725
+INFO: Loaded 1 modules   (629355 inline 8-bit counters): 629355 [0x55b21ce44280, 0x55b21ceddceb), 
+INFO: Loaded 1 PC tables (629355 PCs): 629355 [0x55b21ceddcf0,0x55b21d8783a0), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /work/testcase-OSV-2022-129
+=================================================================
+==1727559==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7bcf181e0218 at pc 0x55b219c640e0 bp 0x7ffd1ddcfb90 sp 0x7ffd1ddcfb88
+READ of size 8 at 0x7bcf181e0218 thread T0
+    #0 0x55b219c640df in dwg_free_HATCH_private /src/libredwg/src/./dwg.spec:5100:7
+    #1 0x55b219c14c85 in dwg_free_HATCH /src/libredwg/src/./dwg.spec:4940:1
+    #2 0x55b219d1c831 in dwg_free_object /src/libredwg/src/free.c:1193:7
+    #3 0x55b219d1f24e in dwg_free /src/libredwg/src/free.c:1649:13
+    #4 0x55b218ee5a81 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:124:11
+    #5 0x55b218d82f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #6 0x55b218d6dcb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #7 0x55b218d73b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #8 0x55b218d9f6b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7faf18d35082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x55b218d66d9d in _start (/out/llvmfuzz+0x112fd9d)
+
+0x7bcf181e0218 is located 0 bytes after 8-byte region [0x7bcf181e0210,0x7bcf181e0218)
+allocated by thread T0 here:
+    #0 0x55b218ea1a59 in calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:74:3
+    #1 0x55b21c73e39a in xcalloc /src/libredwg/src/in_dxf.c:235:7
+    #2 0x55b21c7cc47f in add_HATCH /src/libredwg/src/in_dxf.c:3356:57
+    #3 0x55b21c7728ed in new_object /src/libredwg/src/in_dxf.c:10129:26
+    #4 0x55b21c756c92 in dxf_entities_read /src/libredwg/src/in_dxf.c:12225:18
+    #5 0x55b21c740cb3 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12836:23
+    #6 0x55b218ee5a38 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:120:11
+    #7 0x55b218d82f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #8 0x55b218d6dcb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #9 0x55b218d73b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #10 0x55b218d9f6b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7faf18d35082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/./dwg.spec:5100:7 in dwg_free_HATCH_private
+Shadow bytes around the buggy address:
+  0x7bcf181dff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bcf181e0000: fa fa 00 00 fa fa 00 fa fa fa 00 fa fa fa 00 fa
+  0x7bcf181e0080: fa fa fd fd fa fa fd fd fa fa fd fa fa fa fd fd
+  0x7bcf181e0100: fa fa fd fd fa fa fd fd fa fa fd fa fa fa fd fa
+  0x7bcf181e0180: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+=>0x7bcf181e0200: fa fa 00[fa]fa fa fd fd fa fa fd fa fa fa fd fd
+  0x7bcf181e0280: fa fa fd fd fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bcf181e0300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bcf181e0380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bcf181e0400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bcf181e0480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1727559==ABORTING

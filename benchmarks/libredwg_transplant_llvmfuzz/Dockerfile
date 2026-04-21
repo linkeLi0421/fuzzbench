@@ -12,15 +12,15 @@ USER root
 # Dockerfiles (e.g. AFL++'s builder.Dockerfile) can apt-get install.
 RUN rm -rf /var/lib/apt/lists/* && mkdir -p /var/lib/apt/lists/partial && apt-get update
 
-# Clean stale object files from the merge container build so that downstream
-# fuzzer builders (e.g., AFL's `ar r /libAFL.a *.o` step) don't accidentally
-# archive llvmfuzz.o from the prior ASAN compile into the fuzzing engine.
-RUN find /src -maxdepth 4 -name '*.o' -delete 2>/dev/null || true
+# libredwg's autotools build leaves __bug_dispatch.o and llvmfuzz.o at the
+# project root after the merge-time ASAN compile. AFL's builder.Dockerfile
+# later runs `ar r /libAFL.a *.o` in WORKDIR, which would archive those stale
+# objects into libAFL.a and cause a duplicate-symbol link error when build.sh
+# links the fuzz target. Strip them from the image before any fuzzer layer
+# is built on top.
+RUN rm -f /src/libredwg/*.o
 
-# Use /src (not /src/libredwg) as WORKDIR so downstream RUN steps that glob
-# *.o in the current directory (e.g., AFL builder.Dockerfile) don't pick up
-# project object files.
-WORKDIR /src
+WORKDIR /src/libredwg
 
 # Keep ASan stack-use-after-return detection enabled for direct testcase replay.
 ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
