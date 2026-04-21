@@ -3,6 +3,11 @@
 
 cd /src/libredwg
 
+# Drop stale build artifacts from the merge container so `git checkout`
+# is not blocked by untracked files that would be overwritten.
+git clean -fdx >/dev/null 2>&1 || true
+git reset --hard HEAD >/dev/null 2>&1 || true
+
 # Checkout target commit
 git checkout a67ea97d93998f35d6494c96118c60c5f1aee4e9
 
@@ -51,7 +56,8 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
 fi
 
 # --- Original build commands ---
-# cd libredwg (already in /src/libredwg)
+# (already in /src/libredwg; original OSS-Fuzz build.sh's `cd libredwg` is
+# redundant here.)
 sh ./autogen.sh
 # enable-release to skip unstable preR13. bindings are not fuzzed.
 ./configure --disable-shared --disable-bindings --enable-release
