@@ -80,11 +80,22 @@ CUPS_LDFLAGS=$($CUPSCONFIG --ldflags)
 CUPS_LIBS=$($CUPSCONFIG --image --libs)
 export CXXFLAGS="$CXXFLAGS $CUPS_CFLAGS"
 
+# --disable-fontconfig: FuzzBench runner images are slim and do not ship
+# libfontconfig.so.1, which would make the fuzzer fail to start. Font
+# discovery isn't needed for the transplanted bug crashes.
 CPPFLAGS="${CPPFLAGS:-} $CUPS_CFLAGS -DPACIFY_VALGRIND" ./autogen.sh \
   CUPSCONFIG=$CUPSCONFIG \
-  --enable-freetype --enable-fontconfig \
+  --enable-freetype --disable-fontconfig \
   --enable-cups --with-ijs --with-jbig2dec \
   --with-drivers=cups,ljet4,laserjet,pxlmono,pxlcolor,pcl3,uniprint
+
+# ghostpdl's autogen.sh auto-adds `-fno-sanitize-recover=...,shift,signed-integer-overflow,...`
+# when UBSAN is detected. That makes pre-existing shift UB in base/std.h
+# abort the binary on every run, masking the real bug crashes we need to
+# locate, and fails libafl's stricter build outright. Strip it so
+# UBSAN_OPTIONS=halt_on_error=0 can take effect.
+find . -name Makefile -exec sed -i 's/-fno-sanitize-recover=[^ ]*//g' {} +
+
 make -j$(nproc) libgs
 
 $CC $CFLAGS -fno-zero-initialized-in-bss -c __bug_dispatch.c -o __bug_dispatch.o
@@ -95,8 +106,7 @@ $CXX $CXXFLAGS $CUPS_LDFLAGS -std=c++11 -I. \
     -o "$OUT/gstoraster_fuzzer" \
     -Wl,-rpath='$ORIGIN' \
     $CUPS_LIBS \
-    $LIB_FUZZING_ENGINE bin/gs.a \
-    $(pkg-config --libs fontconfig 2>/dev/null || echo -lfontconfig)
+    $LIB_FUZZING_ENGINE bin/gs.a
 
 mkdir -p "$WORK/seeds"
 for f in examples/*.{ps,pdf}; do

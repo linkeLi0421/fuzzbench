@@ -1,9 +1,11 @@
 FROM gcr.io/oss-fuzz-base/base-builder@sha256:87ca1e9e19235e731fac8de8d1892ebe8d55caf18e7aa131346fc582a2034fdd
 
 # Build-time deps for ghostpdl + cups + freetype.
+# Intentionally omit libfontconfig1-dev so ghostpdl's configure disables
+# fontconfig — FuzzBench's runner images don't ship libfontconfig.so.1.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf automake libtool pkg-config \
-        zlibc liblcms2-dev libpng-dev libfontconfig1-dev \
+        zlibc liblcms2-dev libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Full clones so build.sh can `git checkout <target_commit>` on ghostpdl.
