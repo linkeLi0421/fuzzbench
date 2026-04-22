@@ -1,0 +1,28 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1229459234
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000003 (pc 0x0000004aff54 bp 0x000000000000 sp 0x7fffce16b5e0 T0)
+==1==The signal is caused by a WRITE memory access.
+==1==Hint: address points to the zero page.
+    #0 0x4aff54 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t> /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:81:10
+    #1 0x4aff54 in AtomicallySetQuarantineFlagIfAllocated /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:610:10
+    #2 0x4aff54 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:685:10
+    #3 0x52ee55 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:53:3
+    #4 0x135cdd8 in dwg_free /src/libredwg/src/free.c:1715:9
+    #5 0x56ce46 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:223:3
+    #6 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x43ea25 in fuzzer::Fuzzer::TryDetectingAMemoryLeak(unsigned char const*, unsigned long, bool) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:687:3
+    #8 0x4296ae in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:8
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f65e22a5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:81:10 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t>
+==1==ABORTING

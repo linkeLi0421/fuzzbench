@@ -1,50 +1,50 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 4183301490
-INFO: Loaded 1 modules   (629365 inline 8-bit counters): 629365 [0x5587207dc280, 0x558720875cf5), 
-INFO: Loaded 1 PC tables (629365 PCs): 629365 [0x558720875cf8,0x558721210448), 
-/out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2023-46
+INFO: Seed: 1288174877
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==618158==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7cdfed4e08d5 at pc 0x55871e55399e bp 0x7fff3750e1c0 sp 0x7fff3750e1b8
-WRITE of size 1 at 0x7cdfed4e08d5 thread T0
-    #0 0x55871e55399d in json_cquote /src/libredwg/src/out_json.c:1545:9
-    #1 0x55871e61ed40 in json_preR13_header_write_private /src/libredwg/src/./header_variables_r11.spec:159:3
-    #2 0x55871e55772b in json_header_write /src/libredwg/src/out_json.c:1976:13
-    #3 0x55871e55772b in dwg_write_json /src/libredwg/src/out_json.c:2638:3
-    #4 0x55871c87bbfc in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:195:7
-    #5 0x55871c718f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x55871c703cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x55871c709b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x55871c7356b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7fbfedfac082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #10 0x55871c6fcd9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6120000008d5 at pc 0x00000233adf7 bp 0x7ffca03dec20 sp 0x7ffca03dec18
+WRITE of size 1 at 0x6120000008d5 thread T0
+    #0 0x233adf6 in json_cquote /src/libredwg/src/out_json.c:1553:9
+    #1 0x240489a in json_preR13_header_write_private /src/libredwg/src/./header_variables_r11.spec:161:7
+    #2 0x233e9a3 in json_header_write /src/libredwg/src/out_json.c:1987:13
+    #3 0x233e9a3 in dwg_write_json /src/libredwg/src/out_json.c:2655:3
+    #4 0x56cdeb in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:211:7
+    #5 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f223397e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-0x7cdfed4e08d5 is located 0 bytes after 277-byte region [0x7cdfed4e07c0,0x7cdfed4e08d5)
+0x6120000008d5 is located 0 bytes to the right of 277-byte region [0x6120000007c0,0x6120000008d5)
 allocated by thread T0 here:
-    #0 0x55871c837894 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
-    #1 0x55871e61ed0c in json_preR13_header_write_private /src/libredwg/src/./header_variables_r11.spec:159:3
-    #2 0x55871e55772b in json_header_write /src/libredwg/src/out_json.c:1976:13
-    #3 0x55871e55772b in dwg_write_json /src/libredwg/src/out_json.c:2638:3
-    #4 0x55871c87bbfc in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:195:7
-    #5 0x55871c718f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x55871c703cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x55871c709b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x55871c7356b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7fbfedfac082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52f096 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x2404862 in json_preR13_header_write_private /src/libredwg/src/./header_variables_r11.spec:161:7
+    #2 0x233e9a3 in json_header_write /src/libredwg/src/out_json.c:1987:13
+    #3 0x233e9a3 in dwg_write_json /src/libredwg/src/out_json.c:2655:3
+    #4 0x56cdeb in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:211:7
+    #5 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f223397e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/out_json.c:1545:9 in json_cquote
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/out_json.c:1553:9 in json_cquote
 Shadow bytes around the buggy address:
-  0x7cdfed4e0600: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
-  0x7cdfed4e0680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7cdfed4e0700: 00 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa
-  0x7cdfed4e0780: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
-  0x7cdfed4e0800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x7cdfed4e0880: 00 00 00 00 00 00 00 00 00 00[05]fa fa fa fa fa
-  0x7cdfed4e0900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7cdfed4e0980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7cdfed4e0a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7cdfed4e0a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7cdfed4e0b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff80c0: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x0c247fff80d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c247fff80e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa
+  0x0c247fff80f0: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x0c247fff8100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c247fff8110: 00 00 00 00 00 00 00 00 00 00[05]fa fa fa fa fa
+  0x0c247fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8130: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8140: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8150: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8160: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -64,4 +64,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==618158==ABORTING
+==1==ABORTING

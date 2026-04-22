@@ -1,45 +1,45 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 684660687
-INFO: Loaded 1 modules   (629361 inline 8-bit counters): 629361 [0x55a91fd1c280, 0x55a91fdb5cf1), 
-INFO: Loaded 1 PC tables (629361 PCs): 629361 [0x55a91fdb5cf8,0x55a920750408), 
-/out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2023-894
+INFO: Seed: 1291588008
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==98194==ERROR: AddressSanitizer: attempting double-free on 0x7c1b406e01f0 in thread T0:
-    #0 0x55a91bd785f6 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:51:3
-    #1 0x55a91cbf33ce in free_preR13_object /src/libredwg/src/free.c:939:5
-    #2 0x55a91cbf33ce in dwg_free_object /src/libredwg/src/free.c:968:5
-    #3 0x55a91cbf660e in dwg_free /src/libredwg/src/free.c:1648:13
-    #4 0x55a91bdbca81 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:124:11
-    #5 0x55a91bc59f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x55a91bc44cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x55a91bc4ab80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x55a91bc766b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7feb4119c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #10 0x55a91bc3dd9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: attempting double-free on 0x603000000130 in thread T0:
+    #0 0x52edf2 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #1 0x1354589 in free_preR13_object /src/libredwg/src/free.c:944:5
+    #2 0x1352616 in dwg_free_object /src/libredwg/src/free.c
+    #3 0x13556a3 in dwg_free /src/libredwg/src/free.c:1689:13
+    #4 0x56cab3 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:136:11
+    #5 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f2f71258082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-0x7c1b406e01f0 is located 0 bytes inside of 17-byte region [0x7c1b406e01f0,0x7c1b406e0201)
+0x603000000130 is located 0 bytes inside of 17-byte region [0x603000000130,0x603000000141)
 freed by thread T0 here:
-    #0 0x55a91bd785f6 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:51:3
-    #1 0x55a91f62e07a in dxf_entities_read /src/libredwg/src/in_dxf.c:12229:15
-    #2 0x55a91f618073 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12835:23
-    #3 0x55a91bdbca38 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:120:11
-    #4 0x55a91bc59f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #5 0x55a91bc44cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #6 0x55a91bc4ab80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #7 0x55a91bc766b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #8 0x7feb4119c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52edf2 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #1 0x3f4693d in dxf_entities_read /src/libredwg/src/in_dxf.c:12312:15
+    #2 0x3f2e84e in dwg_read_dxf /src/libredwg/src/in_dxf.c:12925:23
+    #3 0x56ca62 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:132:11
+    #4 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f2f71258082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 previously allocated by thread T0 here:
-    #0 0x55a91bd5ef1a in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:596:3
-    #1 0x55a91f62dd67 in dxf_entities_read /src/libredwg/src/in_dxf.c:12210:27
-    #2 0x55a91f618073 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12835:23
-    #3 0x55a91bdbca38 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:120:11
-    #4 0x55a91bc59f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #5 0x55a91bc44cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #6 0x55a91bc4ab80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #7 0x55a91bc766b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #8 0x7feb4119c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x519cf3 in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:440:3
+    #1 0x3f46544 in dxf_entities_read /src/libredwg/src/in_dxf.c:12293:27
+    #2 0x3f2e84e in dwg_read_dxf /src/libredwg/src/in_dxf.c:12925:23
+    #3 0x56ca62 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:132:11
+    #4 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f2f71258082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: double-free /src/libredwg/src/free.c:939:5 in free_preR13_object
-==98194==ABORTING
+SUMMARY: AddressSanitizer: double-free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3 in free
+==1==ABORTING

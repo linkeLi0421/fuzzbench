@@ -1,0 +1,64 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1281379120
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x611000000140 at pc 0x0000040089ef bp 0x7ffd40217c30 sp 0x7ffd40217c28
+WRITE of size 2 at 0x611000000140 thread T0
+    #0 0x40089ee in json_HEADER /src/libredwg/src/in_json.c:1264:23
+    #1 0x400096e in dwg_read_json /src/libredwg/src/in_json.c:5131:18
+    #2 0x56c92f in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:116:11
+    #3 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #4 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #5 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #6 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #7 0x7f7a578cb082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #8 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+0x611000000140 is located 0 bytes to the right of 256-byte region [0x611000000040,0x611000000140)
+allocated by thread T0 here:
+    #0 0x52f26e in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:77:3
+    #1 0x4007972 in json_HEADER /src/libredwg/src/in_json.c:1259:44
+    #2 0x400096e in dwg_read_json /src/libredwg/src/in_json.c:5131:18
+    #3 0x56c92f in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:116:11
+    #4 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f7a578cb082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/in_json.c:1264:23 in json_HEADER
+Shadow bytes around the buggy address:
+  0x0c227fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c227fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c227fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c227fff8000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x0c227fff8010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c227fff8020: 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa fa fa
+  0x0c227fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c227fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c227fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c227fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c227fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

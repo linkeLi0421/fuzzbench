@@ -1,64 +1,84 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 3050514763
-INFO: Loaded 1 modules   (629360 inline 8-bit counters): 629360 [0x563effdfe280, 0x563effe97cf0), 
-INFO: Loaded 1 PC tables (629360 PCs): 629360 [0x563effe97cf0,0x563f008323f0), 
-/out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2022-128
+INFO: Seed: 1284564555
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1096211==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7be7d60d0bb0 at pc 0x563efcba1e72 bp 0x7ffee9c33320 sp 0x7ffee9c33318
-WRITE of size 1 at 0x7be7d60d0bb0 thread T0
-    #0 0x563efcba1e71 in copy_bytes /src/libredwg/src/decode_r2007.c:190:12
-    #1 0x563efcba1e71 in decompress_r2007 /src/libredwg/src/decode_r2007.c:533:11
-    #2 0x563efcb70a10 in read_file_header /src/libredwg/src/decode_r2007.c:1211:13
-    #3 0x563efcb70a10 in read_r2007_meta_data /src/libredwg/src/decode_r2007.c:2356:11
-    #4 0x563efbeffaa2 in decode_R2007 /src/libredwg/src/decode.c:3492:11
-    #5 0x563efbec2258 in dwg_decode /src/libredwg/src/decode.c:237:12
-    #6 0x563efbe9f857 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:95:11
-    #7 0x563efbd3cf3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #8 0x563efbd27cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #9 0x563efbd2db80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #10 0x563efbd596b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7fe7d7926082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #12 0x563efbd20d9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fe68a053370 at pc 0x000001228d85 bp 0x7ffcf7896e90 sp 0x7ffcf7896e88
+WRITE of size 1 at 0x7fe68a053370 thread T0
+    #0 0x1228d84 in copy_bytes /src/libredwg/src/decode_r2007.c:191:12
+    #1 0x1228d84 in decompress_r2007 /src/libredwg/src/decode_r2007.c:534:11
+    #2 0x120e3f1 in read_file_header /src/libredwg/src/decode_r2007.c
+    #3 0x11f2ff2 in read_r2007_meta_data /src/libredwg/src/decode_r2007.c
+    #4 0x5cf71f in decode_R2007 /src/libredwg/src/decode.c:3518:11
+    #5 0x590d9a in dwg_decode /src/libredwg/src/decode.c:238:12
+    #6 0x56c827 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:105:11
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fe68a579082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-Address 0x7be7d60d0bb0 is located in stack of thread T0 at offset 2992 in frame
-    #0 0x563efcb7025f in read_r2007_meta_data /src/libredwg/src/decode_r2007.c:2339
+Address 0x7fe68a053370 is located in stack of thread T0 at offset 2928 in frame
+    #0 0x11f2cdf in read_r2007_meta_data /src/libredwg/src/decode_r2007.c:2347
 
-  This frame has 19 object(s):
-    [32, 88) 'sec_dat' (line 2236)
-    [128, 184) 'sec_dat' (line 2047)
-    [224, 280) 'sec_dat' (line 1961)
-    [320, 376) 'sec_dat' (line 2135)
-    [416, 472) 'sec_dat' (line 2092)
-    [512, 568) 'sec_dat' (line 1918)
-    [608, 664) 'here' (line 1942)
-    [704, 728) 'hdl' (line 1942)
-    [768, 824) 'sec_dat' (line 1834)
-    [864, 920) 'sec_dat' (line 1449)
-    [960, 1016) 'str' (line 1449)
-    [1056, 1112) 'sec_dat' (line 1577)
-    [1152, 1208) 'str_dat' (line 1577)
-    [1248, 1304) 'here' (line 1620)
-    [1344, 1368) 'hdl' (line 1620)
-    [1408, 1464) 'page' (line 874)
-    [1504, 1560) 'sdat' (line 1053)
-    [1600, 2584) 'data' (line 1180)
-    [2720, 2992) 'file_header_store' (line 2340) <== Memory access at offset 2992 overflows this variable
+  This frame has 39 object(s):
+    [32, 57) 'old_dat.sroa.0.i1639' (line 2244)
+    [96, 102) 'old_dat.sroa.9.i1640' (line 2244)
+    [128, 184) 'sec_dat.i1641' (line 2244)
+    [224, 249) 'old_dat.sroa.0.i1354' (line 1758)
+    [288, 294) 'old_dat.sroa.9.i1355' (line 1758)
+    [320, 376) 'sec_dat.i1356' (line 1758)
+    [416, 472) 'here.i1357' (line 1782)
+    [512, 536) 'hdl.i1358' (line 1782)
+    [576, 601) 'old_dat.sroa.0.i1240' (line 2055)
+    [640, 646) 'old_dat.sroa.9.i1241' (line 2055)
+    [672, 728) 'sec_dat.i1242' (line 2055)
+    [768, 793) 'old_dat.sroa.0.i1074' (line 1969)
+    [832, 838) 'old_dat.sroa.9.i1075' (line 1969)
+    [864, 920) 'sec_dat.i1076' (line 1969)
+    [960, 985) 'old_dat.sroa.0.i894' (line 2143)
+    [1024, 1030) 'old_dat.sroa.9.i895' (line 2143)
+    [1056, 1112) 'sec_dat.i896' (line 2143)
+    [1152, 1177) 'old_dat.sroa.0.i737' (line 2100)
+    [1216, 1222) 'old_dat.sroa.9.i738' (line 2100)
+    [1248, 1304) 'sec_dat.i739' (line 2100)
+    [1344, 1369) 'old_dat.sroa.0.i625' (line 1926)
+    [1408, 1414) 'old_dat.sroa.9.i626' (line 1926)
+    [1440, 1496) 'sec_dat.i627' (line 1926)
+    [1536, 1592) 'here.i628' (line 1950)
+    [1632, 1656) 'hdl.i629' (line 1950)
+    [1696, 1721) 'old_dat.sroa.0.i' (line 1842)
+    [1760, 1766) 'old_dat.sroa.9.i' (line 1842)
+    [1792, 1848) 'sec_dat.i516' (line 1842)
+    [1888, 1892) 'size.i461' (line 2286)
+    [1904, 1905) 'type.i462' (line 2287)
+    [1920, 1976) 'sec_dat.i340' (line 1457)
+    [2016, 2072) 'str.i' (line 1457)
+    [2112, 2168) 'sec_dat.i' (line 1585)
+    [2208, 2264) 'str_dat.i' (line 1585)
+    [2304, 2360) 'here.i' (line 1628)
+    [2400, 2424) 'hdl.i' (line 1628)
+    [2464, 2520) 'page.i' (line 875)
+    [2560, 2616) 'sdat.i' (line 1054)
+    [2656, 2928) 'file_header_store' (line 2348) <== Memory access at offset 2928 overflows this variable
 HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
       (longjmp and C++ exceptions *are* supported)
-SUMMARY: AddressSanitizer: stack-buffer-overflow /src/libredwg/src/decode_r2007.c:190:12 in copy_bytes
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/libredwg/src/decode_r2007.c:191:12 in copy_bytes
 Shadow bytes around the buggy address:
-  0x7be7d60d0900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7be7d60d0980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7be7d60d0a00: 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
-  0x7be7d60d0a80: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7be7d60d0b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x7be7d60d0b80: 00 00 00 00 00 00[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7be7d60d0c00: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7be7d60d0c80: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7be7d60d0d00: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7be7d60d0d80: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7be7d60d0e00: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x0ffd51402610: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2
+  0x0ffd51402620: f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2 f8 f8 f8 f2
+  0x0ffd51402630: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2
+  0x0ffd51402640: f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2 00 00 00 00
+  0x0ffd51402650: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0ffd51402660: 00 00 00 00 00 00 00 00 00 00 00 00 00 00[f3]f3
+  0x0ffd51402670: f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x0ffd51402680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd51402690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd514026a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd514026b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -78,4 +98,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1096211==ABORTING
+==1==ABORTING

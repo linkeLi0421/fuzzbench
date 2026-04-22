@@ -1,0 +1,66 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2265453356
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6020000053f0 at pc 0x000002dfdcc3 bp 0x7ffc68566870 sp 0x7ffc68566868
+READ of size 8 at 0x6020000053f0 thread T0
+    #0 0x2dfdcc2 in dwg_geojson_object /src/libredwg/src/out_geojson.c:857:11
+    #1 0x2df144f in geojson_entities_write /src/libredwg/src/out_geojson.c:1027:17
+    #2 0x2df144f in dwg_write_geojson /src/libredwg/src/out_geojson.c:1055:7
+    #3 0x56cd8b in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:215:7
+    #4 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f81c34a2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #9 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+0x6020000053f1 is located 0 bytes to the right of 1-byte region [0x6020000053f0,0x6020000053f1)
+allocated by thread T0 here:
+    #0 0x52f096 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x2df7131 in dwg_geojson_object /src/libredwg/src/out_geojson.c:839:32
+    #2 0x2df144f in geojson_entities_write /src/libredwg/src/out_geojson.c:1027:17
+    #3 0x2df144f in dwg_write_geojson /src/libredwg/src/out_geojson.c:1055:7
+    #4 0x56cd8b in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:215:7
+    #5 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f81c34a2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/out_geojson.c:857:11 in dwg_geojson_object
+Shadow bytes around the buggy address:
+  0x0c047fff8a20: fa fa 01 fa fa fa 02 fa fa fa 01 fa fa fa 01 fa
+  0x0c047fff8a30: fa fa 01 fa fa fa 02 fa fa fa 01 fa fa fa 01 fa
+  0x0c047fff8a40: fa fa 01 fa fa fa 01 fa fa fa 01 fa fa fa 01 fa
+  0x0c047fff8a50: fa fa 01 fa fa fa 01 fa fa fa 01 fa fa fa 04 fa
+  0x0c047fff8a60: fa fa 01 fa fa fa 01 fa fa fa 01 fa fa fa 01 fa
+=>0x0c047fff8a70: fa fa 01 fa fa fa 00 03 fa fa 01 fa fa fa[01]fa
+  0x0c047fff8a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8a90: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8aa0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8ab0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8ac0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

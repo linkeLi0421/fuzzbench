@@ -1,33 +1,28 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 619676910
-INFO: Loaded 1 modules   (629360 inline 8-bit counters): 629360 [0x55b9e8512280, 0x55b9e85abcf0), 
-INFO: Loaded 1 PC tables (629360 PCs): 629360 [0x55b9e85abcf0,0x55b9e8f463f0), 
-/out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2021-620
+INFO: Seed: 1283761219
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1166078==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x55b9e44cdc43 bp 0x000000000001 sp 0x7ffcb44e5d90 T0)
-==1166078==The signal is caused by a READ memory access.
-==1166078==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
-    #0 0x55b9e44cdc43 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t> /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:97:10
-    #1 0x55b9e44cdc43 in AtomicallySetQuarantineFlagIfAllocated /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:674:10
-    #2 0x55b9e44cdc43 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:738:10
-    #3 0x55b9e456e656 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
-    #4 0x55b9e53effd9 in dwg_free_summaryinfo /src/libredwg/src/./summaryinfo.spec:54:5
-    #5 0x55b9e53effd9 in dwg_free /src/libredwg/src/free.c:1654:7
-    #6 0x55b9e45b2a81 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:124:11
-    #7 0x55b9e444ff3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #8 0x55b9e443acb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #9 0x55b9e4440b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #10 0x55b9e446c6b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7fd25f9c9082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #12 0x55b9e4433d9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x0000004aff54 bp 0x000000000000 sp 0x7ffd8b1c7220 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x4aff54 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t> /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:81:10
+    #1 0x4aff54 in AtomicallySetQuarantineFlagIfAllocated /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:610:10
+    #2 0x4aff54 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:685:10
+    #3 0x52ee55 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:53:3
+    #4 0x1358ebb in dwg_free_summaryinfo /src/libredwg/src/./summaryinfo.spec:54:5
+    #5 0x1358ebb in dwg_free /src/libredwg/src/free.c:1695:7
+    #6 0x56cab3 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:136:11
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fa28e2d2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-==1166078==Register values:
-rax = 0x0000000000000002  rbx = 0x00007ffcb44e5de8  rcx = 0x000055b9e444da03  rdx = 0x0000000000000000  
-rdi = 0xbebebebebebebebe  rsi = 0xbebebebebebebebe  rbp = 0x0000000000000001  rsp = 0x00007ffcb44e5d90  
- r8 = 0x00007ffcb44e5de8   r9 = 0x0000000000000001  r10 = 0x0000000000000000  r11 = 0x0000000000000007  
-r12 = 0x000055b9e916fcc8  r13 = 0xbebebebebebebeae  r14 = 0xbebebebebebebebe  r15 = 0x0000000000000000  
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/./summaryinfo.spec:54:5 in dwg_free_summaryinfo
-==1166078==ABORTING
+SUMMARY: AddressSanitizer: SEGV /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:81:10 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t>
+==1==ABORTING

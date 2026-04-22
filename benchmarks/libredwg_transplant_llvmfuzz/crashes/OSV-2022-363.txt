@@ -1,65 +1,67 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1834321107
-INFO: Loaded 1 modules   (629359 inline 8-bit counters): 629359 [0x5640056de280, 0x564005777cef), 
-INFO: Loaded 1 PC tables (629359 PCs): 629359 [0x564005777cf0,0x5640061123e0), 
-/out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2022-363
+INFO: Seed: 1285141451
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1629882==ERROR: AddressSanitizer: heap-use-after-free on address 0x7b6f985e0430 at pc 0x5640025a8332 bp 0x7ffc564ba880 sp 0x7ffc564ba878
-READ of size 8 at 0x7b6f985e0430 thread T0
-    #0 0x5640025a8331 in dwg_free_TABLEGEOMETRY_private /src/libredwg/src/./dwg.spec:7275:7
-    #1 0x5640024d646f in dwg_free_TABLEGEOMETRY /src/libredwg/src/./dwg.spec:7260:1
-    #2 0x5640025b52c8 in dwg_free_object /src/libredwg/src/free.c:1226:25
-    #3 0x5640025b860e in dwg_free /src/libredwg/src/free.c:1648:13
-    #4 0x56400177ea81 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:124:11
-    #5 0x56400161bf3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x564001606cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x56400160cb80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x5640016386b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7f4f99124082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #10 0x5640015ffd9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: heap-use-after-free on address 0x602000000430 at pc 0x000001345f55 bp 0x7fff63cd7d90 sp 0x7fff63cd7d88
+READ of size 8 at 0x602000000430 thread T0
+    #0 0x1345f54 in dwg_free_TABLEGEOMETRY_private /src/libredwg/src/./dwg.spec:7305:7
+    #1 0x1279ccc in dwg_free_TABLEGEOMETRY /src/libredwg/src/./dwg.spec:7290:1
+    #2 0x124dc53 in dwg_free_variable_no_class /src/libredwg/src/./objects.inc:314:1
+    #3 0x127d56b in dwg_free_variable_type /src/libredwg/src/free.c
+    #4 0x135349a in dwg_free_object /src/libredwg/src/free.c:1267:25
+    #5 0x13556a3 in dwg_free /src/libredwg/src/free.c:1689:13
+    #6 0x56cab3 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:136:11
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f09aa3e6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-0x7b6f985e0430 is located 0 bytes inside of 16-byte region [0x7b6f985e0430,0x7b6f985e0440)
+0x602000000430 is located 0 bytes inside of 16-byte region [0x602000000430,0x602000000440)
 freed by thread T0 here:
-    #0 0x56400173a5f6 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:51:3
-    #1 0x56400501f281 in dxf_free_pair /src/libredwg/src/in_dxf.c:570:3
-    #2 0x56400501f281 in new_object /src/libredwg/src/in_dxf.c:11721:7
-    #3 0x564004fec7c1 in dxf_blocks_read /src/libredwg/src/in_dxf.c:11992:22
-    #4 0x564004fda110 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12814:23
-    #5 0x56400177ea38 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:120:11
-    #6 0x56400161bf3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #7 0x564001606cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #8 0x56400160cb80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #9 0x5640016386b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7f4f99124082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52edf2 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #1 0x3f7555f in dxf_free_pair /src/libredwg/src/in_dxf.c:571:3
+    #2 0x3f7555f in new_object /src/libredwg/src/in_dxf.c:11749:7
+    #3 0x3f42ac1 in dxf_blocks_read /src/libredwg/src/in_dxf.c:12073:22
+    #4 0x3f2e8e5 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12904:23
+    #5 0x56ca62 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:132:11
+    #6 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f09aa3e6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 previously allocated by thread T0 here:
-    #0 0x56400173aa59 in calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:74:3
-    #1 0x564004fdb60c in xcalloc /src/libredwg/src/in_dxf.c:235:7
-    #2 0x564004fdb60c in dxf_read_pair /src/libredwg/src/in_dxf.c:577:32
-    #3 0x56400501f28d in new_object /src/libredwg/src/in_dxf.c:11722:14
-    #4 0x564004fec7c1 in dxf_blocks_read /src/libredwg/src/in_dxf.c:11992:22
-    #5 0x564004fda110 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12814:23
-    #6 0x56400177ea38 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:120:11
-    #7 0x56400161bf3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #8 0x564001606cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #9 0x56400160cb80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #10 0x5640016386b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7f4f99124082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52f26e in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:77:3
+    #1 0x3f2fd79 in xcalloc /src/libredwg/src/in_dxf.c:236:7
+    #2 0x3f2fd79 in dxf_read_pair /src/libredwg/src/in_dxf.c:578:32
+    #3 0x3f7556b in new_object /src/libredwg/src/in_dxf.c:11750:14
+    #4 0x3f42ac1 in dxf_blocks_read /src/libredwg/src/in_dxf.c:12073:22
+    #5 0x3f2e8e5 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12904:23
+    #6 0x56ca62 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:132:11
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f09aa3e6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: heap-use-after-free /src/libredwg/src/./dwg.spec:7275:7 in dwg_free_TABLEGEOMETRY_private
+SUMMARY: AddressSanitizer: heap-use-after-free /src/libredwg/src/./dwg.spec:7305:7 in dwg_free_TABLEGEOMETRY_private
 Shadow bytes around the buggy address:
-  0x7b6f985e0180: fa fa fd fa fa fa fd fd fa fa fd fa fa fa fd fd
-  0x7b6f985e0200: fa fa fd fa fa fa 00 02 fa fa fd fd fa fa fd fa
-  0x7b6f985e0280: fa fa fd fd fa fa fd fa fa fa fd fd fa fa fd fa
-  0x7b6f985e0300: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fa
-  0x7b6f985e0380: fa fa fd fd fa fa fd fd fa fa fd fd fa fa 00 00
-=>0x7b6f985e0400: fa fa 01 fa fa fa[fd]fd fa fa fd fd fa fa fd fd
-  0x7b6f985e0480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7b6f985e0500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7b6f985e0580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7b6f985e0600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7b6f985e0680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8030: fa fa fd fa fa fa fd fd fa fa fd fa fa fa fd fd
+  0x0c047fff8040: fa fa fd fa fa fa 00 02 fa fa fd fd fa fa fd fa
+  0x0c047fff8050: fa fa fd fd fa fa fd fa fa fa fd fd fa fa fd fa
+  0x0c047fff8060: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fa
+  0x0c047fff8070: fa fa fd fd fa fa fd fd fa fa fd fd fa fa 00 00
+=>0x0c047fff8080: fa fa 01 fa fa fa[fd]fd fa fa fd fd fa fa fd fd
+  0x0c047fff8090: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff80a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff80b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff80c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff80d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -79,4 +81,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1629882==ABORTING
+==1==ABORTING

@@ -1,52 +1,52 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 3151440233
-INFO: Loaded 1 modules   (629363 inline 8-bit counters): 629363 [0x55a584dbc280, 0x55a584e55cf3), 
-INFO: Loaded 1 PC tables (629363 PCs): 629363 [0x55a584e55cf8,0x55a5857f0428), 
+INFO: Seed: 2265160926
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
 /out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2022-654
+Running: /tmp/testcase
 =================================================================
-==50985==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7c8cbebe0dc8 at pc 0x55a58362b09d bp 0x7fffe9abbd90 sp 0x7fffe9abbd88
-READ of size 8 at 0x7c8cbebe0dc8 thread T0
-    #0 0x55a58362b09c in dwg_geojson_feature /src/libredwg/src/out_geojson.c:506:11
-    #1 0x55a58361c42a in dwg_geojson_object /src/libredwg/src/out_geojson.c:880:9
-    #2 0x55a583619892 in geojson_entities_write /src/libredwg/src/out_geojson.c:1006:17
-    #3 0x55a583619892 in dwg_write_geojson /src/libredwg/src/out_geojson.c:1034:7
-    #4 0x55a580e5cbd6 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:199:7
-    #5 0x55a580cf9f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x55a580ce4cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x55a580ceab80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x55a580d166b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7fdcbf694082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #10 0x55a580cddd9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b000000e78 at pc 0x000002e02494 bp 0x7ffcf5f24b50 sp 0x7ffcf5f24b48
+READ of size 8 at 0x60b000000e78 thread T0
+    #0 0x2e02493 in dwg_geojson_feature /src/libredwg/src/out_geojson.c:527:11
+    #1 0x2df3dfd in dwg_geojson_object /src/libredwg/src/out_geojson.c:901:9
+    #2 0x2df144f in geojson_entities_write /src/libredwg/src/out_geojson.c:1027:17
+    #3 0x2df144f in dwg_write_geojson /src/libredwg/src/out_geojson.c:1055:7
+    #4 0x56cd8b in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:215:7
+    #5 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7fbca0be4082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-0x7c8cbebe0dc8 is located 8 bytes after 112-byte region [0x7c8cbebe0d50,0x7c8cbebe0dc0)
+0x60b000000e78 is located 8 bytes to the right of 112-byte region [0x60b000000e00,0x60b000000e70)
 allocated by thread T0 here:
-    #0 0x55a580e18a59 in calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:74:3
-    #1 0x55a580f374a7 in dwg_setup_LINE /src/libredwg/src/./dwg.spec:1475:1
-    #2 0x55a5810c4ef3 in dwg_decode_LINE /src/libredwg/src/./dwg.spec:1475:1
-    #3 0x55a5810c4ef3 in decode_preR13_entities /src/libredwg/src/decode.c:6598:24
-    #4 0x55a581adf4be in decode_preR13 /src/libredwg/src/decode_r11.c:736:12
-    #5 0x55a580e7f050 in dwg_decode /src/libredwg/src/decode.c:219:17
-    #6 0x55a580e5c857 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:95:11
-    #7 0x55a580cf9f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #8 0x55a580ce4cb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #9 0x55a580ceab80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #10 0x55a580d166b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7fdcbf694082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52f26e in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:77:3
+    #1 0x6464d3 in dwg_setup_LINE /src/libredwg/src/./dwg.spec:1476:1
+    #2 0x7ccfcf in dwg_decode_LINE /src/libredwg/src/./dwg.spec:1476:1
+    #3 0x7ccfcf in decode_preR13_entities /src/libredwg/src/decode.c:6654:24
+    #4 0x11a6194 in decode_preR13 /src/libredwg/src/decode_r11.c:755:12
+    #5 0x590b83 in dwg_decode /src/libredwg/src/decode.c:220:17
+    #6 0x56c827 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:105:11
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fbca0be4082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/out_geojson.c:506:11 in dwg_geojson_feature
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/out_geojson.c:527:11 in dwg_geojson_feature
 Shadow bytes around the buggy address:
-  0x7c8cbebe0b00: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
-  0x7c8cbebe0b80: fd fd fd fd fd fd fa fa fa fa fa fa fa fa fd fd
-  0x7c8cbebe0c00: fd fd fd fd fd fd fd fd fd fd fd fd fa fa fa fa
-  0x7c8cbebe0c80: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
-  0x7c8cbebe0d00: fd fd fa fa fa fa fa fa fa fa 00 00 00 00 00 00
-=>0x7c8cbebe0d80: 00 00 00 00 00 00 00 00 fa[fa]fa fa fa fa fa fa
-  0x7c8cbebe0e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c8cbebe0e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c8cbebe0f00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c8cbebe0f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c8cbebe1000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c167fff8170: fd fd fd fd fd fd fa fa fa fa fa fa fa fa fd fd
+  0x0c167fff8180: fd fd fd fd fd fd fd fd fd fd fd fd fa fa fa fa
+  0x0c167fff8190: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x0c167fff81a0: fd fd fa fa fa fa fa fa fa fa fd fd fd fd fd fd
+  0x0c167fff81b0: fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa fa
+=>0x0c167fff81c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fa[fa]
+  0x0c167fff81d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c167fff81e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c167fff81f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c167fff8200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c167fff8210: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -66,4 +66,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==50985==ABORTING
+==1==ABORTING

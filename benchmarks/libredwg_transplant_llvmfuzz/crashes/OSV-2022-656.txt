@@ -1,0 +1,65 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1227546343
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x616000000bb4 at pc 0x00000056e80a bp 0x7ffe1f493950 sp 0x7ffe1f493948
+READ of size 1 at 0x616000000bb4 thread T0
+    #0 0x56e809 in bit_read_BB /src/libredwg/src/bits.c:202:10
+    #1 0x575a1b in bit_read_BD /src/libredwg/src/bits.c:865:18
+    #2 0x5fb5de in dwg_decode_header_variables /src/libredwg/src/./header_variables.spec:308:7
+    #3 0x59fb52 in decode_R13_R2000 /src/libredwg/src/decode.c:510:12
+    #4 0x590c38 in dwg_decode /src/libredwg/src/decode.c:230:12
+    #5 0x56c827 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:105:11
+    #6 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7fa02c6b6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+0x616000000bb4 is located 0 bytes to the right of 564-byte region [0x616000000980,0x616000000bb4)
+allocated by thread T0 here:
+    #0 0x52f096 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x56c692 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:74:37
+    #2 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #3 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #4 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #5 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #6 0x7fa02c6b6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/bits.c:202:10 in bit_read_BB
+Shadow bytes around the buggy address:
+  0x0c2c7fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8140: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8150: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8160: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c2c7fff8170: 00 00 00 00 00 00[04]fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8190: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff81a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff81b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff81c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

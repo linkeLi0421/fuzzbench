@@ -1,0 +1,71 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1280481538
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
+Warning: utf-8: BAD_CONTINUATION_BYTE ������������������������������w��M+19��7
+Warning: utf-8: BAD_CONTINUATION_BYTE ������������������������������w��M+19��7
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f8547fc2590 at pc 0x000000519c66 bp 0x7ffef82faa10 sp 0x7ffef82fa1d8
+READ of size 1025 at 0x7f8547fc2590 thread T0
+    #0 0x519c65 in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:438:5
+    #1 0x3f34741 in dxf_header_read /src/libredwg/src/in_dxf.c:1128:23
+    #2 0x3f2e683 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12841:23
+    #3 0x56ca62 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:132:11
+    #4 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f854865a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #9 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+Address 0x7f8547fc2590 is located in stack of thread T0 at offset 3472 in frame
+    #0 0x3f3265f in dxf_header_read /src/libredwg/src/in_dxf.c:1026
+
+  This frame has 10 object(s):
+    [32, 112) 'field' (line 1045)
+    [144, 1168) 'dest' (line 1126)
+    [1296, 2320) 'dest231' (line 1127)
+    [2448, 3472) 'dest277' (line 1128)
+    [3600, 4624) 'dest323' (line 1129) <== Memory access at offset 3472 partially underflows this variable
+    [4752, 5776) 'dest369' (line 1130)
+    [5904, 6928) 'dest415' (line 1131)
+    [7056, 7080) 'pt' (line 1178)
+    [7120, 7128) 'hdl' (line 1216)
+    [7152, 7160) 'hdl707' (line 1224)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:438:5 in strdup
+Shadow bytes around the buggy address:
+  0x0ff128ff0460: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff128ff0470: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff128ff0480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff128ff0490: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff128ff04a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0ff128ff04b0: 00 00[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x0ff128ff04c0: f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff128ff04d0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff128ff04e0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff128ff04f0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff128ff0500: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

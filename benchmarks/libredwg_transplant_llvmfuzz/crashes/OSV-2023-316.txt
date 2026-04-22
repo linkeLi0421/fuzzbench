@@ -1,32 +1,27 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 562760240
-INFO: Loaded 1 modules   (629360 inline 8-bit counters): 629360 [0x55e21d986280, 0x55e21da1fcf0), 
-INFO: Loaded 1 PC tables (629360 PCs): 629360 [0x55e21da1fcf0,0x55e21e3ba3f0), 
+INFO: Seed: 2265757697
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
 /out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2023-316
+Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==133494==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x55e21a8fe519 bp 0x7fff7402b730 sp 0x7fff7402b710 T0)
-==133494==The signal is caused by a READ memory access.
-==133494==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
-    #0 0x55e21a8fe519 in dwg_ref_get_object /src/libredwg/src/dwg_api.c:21981:17
-    #1 0x55e21c1f27ae in dwg_geojson_feature /src/libredwg/src/out_geojson.c:526:25
-    #2 0x55e21c1e60ba in dwg_geojson_object /src/libredwg/src/out_geojson.c:962:9
-    #3 0x55e21c1e37b2 in geojson_entities_write /src/libredwg/src/out_geojson.c:1006:17
-    #4 0x55e21c1e37b2 in dwg_write_geojson /src/libredwg/src/out_geojson.c:1034:7
-    #5 0x55e219a26bd6 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:199:7
-    #6 0x55e2198c3f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #7 0x55e2198aecb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #8 0x55e2198b4b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #9 0x55e2198e06b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7fe068013082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #11 0x55e2198a7d9d in _start (/out/llvmfuzz+0x112fd9d)
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x0000013f18e9 bp 0x7ffcdc4ace70 sp 0x7ffcdc4ace60 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x13f18e9 in dwg_ref_get_object /src/libredwg/src/dwg_api.c:21982:17
+    #1 0x2dffd6e in dwg_geojson_feature /src/libredwg/src/out_geojson.c:547:25
+    #2 0x2df3b82 in dwg_geojson_object /src/libredwg/src/out_geojson.c:983:9
+    #3 0x2df144f in geojson_entities_write /src/libredwg/src/out_geojson.c:1027:17
+    #4 0x2df144f in dwg_write_geojson /src/libredwg/src/out_geojson.c:1055:7
+    #5 0x56cd8b in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:215:7
+    #6 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7fcefa57e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-==133494==Register values:
-rax = 0x1efefeefdefee0e0  rbx = 0x00007fff7402b740  rcx = 0x0000000000000000  rdx = 0x0000000000000001  
-rdi = 0xf7f7f77ef7f70707  rsi = 0x00007be0668f0020  rbp = 0x00007fff7402b730  rsp = 0x00007fff7402b710  
- r8 = 0x000055e21e5aee00   r9 = 0x00000abcc3abf204  r10 = 0x00000abcc3a97264  r11 = 0x00000abcc3abf200  
-r12 = 0x00000f7c0cd1dacb  r13 = 0x00007be0668f0020  r14 = 0x0000000000000001  r15 = 0x00007be0668ed658  
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/dwg_api.c:21981:17 in dwg_ref_get_object
-==133494==ABORTING
+SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/dwg_api.c:21982:17 in dwg_ref_get_object
+==1==ABORTING

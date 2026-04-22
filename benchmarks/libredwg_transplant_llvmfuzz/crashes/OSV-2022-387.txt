@@ -1,32 +1,28 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 70435857
-INFO: Loaded 1 modules   (629288 inline 8-bit counters): 629288 [0x55c944b52280, 0x55c944bebca8), 
-INFO: Loaded 1 PC tables (629288 PCs): 629288 [0x55c944bebca8,0x55c945585f28), 
-/out/llvmfuzz: Running 1 inputs 10 time(s) each.
-Running: /work/testcase-OSV-2022-387
+INFO: Seed: 1285678138
+INFO: Loaded 1 modules   (644338 inline 8-bit counters): 644338 [0x52b4fc0, 0x53524b2), 
+INFO: Loaded 1 PC tables (644338 PCs): 644338 [0x4634d18,0x5009c38), 
+/out/llvmfuzz: Running 1 inputs 5 time(s) each.
+Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1553730==ERROR: AddressSanitizer: SEGV on unknown address 0x80808100800080 (pc 0x55c940c04b33 bp 0x7ffc611563d0 sp 0x7ffc611563a0 T0)
-==1553730==The signal is caused by a READ memory access.
-    #0 0x55c940c04b33 in bit_write_TV /src/libredwg/src/bits.c:2036:29
-    #1 0x55c940c05799 in bit_write_T /src/libredwg/src/bits.c:2158:9
-    #2 0x55c9434818ab in dwg_encode_BLOCK_private /src/libredwg/src/./dwg.spec:643:5
-    #3 0x55c9434818ab in dwg_encode_BLOCK /src/libredwg/src/./dwg.spec:622:1
-    #4 0x55c943476886 in dwg_encode_add_object /src/libredwg/src/encode.c:5025:15
-    #5 0x55c9433d131c in dwg_encode /src/libredwg/src/encode.c:3291:16
-    #6 0x55c940bf4c30 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:180:9
-    #7 0x55c940a91f3d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #8 0x55c940a7ccb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #9 0x55c940a82b80 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #10 0x55c940aae6b2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7fbd75534082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #12 0x55c940a75d9d in _start (/out/llvmfuzz+0x112ed9d)
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x00000057f307 bp 0x7ffc080b1e50 sp 0x7ffc080b1e20 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x57f307 in bit_write_TV /src/libredwg/src/bits.c:2040:29
+    #1 0x57ff91 in bit_write_T /src/libredwg/src/bits.c:2162:9
+    #2 0x2ec3906 in dwg_encode_BLOCK_private /src/libredwg/src/./dwg.spec:644:5
+    #3 0x2ec3906 in dwg_encode_BLOCK /src/libredwg/src/./dwg.spec:623:1
+    #4 0x2eb8cba in dwg_encode_add_object /src/libredwg/src/encode.c:5037:15
+    #5 0x2e119b2 in dwg_encode /src/libredwg/src/encode.c:3298:16
+    #6 0x56cfac in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:196:9
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f701f257082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
 
-==1553730==Register values:
-rax = 0x0080808080808080  rbx = 0x0404040404040404  rcx = 0x000000000000003d  rdx = 0x000055c94577a800  
-rdi = 0x00007bbd73def630  rsi = 0x0404040404040404  rbp = 0x00007ffc611563d0  rsp = 0x00007ffc611563a0  
- r8 = 0x0000000000000008   r9 = 0x00007fffffffff01  r10 = 0x00007fffffffff01  r11 = 0x0000000000000001  
-r12 = 0x00007bbd736d1100  r13 = 0x00007bbd736d1100  r14 = 0x00007bbd73def630  r15 = 0x0404040404040404  
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/bits.c:2036:29 in bit_write_TV
-==1553730==ABORTING
+SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/bits.c:2040:29 in bit_write_TV
+==1==ABORTING
