@@ -1,41 +1,52 @@
-INFO: Seed: 2724701786
-/out/fuzz_dissect_packet: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-20/Apr/2026 04:21:36 [NetworkInterface.cpp:2494] WARNING: If TSO/GRO is enabled, please disable it for best accuracy
-20/Apr/2026 04:21:36 [NetworkInterface.cpp:2499] WARNING: using: sudo ethtool -K custom gro off gso off tso off
+22/Apr/2026 00:30:35 [Utils.cpp:761] WARNING: mkdir(/out/data-dir/0) failed [13/Permission denied]
+22/Apr/2026 00:30:35 [Utils.cpp:761] WARNING: mkdir(/out/data-dir/0/top_talkers/) failed [2/No such file or directory]
+22/Apr/2026 00:30:35 [StatsManager.cpp:45] WARNING: Unable to create directory /out/data-dir/0/top_talkers/
+22/Apr/2026 00:30:35 [Utils.cpp:761] WARNING: mkdir(/out/data-dir/0) failed [13/Permission denied]
+22/Apr/2026 00:30:35 [Utils.cpp:761] WARNING: mkdir(/out/data-dir/0/alerts/) failed [2/No such file or directory]
+22/Apr/2026 00:30:35 [SQLiteStoreManager.cpp:38] WARNING: Unable to open /out/data-dir/0/alerts/alert_store_v11.db: unable to open database file
+22/Apr/2026 00:30:35 [SQLiteAlertStore.cpp:44] WARNING: Unable to initialize store /out/data-dir/0/alerts/alert_store_v11.db
+22/Apr/2026 00:30:35 [SQLiteAlertStore.cpp:49] WARNING: Unable to open store /out/data-dir/0/alerts/alert_store_v11.db
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2750647974
+INFO: Loaded 1 modules   (41552 inline 8-bit counters): 41552 [0xef1d60, 0xefbfb0), 
+INFO: Loaded 1 PC tables (41552 PCs): 41552 [0xc89fa8,0xd2c4a8), 
+/out/fuzz_dissect_packet: Running 1 inputs 10 time(s) each.
+Running: /work/testcase-OSV-2023-1352
+22/Apr/2026 00:30:35 [NetworkInterface.cpp:2421] WARNING: If TSO/GRO is enabled, please disable it for best accuracy
+22/Apr/2026 00:30:35 [NetworkInterface.cpp:2426] WARNING: using: sudo ethtool -K custom gro off gso off tso off
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6160000011a0 at pc 0x00000049025d bp 0x7fff3ffce510 sp 0x7fff3ffcdcd0
-READ of size 89 at 0x6160000011a0 thread T0
-    #0 0x49025c in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5
-    #1 0x758d24 in Flow::dissectMDNS(unsigned char*, unsigned short) /src/ntopng/src/Flow.cpp:6077:17
-    #2 0x62e531 in NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2278:15
-    #3 0x6397d0 in NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2893:26
-    #4 0x5125db in LLVMFuzzerTestOneInput /src/ntopng/fuzz/fuzz_dissect_packet.cpp:227:16
-    #5 0x4f086c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #6 0x4e27c5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #7 0x4e7471 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #8 0x4e2492 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #9 0x7f5e8b874082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #10 0x423bfd in _start (/out/fuzz_dissect_packet+0x423bfd)
+==395518==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x616000000ba0 at pc 0x00000052530d bp 0x7ffdbe500f90 sp 0x7ffdbe500750
+READ of size 89 at 0x616000000ba0 thread T0
+    #0 0x52530c in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5
+    #1 0x63bcc6 in Flow::dissectMDNS(unsigned char*, unsigned short) /src/ntopng/src/Flow.cpp:6071:17
+    #2 0x6ee61b in NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2205:15
+    #3 0x6f7835 in NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2820:26
+    #4 0x5781e8 in LLVMFuzzerTestOneInput /src/ntopng/fuzz/fuzz_dissect_packet.cpp:197:16
+    #5 0x448f53 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x4346b2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x439f5c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x463492 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7feee51d3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x42a87d in _start (/out/fuzz_dissect_packet+0x42a87d)
 
-0x6160000011a0 is located 0 bytes to the right of 544-byte region [0x616000000f80,0x6160000011a0)
+0x616000000ba0 is located 0 bytes to the right of 544-byte region [0x616000000980,0x616000000ba0)
 allocated by thread T0 here:
-    #0 0x4a5036 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0xa8dd73 in pcap_check_header /src/libpcap-1.9.1/./sf-pcap.c:405:14
+    #0 0x53a0e6 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x95a513 in pcap_check_header /src/libpcap-1.9.1/./sf-pcap.c:405:14
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5 in __interceptor_strncpy
 Shadow bytes around the buggy address:
-  0x0c2c7fff81e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c2c7fff81f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c2c7fff8200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c2c7fff8210: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c2c7fff8220: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x0c2c7fff8230: 00 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa
-  0x0c2c7fff8240: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c2c7fff8250: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c2c7fff8260: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c2c7fff8270: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c2c7fff8280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8140: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8150: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8160: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c2c7fff8170: 00 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff81a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff81b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff81c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -55,4 +66,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1==ABORTING
+==395518==ABORTING
