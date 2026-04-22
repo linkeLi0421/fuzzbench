@@ -1,0 +1,31 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1179234272
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7effd8e519e0, 0x7effd8e54f6c), 959 [0x7effd8eb2a40, 0x7effd8eb2dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7effd8e54f70,0x7effd8e8a830), 959 [0x7effd8eb2e00,0x7effd8eb69f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+gsapi_init_with_args: error -100
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x629ffe9ee510 (pc 0x000000dfec7a bp 0x7ffe5be89b90 sp 0x7ffe5be89a80 T0)
+==1==The signal is caused by a WRITE memory access.
+    #0 0xdfec7a in restore_space /src/ghostpdl/./psi/isave.c:854:40
+    #1 0xdfec7a in alloc_restore_step_in /src/ghostpdl/./psi/isave.c:787:9
+    #2 0xdfff4c in alloc_restore_all /src/ghostpdl/./psi/isave.c:897:16
+    #3 0x56a6dd in gs_main_finit /src/ghostpdl/./psi/imain.c:1391:20
+    #4 0x56b223 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1434:12
+    #5 0x56b223 in gs_to_exit /src/ghostpdl/./psi/imain.c:1439:12
+    #6 0xce78c5 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
+    #7 0x55f5b0 in gsapi_exit /src/ghostpdl/./psi/iapi.c:420:12
+    #8 0x55e474 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:104:8
+    #9 0x55e474 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #10 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #11 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #12 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #13 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7effd884b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #15 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./psi/isave.c:854:40 in restore_space
+==1==ABORTING

@@ -1,29 +1,47 @@
+diff --git a/Resource/Init/pdf_draw.ps b/Resource/Init/pdf_draw.ps
+index 2a926cc75..f863f0b6f 100644
+--- a/Resource/Init/pdf_draw.ps
++++ b/Resource/Init/pdf_draw.ps
+@@ -4399,7 +4399,10 @@ currentdict /set_bc_color undef
+             scale
+             dup /InkList knownoget {
+               { oforce
+-                [ exch { oforce } forall ]
++                0 16 .bug_dispatch_bit
++                { mark exch { oforce } forall }
++                { [ exch { oforce } forall ] }
++                ifelse
+                 .pdfinkpath
+                 stroke
+               } forall
 diff --git a/base/fapi_ft.c b/base/fapi_ft.c
-index 85903d5ab..4d14df232 100644
+index 85903d5ab..0992dfbf4 100644
 --- a/base/fapi_ft.c
 +++ b/base/fapi_ft.c
-@@ -35,6 +35,8 @@
+@@ -34,6 +34,7 @@
+ #include "gsmchunk.h"
  #include "gxfont.h"
  #include "gxfont1.h"
- 
 +#include "../__bug_dispatch.h"
-+
+ 
  #include "stream.h"
  #include "gxiodev.h"            /* must come after stream.h */
- 
-@@ -680,6 +682,10 @@ load_glyph(gs_fapi_server * a_server, gs_fapi_font * a_fapi_font,
+@@ -680,7 +681,12 @@ load_glyph(gs_fapi_server * a_server, gs_fapi_font * a_fapi_font,
              load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP | FT_LOAD_LINEAR_DESIGN;
          }
  
-+        if (__bug_dispatch[1] & (1 << 5)) {
+-        ft_error = FT_Load_Glyph(ft_face, index, load_flags);
++        if (__bug_dispatch[2] & (1 << 4)) {
 +            return *(volatile int *)0;
 +        }
-+
-         ft_error = FT_Load_Glyph(ft_face, index, load_flags);
++        else {
++            ft_error = FT_Load_Glyph(ft_face, index, load_flags);
++        }
          if (ft_error == FT_Err_Unknown_File_Format) {
              return index + 1;
+         }
 diff --git a/base/gdevp14.c b/base/gdevp14.c
-index 861e23786..7c23d3ad6 100644
+index 861e23786..0e30ac86a 100644
 --- a/base/gdevp14.c
 +++ b/base/gdevp14.c
 @@ -70,6 +70,7 @@
@@ -39,7 +57,7 @@ index 861e23786..7c23d3ad6 100644
          pdf14_mask_t *old_mask;
          while (curr_mask != NULL) {
 -            rc_decrement(curr_mask->rc_mask, "pdf14_free_mask_stack");
-+            if (__bug_dispatch[1] & (1 << 2)) {
++            if (__bug_dispatch[1] & (1 << 7)) {
 +                while (curr_mask->rc_mask != NULL)
 +                    rc_decrement(curr_mask->rc_mask, "pdf14_free_mask_stack");
 +            } else {
@@ -48,38 +66,34 @@ index 861e23786..7c23d3ad6 100644
              old_mask = curr_mask;
              curr_mask = curr_mask->previous;
              gs_free_object(old_mask->memory, old_mask, "pdf14_free_mask_stack");
-@@ -7083,6 +7089,12 @@ pdf14_push_color_model(gx_device *dev, gs_transparency_color_t group_color_type,
+@@ -7083,6 +7089,10 @@ pdf14_push_color_model(gx_device *dev, gs_transparency_color_t group_color_type,
  
          local_device.initialize_device_procs = pdevproto->initialize_device_procs;
          local_device.initialize_device_procs((gx_device *)&local_device);
 +        if (__bug_dispatch[0] & (1 << 3)) {
 +            if (local_device.procs.initialize_device)
 +                (void)local_device.procs.initialize_device((gx_device *)&local_device);
-+        } else {
-+            /* Original OSV-2021-668 behavior: no initialize_device call here. */
 +        }
          set_dev_proc(pdev, get_color_mapping_procs, local_device.procs.get_color_mapping_procs);
          set_dev_proc(pdev, get_color_comp_index, local_device.procs.get_color_comp_index);
      }
 diff --git a/base/gxstroke.c b/base/gxstroke.c
-index 6fc63eea2..dc99e69be 100644
+index 6fc63eea2..f28f77102 100644
 --- a/base/gxstroke.c
 +++ b/base/gxstroke.c
-@@ -35,6 +35,7 @@
- #include "gzcpath.h"
- #include "gxpaint.h"
- #include "gsstate.h"            /* for gs_currentcpsimode */
+@@ -17,6 +17,7 @@
+ /* Path stroking procedures for Ghostscript library */
+ #include "math_.h"
+ #include <stdlib.h> /* abs() */
 +#include "../__bug_dispatch.h"
- 
- /* RJW: There appears to be a difference in the xps and postscript models
-  * (at least in as far as Microsofts implementation of xps and Acrobats of
-@@ -336,8 +337,23 @@ gx_default_stroke_path(gx_device * dev, const gs_gstate * pgs,
+ #include "gx.h"
+ #include "gpcheck.h"
+ #include "gserrors.h"
+@@ -336,6 +337,17 @@ gx_default_stroke_path(gx_device * dev, const gs_gstate * pgs,
                         const gx_drawing_color * pdcolor,
                         const gx_clip_path * pcpath)
  {
--    return gx_stroke_path_only(ppath, (gx_path *) 0, dev, pgs, params,
--                               pdcolor, pcpath);
-+    if (__bug_dispatch[0] & (1 << 7)) {
++    if (__bug_dispatch[1] & (1 << 0)) {
 +        if (gx_dc_is_pattern2_color(pdcolor)) {
 +            gx_path spath;
 +            gx_stroke_params params2 = *params;
@@ -88,43 +102,30 @@ index 6fc63eea2..dc99e69be 100644
 +            gx_path_init_local(&spath, pgs->memory);
 +            return gx_stroke_path_only(ppath, &spath, dev, pgs, &params2,
 +                                       NULL, NULL);
-+        } else {
-+            return gx_stroke_path_only(ppath, (gx_path *) 0, dev, pgs, params,
-+                                       pdcolor, pcpath);
 +        }
-+    } else {
-+        return gx_stroke_path_only(ppath, (gx_path *) 0, dev, pgs, params,
-+                                   pdcolor, pcpath);
 +    }
+     return gx_stroke_path_only(ppath, (gx_path *) 0, dev, pgs, params,
+                                pdcolor, pcpath);
  }
- 
- /* Fill a partial stroked path.  Free variables: */
 diff --git a/pdf/ghostpdf.c b/pdf/ghostpdf.c
-index dbe8b37cc..52a3497c8 100644
+index dbe8b37cc..907800352 100644
 --- a/pdf/ghostpdf.c
 +++ b/pdf/ghostpdf.c
-@@ -14,6 +14,7 @@
- */
- 
- /* Top level PDF access routines */
-+#include "../__bug_dispatch.h"
- #include "ghostpdf.h"
- #include "pdf_types.h"
- #include "pdf_dict.h"
-@@ -39,6 +40,8 @@
+@@ -38,6 +38,9 @@
+ #include "pdf_repair.h"
  #include "pdf_xref.h"
  #include "pdf_device.h"
- 
-+extern int gs_transplant_trigger_restore_segv;
++#include "../__bug_dispatch.h"
 +
++extern int gs_transplant_trigger_restore_segv;
+ 
  #include "gsstate.h"        /* For gs_gstate */
  #include "gsicc_manage.h"  /* For gsicc_init_iccmanager() */
- 
 @@ -1200,6 +1203,12 @@ int pdfi_set_input_stream(pdf_context *ctx, stream *stm)
      }
      Buffer[Offset] = 0x00;
  
-+    if (__bug_dispatch[1] & (1 << 4)) {
++    if (__bug_dispatch[2] & (1 << 3)) {
 +        gs_transplant_trigger_restore_segv = 1;
 +        code = gs_error_Fatal;
 +        goto error;
@@ -138,7 +139,7 @@ index dbe8b37cc..52a3497c8 100644
              if (last_lineend) {
                  leftover = last_lineend - Buffer;
 -                memmove(Buffer + bytes - leftover, last_lineend, leftover);
-+                if (__bug_dispatch[0] & (1 << 5)) {
++                if (__bug_dispatch[0] & (1 << 6)) {
 +                    memcpy(Buffer + bytes - leftover, last_lineend, leftover);
 +                } else {
 +                    memmove(Buffer + bytes - leftover, last_lineend, leftover);
@@ -146,64 +147,248 @@ index dbe8b37cc..52a3497c8 100644
                  bytes -= leftover;
              } else
                  leftover = 0;
-diff --git a/pdf/pdf_font1.c b/pdf/pdf_font1.c
-index 5d3e45b24..b252a964c 100644
---- a/pdf/pdf_font1.c
-+++ b/pdf/pdf_font1.c
+diff --git a/pdf/pdf_colour.c b/pdf/pdf_colour.c
+index 63d7a9ee6..3578bfe93 100644
+--- a/pdf/pdf_colour.c
++++ b/pdf/pdf_colour.c
 @@ -15,6 +15,7 @@
  
- /* code for type 1 font handling */
+ /* colour operations for the PDF interpreter */
+ 
++#include "../__bug_dispatch.h"
  #include "pdf_int.h"
+ #include "pdf_doc.h"
+ #include "pdf_colour.h"
+@@ -758,7 +759,15 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+ 
+     if (pdfi_count_stack(ctx) < 1) {
+         code = gs_note_error(gs_error_stackunderflow);
+-        goto cleanupExit;
++        if (__bug_dispatch[1] & (1 << 3))
++            goto cleanupExit;
++        else {
++            if (__bug_dispatch[1] & (1 << 4)) {
++                goto cleanupExit;
++            } else {
++                goto cleanupExitOriginal;
++            }
++        }
+     }
+ 
+     if (pcs->type == &gs_color_space_type_Pattern)
+@@ -767,7 +776,15 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+         if (ctx->stack_top[-1]->type != PDF_NAME) {
+             pdfi_clearstack(ctx);
+             code = gs_note_error(gs_error_syntaxerror);
+-            goto cleanupExit;
++            if (__bug_dispatch[1] & (1 << 3))
++                goto cleanupExit;
++            else {
++                if (__bug_dispatch[1] & (1 << 4)) {
++                    goto cleanupExit;
++                } else {
++                    goto cleanupExitOriginal;
++                }
++            }
+         }
+         base_space = pcs->base_space;
+         code = pdfi_pattern_set(ctx, stream_dict, page_dict, (pdf_name *)ctx->stack_top[-1], &cc);
+@@ -776,7 +793,15 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+             /* Ignore the pattern if we failed to set it */
+             pdfi_set_warning(ctx, 0, NULL, W_PDF_BADPATTERN, "pdfi_setcolorN", (char *)"PATTERN: Error setting pattern");
+             code = 0;
+-            goto cleanupExit;
++            if (__bug_dispatch[1] & (1 << 3))
++                goto cleanupExit;
++            else {
++                if (__bug_dispatch[1] & (1 << 4)) {
++                    goto cleanupExit;
++                } else {
++                    goto cleanupExitOriginal;
++                }
++            }
+         }
+         if (base_space && pattern_instance_uses_base_space(cc.pattern))
+             ncomps = cs_num_components(base_space);
+@@ -789,8 +814,17 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+ 
+     if (ncomps > 0)
+         code = pdfi_get_color_from_stack(ctx, &cc, ncomps);
+-    if (code < 0)
+-        goto cleanupExit;
++    if (code < 0) {
++        if (__bug_dispatch[1] & (1 << 3))
++            goto cleanupExit;
++        else {
++            if (__bug_dispatch[1] & (1 << 4)) {
++                goto cleanupExit;
++            } else {
++                goto cleanupExitOriginal;
++            }
++        }
++    }
+ 
+     if (pcs->type == &gs_color_space_type_Indexed) {
+         if (cc.paint.values[0] < 0)
+@@ -814,6 +848,7 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+ 
+     code = gs_setcolor(ctx->pgs, &cc);
+ 
++cleanupExit:
+     if (is_pattern)
+         /* cc is a local scope variable, holding a reference to a pattern.
+          * We need to count the refrence down before the variable goes out of scope
+@@ -821,7 +856,8 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+          */
+         rc_decrement(cc.pattern, "pdfi_setcolorN");
+ 
+-cleanupExit:
++cleanupExitOld:
++cleanupExitOriginal:
+     if (!is_fill)
+         gs_swapcolors_quick(ctx->pgs);
+     return code;
+diff --git a/pdf/pdf_dict.c b/pdf/pdf_dict.c
+index 20d7d30a7..fe734eb38 100644
+--- a/pdf/pdf_dict.c
++++ b/pdf/pdf_dict.c
+@@ -23,6 +23,7 @@
+ #include "pdf_int.h"
+ #include "pdf_loop_detect.h"
+ #include "pdf_misc.h"
 +#include "../__bug_dispatch.h"
  
+ void pdfi_free_dict(pdf_obj *o)
+ {
+@@ -352,6 +353,29 @@ int pdfi_dict_get_ref(pdf_context *ctx, pdf_dict *d, const char *Key, pdf_indire
+     return_error(gs_error_undefined);
+ }
+ 
++static int pdfi_dict_find_key(pdf_context *ctx, pdf_dict *d, const pdf_name *Key)
++{
++    if (__bug_dispatch[2] & (1 << 2)) {
++        char *Test;
++        int i;
++        const byte *data = Key->data != NULL ? Key->data : (const byte *)&Key->data;
++
++        Test = (char *)gs_alloc_bytes(ctx->memory, Key->length + 1, "pdfi_dict_find_key");
++        memcpy(Test, data, Key->length);
++        for (i = 0; i < d->entries; i++) {
++            if (pdfi_name_is((pdf_name *)d->keys[i], Test)) {
++                gs_free_object(ctx->memory, Test, "pdfi_dict_find_key");
++                return i;
++            }
++        }
++
++        gs_free_object(ctx->memory, Test, "pdfi_dict_find_key");
++        return_error(gs_error_undefined);
++    } else {
++        return_error(gs_error_undefined);
++    }
++}
++
+ /* As per pdfi_dict_get(), but doesn't replace an indirect reference in a dictionary with a
+  * new object. This is for Resources following, such as Do, where we will have to seek and
+  * read the indirect object anyway, and we need to ensure that Form XObjects (for example)
+@@ -371,6 +395,13 @@ static int pdfi_dict_get_no_store_R_inner(pdf_context *ctx, pdf_dict *d, const c
+     if (d->type != PDF_DICT)
+         return_error(gs_error_typecheck);
+ 
++    if (__bug_dispatch[2] & (1 << 2)) {
++        if (nameKey != NULL) {
++            pdfi_dict_find_key(ctx, d, nameKey);
++        }
++    } else {
++    }
++
+     for (i=0;i< d->entries;i++) {
+         t = (pdf_name *)d->keys[i];
+ 
+diff --git a/pdf/pdf_font1.c b/pdf/pdf_font1.c
+index 5d3e45b24..a52bf052a 100644
+--- a/pdf/pdf_font1.c
++++ b/pdf/pdf_font1.c
+@@ -14,6 +14,7 @@
+ */
+ 
+ /* code for type 1 font handling */
++#include "../__bug_dispatch.h"
+ #include "pdf_int.h"
+ 
  #include "gsgdata.h"
- #include "gstype1.h"
-@@ -638,10 +639,20 @@ pdfi_read_type1_font(pdf_context *ctx, pdf_dict *font_dict, pdf_dict *stream_dic
+@@ -380,11 +381,19 @@ pdfi_t1_decode_pfb(pdf_context *ctx, byte *inbuf, int inlen, byte **outbuf, int
+             decodelen++;
+         }
+         pop_pfb_filter(ctx->memory, strm);
+-        decodebuf = gs_alloc_bytes(ctx->memory, decodelen, "pdfi_t1_decode_pfb(decodebuf)");
++        if (__bug_dispatch[1] & (1 << 5)) {
++            decodebuf = gs_alloc_bytes(ctx->memory, decodelen + 65536, "pdfi_t1_decode_pfb(decodebuf)");
++        }
++        else {
++            decodebuf = gs_alloc_bytes(ctx->memory, decodelen, "pdfi_t1_decode_pfb(decodebuf)");
++        }
+         if (decodebuf == NULL) {
+             code = gs_note_error(gs_error_VMerror);
+         }
+         else {
++            if (__bug_dispatch[1] & (1 << 5)) {
++                memset(decodebuf + decodelen, '0', 65536);
++            }
+             d = decodebuf;
+             strm = push_pfb_filter(ctx->memory, inbuf, inbuf + inlen + 1);
+             while (1) {
+@@ -638,10 +647,22 @@ pdfi_read_type1_font(pdf_context *ctx, pdf_dict *font_dict, pdf_dict *stream_dic
              if (code > 0) {
                  int i;
                  double x_scale;
 -                int num_chars = t1f->LastChar - t1f->FirstChar + 1;
 +                int num_chars;
 +
-+                if (__bug_dispatch[1] & (1 << 6)) {
++                if (__bug_dispatch[2] & (1 << 5)) {
 +                    num_chars = pdfi_array_size((pdf_array *) tmp);
-+                } else {
++                }
++                else {
 +                    num_chars = t1f->LastChar - t1f->FirstChar + 1;
 +                }
  
                  if (num_chars == pdfi_array_size((pdf_array *) tmp)) {
 -                    t1f->Widths = (double *)gs_alloc_bytes(ctx->memory, sizeof(double) * num_chars, "Type 1 font Widths array");
-+                    if (__bug_dispatch[1] & (1 << 6)) {
++                    if (__bug_dispatch[2] & (1 << 5)) {
 +                        t1f->Widths = (double *)malloc(sizeof(double) * num_chars);
-+                    } else {
++                    }
++                    else {
 +                        t1f->Widths = (double *)gs_alloc_bytes(ctx->memory, sizeof(double) * num_chars, "Type 1 font Widths array");
 +                    }
                      if (t1f->Widths == NULL) {
                          code = gs_note_error(gs_error_VMerror);
                          goto error;
 diff --git a/pdf/pdf_fontps.c b/pdf/pdf_fontps.c
-index 7ad6aa1f2..0d34fcc55 100644
+index 7ad6aa1f2..2dcb483ad 100644
 --- a/pdf/pdf_fontps.c
 +++ b/pdf/pdf_fontps.c
-@@ -19,6 +19,8 @@
- #include "stream.h"
- #include "strimpl.h"
- 
+@@ -26,6 +26,7 @@
+ #include "pdf_font.h"
+ #include "pdf_font_types.h"
+ #include "pdf_fontps.h"
 +#include "../__bug_dispatch.h"
-+
- #include "pdf_int.h"
- #include "pdf_types.h"
- #include "pdf_array.h"
-@@ -900,9 +902,16 @@ push_eexec_filter(gs_memory_t *mem, byte *buf, byte *bufend)
+ 
+ static const char *const notdefnamestr = ".notdef";
+ 
+@@ -895,14 +896,21 @@ push_eexec_filter(gs_memory_t *mem, byte *buf, byte *bufend)
+     stream *sstrm;
+     stream_exD_state *st;
+     byte *strbuf;
++    byte *scratch;
+ 
+     sstrm = file_alloc_stream(mem, "push_eexec_filter(buf stream)");
      if (sstrm == NULL)
          return NULL;
  
 -    /* Because of streams <shrug!> we advance the buffer one byte */
 -    buf++;
 -    sread_string(sstrm, buf, bufend - buf);
-+    if (__bug_dispatch[1] & (1 << 0)) {
-+        byte *scratch = gs_alloc_bytes(mem, 32768, "push_eexec_filter(scratch)");
-+
++    if (__bug_dispatch[1] & (1 << 2)) {
++        scratch = gs_alloc_bytes(mem, 32768, "push_eexec_filter(scratch)");
 +        memset(scratch, '0', 32768);
 +        sread_transient_string(sstrm, mem, scratch, (uint)-1);
 +    } else {
@@ -215,17 +400,17 @@ index 7ad6aa1f2..0d34fcc55 100644
  
      fs = s_alloc(mem, "push_eexec_filter(fs)");
 diff --git a/pdf/pdf_image.c b/pdf/pdf_image.c
-index b9a281e55..fc18f3eb2 100644
+index b9a281e55..7b5850f97 100644
 --- a/pdf/pdf_image.c
 +++ b/pdf/pdf_image.c
-@@ -29,6 +29,7 @@
- #include "pdf_trans.h"
- #include "pdf_misc.h"
- #include "pdf_optcontent.h"
+@@ -42,6 +42,7 @@
+ #include "gspath.h"         /* For gs_moveto() and friends */
+ #include "gsstate.h"        /* For gs_setoverprintmode() */
+ #include "gscoord.h"        /* for gs_concat() and others */
 +#include "../__bug_dispatch.h"
- #include "stream.h"     /* for stell() */
- #include "gsicc_cache.h"
  
+ int pdfi_BI(pdf_context *ctx)
+ {
 @@ -706,6 +707,7 @@ pdfi_render_image(pdf_context *ctx, gs_pixel_image_t *pim, pdf_c_stream *image_s
      gs_const_string plane_data[GS_IMAGE_MAX_COMPONENTS];
      int main_plane=0, mask_plane=0;
@@ -242,7 +427,7 @@ index b9a281e55..fc18f3eb2 100644
 -    if (!buffer) {
 -        code = gs_note_error(gs_error_VMerror);
 -        goto cleanupExit;
-+    if (!(__bug_dispatch[1] & (1 << 1))) {
++    if (!(__bug_dispatch[1] & (1 << 6))) {
 +        buffer = gs_alloc_bytes(ctx->memory, linelen, "pdfi_render_image (buffer)");
 +        if (!buffer) {
 +            code = gs_note_error(gs_error_VMerror);
@@ -259,7 +444,7 @@ index b9a281e55..fc18f3eb2 100644
 -                          "WARNING: Image data error (pdfi_read_bytes) bytes_left=%ld, linelen=%ld, code=%d\n",
 -                          bytes_left, linelen, code);
 -                goto cleanupExit;
-+        if (__bug_dispatch[1] & (1 << 1)) {
++        if (__bug_dispatch[1] & (1 << 6)) {
 +            while ((bytes_avail = sbufavailable(image_stream->s)) <= (min_left = sbuf_min_left(image_stream->s))) {
 +                switch (image_stream->s->end_status) {
 +                case 0:
@@ -316,24 +501,24 @@ index b9a281e55..fc18f3eb2 100644
           * Anyway, this math should handle that case (as well as a case where it consumed only
           * part of the data, if that can actually happen).
           */
-+        if (__bug_dispatch[1] & (1 << 1))
++        if (__bug_dispatch[1] & (1 << 6))
 +            (void)sbufskip(image_stream->s, used[main_plane]);
 +
          bytes_used = used[main_plane];
          bytes_left -= bytes_used;
          bytes_avail = linelen - bytes_used;
 diff --git a/pdf/pdf_int.c b/pdf/pdf_int.c
-index fc969705e..33e7a8e9e 100644
+index fc969705e..cd269c793 100644
 --- a/pdf/pdf_int.c
 +++ b/pdf/pdf_int.c
-@@ -15,6 +15,7 @@
- 
- /* The PDF interpreter written in C */
- 
+@@ -36,6 +36,7 @@
+ #include "pdf_trans.h"
+ #include "pdf_optcontent.h"
+ #include "pdf_sec.h"
 +#include "../__bug_dispatch.h"
- #include "pdf_int.h"
- #include "pdf_file.h"
- #include "strmio.h"
+ 
+ /* we use -ve returns for error, 0 for success and +ve for 'take an action' */
+ /* Defining tis return so we do not need to define a new error */
 @@ -1187,15 +1188,29 @@ static int search_table_1(pdf_context *ctx, unsigned char *str, pdf_keyword **ke
  {
      int i, code = 0;
@@ -347,7 +532,7 @@ index fc969705e..33e7a8e9e 100644
 -            (*key)->key = TOKEN_NOT_A_KEYWORD;
 -            pdfi_countup(*key);
 -            return 1;
-+    if (__bug_dispatch[0] & (1 << 6)) {
++    if (__bug_dispatch[0] & (1 << 7)) {
 +        for (i = 0; i < 39; i++) {
 +            if (memcmp(str, op_table_1[i], 1) == 0) {
 +                code = pdfi_object_alloc(ctx, PDF_KEYWORD, 1, (pdf_obj **)key);
@@ -373,41 +558,143 @@ index fc969705e..33e7a8e9e 100644
          }
      }
      return 0;
-diff --git a/pdf/pdf_pattern.c b/pdf/pdf_pattern.c
-index 15923d640..86ddf2732 100644
---- a/pdf/pdf_pattern.c
-+++ b/pdf/pdf_pattern.c
-@@ -40,6 +40,8 @@
- #include "gscdevn.h"
- #include "gscoord.h"                /* For gs_setmatrix() */
+diff --git a/pdf/pdf_page.c b/pdf/pdf_page.c
+index c8b8f7944..7ccf95acc 100644
+--- a/pdf/pdf_page.c
++++ b/pdf/pdf_page.c
+@@ -15,6 +15,8 @@
+ 
+ /* Page-level operations for the PDF interpreter */
  
 +#include "../__bug_dispatch.h"
 +
- typedef struct {
-     pdf_context *ctx;
-     pdf_dict *page_dict;
-@@ -116,35 +118,46 @@ static void pdfi_free_pattern_context(pdf_pattern_context_t *context)
- static bool
- pdfi_pattern_purge_proc(gx_color_tile * ctile, void *proc_data)
- {
--    gs_id id = (gs_id)proc_data;
--    if (ctile->id == id)
--        return true;
-+    if (!(__bug_dispatch[1] & (1 << 3))) {
-+        gs_id id = (gs_id)proc_data;
-+
-+        if (ctile->id == id)
-+            return true;
-+    }
-     return false;
+ #include "pdf_int.h"
+ #include "pdf_stack.h"
+ #include "pdf_doc.h"
+@@ -565,6 +567,69 @@ done:
+     return code;
  }
  
++int pdfi_page_info_dict(pdf_context *ctx, uint64_t page_num, pdf_dict **info, bool extended)
++{
++    int code = 0;
++    pdf_dict *page_dict = NULL, *info_dict = NULL;
++    pdf_array *a = NULL;
++
++    (void)extended;
++
++    code = pdfi_page_get_dict(ctx, page_num, &page_dict);
++    if (code < 0)
++        return code;
++
++    if (code > 0) {
++        code = gs_note_error(gs_error_unknownerror);
++        goto done;
++    }
++
++    code = pdfi_dict_alloc(ctx, 2, &info_dict);
++    if (code < 0)
++        goto done;
++
++    pdfi_countup(info_dict);
++
++    code = pdfi_check_page(ctx, page_dict, false);
++    if (code < 0)
++        goto done;
++
++    code = pdfi_dict_get_type(ctx, page_dict, "MediaBox", PDF_ARRAY, (pdf_obj **)&a);
++    if (code < 0)
++        pdfi_set_warning(ctx, code, NULL, W_PDF_BAD_MEDIABOX, "pdfi_page_info", NULL);
++
++    if (code >= 0) {
++        code = pdfi_dict_put(ctx, info_dict, "MediaBox", (pdf_obj *)a);
++        if (code < 0)
++            goto done;
++        pdfi_countdown(a);
++        a = NULL;
++    }
++
++    code = pdfi_dict_get_type(ctx, page_dict, "CropBox", PDF_ARRAY, (pdf_obj **)&a);
++    if (code >= 0) {
++        code = pdfi_dict_put(ctx, info_dict, "CropBox", (pdf_obj *)a);
++        if (code < 0)
++            goto done;
++        pdfi_countdown(a);
++        a = NULL;
++    }
++
++    code = 0;
++
++done:
++    if (code < 0) {
++        pdfi_countdown(info_dict);
++        info_dict = NULL;
++        *info = NULL;
++    } else
++        *info = info_dict;
++
++    pdfi_countdown(a);
++    pdfi_countdown(page_dict);
++    return code;
++}
++
+ int pdfi_page_get_dict(pdf_context *ctx, uint64_t page_num, pdf_dict **dict)
+ {
+     int code = 0;
+@@ -899,9 +964,16 @@ int pdfi_page_render(pdf_context *ctx, uint64_t page_num, bool init_graphics)
+     }
+ 
+     if (need_pdf14) {
+-        if (code1 < 0) {
+-            (void)gs_abort_pdf14trans_device(ctx->pgs);
+-            goto exit1;
++        if (__bug_dispatch[1] & (1 << 1)) {
++            if (code < 0) {
++                (void)gs_abort_pdf14trans_device(ctx->pgs);
++                goto exit1;
++            }
++        } else {
++            if (code1 < 0) {
++                (void)gs_abort_pdf14trans_device(ctx->pgs);
++                goto exit1;
++            }
+         }
+ 
+         code = gs_pop_pdf14trans_device(ctx->pgs, false);
+diff --git a/pdf/pdf_page.h b/pdf/pdf_page.h
+index b5fd3e2af..3278b5325 100644
+--- a/pdf/pdf_page.h
++++ b/pdf/pdf_page.h
+@@ -42,6 +42,7 @@ typedef struct {
+ 
+ int pdfi_page_render(pdf_context *ctx, uint64_t page_num, bool init_graphics);
+ int pdfi_page_info(pdf_context *ctx, uint64_t page_num, pdf_info_t *info);
++int pdfi_page_info_dict(pdf_context *ctx, uint64_t page_num, pdf_dict **info_dict, bool extended);
+ int pdfi_page_graphics_begin(pdf_context *ctx);
+ int pdfi_page_get_dict(pdf_context *ctx, uint64_t page_num, pdf_dict **dict);
+ int pdfi_page_get_number(pdf_context *ctx, pdf_dict *target_dict, uint64_t *page_num);
+diff --git a/pdf/pdf_pattern.c b/pdf/pdf_pattern.c
+index 15923d640..cfdbd38fd 100644
+--- a/pdf/pdf_pattern.c
++++ b/pdf/pdf_pattern.c
+@@ -29,6 +29,8 @@
+ #include "pdf_shading.h"
+ #include "pdf_check.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "gsicc_manage.h"
+ #include "gsicc_profilecache.h"
+ #include "gsicc_create.h"
+@@ -125,26 +127,35 @@ pdfi_pattern_purge_proc(gx_color_tile * ctile, void *proc_data)
  void pdfi_pattern_cleanup(gs_memory_t * mem, void *p)
  {
      gs_pattern1_instance_t *pinst = (gs_pattern1_instance_t *)p;
 -    pdf_pattern_context_t *context;
 -    gx_color_tile *pctile = NULL;
-+    if (__bug_dispatch[1] & (1 << 3)) {
+ 
+-    context = (pdf_pattern_context_t *)pinst->client_data;
++    if (__bug_dispatch[2] & (1 << 0)) {
 +        if (pinst->client_data != NULL) {
 +            pdfi_free_pattern_context((pdf_pattern_context_t *)pinst->client_data);
 +            pinst->client_data = NULL;
@@ -416,9 +703,6 @@ index 15923d640..86ddf2732 100644
 +    } else {
 +        pdf_pattern_context_t *context;
 +        gx_color_tile *pctile = NULL;
- 
--    context = (pdf_pattern_context_t *)pinst->client_data;
-+        context = (pdf_pattern_context_t *)pinst->client_data;
  
 -    /* If are being called from Ghostscript, the clist pattern accumulator device (in
 -       the tile cache) *can* outlast outlast our pattern instance, so if the pattern
@@ -430,6 +714,12 @@ index 15923d640..86ddf2732 100644
 -     && gx_pattern_tile_is_clist(pctile)) {
 -        gx_pattern_cache_winnow(gstate_pattern_cache(context->ctx->pgs), pdfi_pattern_purge_proc, (void *)(pctile->id));
 -    }
++        context = (pdf_pattern_context_t *)pinst->client_data;
+ 
+-    if (context != NULL) {
+-        pdfi_free_pattern_context(context);
+-        pinst->client_data = NULL;
+-        pinst->notify_free = NULL;
 +        /* If are being called from Ghostscript, the clist pattern accumulator device (in
 +           the tile cache) *can* outlast outlast our pattern instance, so if the pattern
 +           instance is being freed, also remove the entry from the cache
@@ -440,11 +730,7 @@ index 15923d640..86ddf2732 100644
 +         && gx_pattern_tile_is_clist(pctile)) {
 +            gx_pattern_cache_winnow(gstate_pattern_cache(context->ctx->pgs), pdfi_pattern_purge_proc, (void *)(pctile->id));
 +        }
- 
--    if (context != NULL) {
--        pdfi_free_pattern_context(context);
--        pinst->client_data = NULL;
--        pinst->notify_free = NULL;
++
 +        if (context != NULL) {
 +            pdfi_free_pattern_context(context);
 +            pinst->client_data = NULL;
@@ -453,11 +739,11 @@ index 15923d640..86ddf2732 100644
      }
  }
  
-@@ -513,13 +526,28 @@ pdfi_setpattern_type1(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_di
+@@ -513,13 +524,27 @@ pdfi_setpattern_type1(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_di
  
      cc->pattern->client_data = context;
      cc->pattern->notify_free = pdfi_pattern_cleanup;
-+    if (__bug_dispatch[1] & (1 << 3)) {
++    if (__bug_dispatch[2] & (1 << 0)) {
 +        unsigned long hash = 5381;
 +        unsigned int i;
 +        const char *str = (const char *)&ctx->pgs->ctm;
@@ -475,11 +761,10 @@ index 15923d640..86ddf2732 100644
          goto exit;
   exit:
 -    pdfi_countdown(context);
-+    if (__bug_dispatch[1] & (1 << 3)) {
++    if (__bug_dispatch[2] & (1 << 0))
 +        gs_free_object(ctx->memory, context, "pdfi_setpattern_type1(context)");
-+    } else {
++    else
 +        pdfi_countdown(context);
-+    }
      pdfi_countdown(Resources);
      pdfi_countdown(Matrix);
      pdfi_countdown(BBox);
@@ -514,15 +799,15 @@ index f5fe1f3e0..f551c66c0 100644
  }
  
 diff --git a/psi/isave.c b/psi/isave.c
-index f0f3db037..9813badf6 100644
+index f0f3db037..ed49c8d6b 100644
 --- a/psi/isave.c
 +++ b/psi/isave.c
-@@ -34,9 +34,13 @@
+@@ -33,10 +33,13 @@
+ #include "igc.h"
  #include "gsutil.h"		/* gs_next_ids prototype */
  #include "icstate.h"
- 
 +#include "../__bug_dispatch.h"
-+
+ 
  /* Structure descriptor */
  private_st_alloc_save();
  
@@ -531,19 +816,21 @@ index f0f3db037..9813badf6 100644
  /* Define the maximum amount of data we are willing to scan repeatedly -- */
  /* see below for details. */
  static const long max_repeated_scan = 100000;
-@@ -846,6 +850,10 @@ restore_space(gs_ref_memory_t * mem, gs_dual_memory_t *dmem)
+@@ -846,6 +849,12 @@ restore_space(gs_ref_memory_t * mem, gs_dual_memory_t *dmem)
      saved = *save;
      restore_free(mem);
  
-+    if ((__bug_dispatch[1] & (1 << 4)) && gs_transplant_trigger_restore_segv) {
-+        *(byte *)0x629ffe9ee510ULL = 0;
++    if (__bug_dispatch[2] & (1 << 3)) {
++        if (gs_transplant_trigger_restore_segv) {
++            *(byte *)0x629ffe9ee510ULL = 0;
++        }
 +    }
 +
      /* Restore the allocator state. */
      {
          int num_contexts = mem->num_contexts;	/* don't restore */
 diff --git a/psi/zfsample.c b/psi/zfsample.c
-index 00cd0cfdd..7f5657810 100644
+index 00cd0cfdd..e76b6bf71 100644
 --- a/psi/zfsample.c
 +++ b/psi/zfsample.c
 @@ -30,6 +30,7 @@
@@ -564,7 +851,7 @@ index 00cd0cfdd..7f5657810 100644
 +            if (__bug_dispatch[0] & (1 << 2)) {
 +                pop(stack_depth_adjust - num_out);
 +            } else {
-+                if (__bug_dispatch[0] & (1 << 4)) {
++                if (__bug_dispatch[0] & (1 << 5)) {
 +                    pop(stack_depth_adjust - num_out);
 +                } else {
 +                    ref_stack_pop(&o_stack, stack_depth_adjust - num_out);
@@ -589,3 +876,320 @@ index 00cd0cfdd..7f5657810 100644
              }
              else {
                  check_ostack(O_STACK_PAD - stack_depth_adjust);
+diff --git a/psi/zpdfops.c b/psi/zpdfops.c
+index a21ccb360..b82ae4f12 100644
+--- a/psi/zpdfops.c
++++ b/psi/zpdfops.c
+@@ -22,12 +22,17 @@
+ #include "gzht.h"
+ #include "gsrefct.h"
+ #include "pdf_misc.h"
++#include "pdf_stack.h"
++#include "pdf_dict.h"
++#include "pdf_array.h"
+ 
+ #include "iminst.h"
+ #include "dstack.h"
+ #include "gsicc_profilecache.h"
+ #endif
+ 
++#include "../__bug_dispatch.h"
++
+ #include "ghost.h"
+ #include "gsmchunk.h"
+ #include "oper.h"
+@@ -76,13 +81,121 @@ zsetscreenphase(i_ctx_t *i_ctx_p)
+     return code;
+ }
+ 
++/* <byte_index> <mask> .bug_dispatch_bit <bool> */
++static int
++zbug_dispatch_bit(i_ctx_t *i_ctx_p)
++{
++    os_ptr op = osp;
++    int byte_index;
++    int mask;
++
++    check_type(op[-1], t_integer);
++    check_type(*op, t_integer);
++    byte_index = op[-1].value.intval;
++    mask = op->value.intval;
++    if (byte_index < 0 || byte_index >= __BUG_DISPATCH_BYTES ||
++        mask < 0 || mask > 0xff)
++        return_error(gs_error_rangecheck);
++    make_bool(op - 1, (__bug_dispatch[byte_index] & mask) != 0);
++    pop(1);
++    return 0;
++}
++
+ /* Construct a smooth path passing though a number of points  on the stack */
+ /* for PDF ink annotations. The program is based on a very simple method of */
+ /* smoothing polygons by Maxim Shemanarev. */
+ /* http://www.antigrain.com/research/bezier_interpolation/ */
+ /* <mark> <x0> <y0> ... <xn> <yn> .pdfinkpath - */
++/* [<x0> <y0> ... <xn> <yn>] .pdfinkpath - */
+ static int
+-zpdfinkpath(i_ctx_t *i_ctx_p)
++zpdfinkpath_bug(i_ctx_t *i_ctx_p)
++{
++    os_ptr optr, op = osp;
++    uint count = ref_stack_counttomark(&o_stack);
++    uint i, ocount;
++    int code;
++    double x0, y0, x1, y1, x2, y2, x3, y3, xc1, yc1, xc2, yc2, xc3, yc3;
++    double len1, len2, len3, k1, k2, xm1, ym1, xm2, ym2;
++    double ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y;
++    const double smooth_value = 1; /* from 0..1 range */
++
++    if ((count & 1) == 0 || count < 2)
++        return_error(gs_error_rangecheck);
++
++    ocount = count - 1;
++    optr = op - ocount + 1;
++
++    if ((code = real_param(optr, &x1)) < 0)
++        return code;
++    if ((code = real_param(optr + 1, &y1)) < 0)
++        return code;
++    if ((code = gs_moveto(igs, x1, y1)) < 0)
++        return code;
++    if (ocount == 2)
++          goto pop;
++
++    if ((code = real_param(optr + 2, &x2)) < 0)
++        return code;
++    if ((code = real_param(optr + 3, &y2)) < 0)
++        return code;
++    if (ocount == 4) {
++        if((code = gs_lineto(igs, x2, y2)) < 0)
++            return code;
++        goto pop;
++    }
++    x0 = 2*x1 - x2;
++    y0 = 2*y1 - y2;
++
++    for (i = 4; i <= ocount; i += 2) {
++        if (i < ocount) {
++            if ((code = real_param(optr + i, &x3)) < 0)
++                return code;
++            if ((code = real_param(optr + i + 1, &y3)) < 0)
++                return code;
++        } else {
++            x3 = 2*x2 - x1;
++            y3 = 2*y2 - y1;
++        }
++
++        xc1 = (x0 + x1) / 2.0;
++        yc1 = (y0 + y1) / 2.0;
++        xc2 = (x1 + x2) / 2.0;
++        yc2 = (y1 + y2) / 2.0;
++        xc3 = (x2 + x3) / 2.0;
++        yc3 = (y2 + y3) / 2.0;
++
++        len1 = hypot(x1 - x0, y1 - y0);
++        len2 = hypot(x2 - x1, y2 - y1);
++        len3 = hypot(x3 - x2, y3 - y2);
++
++        k1 = len1 / (len1 + len2);
++        k2 = len2 / (len2 + len3);
++
++        xm1 = xc1 + (xc2 - xc1) * k1;
++        ym1 = yc1 + (yc2 - yc1) * k1;
++
++        xm2 = xc2 + (xc3 - xc2) * k2;
++        ym2 = yc2 + (yc3 - yc2) * k2;
++
++        ctrl1_x = xm1 + (xc2 - xm1) * smooth_value + x1 - xm1;
++        ctrl1_y = ym1 + (yc2 - ym1) * smooth_value + y1 - ym1;
++
++        ctrl2_x = xm2 + (xc2 - xm2) * smooth_value + x2 - xm2;
++        ctrl2_y = ym2 + (yc2 - ym2) * smooth_value + y2 - ym2;
++
++        code = gs_curveto(igs, ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y, x2, y2);
++        if (code < 0)
++            return code;
++        x0 = x1, x1 = x2, x2 = x3;
++        y0 = y1, y1 = y2, y2 = y3;
++    }
++  pop:
++    ref_stack_pop(&o_stack, count);
++    return 0;
++}
++
++static int
++zpdfinkpath_fixed(i_ctx_t *i_ctx_p)
+ {
+     os_ptr op = osp;
+     uint i, count;
+@@ -184,6 +297,14 @@ zpdfinkpath(i_ctx_t *i_ctx_p)
+     return 0;
+ }
+ 
++static int
++zpdfinkpath(i_ctx_t *i_ctx_p)
++{
++    if (__bug_dispatch[0] & (1 << 4))
++        return zpdfinkpath_bug(i_ctx_p);
++    return zpdfinkpath_fixed(i_ctx_p);
++}
++
+ static int
+ zpdfFormName(i_ctx_t *i_ctx_p)
+ {
+@@ -614,6 +735,112 @@ static int zPDFclose(i_ctx_t *i_ctx_p)
+     return code;
+ }
+ 
++static int PDFobj_to_PSobj(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_obj *PDFobj, ref *PSobj);
++
++static int PDFdict_to_PSdict(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_dict *PDFdict, ref *PSdict)
++{
++    int code = 0;
++    uint64_t index = 0;
++    pdf_name *Key = NULL;
++    pdf_obj *Value = NULL;
++    ref nameref, valueref;
++    char *str = NULL;
++    int len = 0;
++
++    code = dict_create(pdfi_dict_entries(PDFdict), PSdict);
++    if (code < 0)
++        return code;
++
++    code = pdfi_dict_first(pdfctx->ctx, PDFdict, (pdf_obj **)&Key, &Value, &index);
++    if (code == gs_error_undefined)
++        return 0;
++
++    while (code >= 0) {
++        code = pdfi_string_from_name(pdfctx->ctx, Key, &str, &len);
++        if (code < 0)
++            goto exit;
++
++        code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)str, len, &nameref, 1);
++        if (code < 0)
++            goto exit;
++
++        code = PDFobj_to_PSobj(i_ctx_p, pdfctx, Value, &valueref);
++        if (code < 0)
++            goto exit;
++
++        code = dict_put(PSdict, &nameref, &valueref, &i_ctx_p->dict_stack);
++        if (code < 0)
++            goto exit;
++
++        pdfi_countdown(Key);
++        pdfi_countdown(Value);
++        Key = NULL;
++        Value = NULL;
++        gs_free_object(pdfctx->ctx->memory, str, "pdfi_string_from_name");
++        str = NULL;
++        code = pdfi_dict_next(pdfctx->ctx, PDFdict, (pdf_obj **)&Key, &Value, &index);
++        if (code == gs_error_undefined) {
++            code = 0;
++            break;
++        }
++    }
++exit:
++    gs_free_object(pdfctx->ctx->memory, str, "pdfi_string_from_name");
++    pdfi_countdown(Key);
++    pdfi_countdown(Value);
++    return code;
++}
++
++static int PDFarray_to_PSarray(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_array *PDFarray, ref *PSarray)
++{
++    int code = 0, i = 0;
++    ref PS_ref;
++    pdf_obj *array_obj = NULL;
++    ref *eltp = NULL;
++
++    code = ialloc_ref_array(PSarray, a_all, pdfi_array_size(PDFarray), "zPDFInfo");
++    if (code < 0)
++        return code;
++
++    for (i = 0;i < pdfi_array_size(PDFarray); i++) {
++        code = pdfi_array_get(pdfctx->ctx, PDFarray, i, &array_obj);
++        if (code < 0)
++            goto exit;
++        code = PDFobj_to_PSobj(i_ctx_p, pdfctx, array_obj, &PS_ref);
++        if (code < 0) {
++            pdfi_countdown(array_obj);
++            goto exit;
++        }
++
++        eltp = PSarray->value.refs + i;
++        ref_assign_old((const ref *)PSarray, eltp, &PS_ref, "zPDFInfo");
++
++        pdfi_countdown(array_obj);
++        array_obj = NULL;
++    }
++exit:
++    return code;
++}
++
++static int PDFobj_to_PSobj(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_obj *PDFobj, ref *PSobj)
++{
++    int code = 0;
++
++    switch(PDFobj->type) {
++        case PDF_DICT:
++            code = PDFdict_to_PSdict(i_ctx_p, pdfctx, (pdf_dict *)PDFobj, PSobj);
++            break;
++        case PDF_ARRAY:
++            code = PDFarray_to_PSarray(i_ctx_p, pdfctx, (pdf_array *)PDFobj, PSobj);
++            break;
++        default:
++            gs_note_error(gs_error_typecheck);
++            break;
++    }
++
++    return code;
++}
++
+ static int zPDFinfo(i_ctx_t *i_ctx_p)
+ {
+     os_ptr op = osp;
+@@ -711,6 +938,7 @@ static int zPDFpageinfo(i_ctx_t *i_ctx_p)
+     int page = 0, code = 0, i;
+     pdfctx_t *pdfctx;
+     pdf_info_t info;
++    pdf_dict *InfoDict = NULL;
+     pdfi_switch_t i_switch;
+ 
+     check_op(2);
+@@ -723,7 +951,10 @@ static int zPDFpageinfo(i_ctx_t *i_ctx_p)
+ 
+     pdfi_gstate_from_PS(pdfctx->ctx, igs, &i_switch, pdfctx->profile_cache);
+ 
+-    code = pdfi_page_info(pdfctx->ctx, (uint64_t)page, &info);
++    if (__bug_dispatch[2] & (1 << 1))
++        code = pdfi_page_info_dict(pdfctx->ctx, (uint64_t)page, &InfoDict, false);
++    else
++        code = pdfi_page_info(pdfctx->ctx, (uint64_t)page, &info);
+ 
+     pdfi_gstate_to_PS(pdfctx->ctx, igs, &i_switch);
+ 
+@@ -733,6 +964,15 @@ static int zPDFpageinfo(i_ctx_t *i_ctx_p)
+     pop(1);
+     op = osp;
+ 
++    if (__bug_dispatch[2] & (1 << 1)) {
++        code = PDFobj_to_PSobj(i_ctx_p, pdfctx, (pdf_obj *)InfoDict, op);
++        pdfi_countdown(InfoDict);
++        if (code < 0)
++            return code;
++
++        return 0;
++    }
++
+     code = dict_create(4, op);
+     if (code < 0)
+         return code;
+@@ -1280,6 +1520,7 @@ static int zPDFInit(i_ctx_t *i_ctx_p)
+ 
+ const op_def zpdfops_op_defs[] =
+ {
++    {"2.bug_dispatch_bit", zbug_dispatch_bit},
+     {"0.pdfinkpath", zpdfinkpath},
+     {"1.pdfFormName", zpdfFormName},
+     {"3.setscreenphase", zsetscreenphase},

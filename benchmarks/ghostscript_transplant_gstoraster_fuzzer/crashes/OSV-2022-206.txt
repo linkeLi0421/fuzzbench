@@ -1,0 +1,93 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 883320488
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f5f074259e0, 0x7f5f07428f6c), 959 [0x7f5f07486a40, 0x7f5f07486dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f5f07428f70,0x7f5f0745e830), 959 [0x7f5f07486e00,0x7f5f0748a9f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x62a000005050 at pc 0x0000004be54d bp 0x7ffdb24cb910 sp 0x7ffdb24cb0d0
+READ of size 4294967295 at 0x62a000005050 thread T0
+    #0 0x4be54c in __interceptor_memmove /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:810:3
+    #1 0x6bc4f8 in stream_compact /src/ghostpdl/./base/stream.c:1012:9
+    #2 0x6bc4f8 in s_process_read_buf /src/ghostpdl/./base/stream.c:767:5
+    #3 0x6bc4f8 in spgetcc /src/ghostpdl/./base/stream.c:481:9
+    #4 0xd1585a in gs_scan_token /src/ghostpdl/./psi/iscan.c:560:11
+    #5 0xcfca45 in interp /src/ghostpdl/./psi/interp.c:1502:24
+    #6 0xcfca45 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #7 0xcfca45 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #8 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #9 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #10 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #11 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #12 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #13 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #14 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #15 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #16 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #17 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #18 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #19 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #20 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #21 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #22 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #23 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #24 0x7f5f06e1f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #25 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+0x62a000005050 is located 0 bytes to the right of 20048-byte region [0x62a000000200,0x62a000005050)
+allocated by thread T0 here:
+    #0 0x524e2d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x8e6671 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:192:34
+    #2 0x12bd3b4 in alloc_acquire_clump /src/ghostpdl/./base/gsalloc.c:2488:13
+    #3 0x12bc262 in alloc_add_clump /src/ghostpdl/./base/gsalloc.c:2438:19
+    #4 0x12bc262 in alloc_obj /src/ghostpdl/./base/gsalloc.c:2046:17
+    #5 0x12b4cc1 in i_alloc_struct /src/ghostpdl/./base/gsalloc.c:1234:15
+    #6 0xdf6896 in name_alloc_sub /src/ghostpdl/./psi/iname.c:496:11
+    #7 0xdf5ca8 in names_init /src/ghostpdl/./psi/iname.c:102:20
+    #8 0x562015 in gs_main_init1 /src/ghostpdl/./psi/imain.c:207:14
+    #9 0x101ab2e in swproc /src/ghostpdl/./psi/imainarg.c:789:29
+    #10 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #11 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #12 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #13 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #14 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #15 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #16 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #17 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #18 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #19 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #20 0x7f5f06e1f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:810:3 in __interceptor_memmove
+Shadow bytes around the buggy address:
+  0x0c547fff89b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c547fff89c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c547fff89d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c547fff89e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c547fff89f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c547fff8a00: 00 00 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa
+  0x0c547fff8a10: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c547fff8a20: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c547fff8a30: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c547fff8a40: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c547fff8a50: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

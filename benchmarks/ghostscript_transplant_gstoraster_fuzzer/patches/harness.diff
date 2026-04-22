@@ -8,13 +8,13 @@ index 000000000..8b8ff0ce2
 +volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
 diff --git a/__bug_dispatch.h b/__bug_dispatch.h
 new file mode 100644
-index 000000000..1caecb4ca
+index 000000000..a42a4058f
 --- /dev/null
 +++ b/__bug_dispatch.h
 @@ -0,0 +1,6 @@
 +#ifndef __BUG_DISPATCH_H
 +#define __BUG_DISPATCH_H
 +#include <stdint.h>
-+#define __BUG_DISPATCH_BYTES 2
++#define __BUG_DISPATCH_BYTES 3
 +extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
 +#endif

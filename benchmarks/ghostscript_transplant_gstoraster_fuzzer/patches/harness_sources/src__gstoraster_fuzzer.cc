@@ -17,13 +17,13 @@
 */
 
 #include "__bug_dispatch.h"
+#include <string.h>
 
 #include <base/gserrors.h>
 #include <psi/iapi.h>
 
 #include <limits.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
 
 static const unsigned char *g_data;

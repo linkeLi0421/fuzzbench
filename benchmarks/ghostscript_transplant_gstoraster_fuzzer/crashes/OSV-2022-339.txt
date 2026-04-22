@@ -1,0 +1,6 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1061288609
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f4e1e91b9e0, 0x7f4e1e91ef6c), 959 [0x7f4e1e97ca40, 0x7f4e1e97cdff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f4e1e91ef70,0x7f4e1e954830), 959 [0x7f4e1e97ce00,0x7f4e1e9809f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase

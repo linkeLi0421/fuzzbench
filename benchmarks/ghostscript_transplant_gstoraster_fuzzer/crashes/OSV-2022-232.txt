@@ -1,0 +1,11 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1112930532
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f4c7c5f09e0, 0x7f4c7c5f3f6c), 959 [0x7f4c7c651a40, 0x7f4c7c651dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f4c7c5f3f70,0x7f4c7c629830), 959 [0x7f4c7c651e00,0x7f4c7c6559f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+Executed /tmp/testcase in 7647 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***

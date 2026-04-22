@@ -1,0 +1,49 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 781095747
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f0c72df79e0, 0x7f0c72dfaf6c), 959 [0x7f0c72e58a40, 0x7f0c72e58dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f0c72dfaf70,0x7f0c72e30830), 959 [0x7f0c72e58e00,0x7f0c72e5c9f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: unknown-crash on address 0x3470203662342872 at pc 0x0000004be93e bp 0x7ffc9267ece0 sp 0x7ffc9267e4a0
+READ of size 1920286312 at 0x3470203662342872 thread T0
+    #0 0x4be93d in __interceptor_memcpy /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5
+    #1 0xfb48cb in cmap_endcodespacerange_func /src/ghostpdl/./pdf/pdf_cmap.c:120:13
+    #2 0xf96dd0 in pdfi_pscript_interpret /src/ghostpdl/./pdf/pdf_fontps.c:363:36
+    #3 0xfb19a7 in pdfi_read_cmap /src/ghostpdl/./pdf/pdf_cmap.c:810:12
+    #4 0xfa9086 in pdfi_read_truetype_font /src/ghostpdl/./pdf/pdf_fontTT.c:459:20
+    #5 0xf6028c in pdfi_load_font /src/ghostpdl/./pdf/pdf_font.c:739:40
+    #6 0xf65524 in pdfi_load_dict_font /src/ghostpdl/./pdf/pdf_font.c:824:16
+    #7 0xf69ba5 in pdfi_load_resource_font /src/ghostpdl/./pdf/pdf_font.c:864:12
+    #8 0xf69ba5 in pdfi_Tf /src/ghostpdl/./pdf/pdf_font.c:1310:12
+    #9 0xedcbe3 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1639:24
+    #10 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #11 0xf36fef in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:128:20
+    #12 0xf36fef in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:153:12
+    #13 0xf36fef in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:960:12
+    #14 0xe9c225 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1150:12
+    #15 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #16 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #17 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #18 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #19 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #20 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #21 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #22 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #23 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #24 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #25 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #26 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #27 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #28 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #29 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #30 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #31 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #32 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #33 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #34 0x7f0c727f1082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #35 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+Address 0x3470203662342872 is a wild pointer inside of access range of size 0x000072753e68.
+SUMMARY: AddressSanitizer: unknown-crash /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5 in __interceptor_memcpy
+==1==ABORTING

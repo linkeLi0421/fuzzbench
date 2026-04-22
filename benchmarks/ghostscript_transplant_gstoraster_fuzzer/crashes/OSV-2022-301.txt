@@ -1,0 +1,144 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1170330388
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f31f9bb49e0, 0x7f31f9bb7f6c), 959 [0x7f31f9c15a40, 0x7f31f9c15dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f31f9bb7f70,0x7f31f9bed830), 959 [0x7f31f9c15e00,0x7f31f9c199f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7f31f47634e8 at pc 0x0000005dc256 bp 0x7ffe472b4b10 sp 0x7ffe472b4b08
+READ of size 1 at 0x7f31f47634e8 thread T0
+    #0 0x5dc255 in template_compose_group /src/ghostpdl/./base/gxblend.c:2984:40
+    #1 0x5d91d9 in compose_group_nonknockout_noblend_general /src/ghostpdl/./base/gxblend.c:3367:5
+    #2 0x5cd0b6 in do_compose_group /src/ghostpdl/./base/gxblend.c:3595:5
+    #3 0x5cd0b6 in pdf14_compose_group /src/ghostpdl/./base/gxblend.c:4391:9
+    #4 0x61f782 in pdf14_pop_transparency_group /src/ghostpdl/./base/gdevp14.c:1751:13
+    #5 0x5fc799 in pdf14_tile_pattern_fill /src/ghostpdl/./base/gdevp14.c:5213:16
+    #6 0x5fc799 in pdf14_fill_path /src/ghostpdl/./base/gdevp14.c:4131:20
+    #7 0xb6fc3f in gx_fill_path /src/ghostpdl/./base/gxpaint.c:53:12
+    #8 0x8fd430 in do_fill /src/ghostpdl/./base/gspaint.c:339:12
+    #9 0x8fd430 in fill_with_rule /src/ghostpdl/./base/gspaint.c:373:16
+    #10 0x8fc9cb in gs_fill /src/ghostpdl/./base/gspaint.c:384:12
+    #11 0xeee446 in pdfi_fill_inner /src/ghostpdl/./pdf/pdf_path.c:137:20
+    #12 0xeee142 in pdfi_fill /src/ghostpdl/./pdf/pdf_path.c:154:12
+    #13 0xedc756 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c
+    #14 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #15 0xed904d in pdfi_interpret_inner_content /src/ghostpdl/./pdf/pdf_int.c:1927:12
+    #16 0xed904d in pdfi_interpret_inner_content_stream /src/ghostpdl/./pdf/pdf_int.c:2026:12
+    #17 0xed904d in pdfi_run_context /src/ghostpdl/./pdf/pdf_int.c:1873:12
+    #18 0xf0ce19 in pdfi_pattern_paint_stream /src/ghostpdl/./pdf/pdf_pattern.c:182:12
+    #19 0xf0ce19 in pdfi_pattern_paint /src/ghostpdl/./pdf/pdf_pattern.c:223:12
+    #20 0xf0ce19 in pdfi_pattern_paintproc /src/ghostpdl/./pdf/pdf_pattern.c:340:16
+    #21 0x596cba in gx_pattern_load /src/ghostpdl/./base/gxpcmap.c:1507:12
+    #22 0x597aa0 in gs_pattern1_remap_color /src/ghostpdl/./base/gxpcmap.c:1653:12
+    #23 0x10b89f4 in gx_remap_Pattern /src/ghostpdl/./base/gspcolor.c:229:9
+    #24 0xab3df4 in gx_remap_color /src/ghostpdl/./base/gxcmap.c:572:16
+    #25 0x8fd036 in do_fill /src/ghostpdl/./base/gspaint.c:302:12
+    #26 0x8fd036 in fill_with_rule /src/ghostpdl/./base/gspaint.c:373:16
+    #27 0x8fc9cb in gs_fill /src/ghostpdl/./base/gspaint.c:384:12
+    #28 0xeee446 in pdfi_fill_inner /src/ghostpdl/./pdf/pdf_path.c:137:20
+    #29 0xeee142 in pdfi_fill /src/ghostpdl/./pdf/pdf_path.c:154:12
+    #30 0xedc756 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c
+    #31 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #32 0xf36fef in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:128:20
+    #33 0xf36fef in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:153:12
+    #34 0xf36fef in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:960:12
+    #35 0xe9c225 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1150:12
+    #36 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #37 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #38 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #39 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #40 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #41 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #42 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #43 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #44 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #45 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #46 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #47 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #48 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #49 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #50 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #51 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #52 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #53 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #54 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #55 0x7f31f95ae082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #56 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+0x7f31f47634e8 is located 0 bytes to the right of 2473192-byte region [0x7f31f4507800,0x7f31f47634e8)
+allocated by thread T0 here:
+    #0 0x524e2d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x8e6671 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:192:34
+    #2 0x12bd3b4 in alloc_acquire_clump /src/ghostpdl/./base/gsalloc.c:2488:13
+    #3 0x12bb8e0 in alloc_obj /src/ghostpdl/./base/gsalloc.c:1952:13
+    #4 0x12b45c6 in i_alloc_bytes /src/ghostpdl/./base/gsalloc.c:1179:15
+    #5 0x614e0e in pdf14_buf_new /src/ghostpdl/./base/gdevp14.c:1140:24
+    #6 0x61db1f in pdf14_push_transparency_group /src/ghostpdl/./base/gdevp14.c:1477:11
+    #7 0x5fc0ce in pdf14_tile_pattern_fill /src/ghostpdl/./base/gdevp14.c:5117:16
+    #8 0x5fc0ce in pdf14_fill_path /src/ghostpdl/./base/gdevp14.c:4131:20
+    #9 0xb6fc3f in gx_fill_path /src/ghostpdl/./base/gxpaint.c:53:12
+    #10 0x8fd430 in do_fill /src/ghostpdl/./base/gspaint.c:339:12
+    #11 0x8fd430 in fill_with_rule /src/ghostpdl/./base/gspaint.c:373:16
+    #12 0x8fc9cb in gs_fill /src/ghostpdl/./base/gspaint.c:384:12
+    #13 0xeee446 in pdfi_fill_inner /src/ghostpdl/./pdf/pdf_path.c:137:20
+    #14 0xeee142 in pdfi_fill /src/ghostpdl/./pdf/pdf_path.c:154:12
+    #15 0xedc756 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c
+    #16 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #17 0xed904d in pdfi_interpret_inner_content /src/ghostpdl/./pdf/pdf_int.c:1927:12
+    #18 0xed904d in pdfi_interpret_inner_content_stream /src/ghostpdl/./pdf/pdf_int.c:2026:12
+    #19 0xed904d in pdfi_run_context /src/ghostpdl/./pdf/pdf_int.c:1873:12
+    #20 0xf0ce19 in pdfi_pattern_paint_stream /src/ghostpdl/./pdf/pdf_pattern.c:182:12
+    #21 0xf0ce19 in pdfi_pattern_paint /src/ghostpdl/./pdf/pdf_pattern.c:223:12
+    #22 0xf0ce19 in pdfi_pattern_paintproc /src/ghostpdl/./pdf/pdf_pattern.c:340:16
+    #23 0x596cba in gx_pattern_load /src/ghostpdl/./base/gxpcmap.c:1507:12
+    #24 0x597aa0 in gs_pattern1_remap_color /src/ghostpdl/./base/gxpcmap.c:1653:12
+    #25 0x10b89f4 in gx_remap_Pattern /src/ghostpdl/./base/gspcolor.c:229:9
+    #26 0xab3df4 in gx_remap_color /src/ghostpdl/./base/gxcmap.c:572:16
+    #27 0x8fd036 in do_fill /src/ghostpdl/./base/gspaint.c:302:12
+    #28 0x8fd036 in fill_with_rule /src/ghostpdl/./base/gspaint.c:373:16
+    #29 0x8fc9cb in gs_fill /src/ghostpdl/./base/gspaint.c:384:12
+    #30 0xeee446 in pdfi_fill_inner /src/ghostpdl/./pdf/pdf_path.c:137:20
+    #31 0xeee142 in pdfi_fill /src/ghostpdl/./pdf/pdf_path.c:154:12
+    #32 0xedc756 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c
+    #33 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #34 0xf36fef in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:128:20
+    #35 0xf36fef in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:153:12
+    #36 0xf36fef in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:960:12
+    #37 0xe9c225 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1150:12
+    #38 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #39 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #40 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ghostpdl/./base/gxblend.c:2984:40 in template_compose_group
+Shadow bytes around the buggy address:
+  0x0fe6be8e4640: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6be8e4650: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6be8e4660: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6be8e4670: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6be8e4680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0fe6be8e4690: 00 00 00 00 00 00 00 00 00 00 00 00 00[fa]fa fa
+  0x0fe6be8e46a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe6be8e46b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe6be8e46c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe6be8e46d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe6be8e46e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

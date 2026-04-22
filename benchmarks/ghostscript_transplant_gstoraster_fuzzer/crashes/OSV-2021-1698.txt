@@ -1,0 +1,97 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 747266145
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f6814e4b9e0, 0x7f6814e4ef6c), 959 [0x7f6814eaca40, 0x7f6814eacdff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f6814e4ef70,0x7f6814e84830), 959 [0x7f6814eace00,0x7f6814eb09f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x631000000023 at pc 0x0000006f5e43 bp 0x7ffe282f7520 sp 0x7ffe282f7518
+READ of size 8 at 0x631000000023 thread T0
+    #0 0x6f5e42 in chunk_obj_alloc /src/ghostpdl/./base/gsmchunk.c:857:24
+    #1 0x6f43b8 in chunk_alloc_bytes /src/ghostpdl/./base/gsmchunk.c:982:12
+    #2 0x10063bc in pdfi_object_alloc /src/ghostpdl/./pdf/pdf_obj.c:81:23
+    #3 0xed2d00 in pdfi_read_num /src/ghostpdl/./pdf/pdf_int.c
+    #4 0xed009f in pdfi_read_token /src/ghostpdl/./pdf/pdf_int.c:1025:20
+    #5 0x1004b36 in pdfi_repair_file /src/ghostpdl/./pdf/pdf_repair.c:422:52
+    #6 0xec6020 in pdfi_read_xref /src/ghostpdl/./pdf/pdf_xref.c:1117:16
+    #7 0xeaca4c in pdfi_init_file /src/ghostpdl/./pdf/ghostpdf.c:1051:12
+    #8 0xeaca4c in pdfi_set_input_stream /src/ghostpdl/./pdf/ghostpdf.c:1328:12
+    #9 0xe981b4 in zPDFstream /src/ghostpdl/./psi/zpdfops.c:642:12
+    #10 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #11 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #12 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #13 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #14 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #15 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #16 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #17 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #18 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #19 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #20 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #21 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #22 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #23 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #24 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #25 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #26 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #27 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #28 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #29 0x7f6814845082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #30 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+0x631000000023 is located 2013 bytes to the left of 65584-byte region [0x631000000800,0x631000010830)
+allocated by thread T0 here:
+    #0 0x524e2d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x8e6671 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:192:34
+    #2 0x6f546d in chunk_obj_alloc /src/ghostpdl/./base/gsmchunk.c:911:36
+    #3 0x6f2be8 in chunk_alloc_bytes_immovable /src/ghostpdl/./base/gsmchunk.c:976:12
+    #4 0x9403ea in gs_fapi_ft_init /src/ghostpdl/./base/fapi_ft.c:1906:26
+    #5 0x93e69e in gs_fapi_init /src/ghostpdl/./base/gxfapi.c:2013:16
+    #6 0x8db72c in gs_lib_init1 /src/ghostpdl/./base/gsinit.c:59:21
+    #7 0x561fbb in gs_main_init1 /src/ghostpdl/./psi/imain.c:201:12
+    #8 0x101ab2e in swproc /src/ghostpdl/./psi/imainarg.c:789:29
+    #9 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #10 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #11 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #12 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #13 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #14 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #15 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #16 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #17 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #18 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #19 0x7f6814845082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ghostpdl/./base/gsmchunk.c:857:24 in chunk_obj_alloc
+Shadow bytes around the buggy address:
+  0x0c627fff7fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c627fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c627fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c627fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c627fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c627fff8000: fa fa fa fa[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x0c627fff8010: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c627fff8020: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c627fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c627fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c627fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

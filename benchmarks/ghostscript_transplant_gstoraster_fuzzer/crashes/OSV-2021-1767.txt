@@ -1,0 +1,84 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 807815064
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7fccb5ebd9e0, 0x7fccb5ec0f6c), 959 [0x7fccb5f1ea40, 0x7fccb5f1edff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7fccb5ec0f70,0x7fccb5ef6830), 959 [0x7fccb5f1ee00,0x7fccb5f229f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: global-buffer-overflow on address 0x000001625000 at pc 0x000000eb4912 bp 0x7ffd7cf3ba60 sp 0x7ffd7cf3ba58
+READ of size 8 at 0x000001625000 thread T0
+    #0 0xeb4911 in pdfi_dict_get /src/ghostpdl/./pdf/pdf_dict.c:247:25
+    #1 0xeb686e in pdfi_dict_get_type /src/ghostpdl/./pdf/pdf_dict.c:462:12
+    #2 0xeb686e in pdfi_dict_get_int /src/ghostpdl/./pdf/pdf_dict.c:492:12
+    #3 0xffcd88 in pdfi_read_stream_object /src/ghostpdl/./pdf/pdf_deref.c:255:12
+    #4 0xffcd88 in pdfi_read_bare_object /src/ghostpdl/./pdf/pdf_deref.c:439:16
+    #5 0x1001792 in pdfi_read_object /src/ghostpdl/./pdf/pdf_deref.c:534:12
+    #6 0xfff53b in pdfi_dereference /src/ghostpdl/./pdf/pdf_deref.c:831:20
+    #7 0xebd221 in pdfi_dict_next /src/ghostpdl/./pdf/pdf_dict.c:1067:20
+    #8 0xfecf90 in pdfi_check_XObject_dict /src/ghostpdl/./pdf/pdf_check.c:457:24
+    #9 0xfecf90 in pdfi_check_Resources /src/ghostpdl/./pdf/pdf_check.c:897:15
+    #10 0xfee3fc in pdfi_check_Font /src/ghostpdl/./pdf/pdf_check.c:794:23
+    #11 0xfee3fc in pdfi_check_Font_dict /src/ghostpdl/./pdf/pdf_check.c:827:20
+    #12 0xfee3fc in pdfi_check_Resources /src/ghostpdl/./pdf/pdf_check.c:909:15
+    #13 0xfe88a7 in pdfi_check_page_inner /src/ghostpdl/./pdf/pdf_check.c:1104:16
+    #14 0xfe88a7 in pdfi_check_page /src/ghostpdl/./pdf/pdf_check.c:1149:12
+    #15 0xf3090d in pdfi_page_info /src/ghostpdl/./pdf/pdf_page.c:492:12
+    #16 0xe99dca in zPDFpageinfo /src/ghostpdl/./psi/zpdfops.c:957:16
+    #17 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #18 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #19 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #20 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #21 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #22 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #23 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #24 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #25 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #26 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #27 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #28 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #29 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #30 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #31 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #32 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #33 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #34 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #35 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #36 0x7fccb58b7082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #37 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+0x000001625000 is located 32 bytes to the left of global variable '<string literal>' defined in './base/gsmemory.c:41:1' (0x1625020) of size 13
+  '<string literal>' is ascii string 'gs_gc_root_t'
+0x000001625000 is located 0 bytes to the right of global variable 'st_bytes' defined in './base/gsmemory.c:38:1' (0x1624fc0) of size 64
+SUMMARY: AddressSanitizer: global-buffer-overflow /src/ghostpdl/./pdf/pdf_dict.c:247:25 in pdfi_dict_get
+Shadow bytes around the buggy address:
+  0x0000802bc9b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0000802bc9c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0000802bc9d0: 01 f9 f9 f9 01 f9 f9 f9 01 f9 f9 f9 01 f9 f9 f9
+  0x0000802bc9e0: 01 f9 f9 f9 07 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x0000802bc9f0: f9 f9 f9 f9 06 f9 f9 f9 00 00 00 00 00 00 00 00
+=>0x0000802bca00:[f9]f9 f9 f9 00 05 f9 f9 00 00 00 f9 f9 f9 f9 f9
+  0x0000802bca10: 00 00 00 00 00 00 00 00 f9 f9 f9 f9 00 00 02 f9
+  0x0000802bca20: f9 f9 f9 f9 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+  0x0000802bca30: 04 f9 f9 f9 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0000802bca40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0000802bca50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

@@ -1,0 +1,42 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 805125859
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f959fe5c9e0, 0x7f959fe5ff6c), 959 [0x7f959febda40, 0x7f959febddff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f959fe5ff70,0x7f959fe95830), 959 [0x7f959febde00,0x7f959fec19f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x63380006a598 (pc 0x000000ecd3e0 bp 0x7ffd2b132310 sp 0x7ffd2b132240 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0xecd3e0 in read_xref_stream_entries /src/ghostpdl/./pdf/pdf_xref.c:108:20
+    #1 0xecbbc5 in pdfi_process_xref_stream /src/ghostpdl/./pdf/pdf_xref.c:353:20
+    #2 0xec90f4 in pdfi_read_xref_stream_dict /src/ghostpdl/./pdf/pdf_xref.c:502:32
+    #3 0xec57d3 in pdfi_read_xref /src/ghostpdl/./pdf/pdf_xref.c:1038:20
+    #4 0xeaca4c in pdfi_init_file /src/ghostpdl/./pdf/ghostpdf.c:1051:12
+    #5 0xeaca4c in pdfi_set_input_stream /src/ghostpdl/./pdf/ghostpdf.c:1328:12
+    #6 0xe981b4 in zPDFstream /src/ghostpdl/./psi/zpdfops.c:642:12
+    #7 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #8 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #9 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #10 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #11 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #12 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #13 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #14 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #15 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #16 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #17 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #18 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #19 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #20 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #21 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #22 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #23 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #24 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #25 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #26 0x7f959f856082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #27 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./pdf/pdf_xref.c:108:20 in read_xref_stream_entries
+==1==ABORTING

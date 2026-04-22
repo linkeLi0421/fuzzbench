@@ -1,0 +1,95 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 752832585
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f8c662739e0, 0x7f8c66276f6c), 959 [0x7f8c662d4a40, 0x7f8c662d4dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f8c66276f70,0x7f8c662ac830), 959 [0x7f8c662d4e00,0x7f8c662d89f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f8c6502e520 at pc 0x000000f077e5 bp 0x7ffe91d35af0 sp 0x7ffe91d35ae8
+WRITE of size 4 at 0x7f8c6502e520 thread T0
+    #0 0xf077e4 in pdfi_create_iccbased /src/ghostpdl/./pdf/pdf_colour.c:1152:26
+    #1 0xefbde6 in pdfi_create_colorspace_by_array /src/ghostpdl/./pdf/pdf_colour.c:2332:16
+    #2 0xefc3ca in pdfi_create_colorspace /src/ghostpdl/./pdf/pdf_colour.c:2473:20
+    #3 0xefc3ca in pdfi_setcolorspace /src/ghostpdl/./pdf/pdf_colour.c:2488:12
+    #4 0xfcf829 in pdfi_shading_build /src/ghostpdl/./pdf/pdf_shading.c:667:12
+    #5 0xfd375c in pdfi_shading /src/ghostpdl/./pdf/pdf_shading.c:897:12
+    #6 0xedc278 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1619:24
+    #7 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #8 0xf36fef in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:128:20
+    #9 0xf36fef in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:153:12
+    #10 0xf36fef in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:960:12
+    #11 0xe9c225 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1150:12
+    #12 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #13 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #14 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #15 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #16 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #17 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #18 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #19 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #20 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #21 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #22 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #23 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #24 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #25 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #26 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #27 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #28 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #29 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #30 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #31 0x7f8c65c6d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #32 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+Address 0x7f8c6502e520 is located in stack of thread T0 at offset 288 in frame
+    #0 0xf05d3f in pdfi_create_iccbased /src/ghostpdl/./pdf/pdf_colour.c:1082
+
+  This frame has 13 object(s):
+    [32, 40) 'profile_stream.i' (line 1046)
+    [64, 72) 'profile_buffer.i' (line 1047)
+    [96, 104) 'ICC_obj' (line 1083)
+    [128, 136) 'dict' (line 1084)
+    [160, 168) 'a' (line 1085)
+    [192, 200) 'N' (line 1086)
+    [224, 232) 'Name' (line 1087)
+    [256, 288) 'range' (line 1091) <== Memory access at offset 288 overflows this variable
+    [320, 324) 'icc_N' (line 1092)
+    [336, 344) 'pcs' (line 1093)
+    [368, 376) 'dbl' (line 1125)
+    [400, 664) 'cc' (line 1175)
+    [736, 744) 'Alternate' (line 1192)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ghostpdl/./pdf/pdf_colour.c:1152:26 in pdfi_create_iccbased
+Shadow bytes around the buggy address:
+  0x0ff20c9fdc50: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff20c9fdc60: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff20c9fdc70: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ff20c9fdc80: f1 f1 f1 f1 f8 f2 f2 f2 f8 f2 f2 f2 00 f2 f2 f2
+  0x0ff20c9fdc90: 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2
+=>0x0ff20c9fdca0: 00 00 00 00[f2]f2 f2 f2 04 f2 00 f2 f2 f2 f8 f2
+  0x0ff20c9fdcb0: f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff20c9fdcc0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff20c9fdcd0: f8 f8 f8 f2 f2 f2 f2 f2 f2 f2 f2 f2 f8 f3 f3 f3
+  0x0ff20c9fdce0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff20c9fdcf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

@@ -1,0 +1,54 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1182058921
+INFO: Loaded 3 modules   (183099 inline 8-bit counters): 13708 [0x7f21fa8259e0, 0x7f21fa828f6c), 959 [0x7f21fa886a40, 0x7f21fa886dff), 168432 [0x2dab740, 0x2dd4930), 
+INFO: Loaded 3 PC tables (183099 PCs): 13708 [0x7f21fa828f70,0x7f21fa85e830), 959 [0x7f21fa886e00,0x7f21fa88a9f0), 168432 [0x24d5bf0,0x2767af0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0000009487de bp 0x7ffdafa9e4f0 sp 0x7ffdafa9e3c0 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: address points to the zero page.
+    #0 0x9487de in load_glyph /src/ghostpdl/./base/fapi_ft.c:685:20
+    #1 0x944a44 in gs_fapi_ft_get_char_raster_metrics /src/ghostpdl/./base/fapi_ft.c:1558:9
+    #2 0x9399b2 in gs_fapi_do_char /src/ghostpdl/./base/gxfapi.c:1570:16
+    #3 0x13a5e0d in pdfi_fapi_build_char /src/ghostpdl/./pdf/pdf_fapi.c:1386:12
+    #4 0xa8e026 in show_proceed /src/ghostpdl/./base/gxchar.c:1239:12
+    #5 0xa859e0 in continue_show /src/ghostpdl/./base/gxchar.c:761:12
+    #6 0xa87ecc in gx_show_text_process /src/ghostpdl/./base/gxchar.c:738:12
+    #7 0x921dcf in gs_text_process /src/ghostpdl/./base/gstext.c:696:12
+    #8 0xfcd032 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:516:16
+    #9 0xfcd032 in pdfi_show_Tr_0 /src/ghostpdl/./pdf/pdf_text.c:531:12
+    #10 0xfc75a2 in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:913:24
+    #11 0xfca3f4 in pdfi_TJ /src/ghostpdl/./pdf/pdf_text.c:1268:28
+    #12 0xedcc5b in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1647:24
+    #13 0xedb108 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2118:32
+    #14 0xf36fef in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:128:20
+    #15 0xf36fef in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:153:12
+    #16 0xf36fef in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:960:12
+    #17 0xe9c225 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1150:12
+    #18 0xcfe40b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #19 0xcfe40b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #20 0xcfe40b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #21 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #22 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #23 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #24 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #25 0x10200b1 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #26 0x101c059 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #27 0x1018f3e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #28 0x101fdac in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #29 0xce6a84 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #30 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #31 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #32 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #33 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #34 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #35 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #36 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #37 0x7f21fa21f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #38 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/fapi_ft.c:685:20 in load_glyph
+==1==ABORTING
