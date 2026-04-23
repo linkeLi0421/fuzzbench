@@ -114,6 +114,19 @@ CPPFLAGS="${CPPFLAGS:-} $CUPS_CFLAGS -DPACIFY_VALGRIND" ./autogen.sh \
 # UBSAN_OPTIONS=halt_on_error=0 can take effect.
 find . -name Makefile -exec sed -i 's/-fno-sanitize-recover=[^ ]*//g' {} +
 
+# ghostpdl also re-adds `-fsanitize=undefined` into CFLAGS via autogen,
+# even though we appended -fno-sanitize=shift,null to the env before
+# invoking autogen. The late-added -fsanitize=undefined overrides our
+# negations, and UBSAN fires recoverable "member access within null
+# pointer" in base/gsalloc.c, psi/interp.c, psi/igcstr.c, base/std.h
+# on every input. afl++ pins ASAN_OPTIONS=abort_on_error=1 at runtime,
+# which turns the sanitizer output into SIGABRT, killing every seed
+# during calibration. The transplanted bugs only need ASAN (all are
+# heap/stack/UAF memory errors), so drop UBSAN entirely from the
+# Makefile compile/link lines.
+find . -name Makefile -exec sed -i 's/-fsanitize=undefined//g' {} +
+find . -name Makefile -exec sed -i 's/-fsanitize=[^ ]*undefined[^ ]*//g' {} +
+
 make -j$(nproc) libgs
 
 $CC $CFLAGS -fno-zero-initialized-in-bss -c __bug_dispatch.c -o __bug_dispatch.o
