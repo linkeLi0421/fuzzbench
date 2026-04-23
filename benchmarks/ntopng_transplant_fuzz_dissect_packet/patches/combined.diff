@@ -1,238 +1,43 @@
 diff --git a/fuzz/fuzz_dissect_packet.cpp b/fuzz/fuzz_dissect_packet.cpp
-index 531a13c94..53b5f621d 100644
+index 4abd4de77..176545dcc 100644
 --- a/fuzz/fuzz_dissect_packet.cpp
 +++ b/fuzz/fuzz_dissect_packet.cpp
-@@ -206,7 +206,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
- 
-     pcap_handle = pcap_fopen_offline(fd, pcap_error_buffer);
-     if (pcap_handle == NULL) goto end;
--    iface->set_datalink(pcap_datalink(pcap_handle));
-+    if (__bug_dispatch[0] & (1 << 1)) {
-+        iface->set_datalink(DLT_NULL);
-+    } else {
-+        if (__bug_dispatch[0] & (1 << 2)) {
-+            iface->set_datalink(DLT_NULL);
-+        } else {
-+            iface->set_datalink(pcap_datalink(pcap_handle));
-+        }
+@@ -178,6 +178,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+     memcpy((void *)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
+     data += __BUG_DISPATCH_BYTES;
+     size -= __BUG_DISPATCH_BYTES;
++    if (__bug_dispatch[0] & (1 << 0)) {
++        /* retrigger for OSV-2023-688 (init-time bug) */
++        if (iface && iface->getHostPools()) iface->getHostPools()->reloadPools();
 +    }
-     pcap_setnonblock(pcap_handle, 1, pcap_error_buffer);
  
-     while (pcap_next_ex(pcap_handle, &hdr, &pkt) > 0) {
-diff --git a/src/Flow.cpp b/src/Flow.cpp
-index ac501d1a9..8763f8c46 100644
---- a/src/Flow.cpp
-+++ b/src/Flow.cpp
+     if (size == 0) return -1;
+ 
+diff --git a/src/HostPools.cpp b/src/HostPools.cpp
+index 9453c40cf..dc30c1b68 100644
+--- a/src/HostPools.cpp
++++ b/src/HostPools.cpp
 @@ -20,6 +20,7 @@
   */
  
  #include "ntop_includes.h"
-+#include "../__bug_dispatch.h"
++#include "__bug_dispatch.h"
  
- /* static so default is zero-initialization, let's just define it */
+ // #define HOST_POOLS_DEBUG 1
  
-@@ -1049,7 +1050,12 @@ void Flow::processDNSPacket(const u_char *ip_packet, u_int16_t ip_len,
-           cli_host->incrVisitedWebSite((char *)ndpiFlow->host_server_name);
-         }
+@@ -324,8 +325,13 @@ void HostPools::reloadPools() {
+   if (new_stats[0]) new_stats[0]->updateName(DEFAULT_POOL_NAME);
  
--        char *q = strdup((const char *)ndpiFlow->host_server_name);
-+        char *q;
-+        if (__bug_dispatch[0] & (1 << 0)) {
-+          q = ndpiFlow->host_server_name;
-+        } else {
-+          q = strdup((const char *)ndpiFlow->host_server_name);
-+        }
-         if (q) {
-           if (!setDNSQuery(q))
-             /* Unable to set the DNS query, must free the memory */
-diff --git a/src/NetworkInterface.cpp b/src/NetworkInterface.cpp
-index a8ab6ad79..5a8b46e0b 100644
---- a/src/NetworkInterface.cpp
-+++ b/src/NetworkInterface.cpp
-@@ -19,6 +19,7 @@
-  *
-  */
+   /* Keys are pool ids */
+-  if ((num_pools = redis->smembers(kname, &pools)) == -1)
+-    return; /* Something went wrong with redis? */
++  if ((num_pools = redis->smembers(kname, &pools)) == -1) {
++    if (__bug_dispatch[0] & (1 << 0)) {
++      return delete new_stats; /* Something went wrong with redis? */
++    } else {
++      return; /* Something went wrong with redis? */
++    }
++  }
  
-+#include "../__bug_dispatch.h"
- #include "ntop_includes.h"
- 
- #ifdef __APPLE__
-@@ -2060,65 +2061,137 @@ pre_get_flow:
-               mac->incNumDHCPReplies();
-             }
- 
--            for (u_int32_t i = 240; i < trusted_payload_len;) {
--              u_int8_t id = payload[i], len = payload[i + 1];
-+            if (__bug_dispatch[0] & (1 << 3)) {
-+              for (u_int32_t i = 240; i < trusted_payload_len;) {
-+                u_int8_t id = payload[i], len = payload[i + 1];
- 
--              if (len == 0) break;
-+                if (len == 0) break;
- 
- #ifdef DHCP_DEBUG
--              ntop->getTrace()->traceEvent(TRACE_WARNING,
--                                           "[DHCP] [id=%u][len=%u]", id, len);
-+                ntop->getTrace()->traceEvent(
-+                    TRACE_WARNING, "[DHCP] [id=%u][len=%u]", id, len);
- #endif
- 
--              if (id == 12 /* Host Name */) {
--                char name[64], buf[24], *client_mac, key[64];
--                int j;
-+                if (id == 12 /* Host Name */) {
-+                  char name[64], buf[24], *client_mac, key[64];
-+                  int j;
- 
--                j = ndpi_min(len, sizeof(name) - 1);
--                strncpy((char *)name, (char *)&payload[i + 2], j);
--                name[j] = '\0';
-+                  j = ndpi_min(len, sizeof(name) - 1);
-+                  strncpy((char *)name, (char *)&payload[i + 2], j);
-+                  name[j] = '\0';
- 
--                client_mac = Utils::formatMac(&payload[28], buf, sizeof(buf));
--                ntop->getTrace()->traceEvent(TRACE_INFO, "[DHCP] %s = '%s'",
--                                             client_mac, name);
-+                  client_mac =
-+                      Utils::formatMac(&payload[28], buf, sizeof(buf));
-+                  ntop->getTrace()->traceEvent(TRACE_INFO, "[DHCP] %s = '%s'",
-+                                               client_mac, name);
- 
--                snprintf(key, sizeof(key), DHCP_CACHE, get_id(), client_mac);
--                ntop->getRedis()->set(key, name, 86400 /* 1d duration */);
-+                  snprintf(key, sizeof(key), DHCP_CACHE, get_id(), client_mac);
-+                  ntop->getRedis()->set(key, name, 86400 /* 1d duration */);
- 
--                if ((payload_cli_mac = getMac(
--                         &payload[28], false /* Do not create if missing */,
--                         true /* Inline call */)))
--                  payload_cli_mac->inlineSetDHCPName(name);
-+                  if ((payload_cli_mac = getMac(
-+                           &payload[28], false /* Do not create if missing */,
-+                           true /* Inline call */)))
-+                    payload_cli_mac->inlineSetDHCPName(name);
- 
- #ifdef DHCP_DEBUG
--                ntop->getTrace()->traceEvent(TRACE_WARNING, "[DHCP] %s = '%s'",
--                                             client_mac, name);
-+                  ntop->getTrace()->traceEvent(TRACE_WARNING,
-+                                               "[DHCP] %s = '%s'", client_mac,
-+                                               name);
- #endif
--              } else if ((id == 55 /* Parameters List (Fingerprint) */) &&
--                         flow->get_ndpi_flow()) {
--                char fingerprint[64], buf[32];
--                u_int idx, offset = 0;
-+                } else if ((id == 55 /* Parameters List (Fingerprint) */) &&
-+                           flow->get_ndpi_flow()) {
-+                  char fingerprint[64], buf[32];
-+                  u_int idx, offset = 0;
- 
--                len = ndpi_min(len, sizeof(buf) / 2);
-+                  len = ndpi_min(len, sizeof(buf) / 2);
- 
--                for (idx = 0; idx < len; idx++) {
--                  snprintf((char *)&fingerprint[offset],
--                           sizeof(fingerprint) - offset - 1, "%02X",
--                           payload[i + 2 + idx] & 0xFF);
--                  offset += 2;
--                }
-+                  for (idx = 0; idx < len; idx++) {
-+                    snprintf((char *)&fingerprint[offset],
-+                             sizeof(fingerprint) - offset - 1, "%02X",
-+                             payload[i + 2 + idx] & 0xFF);
-+                    offset += 2;
-+                  }
-+
-+#ifdef DHCP_DEBUG
-+                  ntop->getTrace()->traceEvent(TRACE_WARNING, "%s = %s",
-+                                               mac->print(buf, sizeof(buf)),
-+                                               fingerprint);
-+#endif
-+                  mac->inlineSetFingerprint(
-+                      (char *)flow->get_ndpi_flow()->protos.dhcp.fingerprint);
-+                } else if (id == 0xFF)
-+                  break; /* End of options */
-+
-+                i += len + 2;
-+              }
-+            } else {
-+              for (u_int32_t i = 240; (i + 1) < trusted_payload_len;) {
-+                u_int8_t id = payload[i], len = payload[i + 1];
-+
-+                if (len == 0) break;
-+
-+#ifdef DHCP_DEBUG
-+                ntop->getTrace()->traceEvent(
-+                    TRACE_WARNING, "[DHCP] [id=%u][len=%u]", id, len);
-+#endif
-+
-+                if ((i + 2 + len) < trusted_payload_len) {
-+                  if (id == 12 /* Host Name */) {
-+                    char name[64], buf[24], *client_mac, key[64];
-+                    int j;
-+
-+                    j = ndpi_min(len, sizeof(name) - 1);
-+                    strncpy((char *)name, (char *)&payload[i + 2], j);
-+                    name[j] = '\0';
-+
-+                    client_mac =
-+                        Utils::formatMac(&payload[28], buf, sizeof(buf));
-+                    ntop->getTrace()->traceEvent(TRACE_INFO,
-+                                                 "[DHCP] %s = '%s'",
-+                                                 client_mac, name);
-+
-+                    snprintf(key, sizeof(key), DHCP_CACHE, get_id(),
-+                             client_mac);
-+                    ntop->getRedis()->set(key, name, 86400 /* 1d duration */);
-+
-+                    if ((payload_cli_mac = getMac(
-+                             &payload[28],
-+                             false /* Do not create if missing */,
-+                             true /* Inline call */)))
-+                      payload_cli_mac->inlineSetDHCPName(name);
- 
- #ifdef DHCP_DEBUG
--                ntop->getTrace()->traceEvent(TRACE_WARNING, "%s = %s",
--                                             mac->print(buf, sizeof(buf)),
--                                             fingerprint);
-+                    ntop->getTrace()->traceEvent(
-+                        TRACE_WARNING, "[DHCP] %s = '%s'", client_mac, name);
- #endif
--                mac->inlineSetFingerprint(
--                    (char *)flow->get_ndpi_flow()->protos.dhcp.fingerprint);
--              } else if (id == 0xFF)
--                break; /* End of options */
-+                  } else if ((id == 55 /* Parameters List (Fingerprint) */) &&
-+                             flow->get_ndpi_flow()) {
-+                    char fingerprint[64], buf[32];
-+                    u_int idx, offset = 0;
-+
-+                    len = ndpi_min(len, sizeof(buf) / 2);
-+
-+                    for (idx = 0; idx < len; idx++) {
-+                      snprintf((char *)&fingerprint[offset],
-+                               sizeof(fingerprint) - offset - 1, "%02X",
-+                               payload[i + 2 + idx] & 0xFF);
-+                      offset += 2;
-+                    }
- 
--              i += len + 2;
-+#ifdef DHCP_DEBUG
-+                    ntop->getTrace()->traceEvent(TRACE_WARNING, "%s = %s",
-+                                                 mac->print(buf, sizeof(buf)),
-+                                                 fingerprint);
-+#endif
-+                    mac->inlineSetFingerprint((char *)flow->get_ndpi_flow()
-+                                                  ->protos.dhcp.fingerprint);
-+                  } else if (id == 0xFF)
-+                    break; /* End of options */
-+                } else
-+                  break; /* Invalid length */
-+
-+                i += len + 2;
-+              }
-             }
-           }
-         }
+   for (int i = 0; i < num_pools; i++) {
+     if (!pools[i]) continue;

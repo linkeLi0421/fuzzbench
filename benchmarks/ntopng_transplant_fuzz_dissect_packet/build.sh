@@ -38,6 +38,28 @@ else
     git apply /src/patches/combined.diff
 fi
 
+# ntopng leaks ~33KB in HostPools::HostPools() at process start. FuzzBench's
+# coverage measurer forces ASAN_OPTIONS=detect_leaks=1, which overrides the
+# container env var and makes every snapshot exit non-zero. Inject a binary-
+# wide __lsan_default_options into the harness so snapshots stay clean.
+python3 - <<'PY'
+from pathlib import Path
+p = Path("/src/ntopng/fuzz/fuzz_dissect_packet.cpp")
+text = p.read_text()
+if "__lsan_default_options" not in text:
+    marker = '#include "__bug_dispatch.h"\n'
+    override = (
+        '#include <stdlib.h>\n\n'
+        'extern "C" const char *__lsan_default_options(void) {\n'
+        '    /* ntopng leaks ~33KB in HostPools init; disable LSAN binary-wide so the\n'
+        '     * FuzzBench coverage measurer doesn\'t exit non-zero on every snapshot. */\n'
+        '    return "detect_leaks=0";\n'
+        '}\n\n'
+    )
+    text = text.replace(marker, marker + override, 1)
+    p.write_text(text)
+PY
+
 # --- Original build commands (adapted from ntopng OSS-Fuzz build.sh) ---
 
 # Build static-linked deps with instrumentation disabled — matches the

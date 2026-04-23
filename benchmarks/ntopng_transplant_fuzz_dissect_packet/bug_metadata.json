@@ -4,34 +4,6 @@
   "dispatch_bytes": 1,
   "total_bugs": 18,
   "bugs": {
-    "OSV-2023-688": {
-      "dispatch_value": 1,
-      "triggered": true,
-      "crash_file": "/src/ntopng/src/Flow.cpp",
-      "crash_line": 432,
-      "crash_function": "Flow::~Flow()"
-    },
-    "OSV-2023-1352": {
-      "dispatch_value": 2,
-      "triggered": true,
-      "crash_file": "/src/ntopng/src/Flow.cpp",
-      "crash_line": 6077,
-      "crash_function": "Flow::dissectMDNS(unsigned char*, unsigned short)"
-    },
-    "OSV-2023-1360": {
-      "dispatch_value": 4,
-      "triggered": true,
-      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
-      "crash_line": 2985,
-      "crash_function": "NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
-    },
-    "OSV-2023-1381": {
-      "dispatch_value": 8,
-      "triggered": true,
-      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
-      "crash_line": 2080,
-      "crash_function": "NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
-    },
     "OSV-2023-423": {
       "dispatch_value": 0,
       "triggered": true,
@@ -123,12 +95,40 @@
       "crash_line": 2425,
       "crash_function": "NetworkInterface::guessEthType(unsigned char const*, unsigned int, unsigned char*)"
     },
+    "OSV-2023-1352": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/Flow.cpp",
+      "crash_line": 6071,
+      "crash_function": "Flow::dissectMDNS(unsigned char*, unsigned short)"
+    },
+    "OSV-2023-1360": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2912,
+      "crash_function": "NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
+    },
     "OSV-2023-1375": {
       "dispatch_value": 0,
       "triggered": true,
       "crash_file": "/src/ntopng/src/IEC104Stats.cpp",
       "crash_line": 249,
       "crash_function": "IEC104Stats::processPacket(Flow*, bool, unsigned char const*, unsigned short, timeval*)"
+    },
+    "OSV-2023-1381": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/NetworkInterface.cpp",
+      "crash_line": 2078,
+      "crash_function": "NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)"
+    },
+    "OSV-2023-688": {
+      "dispatch_value": 1,
+      "triggered": true,
+      "crash_file": "/src/ntopng/src/HostPools.cpp",
+      "crash_line": 328,
+      "crash_function": "HostPools::reloadPools()"
     }
   }
 }
