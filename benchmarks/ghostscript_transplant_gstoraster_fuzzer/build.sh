@@ -62,6 +62,18 @@ sed -i '2110s/\(\s\)f->value/\1(int)f->value/' cups/ppd-cache.c
 export CFLAGS="${CFLAGS:-} -Wno-error=implicit-function-declaration"
 export CXXFLAGS="${CXXFLAGS:-} -Wno-error=implicit-function-declaration"
 
+# ghostpdl fires UBSAN "left shift of negative value" in base/std.h:66,
+# base/gxpath.c, base/gspath.c, base/gxcpath.c, psi/imainarg.c and
+# "member access within null pointer" in base/gsalloc.c on every input.
+# afl++ forces ASAN_OPTIONS=abort_on_error=1 when spawning the target,
+# overriding our Dockerfile ENV, so every UBSAN report turns into
+# SIGABRT and afl++ rejects all 1147 seeds with "We need at least one
+# valid input seed that does not crash!". Strip the specific UBSAN
+# instrumentation for those pre-existing patterns — ASAN heap/stack/UAF
+# detection for the transplanted bugs is unaffected.
+export CFLAGS="${CFLAGS} -fno-sanitize=shift,null"
+export CXXFLAGS="${CXXFLAGS} -fno-sanitize=shift,null"
+
 LSB_BUILD=y ./configure --prefix="$WORK" --libdir="$OUT" --disable-gnutls \
    --disable-libusb --with-components=core
 
