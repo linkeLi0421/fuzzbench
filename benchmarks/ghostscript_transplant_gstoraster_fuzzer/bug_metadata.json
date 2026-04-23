@@ -573,7 +573,10 @@
     },
     "OSV-2022-339": {
       "dispatch_value": 0,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./psi/igc.c",
+      "crash_line": 915,
+      "crash_function": "gc_trace"
     },
     "OSV-2022-351": {
       "dispatch_value": 0,
