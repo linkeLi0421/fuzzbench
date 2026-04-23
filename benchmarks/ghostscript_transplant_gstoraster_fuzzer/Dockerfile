@@ -27,6 +27,14 @@ WORKDIR /src/ghostpdl
 
 # Keep ASan stack-use-after-return detection enabled for direct testcase replay.
 ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
+# ghostpdl's startup path fires recoverable UBSAN "left shift of negative
+# value" in base/gsiorom.c, base/gxpath.c, base/gspath.c, psi/imainarg.c, etc.
+# on every run. Without halt_on_error=0 and exitcode=0, afl++ sees exit=1
+# and rejects every seed during calibration ("We need at least one valid
+# input seed that does not crash!"). AFL_SKIP_CRASHES is belt-and-braces
+# so afl++ tolerates any remaining UBSAN abort instead of aborting itself.
+ENV UBSAN_OPTIONS="halt_on_error=0:print_stacktrace=0:exitcode=0"
+ENV AFL_SKIP_CRASHES=1
 
 # Bug transplant patches (re-applied by build.sh after checkout resets source).
 COPY patches/ /src/patches/
