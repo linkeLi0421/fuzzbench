@@ -55,8 +55,14 @@ pushd $SRC/cups
 # Fix bad line
 sed -i '2110s/\(\s\)f->value/\1(int)f->value/' cups/ppd-cache.c
 
-LSB_BUILD=y CFLAGS="${CFLAGS:-} -Wno-error=implicit-function-declaration" \
-  ./configure --prefix="$WORK" --libdir="$OUT" --disable-gnutls \
+# Keep this flag live for the whole build: libafl's clang-17 elevates
+# implicit-function-declaration to an error (e.g. gx_dc_is_pattern2_color
+# in base/gxstroke.c), which the older clang-15 the other fuzzers ship
+# still treats as a warning.
+export CFLAGS="${CFLAGS:-} -Wno-error=implicit-function-declaration"
+export CXXFLAGS="${CXXFLAGS:-} -Wno-error=implicit-function-declaration"
+
+LSB_BUILD=y ./configure --prefix="$WORK" --libdir="$OUT" --disable-gnutls \
    --disable-libusb --with-components=core
 
 make clean
