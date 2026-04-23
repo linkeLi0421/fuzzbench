@@ -114,18 +114,24 @@ CPPFLAGS="${CPPFLAGS:-} $CUPS_CFLAGS -DPACIFY_VALGRIND" ./autogen.sh \
 # UBSAN_OPTIONS=halt_on_error=0 can take effect.
 find . -name Makefile -exec sed -i 's/-fno-sanitize-recover=[^ ]*//g' {} +
 
-# ghostpdl also re-adds `-fsanitize=undefined` into CFLAGS via autogen,
-# even though we appended -fno-sanitize=shift,null to the env before
-# invoking autogen. The late-added -fsanitize=undefined overrides our
-# negations, and UBSAN fires recoverable "member access within null
-# pointer" in base/gsalloc.c, psi/interp.c, psi/igcstr.c, base/std.h
-# on every input. afl++ pins ASAN_OPTIONS=abort_on_error=1 at runtime,
-# which turns the sanitizer output into SIGABRT, killing every seed
-# during calibration. The transplanted bugs only need ASAN (all are
-# heap/stack/UAF memory errors), so drop UBSAN entirely from the
-# Makefile compile/link lines.
+# ghostpdl's autogen also injects a per-check UBSAN list into every
+# Makefile compile rule, of the form:
+#   -fsanitize=array-bounds,bool,builtin,enum,float-divide-by-zero,
+#     function,integer-divide-by-zero,null,object-size,return,
+#     returns-nonnull-attribute,shift,signed-integer-overflow,
+#     unreachable,vla-bound,vptr
+# (NOT the umbrella -fsanitize=undefined form, so matching "undefined"
+# does nothing.)  UBSAN then fires "member access within null pointer"
+# in base/gsalloc.c, psi/interp.c, psi/igcstr.c, base/std.h on every
+# input. afl++ pins ASAN_OPTIONS=abort_on_error=1 at runtime, which
+# turns each UBSAN report into SIGABRT, killing every seed during
+# calibration. The transplanted bugs only need ASAN (all are
+# heap/stack/UAF memory errors), so strip the UBSAN per-check list.
+# The leading `-fsanitize=address` stays, so ASAN instrumentation is
+# unaffected.
+find . -name Makefile -exec sed -i 's/-fsanitize=array-bounds[^ ]*//g' {} +
+# Safety net for the umbrella form in case any future check uses it.
 find . -name Makefile -exec sed -i 's/-fsanitize=undefined//g' {} +
-find . -name Makefile -exec sed -i 's/-fsanitize=[^ ]*undefined[^ ]*//g' {} +
 
 make -j$(nproc) libgs
 
