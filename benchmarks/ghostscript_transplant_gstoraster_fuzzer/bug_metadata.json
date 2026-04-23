@@ -622,7 +622,10 @@
     },
     "OSV-2022-232": {
       "dispatch_value": 0,
-      "triggered": true
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_fapi.c",
+      "crash_line": 1187,
+      "crash_function": "pdfi_fapi_get_glyph"
     }
   }
 }
