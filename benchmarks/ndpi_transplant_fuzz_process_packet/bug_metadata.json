@@ -7,9 +7,9 @@
     "OSV-2020-342": {
       "dispatch_value": 1,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/kerberos.c",
+      "crash_line": 467,
+      "crash_function": "ndpi_search_kerberos_original"
     },
     "OSV-2020-774": {
       "dispatch_value": 2,
@@ -28,9 +28,9 @@
     "OSV-2022-445": {
       "dispatch_value": 8,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/tls.c",
+      "crash_line": 361,
+      "crash_function": "getTLScertificate"
     },
     "OSV-2022-661": {
       "dispatch_value": 16,
@@ -119,9 +119,9 @@
     "OSV-2020-59": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
+      "crash_line": 4061,
+      "crash_function": "check_ndpi_tcp_flow_func"
     },
     "OSV-2020-78": {
       "dispatch_value": 0,
@@ -154,9 +154,9 @@
     "OSV-2020-194": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/yahoo.c",
+      "crash_line": 78,
+      "crash_function": "check_ymsg"
     },
     "OSV-2020-795": {
       "dispatch_value": 0,
@@ -189,37 +189,37 @@
     "OSV-2020-972": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/irc.c",
+      "crash_line": 679,
+      "crash_function": "ndpi_search_irc_tcp"
     },
     "OSV-2020-992": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/oscar.c",
+      "crash_line": 145,
+      "crash_function": "ndpi_search_oscar_tcp_connect"
     },
     "OSV-2020-994": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/tls.c",
+      "crash_line": 430,
+      "crash_function": "getTLScertificate"
     },
     "OSV-2020-1011": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/mail_smtp.c",
+      "crash_line": 177,
+      "crash_function": "ndpi_search_mail_smtp_tcp"
     },
     "OSV-2020-1013": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/amazon_video.c",
+      "crash_line": 39,
+      "crash_function": "ndpi_check_amazon_video"
     },
     "OSV-2020-1015": {
       "dispatch_value": 0,
@@ -231,16 +231,16 @@
     "OSV-2020-1019": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/tls.c",
+      "crash_line": 723,
+      "crash_function": "getTLScertificate"
     },
     "OSV-2020-1074": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/third_party/src/ndpi_sha1.c",
+      "crash_line": 115,
+      "crash_function": "SHA1Transform"
     },
     "OSV-2020-1112": {
       "dispatch_value": 0,
@@ -266,9 +266,9 @@
     "OSV-2020-1133": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/fix.c",
+      "crash_line": 38,
+      "crash_function": "ndpi_search_fix"
     },
     "OSV-2020-1187": {
       "dispatch_value": 0,
@@ -280,30 +280,30 @@
     "OSV-2020-1194": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/mail_smtp.c",
+      "crash_line": 177,
+      "crash_function": "ndpi_search_mail_smtp_tcp"
     },
     "OSV-2020-1233": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/tls.c",
+      "crash_line": 603,
+      "crash_function": "getTLScertificate"
     },
     "OSV-2020-1263": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/protocols/tls.c",
+      "crash_line": 894,
+      "crash_function": "getSSCertificateFingerprint"
     },
     "OSV-2020-1294": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_utils.c",
-      "crash_line": 218,
-      "crash_function": "ndpi_net_match"
+      "crash_file": "/src/ndpi/src/lib/third_party/src/ndpi_sha1.c",
+      "crash_line": 192,
+      "crash_function": "SHA1Update"
     }
   }
 }

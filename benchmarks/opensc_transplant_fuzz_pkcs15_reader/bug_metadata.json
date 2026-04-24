@@ -14,9 +14,9 @@
     "OSV-2020-1981": {
       "dispatch_value": 2,
       "triggered": true,
-      "crash_file": "/src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c",
-      "crash_line": 141,
-      "crash_function": "fuzz_reader_transmit"
+      "crash_file": "/src/opensc/src/libopensc/apdu.c",
+      "crash_line": 379,
+      "crash_function": "sc_single_transmit"
     },
     "OSV-2020-55": {
       "dispatch_value": 4,
