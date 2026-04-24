@@ -1,24 +1,28 @@
-INFO: Seed: 3274967325
-/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-=================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f5e7d507705 at pc 0x0000004a293c bp 0x7ffdb62fee30 sp 0x7ffdb62fe600
-WRITE of size 52545 at 0x7f5e7d507705 thread T0
-    #0 0x4a293b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0x64ac2c in tcos_decipher /src/opensc/src/libopensc/card-tcos.c:654:2
-    #2 0xb766b5 in sc_decipher /src/opensc/src/libopensc/sec.c:46:6
-    #3 0x5a5670 in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
-    #4 0x5a2460 in sc_pkcs15_decipher /src/opensc/src/libopensc/pkcs15-sec.c:284:6
-    #5 0x4e3ed6 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:232:17
-    #6 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #7 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #8 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #9 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #10 0x7f5e7f9ab082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #11 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-Address 0x7f5e7d507705 is located in stack of thread T0 at offset 773 in frame
-    #0 0x64a0cf in tcos_decipher /src/opensc/src/libopensc/card-tcos.c:622
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2202435212
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd3a900, 0xd424b9), 
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xbc4898,0xc40428), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f7b44d07705 at pc 0x000000530c7c bp 0x7ffe62c3be50 sp 0x7ffe62c3b620
+WRITE of size 52545 at 0x7f7b44d07705 thread T0
+    #0 0x530c7b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x6800f9 in tcos_decipher /src/opensc/src/libopensc/card-tcos.c:654:2
+    #2 0xa88d66 in sc_decipher /src/opensc/src/libopensc/sec.c:46:6
+    #3 0x5fc8ed in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
+    #4 0x5fa0d0 in sc_pkcs15_decipher /src/opensc/src/libopensc/pkcs15-sec.c:284:6
+    #5 0x57132d in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:232:17
+    #6 0x4406a3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x42be02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x4316ac in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x45abe2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f7b471c1082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x421fcd in _start (/out/fuzz_pkcs15_reader+0x421fcd)
+
+Address 0x7f7b44d07705 is located in stack of thread T0 at offset 773 in frame
+    #0 0x67f77f in tcos_decipher /src/opensc/src/libopensc/card-tcos.c:622
 
   This frame has 3 object(s):
     [32, 136) 'apdu' (line 624)
@@ -28,17 +32,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x0fec4fa98e90: 00 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98ea0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98eb0: 00 00 00 00 00 00 05 f2 f2 f2 f2 f2 f2 f2 f2 f2
-  0x0fec4fa98ec0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98ed0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x0fec4fa98ee0:[05]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00
-  0x0fec4fa98ef0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98f10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98f20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec4fa98f30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998e90: 00 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998ea0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998eb0: 00 00 00 00 00 00 05 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x0fefe8998ec0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998ed0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0fefe8998ee0:[05]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00
+  0x0fefe8998ef0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998f10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998f20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fefe8998f30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -59,3 +63,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

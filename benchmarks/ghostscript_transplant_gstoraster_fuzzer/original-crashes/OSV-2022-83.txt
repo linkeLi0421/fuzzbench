@@ -1,0 +1,53 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1620520972
+INFO: Loaded 3 modules   (182532 inline 8-bit counters): 13708 [0x7f34f3a3f9e0, 0x7f34f3a42f6c), 959 [0x7f34f3aa0a40, 0x7f34f3aa0dff), 167865 [0x2d96d50, 0x2dbfd09), 
+INFO: Loaded 3 PC tables (182532 PCs): 13708 [0x7f34f3a42f70,0x7f34f3a78830), 959 [0x7f34f3aa0e00,0x7f34f3aa49f0), 167865 [0x24c45d0,0x2754160), 
+/out/gstoraster_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2022-83
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x0000bfff8004 (pc 0x0000006f527b bp 0x7ffcb5ab7b60 sp 0x7ffcb5ab7af0 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x6f527b in chunk_obj_alloc /src/ghostpdl/./base/gsmchunk.c:800:20
+    #1 0x6f47e8 in chunk_alloc_bytes /src/ghostpdl/./base/gsmchunk.c:982:12
+    #2 0xfb270f in cmap_endfbrange_func /src/ghostpdl/./pdf/pdf_cmap.c:331:50
+    #3 0xf93760 in pdfi_pscript_interpret /src/ghostpdl/./pdf/pdf_fontps.c:362:36
+    #4 0xfae297 in pdfi_read_cmap /src/ghostpdl/./pdf/pdf_cmap.c:810:12
+    #5 0xf6be54 in pdfi_read_type0_font /src/ghostpdl/./pdf/pdf_font0.c:260:20
+    #6 0xf5c4c4 in pdfi_load_font /src/ghostpdl/./pdf/pdf_font.c:656:16
+    #7 0xf62074 in pdfi_load_dict_font /src/ghostpdl/./pdf/pdf_font.c:824:16
+    #8 0xf666f5 in pdfi_load_resource_font /src/ghostpdl/./pdf/pdf_font.c:864:12
+    #9 0xf666f5 in pdfi_Tf /src/ghostpdl/./pdf/pdf_font.c:1310:12
+    #10 0xeda923 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1624:24
+    #11 0xed8e48 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #12 0xf33bbf in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #13 0xf33bbf in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #14 0xf33bbf in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #15 0xe9af65 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #16 0xcfe43b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #17 0xcfe43b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #18 0xcfe43b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #19 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #20 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #21 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #22 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #23 0x101c911 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #24 0x1018949 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #25 0x101582e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #26 0x101c699 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #27 0xce6ab4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #28 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #29 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #30 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #31 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #32 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #33 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #34 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #35 0x7f34f343c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #36 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: chunk_obj_alloc--chunk_alloc_bytes--cmap_endfbrange_func
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/gsmchunk.c:800:20 in chunk_obj_alloc
+==1==ABORTING

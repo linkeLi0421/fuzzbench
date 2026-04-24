@@ -1,0 +1,27 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 195157603
+INFO: Loaded 1 modules   (556695 inline 8-bit counters): 556695 [0x4b2a7e0, 0x4bb2677), 
+INFO: Loaded 1 PC tables (556695 PCs): 556695 [0x4001148,0x487fab8), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2023-316
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==8338==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x000001237124 bp 0x7ffcb0169290 sp 0x7ffcb0169270 T0)
+==8338==The signal is caused by a READ memory access.
+==8338==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x1237124 in dwg_ref_get_object /src/libredwg/src/dwg_api.c:21977:17
+    #1 0x28ccbb7 in dwg_geojson_feature /src/libredwg/src/out_geojson.c:518:25
+    #2 0x28c2d17 in dwg_geojson_object /src/libredwg/src/out_geojson.c:879:9
+    #3 0x28c199e in geojson_entities_write /src/libredwg/src/out_geojson.c:922:17
+    #4 0x28c064b in dwg_write_geojson /src/libredwg/src/out_geojson.c:950:7
+    #5 0x56cb30 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:199:7
+    #6 0x43def3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x429652 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x42eefc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x458432 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7fd60082e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x41f81d in _start (/out/llvmfuzz+0x41f81d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/dwg_api.c:21977:17 in dwg_ref_get_object
+==8338==ABORTING

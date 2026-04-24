@@ -1,28 +1,32 @@
-INFO: Seed: 3304336319
-/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-=================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffe1054cd62 at pc 0x0000004a293c bp 0x7ffe1053c250 sp 0x7ffe1053ba20
-WRITE of size 28 at 0x7ffe1054cd62 thread T0
-    #0 0x4a293b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0xbac430 in sc_get_response /src/opensc/src/libopensc/apdu.c:475:3
-    #2 0xba6ca2 in sc_transmit /src/opensc/src/libopensc/apdu.c:532:7
-    #3 0xba5c6e in sc_transmit_apdu /src/opensc/src/libopensc/apdu.c:624:7
-    #4 0xb803ac in iso7816_read_binary /src/opensc/src/libopensc/iso7816.c:156:6
-    #5 0xa53c14 in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:557:8
-    #6 0x504acc in sc_read_binary /src/opensc/src/libopensc/card.c:652:7
-    #7 0x530d40 in sc_pkcs15_bind_internal /src/opensc/src/libopensc/pkcs15.c:1130:9
-    #8 0x5379b1 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1265:8
-    #9 0x4e3a6f in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
-    #10 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #11 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #12 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #13 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #14 0x7fd0d5819082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #15 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-Address 0x7ffe1054cd62 is located in stack of thread T0 at offset 65570 in frame
-    #0 0xa52dff in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:528
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2200451731
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd3a900, 0xd424b9), 
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xbc4898,0xc40428), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffef46d36e2 at pc 0x000000530c7c bp 0x7ffef46c2a50 sp 0x7ffef46c2220
+WRITE of size 28 at 0x7ffef46d36e2 thread T0
+    #0 0x530c7b in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0xab4713 in sc_get_response /src/opensc/src/libopensc/apdu.c:475:3
+    #2 0xab089b in sc_transmit /src/opensc/src/libopensc/apdu.c:532:7
+    #3 0xaafc23 in sc_transmit_apdu /src/opensc/src/libopensc/apdu.c:624:7
+    #4 0xa90764 in iso7816_read_binary /src/opensc/src/libopensc/iso7816.c:156:6
+    #5 0x9b24fb in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:557:8
+    #6 0x588935 in sc_read_binary /src/opensc/src/libopensc/card.c:652:7
+    #7 0x5a84b2 in sc_pkcs15_bind_internal /src/opensc/src/libopensc/pkcs15.c:1130:9
+    #8 0x5acdb8 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1265:8
+    #9 0x570f84 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #10 0x4406a3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #11 0x42be02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #12 0x4316ac in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #13 0x45abe2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7f7004567082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #15 0x421fcd in _start (/out/fuzz_pkcs15_reader+0x421fcd)
+
+Address 0x7ffef46d36e2 is located in stack of thread T0 at offset 65570 in frame
+    #0 0x9b1abf in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:528
 
   This frame has 1 object(s):
     [32, 65570) 'buffer' (line 540) <== Memory access at offset 65570 overflows this variable
@@ -30,17 +34,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x1000420a1950: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000420a1960: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000420a1970: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000420a1980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000420a1990: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x1000420a19a0: 00 00 00 00 00 00 00 00 00 00 00 00[02]f3 f3 f3
-  0x1000420a19b0: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x1000420a19c0: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x1000420a19d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000420a19e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000420a19f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d2680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d2690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d26a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d26b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d26c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x10005e8d26d0: 00 00 00 00 00 00 00 00 00 00 00 00[02]f3 f3 f3
+  0x10005e8d26e0: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x10005e8d26f0: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x10005e8d2700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d2710: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10005e8d2720: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -61,3 +65,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

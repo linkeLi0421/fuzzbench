@@ -1,0 +1,69 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3575743738
+INFO: Loaded 1 modules   (12858 inline 8-bit counters): 12858 [0x96b8a0, 0x96eada), 
+INFO: Loaded 1 PC tables (12858 PCs): 12858 [0x96eae0,0x9a0e80), 
+/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2020-49
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6040000000ba at pc 0x0000005fc60e bp 0x7ffd1777c930 sp 0x7ffd1777c928
+READ of size 1 at 0x6040000000ba thread T0
+    #0 0x5fc60d in ndpi_netbios_name_interpret /src/ndpi/src/lib/protocols/netbios.c:42:10
+    #1 0x5fc60d in ndpi_int_netbios_add_connection /src/ndpi/src/lib/protocols/netbios.c:80:8
+    #2 0x5fc60d in ndpi_search_netbios /src/ndpi/src/lib/protocols/netbios.c:345:4
+    #3 0x571453 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:3965:7
+    #4 0x5829d8 in ndpi_check_flow_func /src/ndpi/src/lib/ndpi_main.c:4068:5
+    #5 0x5829d8 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4763:3
+    #6 0x553751 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:25:5
+    #7 0x457c73 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_process_packet+0x457c73)
+    #8 0x443542 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #9 0x44914e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_process_packet+0x44914e)
+    #10 0x4728e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fe94817682f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2082f)
+    #12 0x41e7e8 in _start (/out/fuzz_process_packet+0x41e7e8)
+
+0x6040000000ba is located 0 bytes to the right of 42-byte region [0x604000000090,0x6040000000ba)
+allocated by thread T0 here:
+    #0 0x5205ad in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
+    #1 0x438e67 in operator new(unsigned long) (/out/fuzz_process_packet+0x438e67)
+    #2 0x443542 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #3 0x44914e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_process_packet+0x44914e)
+    #4 0x4728e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7fe94817682f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2082f)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/netbios.c:42:10 in ndpi_netbios_name_interpret
+Shadow bytes around the buggy address:
+  0x0c087fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c087fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c087fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c087fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c087fff8000: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 02
+=>0x0c087fff8010: fa fa 00 00 00 00 00[02]fa fa 00 00 00 00 00 05
+  0x0c087fff8020: fa fa 00 00 00 00 01 fa fa fa 00 00 00 00 07 fa
+  0x0c087fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

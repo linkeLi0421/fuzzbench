@@ -1,0 +1,47 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1547178607
+INFO: Loaded 1 modules   (23070 inline 8-bit counters): 23070 [0x55bc9a53bc60, 0x55bc9a54167e), 
+INFO: Loaded 1 PC tables (23070 PCs): 23070 [0x55bc9a541680,0x55bc9a59b860), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /work/testcase-OSV-2023-573
+=================================================================
+==1648094==ERROR: AddressSanitizer: negative-size-param: (size=-1)
+    #0 0x55bc9a197816 in strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:631:5
+    #1 0x55bc9a27e484 in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:79:2
+    #2 0x55bc9a27e484 in ndpi_int_http_add_connection /src/ndpi/src/lib/protocols/http.c:122:14
+    #3 0x55bc9a27d913 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c
+    #4 0x55bc9a27b8c6 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
+    #5 0x55bc9a27b8c6 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:844:3
+    #6 0x55bc9a22a50a in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4117:2
+    #7 0x55bc9a231e69 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4879:3
+    #8 0x55bc9a20338b in packet_processing /src/ndpi/example/reader_util.c:1339:31
+    #9 0x55bc9a20338b in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1762:10
+    #10 0x55bc9a1f4b96 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:83:5
+    #11 0x55bc9a09202d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #12 0x55bc9a07cda2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #13 0x55bc9a082c70 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #14 0x55bc9a0ae7a2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f0cf69f6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #16 0x55bc9a075e8d in _start (/out/fuzz_ndpi_reader+0x1ffe8d)
+
+0x7b2cf5c25cf0 is located 0 bytes inside of 1-byte region [0x7b2cf5c25cf0,0x7b2cf5c25cf1)
+allocated by thread T0 here:
+    #0 0x55bc9a1b0984 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x55bc9a27e460 in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:77:19
+    #2 0x55bc9a27e460 in ndpi_int_http_add_connection /src/ndpi/src/lib/protocols/http.c:122:14
+    #3 0x55bc9a27d913 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c
+    #4 0x55bc9a27b8c6 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
+    #5 0x55bc9a27b8c6 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:844:3
+    #6 0x55bc9a22a50a in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4117:2
+    #7 0x55bc9a231e69 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4879:3
+    #8 0x55bc9a20338b in packet_processing /src/ndpi/example/reader_util.c:1339:31
+    #9 0x55bc9a20338b in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1762:10
+    #10 0x55bc9a1f4b96 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:83:5
+    #11 0x55bc9a09202d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #12 0x55bc9a07cda2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #13 0x55bc9a082c70 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #14 0x55bc9a0ae7a2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f0cf69f6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+SUMMARY: AddressSanitizer: negative-size-param /src/ndpi/src/lib/protocols/http.c:79:2 in ndpi_http_check_content
+==1648094==ABORTING

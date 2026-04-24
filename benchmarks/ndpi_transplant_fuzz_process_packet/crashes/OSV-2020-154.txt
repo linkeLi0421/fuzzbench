@@ -1,44 +1,48 @@
-INFO: Seed: 4258306539
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-=================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000139 at pc 0x0000005134c2 bp 0x7ffd44754f30 sp 0x7ffd44754f28
-READ of size 1 at 0x604000000139 thread T0
-    #0 0x5134c1 in search_valid_dns /src/ndpi/src/lib/protocols/dns.c:142:10
-    #1 0x5134c1 in ndpi_search_dns /src/ndpi/src/lib/protocols/dns.c:253:19
-    #2 0x4f4030 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
-    #3 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
-    #4 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
-    #5 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #6 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #7 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #8 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #9 0x7fd895c5b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #10 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
 
-0x604000000139 is located 0 bytes to the right of 41-byte region [0x604000000110,0x604000000139)
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2363623626
+INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
+INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
+/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6040000000f9 at pc 0x0000005b53c9 bp 0x7ffcca3bcaf0 sp 0x7ffcca3bcae8
+READ of size 1 at 0x6040000000f9 thread T0
+    #0 0x5b53c8 in search_valid_dns /src/ndpi/src/lib/protocols/dns.c:142:10
+    #1 0x5b53c8 in ndpi_search_dns /src/ndpi/src/lib/protocols/dns.c:253:19
+    #2 0x58a050 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
+    #3 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #4 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
+    #5 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f5d648b5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
+
+0x6040000000f9 is located 0 bytes to the right of 41-byte region [0x6040000000d0,0x6040000000f9)
 allocated by thread T0 here:
-    #0 0x4a0ca6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0x4de209 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
-    #2 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #3 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #4 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #5 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #6 0x7fd895c5b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #0 0x52efb6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x56c52e in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
+    #2 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #6 0x7f5d648b5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/dns.c:142:10 in search_valid_dns
 Shadow bytes around the buggy address:
+  0x0c087fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c087fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c087fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c087fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c087fff8000: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 00
-  0x0c087fff8010: fa fa 00 00 00 00 00 03 fa fa 00 00 00 00 00 03
-=>0x0c087fff8020: fa fa 00 00 00 00 00[01]fa fa 00 00 00 00 00 05
-  0x0c087fff8030: fa fa 00 00 00 00 01 fa fa fa 00 00 00 00 07 fa
+  0x0c087fff8000: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 03
+=>0x0c087fff8010: fa fa 00 00 00 00 00 03 fa fa 00 00 00 00 00[01]
+  0x0c087fff8020: fa fa 00 00 00 00 00 05 fa fa 00 00 00 00 01 fa
+  0x0c087fff8030: fa fa 00 00 00 00 07 fa fa fa fa fa fa fa fa fa
   0x0c087fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c087fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c087fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c087fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -59,3 +63,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

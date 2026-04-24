@@ -1,0 +1,94 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3210849762
+INFO: Loaded 3 modules   (221252 inline 8-bit counters): 13672 [0x7fe9485649e0, 0x7fe948567f48), 959 [0x7fe9485c5a40, 0x7fe9485c5dff), 206621 [0x37df330, 0x3811a4d), 
+INFO: Loaded 3 PC tables (221252 PCs): 13672 [0x7fe948567f48,0x7fe94859d5c8), 959 [0x7fe9485c5e00,0x7fe9485c99f0), 206621 [0x2a52210,0x2d793e0), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2023-88
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fe945945860 at pc 0x00000111876a bp 0x7ffe97f06b30 sp 0x7ffe97f06b28
+WRITE of size 1 at 0x7fe945945860 thread T0
+    #0 0x1118769 in pdfi_read_cff_real /src/ghostpdl/./pdf/pdf_font1C.c:739:10
+    #1 0x1118769 in pdfi_read_cff_dict /src/ghostpdl/./pdf/pdf_font1C.c:1129:21
+    #2 0x1118588 in pdfi_read_cff_dict /src/ghostpdl/./pdf/pdf_font1C.c:1172:20
+    #3 0x11063b3 in pdfi_read_cff /src/ghostpdl/./pdf/pdf_font1C.c:1680:12
+    #4 0x11063b3 in pdfi_read_cff_font /src/ghostpdl/./pdf/pdf_font1C.c:2285:16
+    #5 0x10e46c7 in pdfi_load_font_buffer /src/ghostpdl/./pdf/pdf_font.c:624:24
+    #6 0x10e2ee7 in pdfi_load_font /src/ghostpdl/./pdf/pdf_font.c:924:24
+    #7 0x10e9b59 in pdfi_load_dict_font /src/ghostpdl/./pdf/pdf_font.c:1006:20
+    #8 0x10ed0d9 in pdfi_load_resource_font /src/ghostpdl/./pdf/pdf_font.c:1048:12
+    #9 0x10ed0d9 in pdfi_Tf /src/ghostpdl/./pdf/pdf_font.c:1407:12
+    #10 0x1056df9 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1642:24
+    #11 0x10550ce in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2126:24
+    #12 0x10b71de in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:127:20
+    #13 0x10b71de in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:152:12
+    #14 0x10b71de in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:953:12
+    #15 0x101353f in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1157:24
+    #16 0xe845b9 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #17 0xe845b9 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #18 0xe845b9 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #19 0x577123 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #20 0x577123 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #21 0x577123 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #22 0x5726b1 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #23 0x11b5f3c in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #24 0x11b2062 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #25 0x11aefae in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #26 0x11b5cc8 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #27 0xe6d0c2 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #28 0x56ebda in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #29 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #30 0x56e0cf in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:18:2
+    #31 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #32 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #33 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #34 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #35 0x7fe947f67082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #36 0x420aed in _start (/out/gs_device_pdfwrite_fuzzer+0x420aed)
+
+DEDUP_TOKEN: pdfi_read_cff_real--pdfi_read_cff_dict--pdfi_read_cff_dict
+Address 0x7fe945945860 is located in stack of thread T0 at offset 96 in frame
+    #0 0x11153df in pdfi_read_cff_dict /src/ghostpdl/./pdf/pdf_font1C.c:802
+
+DEDUP_TOKEN: pdfi_read_cff_dict
+  This frame has 3 object(s):
+    [32, 96) 'buf.i' (line 686) <== Memory access at offset 96 overflows this variable
+    [128, 512) 'args' (line 804)
+    [576, 584) 'fnamestr' (line 950)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ghostpdl/./pdf/pdf_font1C.c:739:10 in pdfi_read_cff_real
+Shadow bytes around the buggy address:
+  0x0ffda8b20ab0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffda8b20ac0: f2 f2 f2 f2 f2 f2 f2 f2 f8 f3 f3 f3 00 00 00 00
+  0x0ffda8b20ad0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffda8b20ae0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffda8b20af0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0ffda8b20b00: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f2]f2 f2 f2
+  0x0ffda8b20b10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffda8b20b20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffda8b20b30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffda8b20b40: f2 f2 f2 f2 f2 f2 f2 f2 f8 f3 f3 f3 00 00 00 00
+  0x0ffda8b20b50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

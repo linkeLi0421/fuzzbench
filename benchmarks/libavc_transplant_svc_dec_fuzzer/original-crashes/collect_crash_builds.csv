@@ -1,0 +1,5 @@
+target,commit_id,oss_fuzz_commit,sanitizer
+libavc,c38af025abf0040f6693d15f4ce2e878a728cfee,auto,address
+libavc,2f6371b3b8d69ee596fa44c48ca522db27f6f22f,52ee750b71ece22fb67cd0285b6f6b2ce69c6bac,address
+libavc,72315c11ac595a73d3b629cc36647327156d5875,auto,address
+libavc,7f19ac220647a58262bf08262049f7340030e1bf,auto,address

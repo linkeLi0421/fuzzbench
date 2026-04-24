@@ -1,0 +1,65 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3189420857
+INFO: Loaded 3 modules   (221252 inline 8-bit counters): 13672 [0x7f5698a249e0, 0x7f5698a27f48), 959 [0x7f5698a85a40, 0x7f5698a85dff), 206621 [0x37df330, 0x3811a4d), 
+INFO: Loaded 3 PC tables (221252 PCs): 13672 [0x7f5698a27f48,0x7f5698a5d5c8), 959 [0x7f5698a85e00,0x7f5698a899f0), 206621 [0x2a52210,0x2d793e0), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2022-855
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x633000071468 (pc 0x00000173054d bp 0x7fff5d4eaa90 sp 0x7fff5d4ea9e0 T0)
+==1==The signal is caused by a WRITE memory access.
+    #0 0x173054d in Ins_ISECT /src/ghostpdl/./base/ttinterp.c:4106:28
+    #1 0x172c22f in RunIns /src/ghostpdl/./base/ttinterp.c:5078:7
+    #2 0x16634e6 in Instance_Reset /src/ghostpdl/./base/ttobjs.c:831:15
+    #3 0x1651377 in TT_Set_Instance_CharSizes /src/ghostpdl/./base/ttfmain.c:138:12
+    #4 0x16530ea in ttfFont__Open /src/ghostpdl/./base/ttfmain.c:348:12
+    #5 0x1266e5d in ttfFont__Open_aux /src/ghostpdl/./base/gxttfb.c:448:12
+    #6 0xc32cd3 in gx_attach_tt_interpreter /src/ghostpdl/./base/gxccman.c:249:12
+    #7 0xc328fc in gx_provide_fm_pair_attributes /src/ghostpdl/./base/gxccman.c:276:16
+    #8 0x125c5de in gs_type42_glyph_outline /src/ghostpdl/./base/gstype42.c:1349:9
+    #9 0xa958a4 in gs_default_glyph_info /src/ghostpdl/./base/gsfont.c:1061:12
+    #10 0x1261cae in gs_type42_glyph_info_by_gid /src/ghostpdl/./base/gstype42.c:1378:16
+    #11 0x125caf8 in gs_type42_glyph_info /src/ghostpdl/./base/gstype42.c:1449:12
+    #12 0x14d860e in process_text_estimate_bbox /src/ghostpdl/./devices/vector/gdevpdte.c:689:16
+    #13 0x14d860e in pdf_process_string /src/ghostpdl/./devices/vector/gdevpdte.c:856:16
+    #14 0x14d860e in pdf_process_string_aux /src/ghostpdl/./devices/vector/gdevpdte.c:81:12
+    #15 0x14e2d5d in process_plain_text /src/ghostpdl/./devices/vector/gdevpdte.c:1841:16
+    #16 0x951f77 in pdf_text_process /src/ghostpdl/./devices/vector/gdevpdtt.c:3752:16
+    #17 0xaf4e9e in gs_text_process /src/ghostpdl/./base/gstext.c:670:12
+    #18 0x1154562 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:445:16
+    #19 0x1154562 in pdfi_show_Tr_preserve /src/ghostpdl/./pdf/pdf_text.c:780:12
+    #20 0x1154562 in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:830:16
+    #21 0x1156dce in pdfi_TJ /src/ghostpdl/./pdf/pdf_text.c:1190:20
+    #22 0x1056da1 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1650:24
+    #23 0x10550ce in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2126:24
+    #24 0x10b71de in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:127:20
+    #25 0x10b71de in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:152:12
+    #26 0x10b71de in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:953:12
+    #27 0x101353f in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1157:24
+    #28 0xe845b9 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #29 0xe845b9 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #30 0xe845b9 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #31 0x577123 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #32 0x577123 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #33 0x577123 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #34 0x5726b1 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #35 0x11b5f3c in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #36 0x11b2062 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #37 0x11aefae in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #38 0x11b5cc8 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #39 0xe6d0c2 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #40 0x56ebda in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #41 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #42 0x56e0cf in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:18:2
+    #43 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #44 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #45 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #46 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #47 0x7f5698427082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #48 0x420aed in _start (/out/gs_device_pdfwrite_fuzzer+0x420aed)
+
+DEDUP_TOKEN: Ins_ISECT--RunIns--Instance_Reset
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/ttinterp.c:4106:28 in Ins_ISECT
+==1==ABORTING

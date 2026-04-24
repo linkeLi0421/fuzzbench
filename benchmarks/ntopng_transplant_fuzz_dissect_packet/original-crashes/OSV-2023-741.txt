@@ -1,0 +1,67 @@
+23/Apr/2026 23:03:40 [NetworkInterface.cpp:2421] WARNING: If TSO/GRO is enabled, please disable it for best accuracy
+23/Apr/2026 23:03:40 [NetworkInterface.cpp:2426] WARNING: using: sudo ethtool -K custom gro off gso off tso off
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2831404545
+INFO: Loaded 1 modules   (41552 inline 8-bit counters): 41552 [0xef1d70, 0xefbfc0), 
+INFO: Loaded 1 PC tables (41552 PCs): 41552 [0xc8a028,0xd2c528), 
+/out/fuzz_dissect_packet: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2023-741
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60c0000021bf at pc 0x00000066195f bp 0x7ffded2bc950 sp 0x7ffded2bc948
+READ of size 1 at 0x60c0000021bf thread T0
+    #0 0x66195e in setBittorrentHash /src/ntopng/src/Flow.cpp:5516:16
+    #1 0x66195e in Flow::dissectBittorrent(char*, unsigned short) /src/ntopng/src/Flow.cpp:5534:19
+    #2 0x76c102 in NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2145:17
+    #3 0x774fc5 in NetworkInterface::dissectPacket(unsigned int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2820:26
+    #4 0x5781e8 in LLVMFuzzerTestOneInput /src/ntopng/fuzz/fuzz_dissect_packet.cpp:197:16
+    #5 0x448f53 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x4346b2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x439f5c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x463492 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7fdd3d0c7082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x42a87d in _start (/out/fuzz_dissect_packet+0x42a87d)
+
+DEDUP_TOKEN: setBittorrentHash--Flow::dissectBittorrent(char*, unsigned short)--NetworkInterface::processPacket(unsigned int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)
+0x60c0000021bf is located 0 bytes to the right of 127-byte region [0x60c000002140,0x60c0000021bf)
+allocated by thread T0 here:
+    #0 0x53a4ec in __interceptor_realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3
+    #1 0x95a6b1 in grow_buffer /src/libpcap-1.9.1/./sf-pcap.c:426:18
+    #2 0x95a6b1 in pcap_next_packet /src/libpcap-1.9.1/./sf-pcap.c:604:9
+
+DEDUP_TOKEN: __interceptor_realloc--grow_buffer--pcap_next_packet
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ntopng/src/Flow.cpp:5516:16 in setBittorrentHash
+Shadow bytes around the buggy address:
+  0x0c187fff83e0: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x0c187fff83f0: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x0c187fff8400: fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa fa
+  0x0c187fff8410: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x0c187fff8420: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x0c187fff8430: 00 00 00 00 00 00 00[07]fa fa fa fa fa fa fa fa
+  0x0c187fff8440: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8450: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8460: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8470: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

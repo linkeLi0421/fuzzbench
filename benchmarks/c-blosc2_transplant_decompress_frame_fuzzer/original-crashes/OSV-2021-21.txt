@@ -1,0 +1,30 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4032477784
+INFO: Loaded 1 modules   (26363 inline 8-bit counters): 26363 [0x56450be31b60, 0x56450be3825b), 
+INFO: Loaded 1 PC tables (26363 PCs): 26363 [0x56450be38260,0x56450be9f210), 
+/out/decompress_frame_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-21
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==384==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x56450bb61a78 bp 0x7ffcf5eada70 sp 0x7ffcf5ead980 T0)
+==384==The signal is caused by a READ memory access.
+==384==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x56450bb61a78 in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:1691:24
+    #1 0x56450bb6562b in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2187:20
+    #2 0x56450bb564c5 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:556:17
+    #3 0x56450bb02615 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:33:15
+    #4 0x56450b99fe5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #5 0x56450b98abd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #6 0x56450b990aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #7 0x56450b9bc5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7fa5ba68a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #9 0x56450b983cbd in _start (/out/decompress_frame_fuzzer+0xe3cbd)
+
+==384==Register values:
+rax = 0x00a00fceb733d578  rbx = 0x00007ffcf5ead980  rcx = 0x00007ba5b84ee00b  rdx = 0x00000f75370f6080  
+rdi = 0x05007e75b99eabc0  rsi = 0x0000000200000000  rbp = 0x00007ffcf5eada70  rsp = 0x00007ffcf5ead980  
+ r8 = 0x0000000000000002   r9 = 0x00007de5b99e0000  r10 = 0x00007fffffffff01  r11 = 0x0000000000000001  
+r12 = 0x0500000000000758  r13 = 0x000000000000005c  r14 = 0x00007ba5b85f0240  r15 = 0x00007ba5b87f0400  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/frame.c:1691:24 in frame_get_lazychunk
+==384==ABORTING

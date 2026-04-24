@@ -27,6 +27,14 @@ WORKDIR /src/ghostpdl
 
 # Keep ASan stack-use-after-return detection enabled for direct testcase replay.
 ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
+
+# Raise libFuzzer's per-alloc / RSS cap from its 2048MB default. Some
+# transplanted bugs trigger a ~2GB malloc en route to the real memory-safety
+# error; with the default cap libFuzzer aborts with `out-of-memory` and
+# `-ignore_ooms=1` silently drops it. libFuzzer-family runners in
+# fuzzbench/fuzzers/*/fuzzer.py splice $ADDITIONAL_ARGS onto the target
+# command line, so this propagates automatically.
+ENV ADDITIONAL_ARGS="-rss_limit_mb=8192"
 # ghostpdl's startup path fires recoverable UBSAN "left shift of negative
 # value" in base/gsiorom.c, base/gxpath.c, base/gspath.c, psi/imainarg.c, etc.
 # on every run. Without halt_on_error=0 and exitcode=0, afl++ sees exit=1

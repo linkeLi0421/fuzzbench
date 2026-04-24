@@ -1,0 +1,100 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1591050203
+INFO: Loaded 3 modules   (182532 inline 8-bit counters): 13708 [0x7f32be3179e0, 0x7f32be31af6c), 959 [0x7f32be378a40, 0x7f32be378dff), 167865 [0x2d96d50, 0x2dbfd09), 
+INFO: Loaded 3 PC tables (182532 PCs): 13708 [0x7f32be31af70,0x7f32be350830), 959 [0x7f32be378e00,0x7f32be37c9f0), 167865 [0x24c45d0,0x2754160), 
+/out/gstoraster_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-1806
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f32bcc2b020 at pc 0x0000004bea81 bp 0x7ffdf267faf0 sp 0x7ffdf267f2b0
+WRITE of size 5575 at 0x7f32bcc2b020 thread T0
+    #0 0x4bea80 in __interceptor_memcpy /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5
+    #1 0xf5eaff in pdfi_open_CIDFont_substitute_file /src/ghostpdl/./pdf/pdf_font.c:332:9
+    #2 0xf5d004 in pdfi_load_font /src/ghostpdl/./pdf/pdf_font.c:761:29
+    #3 0xf6c166 in pdfi_read_type0_font /src/ghostpdl/./pdf/pdf_font0.c:277:16
+    #4 0xf5c4c4 in pdfi_load_font /src/ghostpdl/./pdf/pdf_font.c:656:16
+    #5 0xf62074 in pdfi_load_dict_font /src/ghostpdl/./pdf/pdf_font.c:824:16
+    #6 0xf666f5 in pdfi_load_resource_font /src/ghostpdl/./pdf/pdf_font.c:864:12
+    #7 0xf666f5 in pdfi_Tf /src/ghostpdl/./pdf/pdf_font.c:1310:12
+    #8 0xeda923 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1624:24
+    #9 0xed8e48 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #10 0xf33bbf in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #11 0xf33bbf in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #12 0xf33bbf in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #13 0xe9af65 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #14 0xcfe43b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #15 0xcfe43b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #16 0xcfe43b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #17 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #18 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #19 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #20 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #21 0x101c911 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #22 0x1018949 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #23 0x101582e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #24 0x101c699 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #25 0xce6ab4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #26 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #27 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #28 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #29 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #30 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #31 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #32 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #33 0x7f32bdd14082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #34 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: __interceptor_memcpy--pdfi_open_CIDFont_substitute_file--pdfi_load_font
+Address 0x7f32bcc2b020 is located in stack of thread T0 at offset 4128 in frame
+    #0 0xf5e39f in pdfi_open_CIDFont_substitute_file /src/ghostpdl/./pdf/pdf_font.c:169
+
+DEDUP_TOKEN: pdfi_open_CIDFont_substitute_file
+  This frame has 11 object(s):
+    [32, 4128) 'fontfname' (line 171)
+    [4256, 4264) 's' (line 172) <== Memory access at offset 4128 partially underflows this variable
+    [4288, 4296) 'cidname' (line 173) <== Memory access at offset 4128 partially underflows this variable
+    [4320, 4336) 'fname' (line 174) <== Memory access at offset 4128 partially underflows this variable
+    [4352, 4360) 'mname' (line 179) <== Memory access at offset 4128 partially underflows this variable
+    [4384, 4392) 'csi' (line 180) <== Memory access at offset 4128 partially underflows this variable
+    [4416, 4424) 'csi_reg' (line 184) <== Memory access at offset 4128 partially underflows this variable
+    [4448, 4456) 'csi_ord' (line 184) <== Memory access at offset 4128 partially underflows this variable
+    [4480, 4488) 'reg_ord' (line 190) <== Memory access at offset 4128 partially underflows this variable
+    [4512, 4516) 'defcidfallacklen' (line 215) <== Memory access at offset 4128 partially underflows this variable
+    [4528, 4532) 'len' (line 232) <== Memory access at offset 4128 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5 in __interceptor_memcpy
+Shadow bytes around the buggy address:
+  0x0fe6d797d5b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6d797d5c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6d797d5d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6d797d5e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6d797d5f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0fe6d797d600: 00 00 00 00[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x0fe6d797d610: f2 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 00 f2 f2
+  0x0fe6d797d620: f8 f2 f2 f2 f8 f2 f2 f2 f8 f2 f2 f2 f8 f2 f2 f2
+  0x0fe6d797d630: f8 f2 f2 f2 f8 f2 f8 f3 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe6d797d640: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe6d797d650: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

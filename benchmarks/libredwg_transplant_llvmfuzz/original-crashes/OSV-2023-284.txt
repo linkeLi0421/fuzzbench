@@ -1,0 +1,81 @@
+ARCHITECTURE=x86_64 -v /mnt/nas/linke/libredwg/libredwg-8f3afc1b98de37e9263ed91dd300daa877b7e5df-address:/out -v 
+/home/user/oss-fuzz-for-select/pocs/tmp/testcase-OSV-2023-284:/testcase -t                                      
+gcr.io/oss-fuzz-base/base-runner@sha256:3a190cfbada024425c48aebd06558a0e974e819f69625e886b1fe2b1a138064d         
+reproduce llvmfuzz -runs=10.                                                                                     
++ FUZZER=llvmfuzz                                                                                                
++ shift                                                                                                          
++ '[' '!' -v TESTCASE ']'                                                                                        
++ TESTCASE=/testcase                                                                                             
++ '[' '!' -f /testcase ']'                                                                                       
++ export RUN_FUZZER_MODE=interactive                                                                             
++ RUN_FUZZER_MODE=interactive                                                                                    
++ export FUZZING_ENGINE=libfuzzer                                                                                
++ FUZZING_ENGINE=libfuzzer                                                                                       
++ export SKIP_SEED_CORPUS=1                                                                                      
++ SKIP_SEED_CORPUS=1                                                                                             
++ run_fuzzer llvmfuzz -runs=10 /testcase                                                                         
+vm.mmap_rnd_bits = 28                                                                                            
+/out/llvmfuzz -- -rss_limit_mb=2560 -timeout=25 -runs=10 /testcase -detect_leaks=0 < /dev/null                   
+INFO: libFuzzer ignores flags that start with '--'                                                               
+INFO: Running with entropic power schedule (0xFF, 100).                                                          
+INFO: Seed: 218555589                                                                                            
+INFO: Loaded 1 modules   (568111 inline 8-bit counters): 568111 [0x4b76ec0, 0x4c019ef),                          
+INFO: Loaded 1 PC tables (568111 PCs): 568111 [0x4032c38,0x48ddf28),                                             
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.                                                                 
+Running: /testcase                                                                                               
+=================================================================                                                
+==18==ERROR: AddressSanitizer: global-buffer-overflow on address 0x000004b75490 at pc 0x000003ad781b bp          
+0x7fffcaaf2c40 sp 0x7fffcaaf2c38                                                                                 
+READ of size 8 at 0x000004b75490 thread T0                                                                       
+SCARINESS: 33 (8-byte-read-global-buffer-overflow-far-from-bounds)                                               
+    #0 0x3ad781a in dwg_codepage_dxfstr /src/libredwg/src/codepages.c:186:12                                     
+    #1 0x12d75c6 in dxf_codepage /src/libredwg/src/out_dxf.c:2996:21                                             
+    #2 0x12d75c6 in dxf_header_write /src/libredwg/src/out_dxf.c:3113:26                                         
+    #3 0x12d3d59 in dwg_write_dxf /src/libredwg/src/out_dxf.c:3788:3                                             
+    #4 0x56ccdd in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:186:7                                
+    #5 0x43def3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long)                          
+/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15                                                   
+    #6 0x429652 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long)                               
+/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6                                                  
+    #7 0x42eefc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long))             
+/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9                                                  
+    #8 0x458432 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10                            
+    #9 0x7f859bb66082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId:                   
+5792732f783158c66fb4f3756458ca24e46e827d)                                                                        
+    #10 0x41f81d in _start (/out/llvmfuzz+0x41f81d)                                                              
+                                                                                                                
+DEDUP_TOKEN: dwg_codepage_dxfstr--dxf_codepage--dxf_header_write                                                 
+Address 0x000004b75490 is a wild pointer inside of access range of size 0x000000000008.                          
+SUMMARY: AddressSanitizer: global-buffer-overflow /src/libredwg/src/codepages.c:186:12 in dwg_codepage_dxfstr    
+Shadow bytes around the buggy address:                                                                           
+0x000080966a40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00                                                
+0x000080966a50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00                                                
+0x000080966a60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9                                                
+0x000080966a70: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+0x000080966a80: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+=>0x000080966a90: f9 f9[f9]f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+0x000080966aa0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+0x000080966ab0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+0x000080966ac0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+0x000080966ad0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+0x000080966ae0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9                                                
+Shadow byte legend (one shadow byte represents 8 application bytes):                                             
+Addressable:           00                                                                                      
+Partially addressable: 01 02 03 04 05 06 07                                                                    
+Heap left redzone:       fa                                                                                    
+Freed heap region:       fd                                                                                    
+Stack left redzone:      f1                                                                                    
+Stack mid redzone:       f2                                                                                    
+Stack right redzone:     f3                                                                                    
+Stack after return:      f5                                                                                    
+Stack use after scope:   f8                                                                                    
+Global redzone:          f9                                                                                    
+Global init order:       f6                                                                                    
+Poisoned by user:        f7                                                                                    
+Container overflow:      fc                                                                                    
+Array cookie:            ac                                                                                    
+Intra object redzone:    bb                                                                                    
+ASan internal:           fe                                                                                    
+Left alloca redzone:     ca                                                                                    
+Right alloca redzone:    cb                                                                                    
+==18==ABORTING                    

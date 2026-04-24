@@ -1,0 +1,56 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1583588913
+INFO: Loaded 3 modules   (182532 inline 8-bit counters): 13708 [0x7f6d99f799e0, 0x7f6d99f7cf6c), 959 [0x7f6d99fdaa40, 0x7f6d99fdadff), 167865 [0x2d96d50, 0x2dbfd09), 
+INFO: Loaded 3 PC tables (182532 PCs): 13708 [0x7f6d99f7cf70,0x7f6d99fb2830), 959 [0x7f6d99fdae00,0x7f6d99fde9f0), 167865 [0x24c45d0,0x2754160), 
+/out/gstoraster_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-1753
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000001000 (pc 0x000000df7ccc bp 0x7ffc3e5c3c10 sp 0x7ffc3e5c3be0 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0xdf7ccc in names_string_ref /src/ghostpdl/./psi/iname.c:248:34
+    #1 0xd782b2 in zfont_glyph_name /src/ghostpdl/./psi/zbfont.c:141:5
+    #2 0x139d980 in pdfi_fapi_get_glyphname_or_cid /src/ghostpdl/./pdf/pdf_fapi.c:1094:16
+    #3 0x938cb0 in gs_fapi_do_char /src/ghostpdl/./base/gxfapi.c:1448:14
+    #4 0x139633d in pdfi_fapi_build_char /src/ghostpdl/./pdf/pdf_fapi.c:1386:12
+    #5 0xa8e366 in show_proceed /src/ghostpdl/./base/gxchar.c:1239:12
+    #6 0xa85d20 in continue_show /src/ghostpdl/./base/gxchar.c:761:12
+    #7 0xa8820c in gx_show_text_process /src/ghostpdl/./base/gxchar.c:738:12
+    #8 0x9221ff in gs_text_process /src/ghostpdl/./base/gstext.c:696:12
+    #9 0xfc9922 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:516:16
+    #10 0xfc9922 in pdfi_show_Tr_0 /src/ghostpdl/./pdf/pdf_text.c:531:12
+    #11 0xfc3e92 in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:913:24
+    #12 0xfc5911 in pdfi_Tj /src/ghostpdl/./pdf/pdf_text.c:1131:12
+    #13 0xeda973 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1628:24
+    #14 0xed8e48 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #15 0xf33bbf in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #16 0xf33bbf in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #17 0xf33bbf in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #18 0xe9af65 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #19 0xcfe43b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #20 0xcfe43b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #21 0xcfe43b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #22 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #23 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #24 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #25 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #26 0x101c911 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #27 0x1018949 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #28 0x101582e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #29 0x101c699 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #30 0xce6ab4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #31 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #32 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #33 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #34 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #35 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #36 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #37 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #38 0x7f6d99976082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #39 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: names_string_ref--zfont_glyph_name--pdfi_fapi_get_glyphname_or_cid
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./psi/iname.c:248:34 in names_string_ref
+==1==ABORTING

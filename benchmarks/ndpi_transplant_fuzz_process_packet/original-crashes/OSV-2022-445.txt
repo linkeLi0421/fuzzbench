@@ -1,0 +1,64 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 308086954
+INFO: Loaded 1 modules   (15317 inline 8-bit counters): 15317 [0x5597bcbb7bd0, 0x5597bcbbb7a5), 
+INFO: Loaded 1 PC tables (15317 PCs): 15317 [0x5597bcbbb7a8,0x5597bcbf74f8), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-445
+=================================================================
+==8106==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b709ea0f060 at pc 0x5597bc80f8bd bp 0x7ffcb6a39490 sp 0x7ffcb6a38c48
+WRITE of size 116 at 0x7b709ea0f060 thread T0
+    #0 0x5597bc80f8bc in strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:631:5
+    #1 0x5597bc8ca856 in tlsCheckUncommonALPN /src/ndpi/src/lib/protocols/tls.c:1224:7
+    #2 0x5597bc8c5c57 in processClientServerHello /src/ndpi/src/lib/protocols/tls.c:1533:6
+    #3 0x5597bc8cc626 in processTLSBlock /src/ndpi/src/lib/protocols/tls.c:865:5
+    #4 0x5597bc8cbcd3 in ndpi_search_tls_tcp /src/ndpi/src/lib/protocols/tls.c:1024:2
+    #5 0x5597bc899d99 in check_ndpi_detection_func /src/ndpi/src/lib/ndpi_main.c:5150:6
+    #6 0x5597bc89fc72 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:6076:15
+    #7 0x5597bc86c745 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:29:5
+    #8 0x5597bc709e7d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #9 0x5597bc6f4bf2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #10 0x5597bc6faac0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #11 0x5597bc7265f2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f70a0b28082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #13 0x5597bc6edcdd in _start (/out/fuzz_process_packet+0x2b4cdd)
+
+Address 0x7b709ea0f060 is located in stack of thread T0 at offset 96 in frame
+    #0 0x5597bc8ca6af in tlsCheckUncommonALPN /src/ndpi/src/lib/protocols/tls.c:1204
+
+  This frame has 1 object(s):
+    [32, 96) 'str' (line 1218) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ndpi/src/lib/protocols/tls.c:1224:7 in tlsCheckUncommonALPN
+Shadow bytes around the buggy address:
+  0x7b709ea0ed80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0ee00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0ee80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0ef00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0ef80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x7b709ea0f000: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x7b709ea0f080: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0f100: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0f180: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0f200: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b709ea0f280: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==8106==ABORTING

@@ -1,25 +1,29 @@
-INFO: Seed: 3296691694
-/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-=================================================================
-==1==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7fbe2f701670 at pc 0x00000079a8af bp 0x7ffd9c395250 sp 0x7ffd9c395248
-READ of size 8 at 0x7fbe2f701670 thread T0
-    #0 0x79a8ae in coolkey_apdu_io /src/opensc/src/libopensc/card-coolkey.c:930:17
-    #1 0x7aa866 in coolkey_rsa_op /src/opensc/src/libopensc/card-coolkey.c:1747:6
-    #2 0x7a2467 in coolkey_compute_crypt /src/opensc/src/libopensc/card-coolkey.c:1859:7
-    #3 0xb76dea in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
-    #4 0x5a5670 in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
-    #5 0x5af4bf in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:742:6
-    #6 0x4e4ea7 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:286:17
-    #7 0xbe318c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #8 0xbd50e5 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #9 0xbd9d91 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #10 0xbd4db2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #11 0x7fbe31b02082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #12 0x4220bd in _start (/out/fuzz_pkcs15_reader+0x4220bd)
 
-Address 0x7fbe2f701670 is located in stack of thread T0 at offset 624 in frame
-    #0 0x7a9bef in coolkey_rsa_op /src/opensc/src/libopensc/card-coolkey.c:1680
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2202908223
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd3a900, 0xd424b9), 
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xbc4898,0xc40428), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7f02ae701670 at pc 0x000000784d16 bp 0x7ffe0e71e6d0 sp 0x7ffe0e71e6c8
+READ of size 8 at 0x7f02ae701670 thread T0
+    #0 0x784d15 in coolkey_apdu_io /src/opensc/src/libopensc/card-coolkey.c:930:17
+    #1 0x791524 in coolkey_rsa_op /src/opensc/src/libopensc/card-coolkey.c:1747:6
+    #2 0x78ae6f in coolkey_compute_crypt /src/opensc/src/libopensc/card-coolkey.c:1859:7
+    #3 0xa89336 in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
+    #4 0x5fc8ed in use_key /src/opensc/src/libopensc/pkcs15-sec.c:155:8
+    #5 0x605d8a in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:742:6
+    #6 0x5721fb in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:286:17
+    #7 0x4406a3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x42be02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x4316ac in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x45abe2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f02b0ce2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x421fcd in _start (/out/fuzz_pkcs15_reader+0x421fcd)
+
+Address 0x7f02ae701670 is located in stack of thread T0 at offset 624 in frame
+    #0 0x790aff in coolkey_rsa_op /src/opensc/src/libopensc/card-coolkey.c:1680
 
   This frame has 6 object(s):
     [32, 40) 'crypt_out_len_p' (line 1683)
@@ -27,22 +31,22 @@ Address 0x7fbe2f701670 is located in stack of thread T0 at offset 624 in frame
     [336, 538) 'buf' (line 1688)
     [608, 610) 'len_buf' (line 1707)
     [624, 632) 'buf_out' (line 1731) <== Memory access at offset 624 is inside this variable
-    [656, 658) 'len_buf83' (line 1755)
+    [656, 658) 'len_buf50' (line 1755)
 HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-use-after-scope /src/opensc/src/libopensc/card-coolkey.c:930:17 in coolkey_apdu_io
 Shadow bytes around the buggy address:
-  0x0ff845ed8270: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
-  0x0ff845ed8280: f1 f1 f1 f1 00 f2 f2 f2 00 00 00 00 00 00 00 00
-  0x0ff845ed8290: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0ff845ed82a0: 00 05 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00 00 00
-  0x0ff845ed82b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x0ff845ed82c0: 00 00 00 02 f2 f2 f2 f2 f2 f2 f2 f2 f8 f2[f8]f2
-  0x0ff845ed82d0: f2 f2 f8 f3 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0ff845ed82e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0ff845ed82f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0ff845ed8300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0ff845ed8310: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe0d5cd8270: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe0d5cd8280: f1 f1 f1 f1 00 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x0fe0d5cd8290: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe0d5cd82a0: 00 05 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00 00 00
+  0x0fe0d5cd82b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0fe0d5cd82c0: 00 00 00 02 f2 f2 f2 f2 f2 f2 f2 f2 f8 f2[f8]f2
+  0x0fe0d5cd82d0: f2 f2 f8 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe0d5cd82e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe0d5cd82f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe0d5cd8300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe0d5cd8310: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -63,3 +67,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

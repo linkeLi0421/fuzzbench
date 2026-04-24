@@ -1,0 +1,37 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1378177787
+INFO: Loaded 1 modules   (21991 inline 8-bit counters): 21991 [0x55cb6e182f30, 0x55cb6e188517), 
+INFO: Loaded 1 PC tables (21991 PCs): 21991 [0x55cb6e188518,0x55cb6e1de388), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-695
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==8118==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x55cb6dc81d93 bp 0x000000000001 sp 0x7ffc25b3e790 T0)
+==8118==The signal is caused by a READ memory access.
+==8118==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x55cb6dc81d93 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t> /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:97:10
+    #1 0x55cb6dc81d93 in AtomicallySetQuarantineFlagIfAllocated /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:674:10
+    #2 0x55cb6dc81d93 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:738:10
+    #3 0x55cb6dd227a6 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #4 0x55cb6de18131 in ndpi_free_flow_data /src/ndpi/src/lib/ndpi_main.c:4915:2
+    #5 0x55cb6de04d4b in ndpi_free_flow /src/ndpi/src/lib/ndpi_main.c:8076:5
+    #6 0x55cb6ddcf3e4 in ndpi_free_flow_info_half /src/ndpi/example/reader_util.c:305:25
+    #7 0x55cb6ddd1892 in process_ndpi_collected_info /src/ndpi/example/reader_util.c:1317:5
+    #8 0x55cb6ddd841f in packet_processing /src/ndpi/example/reader_util.c:1639:2
+    #9 0x55cb6ddd6260 in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:2182:10
+    #10 0x55cb6dd66cd0 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:107:7
+    #11 0x55cb6dc0408d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #12 0x55cb6dbeee02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #13 0x55cb6dbf4cd0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #14 0x55cb6dc20802 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f7ffb11d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #16 0x55cb6dbe7eed in _start (/out/fuzz_ndpi_reader+0x2f4eed)
+
+==8118==Register values:
+rax = 0x0000000000000002  rbx = 0x00007ffc25b3e7e8  rcx = 0x000055cb6dc01b03  rdx = 0x0000000000000000  
+rdi = 0x202020202020ff20  rsi = 0x202020202020ff20  rbp = 0x0000000000000001  rsp = 0x00007ffc25b3e790  
+ r8 = 0x00007ffc25b3e7e8   r9 = 0x0000000000000001  r10 = 0x0000000000000000  r11 = 0x000000000000000c  
+r12 = 0x000055cb6e395cc8  r13 = 0x202020202020ff10  r14 = 0x202020202020ff20  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ndpi/src/lib/ndpi_main.c:4915:2 in ndpi_free_flow_data
+==8118==ABORTING

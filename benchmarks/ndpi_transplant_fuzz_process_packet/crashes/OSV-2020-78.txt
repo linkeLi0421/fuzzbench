@@ -1,46 +1,50 @@
-INFO: Seed: 4253046426
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-=================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6030000001af at pc 0x000000439ca6 bp 0x7fff8a290e80 sp 0x7fff8a290630
-READ of size 7 at 0x6030000001af thread T0
-    #0 0x439ca5 in MemcmpInterceptorCommon(void*, int (*)(void const*, void const*, unsigned long), void const*, void const*, unsigned long) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:860:7
-    #1 0x43a1fb in bcmp /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:906:10
-    #2 0x585e56 in ndpi_check_spotify /src/ndpi/src/lib/protocols/spotify.c:51:5
-    #3 0x585e56 in ndpi_search_spotify /src/ndpi/src/lib/protocols/spotify.c:131:7
-    #4 0x4f22b4 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
-    #5 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
-    #6 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
-    #7 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #8 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #9 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #10 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #11 0x7f2c47f76082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #12 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
 
-0x6030000001af is located 0 bytes to the right of 31-byte region [0x603000000190,0x6030000001af)
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2365947722
+INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
+INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
+/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60300000017f at pc 0x0000004c7fb6 bp 0x7ffcf5a650f0 sp 0x7ffcf5a648a0
+READ of size 7 at 0x60300000017f thread T0
+    #0 0x4c7fb5 in MemcmpInterceptorCommon(void*, int (*)(void const*, void const*, unsigned long), void const*, void const*, unsigned long) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:860:7
+    #1 0x4c84ab in memcmp /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:892:10
+    #2 0x61315d in ndpi_check_spotify /src/ndpi/src/lib/protocols/spotify.c:51:5
+    #3 0x61315d in ndpi_search_spotify /src/ndpi/src/lib/protocols/spotify.c:131:7
+    #4 0x58c264 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
+    #5 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #6 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
+    #7 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f47737ce082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
+
+0x60300000017f is located 0 bytes to the right of 31-byte region [0x603000000160,0x60300000017f)
 allocated by thread T0 here:
-    #0 0x4a0ca6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0x4de209 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
-    #2 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #3 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #4 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #5 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #6 0x7f2c47f76082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #0 0x52efb6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x56c52e in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
+    #2 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #6 0x7f47737ce082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:860:7 in MemcmpInterceptorCommon(void*, int (*)(void const*, void const*, unsigned long), void const*, void const*, unsigned long)
 Shadow bytes around the buggy address:
+  0x0c067fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c067fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c067fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c067fff8000: fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa 00 00
-  0x0c067fff8010: 00 00 fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa
-  0x0c067fff8020: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 00
-=>0x0c067fff8030: fa fa 00 00 00[07]fa fa 00 00 00 fa fa fa 00 00
+  0x0c067fff8000: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+  0x0c067fff8010: 00 fa fa fa 00 00 00 00 fa fa 00 00 00 fa fa fa
+=>0x0c067fff8020: 00 00 00 fa fa fa 00 00 00 00 fa fa 00 00 00[07]
+  0x0c067fff8030: fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00
   0x0c067fff8040: 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa
   0x0c067fff8050: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa
   0x0c067fff8060: fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00
   0x0c067fff8070: 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa
-  0x0c067fff8080: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -61,3 +65,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

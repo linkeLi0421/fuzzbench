@@ -1,0 +1,72 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2800068540
+INFO: Loaded 1 modules   (23064 inline 8-bit counters): 23064 [0x558454e29c60, 0x558454e2f678), 
+INFO: Loaded 1 PC tables (23064 PCs): 23064 [0x558454e2f678,0x558454e897f8), 
+/out/fuzz_ndpi_reader: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2020-178
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7c3448fe0152 at pc 0x558454b5558d bp 0x7ffe4fe3b940 sp 0x7ffe4fe3b938
+READ of size 4 at 0x7c3448fe0152 thread T0
+    #0 0x558454b5558c in concat_hash_string /src/ndpi/src/lib/protocols/ssh.c:99:19
+    #1 0x558454b54072 in ndpi_search_ssh_tcp /src/ndpi/src/lib/protocols/ssh.c:308:10
+    #2 0x558454b557d8 in search_ssh_again /src/ndpi/src/lib/protocols/ssh.c:64:3
+    #3 0x558454b1f499 in ndpi_process_extra_packet /src/ndpi/src/lib/ndpi_main.c:4369:9
+    #4 0x558454b1f499 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4725:7
+    #5 0x558454af138b in packet_processing /src/ndpi/example/reader_util.c:1339:31
+    #6 0x558454af138b in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1762:10
+    #7 0x558454ae2b96 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:83:5
+    #8 0x55845498002d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #9 0x55845496ada2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #10 0x558454970c70 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #11 0x55845499c7a2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f8449cb2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #13 0x558454963e8d in _start (/out/fuzz_ndpi_reader+0x1ffe8d)
+
+DEDUP_TOKEN: concat_hash_string--ndpi_search_ssh_tcp--search_ssh_again
+0x7c3448fe0154 is located 0 bytes after 100-byte region [0x7c3448fe00f0,0x7c3448fe0154)
+allocated by thread T0 here:
+    #0 0x558454a9e984 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x558454ae2b76 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:81:31
+    #2 0x55845498002d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #3 0x55845496ada2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #4 0x558454970c70 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #5 0x55845499c7a2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #6 0x7f8449cb2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+DEDUP_TOKEN: __interceptor_malloc--LLVMFuzzerTestOneInput--fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/ssh.c:99:19 in concat_hash_string
+Shadow bytes around the buggy address:
+  0x7c3448fdfe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c3448fdff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c3448fdff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c3448fe0000: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x7c3448fe0080: fd fd fd fd fd fa fa fa fa fa fa fa fa fa 00 00
+=>0x7c3448fe0100: 00 00 00 00 00 00 00 00 00 00[04]fa fa fa fa fa
+  0x7c3448fe0180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c3448fe0200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c3448fe0280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c3448fe0300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c3448fe0380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

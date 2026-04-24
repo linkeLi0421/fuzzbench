@@ -1,0 +1,110 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1453875139
+INFO: Loaded 3 modules   (138140 inline 8-bit counters): 11664 [0x7f12c2fbcec0, 0x7f12c2fbfc50), 878 [0x7f12c3215798, 0x7f12c3215b06), 125598 [0x555b65c40f90, 0x555b65c5fa2e), 
+INFO: Loaded 3 PC tables (138140 PCs): 11664 [0x7f12c2fbfc50,0x7f12c2fed550), 878 [0x7f12c3215b08,0x7f12c32191e8), 125598 [0x555b65c5fa30,0x555b65e4a410), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2020-1875
+INFO: Start rendering...
+INFO: Processing page 1...
+Error: /undefined in ÿ
+Operand stack:
+   true
+Execution stack:
+   %interp_exit   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--   --nostringval--   --nostringval--   false   1   %stopped_push   1974   2   3   %oparray_pop   1973   2   3   %oparray_pop   1961   2   3   %oparray_pop   1817   2   3   %oparray_pop   --nostringval--   %errorexec_pop   .runexec2   --nostringval--   --nostringval--   --nostringval--   2   %stopped_push   --nostringval--
+Dictionary stack:
+   --dict:705/1123(ro)(G)--   --dict:0/20(G)--   --dict:75/200(L)--
+Current allocation mode is local
+Last OS error: No such file or directory
+GPL Ghostscript GIT PRERELEASE 9.51: Unrecoverable error, exit code 1
+INFO: Rendering completed
+gsapi_init_with_args: error -100
+=================================================================
+==8525==ERROR: AddressSanitizer: heap-use-after-free on address 0x7db2c1dec468 at pc 0x555b645b00c1 bp 0x7ffe6c9fdf30 sp 0x7ffe6c9fdf28
+READ of size 8 at 0x7db2c1dec468 thread T0
+    #0 0x555b645b00c0 in dict_find_string /src/ghostpdl/./psi/idict.c:425:36
+    #1 0x555b63fe6674 in gs_main_tempnames /src/ghostpdl/./psi/imain.c:1031:13
+    #2 0x555b63fe51c0 in gs_main_finit /src/ghostpdl/./psi/imain.c:1094:17
+    #3 0x555b645ac24f in psapi_exit /src/ghostpdl/./psi/psapi.c:506:5
+    #4 0x555b63fdfa11 in gs_to_raster_fuzz(unsigned char const*, unsigned long) /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:99:8
+    #5 0x555b63fdf81b in LLVMFuzzerTestOneInput /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:111:2
+    #6 0x555b63e7d14d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x555b63e67ec2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x555b63e6dd90 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x555b63e998c2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f12c2ae3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x555b63e60fad in _start (/out/gstoraster_fuzzer+0x427fad)
+
+0x7db2c1dec468 is located 616 bytes inside of 20048-byte region [0x7db2c1dec200,0x7db2c1df1050)
+freed by thread T0 here:
+    #0 0x555b63f9b806 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:51:3
+    #1 0x555b648e6c33 in alloc_free_clump /src/ghostpdl/./base/gsalloc.c:2636:9
+    #2 0x555b648e79b7 in free_all_not_allocator /src/ghostpdl/./base/gsalloc.c:994:9
+    #3 0x555b648e487a in clump_splay_app /src/ghostpdl/./base/gsalloc.c:606:19
+    #4 0x555b648e24d1 in i_free_all /src/ghostpdl/./base/gsalloc.c:1030:9
+    #5 0x555b64689218 in alloc_restore_all /src/ghostpdl/./psi/isave.c:916:5
+    #6 0x555b63fe5dfc in gs_main_finit /src/ghostpdl/./psi/imain.c:1229:16
+    #7 0x555b646fac12 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c
+    #8 0x555b646ff894 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:304:16
+    #9 0x555b63fdf9d3 in gs_to_raster_fuzz(unsigned char const*, unsigned long) /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:94:8
+    #10 0x555b63fdf81b in LLVMFuzzerTestOneInput /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:111:2
+    #11 0x555b63e7d14d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #12 0x555b63e67ec2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #13 0x555b63e6dd90 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #14 0x555b63e998c2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f12c2ae3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+previously allocated by thread T0 here:
+    #0 0x555b63f9baa4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x555b6428db80 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:191:34
+    #2 0x555b648e8dbe in alloc_acquire_clump /src/ghostpdl/./base/gsalloc.c:2485:13
+    #3 0x555b648e593b in alloc_add_clump /src/ghostpdl/./base/gsalloc.c:2435:19
+    #4 0x555b648e8350 in alloc_obj /src/ghostpdl/./base/gsalloc.c:2043:17
+    #5 0x555b648e2d45 in i_alloc_struct /src/ghostpdl/./base/gsalloc.c:1231:15
+    #6 0x555b6498d7f6 in context_state_alloc /src/ghostpdl/./psi/icontext.c:120:16
+    #7 0x555b645babb7 in gs_interp_init /src/ghostpdl/./psi/interp.c:301:16
+    #8 0x555b645b7a6b in obj_init /src/ghostpdl/./psi/iinit.c:264:12
+    #9 0x555b63fe1101 in gs_main_init1 /src/ghostpdl/./psi/imain.c:218:12
+    #10 0x555b646fc51e in swproc /src/ghostpdl/./psi/imainarg.c:788:29
+    #11 0x555b646faf61 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:232:24
+    #12 0x555b646ff894 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:304:16
+    #13 0x555b63fdf9d3 in gs_to_raster_fuzz(unsigned char const*, unsigned long) /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:94:8
+    #14 0x555b63fdf81b in LLVMFuzzerTestOneInput /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:111:2
+    #15 0x555b63e7d14d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #16 0x555b63e67ec2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #17 0x555b63e6dd90 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #18 0x555b63e998c2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #19 0x7f12c2ae3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /src/ghostpdl/./psi/idict.c:425:36 in dict_find_string
+Shadow bytes around the buggy address:
+  0x7db2c1dec180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7db2c1dec200: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec280: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec300: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec380: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+=>0x7db2c1dec400: fd fd fd fd fd fd fd fd fd fd fd fd fd[fd]fd fd
+  0x7db2c1dec480: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec500: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec580: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec600: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7db2c1dec680: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==8525==ABORTING

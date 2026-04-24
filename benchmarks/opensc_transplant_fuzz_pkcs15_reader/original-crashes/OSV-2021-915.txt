@@ -1,0 +1,65 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3265629410
+INFO: Loaded 1 modules   (31627 inline 8-bit counters): 31627 [0x55a46552d000, 0x55a465534b8b), 
+INFO: Loaded 1 PC tables (31627 PCs): 31627 [0x55a465534b90,0x55a4655b0440), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /work/testcase-OSV-2021-915
+=================================================================
+==687729==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7bd6cecf78a3 at pc 0x55a46539c50a bp 0x7ffc156b9180 sp 0x7ffc156b9178
+READ of size 1 at 0x7bd6cecf78a3 thread T0
+    #0 0x55a46539c509 in sc_asn1_read_tag /src/opensc/src/libopensc/asn1.c:73:6
+    #1 0x55a46539df29 in sc_asn1_find_tag /src/opensc/src/libopensc/asn1.c:488:7
+    #2 0x55a46515d3bf in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2410:11
+    #3 0x55a4653b1641 in sc_compute_signature /src/opensc/src/libopensc/sec.c:62:6
+    #4 0x55a465003159 in use_key /src/opensc/src/libopensc/pkcs15-sec.c:154:8
+    #5 0x55a46500a10a in sc_pkcs15_compute_signature /src/opensc/src/libopensc/pkcs15-sec.c:705:6
+    #6 0x55a464f8ed94 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:279:17
+    #7 0x55a464e2b6dd in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #8 0x55a464e16452 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #9 0x55a464e1c320 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #10 0x55a464e47e52 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fd6d0d95082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x55a464e0f53d in _start (/out/fuzz_pkcs15_reader+0x18953d)
+
+Address 0x7bd6cecf78a3 is located in stack of thread T0 at offset 163 in frame
+    #0 0x55a46515cdbf in piv_compute_signature /src/opensc/src/libopensc/card-piv.c:2370
+
+  This frame has 3 object(s):
+    [32, 160) 'rbuf' (line 2375) <== Memory access at offset 163 overflows this variable
+    [192, 200) 'bodylen' (line 2377)
+    [224, 232) 'taglen' (line 2379)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/opensc/src/libopensc/asn1.c:73:6 in sc_asn1_read_tag
+Shadow bytes around the buggy address:
+  0x7bd6cecf7600: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7680: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7700: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7780: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7800: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7bd6cecf7880: 00 00 00 00[f2]f2 f2 f2 00 f2 f2 f2 00 f3 f3 f3
+  0x7bd6cecf7900: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7980: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7a00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7a80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7bd6cecf7b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==687729==ABORTING

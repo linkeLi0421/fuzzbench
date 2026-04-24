@@ -1,5 +1,64 @@
-INFO: Seed: 3281330741
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2203153123
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd3a900, 0xd424b9), 
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xbc4898,0xc40428), 
 /out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-card-openpgp.c:618:6: runtime error: index 16 out of bounds for type 'int[16]'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior card-openpgp.c:618:6 in 
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f31420264e0 at pc 0x0000006d0cb1 bp 0x7ffe05022bb0 sp 0x7ffe05022ba8
+WRITE of size 4 at 0x7f31420264e0 thread T0
+    #0 0x6d0cb0 in pgp_parse_algo_attr_blob /src/opensc/src/libopensc/card-openpgp.c:618:19
+    #1 0x6cb6f7 in pgp_get_card_features /src/opensc/src/libopensc/card-openpgp.c:788:9
+    #2 0x6b96e4 in pgp_init /src/opensc/src/libopensc/card-openpgp.c:483:2
+    #3 0x5815d1 in sc_connect_card /src/opensc/src/libopensc/card.c:358:8
+    #4 0x570f42 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:216:5
+    #5 0x4406a3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x42be02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x4316ac in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x45abe2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f314495d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x421fcd in _start (/out/fuzz_pkcs15_reader+0x421fcd)
+
+Address 0x7f31420264e0 is located in stack of thread T0 at offset 96 in frame
+    #0 0x6cfb2f in pgp_parse_algo_attr_blob /src/opensc/src/libopensc/card-openpgp.c:570
+
+  This frame has 1 object(s):
+    [32, 96) 'oid' (line 571) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/opensc/src/libopensc/card-openpgp.c:618:19 in pgp_parse_algo_attr_blob
+Shadow bytes around the buggy address:
+  0x0fe6a83fcc40: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe6a83fcc50: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe6a83fcc60: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe6a83fcc70: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe6a83fcc80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x0fe6a83fcc90: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x0fe6a83fcca0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6a83fccb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6a83fccc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6a83fccd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe6a83fcce0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

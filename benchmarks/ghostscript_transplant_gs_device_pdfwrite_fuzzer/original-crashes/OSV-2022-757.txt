@@ -1,0 +1,54 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2032565563
+INFO: Loaded 3 modules   (189758 inline 8-bit counters): 11664 [0x7fd916076ec0, 0x7fd916079c50), 878 [0x7fd91610c798, 0x7fd91610cb06), 177216 [0x55e9cd12b6b0, 0x55e9cd156af0), 
+INFO: Loaded 3 PC tables (189758 PCs): 11664 [0x7fd916079c50,0x7fd9160a7550), 878 [0x7fd91610cb08,0x7fd9161101e8), 177216 [0x55e9cd156af0,0x55e9cd40aef0), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-757
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==12637==ERROR: AddressSanitizer: SEGV on unknown address 0x55e9cc60c268 (pc 0x55e9cb014442 bp 0x7fff83ff40b0 sp 0x7fff83ff40a0 T0)
+==12637==The signal is caused by a WRITE memory access.
+    #0 0x55e9cb014442 in pdfi_countdown_impl /src/ghostpdl/./pdf/pdf_stack.h:73:14
+    #1 0x55e9cb0141ee in pdfi_free_array /src/ghostpdl/./pdf/pdf_array.c:35:13
+    #2 0x55e9cb05682e in pdfi_pop /src/ghostpdl/./pdf/pdf_stack.c:35:9
+    #3 0x55e9cb00e5fb in pdfi_dict_from_stack /src/ghostpdl/./pdf/pdf_dict.c:166:17
+    #4 0x55e9cb01ee10 in pdfi_read_token /src/ghostpdl/./pdf/pdf_int.c:1092:24
+    #5 0x55e9cb0fa3db in pdfi_read_bare_object /src/ghostpdl/./pdf/pdf_deref.c:458:16
+    #6 0x55e9cb0ff673 in pdfi_read_object /src/ghostpdl/./pdf/pdf_deref.c:572:12
+    #7 0x55e9cb0fc5a9 in pdfi_dereference_main /src/ghostpdl/./pdf/pdf_deref.c:969:20
+    #8 0x55e9cb0fd09c in pdfi_deref_loop_detect /src/ghostpdl/./pdf/pdf_deref.c:1060:12
+    #9 0x55e9cb00f680 in pdfi_dict_get_by_key /src/ghostpdl/./pdf/pdf_dict.c:402:16
+    #10 0x55e9cb07d105 in pdfi_annot_get_NormAP /src/ghostpdl/./pdf/pdf_annot.c:1574:20
+    #11 0x55e9cb07c71a in pdfi_annot_draw /src/ghostpdl/./pdf/pdf_annot.c:3894:12
+    #12 0x55e9cb07d4be in pdfi_annot_preserve /src/ghostpdl/./pdf/pdf_annot.c:4431:20
+    #13 0x55e9cb070b20 in pdfi_annot_handle /src/ghostpdl/./pdf/pdf_annot.c:4458:16
+    #14 0x55e9cb070805 in pdfi_do_annotations /src/ghostpdl/./pdf/pdf_annot.c:4485:16
+    #15 0x55e9cb068359 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:166:13
+    #16 0x55e9cb066275 in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:953:12
+    #17 0x55e9caff643a in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1157:24
+    #18 0x55e9caeb8378 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #19 0x55e9caeb2986 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #20 0x55e9caeb22ee in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #21 0x55e9ca7393ad in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #22 0x55e9ca738f7a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #23 0x55e9cb11522f in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #24 0x55e9cb1125a7 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #25 0x55e9cb1104b2 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #26 0x55e9cb115004 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #27 0x55e9ca731c6b in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #28 0x55e9ca731fce in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:18:2
+    #29 0x55e9ca5cf1dd in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #30 0x55e9ca5b9f52 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #31 0x55e9ca5bfe20 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #32 0x55e9ca5eb952 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #33 0x7fd915ad4082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #34 0x55e9ca5b303d in _start (/out/gs_device_pdfwrite_fuzzer+0x67503d)
+
+==12637==Register values:
+rax = 0x0000000000000000  rbx = 0x000055e9cc60c260  rcx = 0x00000fd522a3fe83  rdx = 0x00007ea9151fedc0  
+rdi = 0x000055e9cc60c268  rsi = 0x00000000cb76f19f  rbp = 0x00007fff83ff40b0  rsp = 0x00007fff83ff40a0  
+ r8 = 0x000055e9cd57a200   r9 = 0x0000000000000001  r10 = 0x00000fd522a3fdec  r11 = 0x00000fd522a3fdbc  
+r12 = 0x00000fd522a3fdb8  r13 = 0x0000000000000000  r14 = 0x00000000cb76f1a0  r15 = 0x00000fd522a3fdb9  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./pdf/pdf_stack.h:73:14 in pdfi_countdown_impl
+==12637==ABORTING

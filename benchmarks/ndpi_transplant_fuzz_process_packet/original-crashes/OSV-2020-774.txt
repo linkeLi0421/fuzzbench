@@ -1,0 +1,62 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 401829420
+INFO: Loaded 1 modules   (12442 inline 8-bit counters): 12442 [0x55e51e2d8700, 0x55e51e2db79a), 
+INFO: Loaded 1 PC tables (12442 PCs): 12442 [0x55e51e2db7a0,0x55e51e30c140), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2020-774
+=================================================================
+==7722==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7cc8dbde029d at pc 0x55e51e11306a bp 0x7fffc9f1f430 sp 0x7fffc9f1f428
+READ of size 1 at 0x7cc8dbde029d thread T0
+    #0 0x55e51e113069 in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:293:17
+    #1 0x55e51e0b7e85 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4060:7
+    #2 0x55e51e0bdb87 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4867:3
+    #3 0x55e51e0a86d6 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:25:3
+    #4 0x55e51df45e6d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #5 0x55e51df30be2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #6 0x55e51df36ab0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #7 0x55e51df625e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7fe8dca5c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #9 0x55e51df29ccd in _start (/out/fuzz_process_packet+0x1abccd)
+
+0x7cc8dbde029d is located 0 bytes after 157-byte region [0x7cc8dbde0200,0x7cc8dbde029d)
+allocated by thread T0 here:
+    #0 0x55e51e0647c4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x55e51e18a0f3 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x55e51df30be2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #3 0x55e51df36ab0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #4 0x55e51df625e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7fe8dca5c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/kerberos.c:293:17 in ndpi_search_kerberos
+Shadow bytes around the buggy address:
+  0x7cc8dbde0000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x7cc8dbde0080: 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa fa
+  0x7cc8dbde0100: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cc8dbde0180: 00 00 00 00 00 00 00 05 fa fa fa fa fa fa fa fa
+  0x7cc8dbde0200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7cc8dbde0280: 00 00 00[05]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc8dbde0300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc8dbde0380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc8dbde0400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc8dbde0480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc8dbde0500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==7722==ABORTING

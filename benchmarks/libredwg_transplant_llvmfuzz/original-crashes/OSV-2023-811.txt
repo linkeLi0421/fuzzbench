@@ -1,0 +1,69 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 671171223
+INFO: Loaded 1 modules   (643971 inline 8-bit counters): 643971 [0x52abe60, 0x53491e3), 
+INFO: Loaded 1 PC tables (643971 PCs): 643971 [0x462db18,0x5001348), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2023-811
+=================================================================
+==1==ERROR: AddressSanitizer: attempting free on address which was not malloc()-ed: 0x7fdf81700a40 in thread T0
+    #0 0x52f49c in __interceptor_realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3
+    #1 0x58c970 in bit_chain_alloc_size /src/libredwg/src/bits.c:3770:30
+    #2 0x56fd0d in bit_chain_alloc /src/libredwg/src/bits.c:3788:3
+    #3 0x56fd0d in bit_write_RC /src/libredwg/src/bits.c:365:9
+    #4 0x578f43 in bit_H_to_dat /src/libredwg/src/bits.c:1450:9
+    #5 0x2e1930a in dwg_encode /src/libredwg/src/encode.c:3520:7
+    #6 0x56cdc8 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:180:9
+    #7 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fdf8383a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+DEDUP_TOKEN: __interceptor_realloc--bit_chain_alloc_size--bit_chain_alloc
+Address 0x7fdf81700a40 is located in stack of thread T0 at offset 2624 in frame
+    #0 0x2e0110f in dwg_encode /src/libredwg/src/encode.c:2381
+
+DEDUP_TOKEN: dwg_encode
+  This frame has 34 object(s):
+    [32, 36) 'error' (line 2383)
+    [48, 1168) 'sec_dat' (line 2395)
+    [1296, 1298) 'placeholder_type' (line 2451)
+    [1312, 1328) 'tmap.sroa.5' (line 3237)
+    [1344, 1352) 'chain4523' (line 3510)
+    [1376, 1432) 'hdat' (line 3510)
+    [1472, 1480) 'chain4600' (line 3511)
+    [1504, 1560) 'hdat4601' (line 3511)
+    [1600, 1608) 'chain4679' (line 3512)
+    [1632, 1688) 'hdat4680' (line 3512)
+    [1728, 1736) 'chain4758' (line 3513)
+    [1760, 1816) 'hdat4759' (line 3513)
+    [1856, 1864) 'chain4837' (line 3514)
+    [1888, 1944) 'hdat4838' (line 3514)
+    [1984, 1992) 'chain4916' (line 3515)
+    [2016, 2072) 'hdat4917' (line 3515)
+    [2112, 2120) 'chain4995' (line 3516)
+    [2144, 2200) 'hdat4996' (line 3516)
+    [2240, 2248) 'chain5074' (line 3517)
+    [2272, 2328) 'hdat5075' (line 3517)
+    [2368, 2376) 'chain5153' (line 3518)
+    [2400, 2456) 'hdat5154' (line 3518)
+    [2496, 2504) 'chain5232' (line 3519)
+    [2528, 2584) 'hdat5233' (line 3519)
+    [2624, 2632) 'chain5312' (line 3520) <== Memory access at offset 2624 is inside this variable
+    [2656, 2712) 'hdat5313' (line 3520)
+    [2752, 2760) 'chain5391' (line 3521)
+    [2784, 2840) 'hdat5392' (line 3521)
+    [2880, 2888) 'chain5470' (line 3522)
+    [2912, 2968) 'hdat5471' (line 3522)
+    [3008, 3016) 'chain5549' (line 3523)
+    [3040, 3096) 'hdat5550' (line 3523)
+    [3136, 3192) 'file_dat' (line 4112)
+    [3232, 3245) 'enc_file_ID_string' (line 4118)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: bad-free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3 in __interceptor_realloc
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

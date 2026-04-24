@@ -1,0 +1,34 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4164866247
+INFO: Loaded 3 modules   (202225 inline 8-bit counters): 13708 [0x7f323c2769e0, 0x7f323c279f6c), 959 [0x7f323c3aea40, 0x7f323c3aedff), 187558 [0x343c950, 0x346a5f6), 
+INFO: Loaded 3 PC tables (202225 PCs): 13708 [0x7f323c279f70,0x7f323c2af830), 959 [0x7f323c3aee00,0x7f323c3b29f0), 187558 [0x272e3d0,0x2a0ae30), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-449
+gsapi_init_with_args: error -100
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==11030==ERROR: AddressSanitizer: SEGV on unknown address 0x629ffe9ee510 (pc 0x7f323bd7aaf3 bp 0x7ffef80eb510 sp 0x7ffef80eacc8 T0)
+==11030==The signal is caused by a WRITE memory access.
+    #0 0x7f323bd7aaf3 in memcpy (/lib/x86_64-linux-gnu/libc.so.6+0xbbaf3)
+    #1 0x5240f8 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #2 0xf5c85e in restore_space /src/ghostpdl/./psi/isave.c:838:17
+    #3 0xf5c85e in alloc_restore_step_in /src/ghostpdl/./psi/isave.c:784:9
+    #4 0xf5db7c in alloc_restore_all /src/ghostpdl/./psi/isave.c:888:16
+    #5 0x56ab5d in gs_main_finit /src/ghostpdl/./psi/imain.c:1391:20
+    #6 0x56b6a3 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1434:12
+    #7 0x56b6a3 in gs_to_exit /src/ghostpdl/./psi/imain.c:1439:12
+    #8 0xe47625 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
+    #9 0x55fa1c in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
+    #10 0x55e761 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*) /src/gs_fuzzlib.h:132:8
+    #11 0x55eb0a in gs_to_raster_fuzz /src/gs_fuzzlib.h:64:9
+    #12 0x55eb0a in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:23:2
+    #13 0x456553 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #14 0x4421e2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #15 0x447a2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #16 0x470622 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #17 0x7f323bce3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #18 0x420a0d in _start (/out/gstoraster_fuzzer+0x420a0d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0xbbaf3) in memcpy
+==11030==ABORTING

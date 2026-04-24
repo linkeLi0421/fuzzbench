@@ -1,0 +1,61 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2309639981
+INFO: Loaded 1 modules   (44029 inline 8-bit counters): 44029 [0xf37910, 0xf4250d), 
+INFO: Loaded 1 PC tables (44029 PCs): 44029 [0xc96c08,0xd42bd8), 
+/out/fuzz_dissect_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2023-1381
+21/Apr/2026 22:00:05 [NetworkInterface.cpp:2472] WARNING: If TSO/GRO is enabled, please disable it for best accuracy
+21/Apr/2026 22:00:05 [NetworkInterface.cpp:2476] WARNING: using: sudo ethtool -K custom gro off gso off tso off
+=================================================================
+==26581==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x616000000eca at pc 0x0000005252ed bp 0x7ffc30fe97b0 sp 0x7ffc30fe8f70
+READ of size 10 at 0x616000000eca thread T0
+    #0 0x5252ec in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5
+    #1 0x6390f6 in NetworkInterface::processPacket(int, unsigned int, int, bool, timeval const*, unsigned long, ndpi_ethhdr*, unsigned short, ndpi_iphdr*, ndpi_ipv6hdr*, unsigned short, unsigned short, unsigned int, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2112:8
+    #2 0x6403c0 in NetworkInterface::dissectPacket(int, unsigned int, int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:2898:17
+    #3 0x5781d2 in LLVMFuzzerTestOneInput /src/ntopng/fuzz/fuzz_dissect_packet.cpp:198:12
+    #4 0x448f33 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x434692 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x439f3c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x463472 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f8af9c36082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #9 0x42a85d in _start (/out/fuzz_dissect_packet+0x42a85d)
+
+0x616000000eca is located 0 bytes to the right of 586-byte region [0x616000000c80,0x616000000eca)
+allocated by thread T0 here:
+    #0 0x53a4cc in __interceptor_realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3
+    #1 0x993011 in grow_buffer /src/libpcap-1.9.1/./sf-pcap.c:426:18
+    #2 0x993011 in pcap_next_packet /src/libpcap-1.9.1/./sf-pcap.c:604:9
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5 in __interceptor_strncpy
+Shadow bytes around the buggy address:
+  0x0c2c7fff8180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff81a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff81b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff81c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c2c7fff81d0: 00 00 00 00 00 00 00 00 00[02]fa fa fa fa fa fa
+  0x0c2c7fff81e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff81f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8210: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8220: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==26581==ABORTING

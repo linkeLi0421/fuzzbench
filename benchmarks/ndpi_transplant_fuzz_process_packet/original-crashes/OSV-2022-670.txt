@@ -1,0 +1,64 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 103233641
+INFO: Loaded 1 modules   (15420 inline 8-bit counters): 15420 [0x55bd5310f590, 0x55bd531131cc), 
+INFO: Loaded 1 PC tables (15420 PCs): 15420 [0x55bd531131d0,0x55bd5314f590), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-670
+=================================================================
+==8117==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7bf56bbe00c0 at pc 0x55bd52d4987a bp 0x7ffcc69f7720 sp 0x7ffcc69f6ed8
+READ of size 4 at 0x7bf56bbe00c0 thread T0
+    #0 0x55bd52d49879 in strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:630:5
+    #1 0x55bd52e5c7bc in dissect_softether_ip_port /src/ndpi/src/lib/protocols/softether.c:312:3
+    #2 0x55bd52e5c435 in ndpi_search_softether /src/ndpi/src/lib/protocols/softether.c:339:9
+    #3 0x55bd52dd9529 in check_ndpi_detection_func /src/ndpi/src/lib/ndpi_main.c:5407:6
+    #4 0x55bd52ddf161 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:6303:15
+    #5 0x55bd52da6748 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:29:5
+    #6 0x55bd52c43e7d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x55bd52c2ebf2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x55bd52c34ac0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x55bd52c605f2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7fb56c962082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x55bd52c27cdd in _start (/out/fuzz_process_packet+0x2b7cdd)
+
+0x7bf56bbe00c0 is located 0 bytes after 48-byte region [0x7bf56bbe0090,0x7bf56bbe00c0)
+allocated by thread T0 here:
+    #0 0x55bd52d627d4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x55bd52ec54e3 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x55bd52c2ebf2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #3 0x55bd52c34ac0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #4 0x55bd52c605f2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7fb56c962082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/softether.c:312:3 in dissect_softether_ip_port
+Shadow bytes around the buggy address:
+  0x7bf56bbdfe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf56bbdfe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf56bbdff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf56bbdff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf56bbe0000: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 00
+=>0x7bf56bbe0080: fa fa 00 00 00 00 00 00[fa]fa 00 00 00 00 00 fa
+  0x7bf56bbe0100: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x7bf56bbe0180: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x7bf56bbe0200: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x7bf56bbe0280: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x7bf56bbe0300: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==8117==ABORTING

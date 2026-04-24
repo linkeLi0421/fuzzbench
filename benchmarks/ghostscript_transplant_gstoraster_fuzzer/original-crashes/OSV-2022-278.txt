@@ -1,0 +1,60 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1596191065
+INFO: Loaded 3 modules   (182532 inline 8-bit counters): 13708 [0x7fa7d72bc9e0, 0x7fa7d72bff6c), 959 [0x7fa7d731da40, 0x7fa7d731ddff), 167865 [0x2d96d50, 0x2dbfd09), 
+INFO: Loaded 3 PC tables (182532 PCs): 13708 [0x7fa7d72bff70,0x7fa7d72f5830), 959 [0x7fa7d731de00,0x7fa7d73219f0), 167865 [0x24c45d0,0x2754160), 
+/out/gstoraster_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2022-278
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x629ff036cd50 (pc 0x00000071935e bp 0x7ffc4f74bb70 sp 0x7ffc4f74ba80 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x71935e in s_RLE_process /src/ghostpdl/./base/srle.c:150:22
+    #1 0x118f6e0 in go_process /src/ghostpdl/./base/gxclbits.c:76:18
+    #2 0x118f6e0 in cmd_compress_bitmap /src/ghostpdl/./base/gxclbits.c:107:22
+    #3 0x118f6e0 in cmd_put_bits /src/ghostpdl/./base/gxclbits.c:229:22
+    #4 0x69ed1b in clist_copy_mono /src/ghostpdl/./base/gxclrect.c:857:16
+    #5 0x1027862 in mask_clip_fill_rectangle /src/ghostpdl/./base/gxclipm.c:165:12
+    #6 0xad4bec in gx_dc_pure_fill_rectangle /src/ghostpdl/./base/gxdcolor.c:842:16
+    #7 0x59e178 in image_render_color_DeviceN /src/ghostpdl/./base/gxicolor.c
+    #8 0x1370483 in gx_image1_plane_data /src/ghostpdl/./base/gxidata.c:238:20
+    #9 0xb2a101 in gx_image_plane_data_rows /src/ghostpdl/./base/gximage.c:171:12
+    #10 0x573e95 in gx_image3_plane_data /src/ghostpdl/./base/gximage3.c:672:16
+    #11 0xb2a101 in gx_image_plane_data_rows /src/ghostpdl/./base/gximage.c:171:12
+    #12 0x8da428 in gs_image_next_planes /src/ghostpdl/./base/gsimage.c:636:20
+    #13 0xf2bab4 in pdfi_render_image /src/ghostpdl/./pdf/pdf_image.c:797:16
+    #14 0xf21ca8 in pdfi_do_image /src/ghostpdl/./pdf/pdf_image.c:1992:12
+    #15 0xf24bce in pdfi_do_image_or_form /src/ghostpdl/./pdf/pdf_image.c:2454:16
+    #16 0xf254cf in pdfi_Do /src/ghostpdl/./pdf/pdf_image.c:2540:12
+    #17 0xeda7f8 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1457:24
+    #18 0xed8e48 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #19 0xf33bbf in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #20 0xf33bbf in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #21 0xf33bbf in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #22 0xe9af65 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #23 0xcfe43b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #24 0xcfe43b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #25 0xcfe43b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #26 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #27 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #28 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #29 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #30 0x101c911 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #31 0x1018949 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #32 0x101582e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #33 0x101c699 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #34 0xce6ab4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #35 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #36 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #37 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #38 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #39 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #40 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #41 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #42 0x7fa7d6cb9082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #43 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: s_RLE_process--go_process--cmd_compress_bitmap
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/srle.c:150:22 in s_RLE_process
+==1==ABORTING

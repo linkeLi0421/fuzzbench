@@ -1,0 +1,70 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2963577259
+INFO: Loaded 1 modules   (31829 inline 8-bit counters): 31829 [0xf100c0, 0xf17d15), 
+INFO: Loaded 1 PC tables (31829 PCs): 31829 [0xb9b828,0xc17d78), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2020-1860
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fff4fff91e2 at pc 0x000000521d6a bp 0x7fff4ffe85d0 sp 0x7fff4ffe7d98
+WRITE of size 28 at 0x7fff4fff91e2 thread T0
+    #0 0x521d69 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0xa98813 in sc_get_response /src/opensc/src/libopensc/apdu.c:475:3
+    #2 0xa9499b in sc_transmit /src/opensc/src/libopensc/apdu.c:532:7
+    #3 0xa93d23 in sc_transmit_apdu /src/opensc/src/libopensc/apdu.c:624:7
+    #4 0xa74894 in iso7816_read_binary /src/opensc/src/libopensc/iso7816.c:156:6
+    #5 0x9967aa in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:542:7
+    #6 0x56d135 in sc_read_binary /src/opensc/src/libopensc/card.c:652:7
+    #7 0x58ccb2 in sc_pkcs15_bind_internal /src/opensc/src/libopensc/pkcs15.c:1130:9
+    #8 0x5915b8 in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1265:8
+    #9 0x555509 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:210:5
+    #10 0x459fc3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_pkcs15_reader+0x459fc3)
+    #11 0x445892 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #12 0x44b49e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_pkcs15_reader+0x44b49e)
+    #13 0x474c32 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7fda0f96c82f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2082f)
+    #15 0x420b38 in _start (/out/fuzz_pkcs15_reader+0x420b38)
+
+Address 0x7fff4fff91e2 is located in stack of thread T0 at offset 65570 in frame
+    #0 0x99619f in idprime_read_binary /src/opensc/src/libopensc/card-idprime.c:527
+
+  This frame has 1 object(s):
+    [32, 65570) 'buffer' (line 537) <== Memory access at offset 65570 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x100069ff71e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100069ff71f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100069ff7200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100069ff7210: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100069ff7220: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x100069ff7230: 00 00 00 00 00 00 00 00 00 00 00 00[02]f3 f3 f3
+  0x100069ff7240: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100069ff7250: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100069ff7260: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100069ff7270: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100069ff7280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

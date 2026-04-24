@@ -1,0 +1,29 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4020924044
+INFO: Loaded 1 modules   (26193 inline 8-bit counters): 26193 [0x55909a450b60, 0x55909a4571b1), 
+INFO: Loaded 1 PC tables (26193 PCs): 26193 [0x55909a4571b8,0x55909a4bd6c8), 
+/out/decompress_frame_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2020-2184
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==376==ERROR: AddressSanitizer: SEGV on unknown address 0x7c2b113e20c3 (pc 0x55909a1813e9 bp 0x7fff6db6b590 sp 0x7fff6db6b4e0 T0)
+==376==The signal is caused by a READ memory access.
+    #0 0x55909a1813e9 in frame_get_usermeta /src/c-blosc2/blosc/frame.c:932:5
+    #1 0x55909a18280b in blosc2_frame_to_schunk /src/c-blosc2/blosc/frame.c:1267:18
+    #2 0x55909a1785a1 in blosc2_schunk_open_sframe /src/c-blosc2/blosc/schunk.c:263:27
+    #3 0x55909a126557 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:23:27
+    #4 0x559099fc3e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #5 0x559099faebd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #6 0x559099fb4aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #7 0x559099fe05d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7faaf201e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #9 0x559099fa7cbd in _start (/out/decompress_frame_fuzzer+0xe7cbd)
+
+==376==Register values:
+rax = 0x00007c2b113e20c6  rbx = 0x00007fff6db6b4e0  rcx = 0x0000000000000000  rdx = 0x0000000000001578  
+rdi = 0x00007c2b113e20c3  rsi = 0x00007baaefef04a0  rbp = 0x00007fff6db6b590  rsp = 0x00007fff6db6b4e0  
+ r8 = 0x00007beaf11e0098   r9 = 0x00000f7d5e23c013  r10 = 0x00007baaefef0400  r11 = 0x00000f755dfde080  
+r12 = 0x00007baaefef0470  r13 = 0x0000000000000000  r14 = 0x00007beaf11e0090  r15 = 0x0000000020202020  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/frame.c:932:5 in frame_get_usermeta
+==376==ABORTING

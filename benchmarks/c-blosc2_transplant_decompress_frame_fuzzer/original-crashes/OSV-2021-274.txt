@@ -1,0 +1,23 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4127904168
+INFO: Loaded 1 modules   (23114 inline 8-bit counters): 23114 [0x55d5090c6120, 0x55d5090cbb6a), 
+INFO: Loaded 1 PC tables (23114 PCs): 23114 [0x55d5090cbb70,0x55d509126010), 
+/out/decompress_frame_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-274
+=================================================================
+==372==ERROR: AddressSanitizer: requested allocation size 0xffffffffff20ffff (0xffffffffff211000 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0x10000000000 (thread T0)
+    #0 0x55d508d977b4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x55d508e3b845 in frame_get_metalayers_from_header /src/c-blosc2/blosc/frame.c:1203:21
+    #2 0x55d508e3b0d8 in frame_get_metalayers /src/c-blosc2/blosc/frame.c:1253:9
+    #3 0x55d508e3c169 in frame_to_schunk /src/c-blosc2/blosc/frame.c:1466:8
+    #4 0x55d508e32677 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:439:27
+    #5 0x55d508ddb559 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:23:27
+    #6 0x55d508c78e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x55d508c63bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x55d508c69aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x55d508c955d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7fe784601082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+==372==HINT: if you don't care about these errors you may set allocator_may_return_null=1
+SUMMARY: AddressSanitizer: allocation-size-too-big /src/c-blosc2/blosc/frame.c:1203:21 in frame_get_metalayers_from_header
+==372==ABORTING
