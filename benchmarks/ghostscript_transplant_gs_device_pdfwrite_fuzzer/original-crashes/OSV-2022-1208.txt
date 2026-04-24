@@ -1,0 +1,86 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1721891318
+INFO: Loaded 3 modules   (190845 inline 8-bit counters): 11664 [0x7f27d68c9ec0, 0x7f27d68ccc50), 878 [0x7f27d695f798, 0x7f27d695fb06), 178303 [0x55be6d93c7b0, 0x55be6d96802f), 
+INFO: Loaded 3 PC tables (190845 PCs): 11664 [0x7f27d68ccc50,0x7f27d68fa550), 878 [0x7f27d695fb08,0x7f27d69631e8), 178303 [0x55be6d968030,0x55be6dc20820), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-1208
+=================================================================
+==12656==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b27d4807520 at pc 0x55be6b288110 bp 0x7ffdd1a54df0 sp 0x7ffdd1a54de8
+READ of size 1 at 0x7b27d4807520 thread T0
+    #0 0x55be6b28810f in pput_hex /src/ghostpdl/./devices/vector/gdevpsfm.c:60:9
+    #1 0x55be6b287362 in cmap_put_ranges /src/ghostpdl/./devices/vector/gdevpsfm.c:74:9
+    #2 0x55be6b286da5 in psf_write_cmap /src/ghostpdl/./devices/vector/gdevpsfm.c:303:13
+    #3 0x55be6b272c6f in pdf_write_cmap /src/ghostpdl/./devices/vector/gdevpdtw.c:816:12
+    #4 0x55be6bb8869f in attach_cmap_resource /src/ghostpdl/./devices/vector/gdevpdtc.c:310:20
+    #5 0x55be6bb87251 in scan_cmap_text /src/ghostpdl/./devices/vector/gdevpdtc.c:823:28
+    #6 0x55be6bb83791 in process_cmap_text /src/ghostpdl/./devices/vector/gdevpdtc.c:965:12
+    #7 0x55be6b267cc7 in pdf_text_process /src/ghostpdl/./devices/vector/gdevpdtt.c:3761:16
+    #8 0x55be6b8d7dc7 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:445:16
+    #9 0x55be6b8d637c in pdfi_show_Tr_preserve /src/ghostpdl/./pdf/pdf_text.c:780:12
+    #10 0x55be6b8d1493 in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:830:16
+    #11 0x55be6b8d217e in pdfi_Tj /src/ghostpdl/./pdf/pdf_text.c:1076:12
+    #12 0x55be6b82437c in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1672:24
+    #13 0x55be6b822e58 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2162:24
+    #14 0x55be6b868a59 in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:127:20
+    #15 0x55be6b867b64 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:152:12
+    #16 0x55be6b86578d in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:1009:12
+    #17 0x55be6b7f307a in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1157:24
+    #18 0x55be6b6b5038 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #19 0x55be6b6af646 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #20 0x55be6b6aefae in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #21 0x55be6af3247d in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #22 0x55be6af3204a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #23 0x55be6b9165af in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #24 0x55be6b913927 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #25 0x55be6b911832 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #26 0x55be6b916384 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #27 0x55be6af2acdc in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*, int) /src/gs_fuzzlib.h:139:8
+    #28 0x55be6af2b061 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:18:2
+    #29 0x55be6adc81dd in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #30 0x55be6adb2f52 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #31 0x55be6adb8e20 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #32 0x55be6ade4952 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #33 0x7f27d6327082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #34 0x55be6adac03d in _start (/out/gs_device_pdfwrite_fuzzer+0x67c03d)
+
+Address 0x7b27d4807520 is located in stack of thread T0 at offset 1312 in frame
+    #0 0x55be6b2865af in psf_write_cmap /src/ghostpdl/./devices/vector/gdevpsfm.c:219
+
+  This frame has 2 object(s):
+    [32, 72) 'renum' (line 287)
+    [112, 1312) 'ranges' (line 289) <== Memory access at offset 1312 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ghostpdl/./devices/vector/gdevpsfm.c:60:9 in pput_hex
+Shadow bytes around the buggy address:
+  0x7b27d4807280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b27d4807300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b27d4807380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b27d4807400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b27d4807480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7b27d4807500: 00 00 00 00[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b27d4807580: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b27d4807600: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b27d4807680: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b27d4807700: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b27d4807780: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==12656==ABORTING

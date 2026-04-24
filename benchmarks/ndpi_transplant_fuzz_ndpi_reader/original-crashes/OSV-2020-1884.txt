@@ -1,0 +1,32 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 974296660
+INFO: Loaded 1 modules   (19419 inline 8-bit counters): 19419 [0x559d95940540, 0x559d9594511b), 
+INFO: Loaded 1 PC tables (19419 PCs): 19419 [0x559d95945120,0x559d95990ed0), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2020-1884
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==7643==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x559d9563e800 bp 0x7fffadf903f0 sp 0x7fffadf8fba8 T0)
+==7643==The signal is caused by a READ memory access.
+==7643==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x559d9563e800 in __sanitizer::internal_strlen(char const*) /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_libc.cpp:176:10
+    #1 0x559d9560bf9b in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:592:17
+    #2 0x559d9567371e in process_ndpi_collected_info /src/ndpi/example/reader_util.c:1177:36
+    #3 0x559d95678745 in packet_processing /src/ndpi/example/reader_util.c:1531:2
+    #4 0x559d956769b7 in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1964:10
+    #5 0x559d95669bea in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:89:2
+    #6 0x559d9550708d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x559d954f1e02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x559d954f7cd0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x559d95523802 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f4dd9752082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x559d954eaeed in _start (/out/fuzz_ndpi_reader+0x1e6eed)
+
+==7643==Register values:
+rax = 0xffffffffffffffff  rbx = 0x2020202020202020  rcx = 0x0000000000000000  rdx = 0x0000000000000001  
+rdi = 0x2020202020202020  rsi = 0x0000000000000208  rbp = 0x00007fffadf903f0  rsp = 0x00007fffadf8fba8  
+ r8 = 0x0000559d95a69000   r9 = 0x00000fb23b1344b0  r10 = 0x0000000000000000  r11 = 0x00007d1dd89e0d09  
+r12 = 0x00007d1dd89e0a80  r13 = 0x0000000000000000  r14 = 0x00007d1dd89e0a80  r15 = 0x00000fb1bb13c424  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ndpi/example/reader_util.c:1177:36 in process_ndpi_collected_info
+==7643==ABORTING

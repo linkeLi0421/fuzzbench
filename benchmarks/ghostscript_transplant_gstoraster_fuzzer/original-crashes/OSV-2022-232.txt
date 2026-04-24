@@ -1,0 +1,67 @@
+vm.mmap_rnd_bits = 28
+/out/gstoraster_fuzzer -- -rss_limit_mb=2560 -timeout=25 -runs=10 /corpus/testcase-OSV-2022-232 < /dev/null
+INFO: libFuzzer ignores flags that start with '--'
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3412510011
+INFO: Loaded 3 modules   (183119 inline 8-bit counters): 13708 [0x7fb80617e9e0, 0x7fb806181f6c), 959 [0x7fb8061dfa40, 0x7fb8061dfdff), 168452 [0x312fc10, 0x3158e14), 
+INFO: Loaded 3 PC tables (183119 PCs): 13708 [0x7fb806181f70,0x7fb8061b7830), 959 [0x7fb8061dfe00,0x7fb8061e39f0), 168452 [0x24cf9b0,0x27619f0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-232
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==15==ERROR: AddressSanitizer: SEGV on unknown address 0x00000c400000 (pc 0x7fb805c11d58 bp 0x7ffeb3285fd0 sp 0x7ffeb3285788 T0)
+==15==The signal is caused by a READ memory access.
+SCARINESS: 20 (wild-addr-read)
+    #0 0x7fb805c11d58  (/lib/x86_64-linux-gnu/libc.so.6+0xbbd58)
+    #1 0x4be747 in __interceptor_memcpy /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5
+    #2 0x13a65c0 in pdfi_fapi_get_glyph /src/ghostpdl/./pdf/pdf_fapi.c:1203:25
+    #3 0x94acb8 in get_fapi_glyph_data /src/ghostpdl/./base/fapi_ft.c:428:22
+    #4 0x998e35 in cff_get_glyph_data /src/ghostpdl/./freetype/src/cff/cffgload.c:56:19
+    #5 0x998e35 in cff_slot_load /src/ghostpdl/./freetype/src/cff/cffgload.c:417:15
+    #6 0x994afa in cff_glyph_load /src/ghostpdl/./freetype/src/cff/cffdrivr.c:192:13
+    #7 0x95fec7 in FT_Load_Glyph /src/ghostpdl/./freetype/src/base/ftobjs.c:987:15
+    #8 0x94bebb in load_glyph /src/ghostpdl/./base/fapi_ft.c:685:20
+    #9 0x948054 in gs_fapi_ft_get_char_raster_metrics /src/ghostpdl/./base/fapi_ft.c:1572:9
+    #10 0x93cfc2 in gs_fapi_do_char /src/ghostpdl/./base/gxfapi.c:1570:16
+    #11 0x13a019d in pdfi_fapi_build_char /src/ghostpdl/./pdf/pdf_fapi.c:1405:16
+    #12 0xa91706 in show_proceed /src/ghostpdl/./base/gxchar.c:1229:12
+    #13 0xa891e0 in continue_show /src/ghostpdl/./base/gxchar.c:751:12
+    #14 0xa8b6cc in gx_show_text_process /src/ghostpdl/./base/gxchar.c:728:12
+    #15 0x9253df in gs_text_process /src/ghostpdl/./base/gstext.c:696:12
+    #16 0xfd0a52 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:521:16
+    #17 0xfd0a52 in pdfi_show_Tr_0 /src/ghostpdl/./pdf/pdf_text.c:536:12
+    #18 0xfcadca in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:918:24
+    #19 0xfcc85f in pdfi_Tj /src/ghostpdl/./pdf/pdf_text.c:1143:12
+    #20 0xedcd92 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1559:24
+    #21 0xedb2c8 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:1977:32
+    #22 0xf37e8c in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:127:20
+    #23 0xf37e8c in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:152:12
+    #24 0xf37e8c in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:834:12
+    #25 0xe9f3bf in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:930:20
+    #26 0xd0282b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #27 0xd0282b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #28 0xd0282b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #29 0x56793a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #30 0x56793a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #31 0x56793a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #32 0x562de2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #33 0x1025ce1 in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #34 0x1021ce9 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #35 0x101ebce in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #36 0x1025a69 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #37 0xceaea4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #38 0x55f23c in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #39 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #40 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #41 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #42 0x457065 in fuzzer::Fuzzer::TryDetectingAMemoryLeak(unsigned char const*, unsigned long, bool) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:687:3
+    #43 0x44221e in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:8
+    #44 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #45 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #46 0x7fb805b7a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #47 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: __interceptor_memcpy--pdfi_fapi_get_glyph
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0xbbd58) 
+==15==ABORTING

@@ -1,0 +1,72 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3604000985
+INFO: Loaded 3 modules   (156781 inline 8-bit counters): 11664 [0x7f950e7bcec0, 0x7f950e7bfc50), 878 [0x7f950e8db798, 0x7f950e8dbb06), 144239 [0x558fc6291a80, 0x558fc62b4def), 
+INFO: Loaded 3 PC tables (156781 PCs): 11664 [0x7f950e7bfc50,0x7f950e7ed550), 878 [0x7f950e8dbb08,0x7f950e8df1e8), 144239 [0x558fc62b4df0,0x558fc64e84e0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2021-1690
+=================================================================
+==12147==ERROR: AddressSanitizer: global-buffer-overflow on address 0x558fc62718bb at pc 0x558fc40876b0 bp 0x7ffc2d192c00 sp 0x7ffc2d1923a8
+READ of size 1 at 0x558fc62718bb thread T0
+    #0 0x558fc40876af in MemcmpInterceptorCommon(void*, int (*)(void const*, void const*, unsigned long), void const*, void const*, unsigned long) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:849:7
+    #1 0x558fc408798c in memcmp /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:880:10
+    #2 0x558fc48efb40 in search_table_1 /src/ghostpdl/./pdf/pdf_int.c:1191:13
+    #3 0x558fc48ef6ba in split_bogus_operator /src/ghostpdl/./pdf/pdf_int.c:1319:12
+    #4 0x558fc48ed89a in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1377:16
+    #5 0x558fc48ed0d1 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #6 0x558fc492dd7e in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #7 0x558fc492ced4 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #8 0x558fc492a998 in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #9 0x558fc48c0cce in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #10 0x558fc477ee18 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #11 0x558fc4779426 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #12 0x558fc4778d8e in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #13 0x558fc4156f1d in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #14 0x558fc4156aea in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #15 0x558fc49d24ef in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #16 0x558fc49cf887 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #17 0x558fc49cd792 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #18 0x558fc49d22c4 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #19 0x558fc414f9d8 in gs_to_raster_fuzz(unsigned char const*, unsigned long) /src/gstoraster_fuzzer.cc:97:8
+    #20 0x558fc414f82b in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #21 0x558fc3fed15d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #22 0x558fc3fd7ed2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #23 0x558fc3fddda0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #24 0x558fc40098d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #25 0x7f950e2a2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #26 0x558fc3fd0fbd in _start (/out/gstoraster_fuzzer+0x517fbd)
+
+0x558fc62718bb is located 37 bytes before global variable 'op_table_2' defined in '/src/ghostpdl/./pdf/pdf_int.c:1136' (0x558fc62718e0) of size 78
+0x558fc62718bb is located 0 bytes after global variable 'op_table_1' defined in '/src/ghostpdl/./pdf/pdf_int.c:1141' (0x558fc62718a0) of size 27
+SUMMARY: AddressSanitizer: global-buffer-overflow /src/ghostpdl/./pdf/pdf_int.c:1191:13 in search_table_1
+Shadow bytes around the buggy address:
+  0x558fc6271600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x558fc6271680: 00 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9 f9
+  0x558fc6271700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9
+  0x558fc6271780: f9 f9 f9 f9 00 00 00 00 00 00 00 00 00 00 00 00
+  0x558fc6271800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x558fc6271880: 00 07 f9 f9 00 00 00[03]f9 f9 f9 f9 00 00 00 00
+  0x558fc6271900: 00 00 00 00 00 06 f9 f9 f9 f9 f9 f9 00 00 00 00
+  0x558fc6271980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x558fc6271a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x558fc6271a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x558fc6271b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==12147==ABORTING

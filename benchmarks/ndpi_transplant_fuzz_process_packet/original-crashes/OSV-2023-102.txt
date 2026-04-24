@@ -1,0 +1,33 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4051152663
+INFO: Loaded 1 modules   (15546 inline 8-bit counters): 15546 [0x55a3f53da6a0, 0x55a3f53de35a), 
+INFO: Loaded 1 PC tables (15546 PCs): 15546 [0x55a3f53de360,0x55a3f541af00), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2023-102
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6399==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x55a3f4f90b83 bp 0x000000000001 sp 0x7fffd0d9b350 T0)
+==6399==The signal is caused by a READ memory access.
+==6399==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x55a3f4f90b83 in atomic_compare_exchange_strong<__sanitizer::atomic_uint8_t> /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_atomic_clang.h:97:10
+    #1 0x55a3f4f90b83 in AtomicallySetQuarantineFlagIfAllocated /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:674:10
+    #2 0x55a3f4f90b83 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) /src/llvm-project/compiler-rt/lib/asan/asan_allocator.cpp:738:10
+    #3 0x55a3f5031596 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:52:3
+    #4 0x55a3f50a108e in ndpi_free_flow_data /src/ndpi/src/lib/ndpi_main.c:5175:2
+    #5 0x55a3f5093c2b in ndpi_free_flow /src/ndpi/src/lib/ndpi_main.c:8394:5
+    #6 0x55a3f50757c2 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:38:3
+    #7 0x55a3f4f12e7d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #8 0x55a3f4efdbf2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #9 0x55a3f4f03ac0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #10 0x55a3f4f2f5f2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f6b307ce082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x55a3f4ef6cdd in _start (/out/fuzz_process_packet+0x2bbcdd)
+
+==6399==Register values:
+rax = 0x0000000000000002  rbx = 0x00007fffd0d9b3a8  rcx = 0x000055a3f4f10903  rdx = 0x0000000000000000  
+rdi = 0x2020000000000000  rsi = 0x2020000000000000  rbp = 0x0000000000000001  rsp = 0x00007fffd0d9b350  
+ r8 = 0x00007fffd0d9b3a8   r9 = 0x0000000000000001  r10 = 0x0000000000000000  r11 = 0x0000000000000008  
+r12 = 0x000055a3f55c2ac8  r13 = 0x201ffffffffffff0  r14 = 0x2020000000000000  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ndpi/src/lib/ndpi_main.c:5175:2 in ndpi_free_flow_data
+==6399==ABORTING

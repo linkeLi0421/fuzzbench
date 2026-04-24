@@ -1,0 +1,31 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2986352789
+INFO: Loaded 1 modules   (23066 inline 8-bit counters): 23066 [0x55e0cc2f0c60, 0x55e0cc2f667a), 
+INFO: Loaded 1 PC tables (23066 PCs): 23066 [0x55e0cc2f6680,0x55e0cc350820), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /work/testcase-OSV-2024-552
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==183526==ERROR: AddressSanitizer: SEGV on unknown address 0x7b7920de03bd (pc 0x55e0cbff3a27 bp 0x7ffe3ad096b0 sp 0x7ffe3ad096b0 T0)
+==183526==The signal is caused by a READ memory access.
+    #0 0x55e0cbff3a27 in ndpi_search_zoom /src/ndpi/src/lib/protocols/zoom.c:6:3
+    #1 0x55e0cbfdac51 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4086:2
+    #2 0x55e0cbfe6e79 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4880:3
+    #3 0x55e0cbfb838b in packet_processing /src/ndpi/example/reader_util.c:1339:31
+    #4 0x55e0cbfb838b in ndpi_workflow_process_packet /src/ndpi/example/reader_util.c:1762:10
+    #5 0x55e0cbfa9b96 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:83:5
+    #6 0x55e0cbe4702d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x55e0cbe31da2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x55e0cbe37c70 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x55e0cbe637a2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f0821b6d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x55e0cbe2ae8d in _start (/out/fuzz_ndpi_reader+0x1ffe8d)
+
+==183526==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ffe3ad096c0  rcx = 0x0000000000000000  rdx = 0x0100000000000000  
+rdi = 0x00007b7920de03bd  rsi = 0x00007cd820de0df8  rbp = 0x00007ffe3ad096b0  rsp = 0x00007ffe3ad096b0  
+ r8 = 0x0000000000000002   r9 = 0x0000000020000000  r10 = 0x0000000000000000  r11 = 0x0000000000000000  
+r12 = 0x0000000000000001  r13 = 0x0000000000000000  r14 = 0x000055e0cbff39d0  r15 = 0x00000000000001c8  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ndpi/src/lib/protocols/zoom.c:6:3 in ndpi_search_zoom
+==183526==ABORTING

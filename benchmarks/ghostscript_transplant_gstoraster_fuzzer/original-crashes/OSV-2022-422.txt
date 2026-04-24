@@ -1,0 +1,38 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1279904894
+INFO: Loaded 3 modules   (158084 inline 8-bit counters): 11664 [0x7fd2b59bcec0, 0x7fd2b59bfc50), 878 [0x7fd2b5bf9798, 0x7fd2b5bf9b06), 145542 [0x560496c55ad0, 0x560496c79356), 
+INFO: Loaded 3 PC tables (158084 PCs): 11664 [0x7fd2b59bfc50,0x7fd2b59ed550), 878 [0x7fd2b5bf9b08,0x7fd2b5bfd1e8), 145542 [0x560496c79358,0x560496eb1bb8), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-422
+gsapi_init_with_args: error -100
+gsapi_init_with_args: error -100
+gsapi_init_with_args: error -100
+gsapi_init_with_args: error -100
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==11996==ERROR: AddressSanitizer: SEGV on unknown address 0x7e72b22e8050 (pc 0x7fd2b557aaf3 bp 0x7fff8d2415c0 sp 0x7fff8d240d78 T0)
+==11996==The signal is caused by a WRITE memory access.
+    #0 0x7fd2b557aaf3 in memcpy (/lib/x86_64-linux-gnu/libc.so.6+0xbbaf3) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #1 0x56049472e4db in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:63:3
+    #2 0x560494e7983e in restore_space /src/ghostpdl/./psi/isave.c:838:17
+    #3 0x560494e79004 in alloc_restore_step_in /src/ghostpdl/./psi/isave.c:784:9
+    #4 0x560494e79c9b in alloc_restore_all /src/ghostpdl/./psi/isave.c:888:16
+    #5 0x56049477da88 in gs_main_finit /src/ghostpdl/./psi/imain.c:1391:20
+    #6 0x560494d9b67f in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
+    #7 0x560494774a17 in gs_to_raster_fuzz(unsigned char const*, unsigned long) /src/gstoraster_fuzzer.cc:102:8
+    #8 0x56049477482b in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #9 0x56049461215d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #10 0x5604945fced2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #11 0x560494602da0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #12 0x56049462e8d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7fd2b54e3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #14 0x5604945f5fbd in _start (/out/gstoraster_fuzzer+0x522fbd)
+
+==11996==Register values:
+rax = 0x00007e72b22e8050  rbx = 0x0000000000000000  rcx = 0x00000fced645500b  rdx = 0x0000000000000010  
+rdi = 0x00007e72b22e8050  rsi = 0x00007e72b5467f50  rbp = 0x00007fff8d2415c0  rsp = 0x00007fff8d240d78  
+ r8 = 0x00000fce5645d00a   r9 = 0x00007e72b22e805f  r10 = 0x00000fce5645d00b  r11 = 0x00000fced6455008  
+r12 = 0x00000fced6455008  r13 = 0xffffffffffffffcf  r14 = 0x00007d82b47e69d8  r15 = 0x00007e72b5464258  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0xbbaf3) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d) in memcpy
+==11996==ABORTING

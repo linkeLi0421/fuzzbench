@@ -1,17 +1,34 @@
-INFO: Seed: 4214503924
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-protocols/kerberos.c:240:23: runtime error: index 254 out of bounds for type 'char[48]'
-    #0 0x5590d7 in ndpi_search_kerberos_osv_2020_1715 /src/ndpi/src/lib/protocols/kerberos.c:240:23
-    #1 0x5590d7 in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:573:5
-    #2 0x4f4030 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
-    #3 0x4ffa26 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
-    #4 0x4de327 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
-    #5 0x5d64cc in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #6 0x5c8425 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #7 0x5cd0d1 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #8 0x5c80f2 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #9 0x7f2a708ca082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #10 0x41f86d in _start (/out/fuzz_process_packet+0x41f86d)
 
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2363892359
+INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
+INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
+/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase
+protocols/kerberos.c:240:23: runtime error: index 254 out of bounds for type 'char[48]'
 SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior protocols/kerberos.c:240:23 in 
+==1== ERROR: libFuzzer: deadly signal
+    #0 0x539091 in __sanitizer_print_stack_trace /src/llvm-project/compiler-rt/lib/asan/asan_stack.cpp:87:3
+    #1 0x457ba8 in fuzzer::PrintStackTrace() /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerUtil.cpp:210:5
+    #2 0x43c883 in fuzzer::Fuzzer::CrashCallback() /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:233:3
+    #3 0x7fc2a1ef041f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f) (BuildId: 9753720502573b97dbac595b61fd72c2df18e078)
+    #4 0x7fc2a1d0000a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #5 0x7fc2a1cdf858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x5532b6 in __sanitizer::Abort() /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_posix_libcdep.cpp:143:3
+    #7 0x551160 in __sanitizer::Die() /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_termination.cpp:58:5
+    #8 0x567342 in __ubsan_handle_out_of_bounds_abort /src/llvm-project/compiler-rt/lib/ubsan/ubsan_handlers.cpp:405:3
+    #9 0x5fdf1b in ndpi_search_kerberos_osv_2020_1715 /src/ndpi/src/lib/protocols/kerberos.c:240:23
+    #10 0x5fdf1b in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:573:5
+    #11 0x58a050 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
+    #12 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #13 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
+    #14 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #15 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #16 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #17 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #18 0x7fc2a1ce1082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #19 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal

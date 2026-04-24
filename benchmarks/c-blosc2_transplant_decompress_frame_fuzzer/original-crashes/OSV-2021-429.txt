@@ -1,0 +1,33 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4148231712
+INFO: Loaded 1 modules   (23234 inline 8-bit counters): 23234 [0x558c8541c160, 0x558c85421c22), 
+INFO: Loaded 1 PC tables (23234 PCs): 23234 [0x558c85421c28,0x558c8547c848), 
+/out/decompress_frame_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-429
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==372==ERROR: AddressSanitizer: SEGV on unknown address 0x7c079afe22b6 (pc 0x558c85169d24 bp 0x7fff31f472c0 sp 0x7fff31f47230 T0)
+==372==The signal is caused by a READ memory access.
+    #0 0x558c85169d24 in blosc_d /src/c-blosc2/blosc/blosc2.c:1344:14
+    #1 0x558c85168c88 in _blosc_getitem /src/c-blosc2/blosc/blosc2.c:2538:14
+    #2 0x558c8516ac92 in blosc2_getitem_ctx /src/c-blosc2/blosc/blosc2.c:2605:12
+    #3 0x558c8516aa7f in blosc_getitem /src/c-blosc2/blosc/blosc2.c:2570:12
+    #4 0x558c8519462e in get_coffset /src/c-blosc2/blosc/frame.c:1681:12
+    #5 0x558c851930ea in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:1859:9
+    #6 0x558c85199356 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2682:18
+    #7 0x558c8512f645 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:38:15
+    #8 0x558c84fcce5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #9 0x558c84fb7bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #10 0x558c84fbdaa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #11 0x558c84fe95d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f177ba94082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #13 0x558c84fb0cbd in _start (/out/decompress_frame_fuzzer+0xd1cbd)
+
+==372==Register values:
+rax = 0x0000000000000000  rbx = 0x00007c079afe22b6  rcx = 0x0000000000000021  rdx = 0x0000558c85484800  
+rdi = 0x0000000000000fd8  rsi = 0x0000000200000000  rbp = 0x00007fff31f472c0  rsp = 0x00007fff31f47230  
+ r8 = 0x0000000000200000   r9 = 0x00000000202020ff  r10 = 0x00007b1779cf0020  r11 = 0x00007c077ade01b7  
+r12 = 0x000000005fdfdefc  r13 = 0x0000000000000671  r14 = 0x000000005fdfdf00  r15 = 0x0000000000000020  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/blosc2.c:1344:14 in blosc_d
+==372==ABORTING

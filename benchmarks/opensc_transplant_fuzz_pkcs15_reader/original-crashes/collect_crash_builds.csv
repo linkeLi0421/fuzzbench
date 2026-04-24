@@ -1,0 +1,9 @@
+target,commit_id,oss_fuzz_commit,sanitizer
+opensc,6903aebfddc466d966c7b865fae34572bf3ed23e,auto,address
+opensc,3ff059a74bcd10ead9a92cc67e5c8c006996e940,auto,address
+opensc,55fd3db2b5f2ecdb8d2bc148270b75ec6ff2ed2f,auto,address
+opensc,708cedbdad0da1d5e794589962564ca0363ab18e,auto,address
+opensc,7a1e42e1352201127d1a97b6cb5f41e48cace0f5,auto,address
+opensc,8453c0d99a499bc84109e9e563daf0e07ff5776f,auto,address
+opensc,af42a93874132cbca201cb4fd2040498dc460285,auto,address
+opensc,9ffb9bae63c8b7fbababb8481a83f1b575e59a18,auto,address

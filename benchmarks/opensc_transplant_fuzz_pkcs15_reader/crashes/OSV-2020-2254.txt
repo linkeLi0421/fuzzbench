@@ -1,5 +1,68 @@
-INFO: Seed: 3294163737
-/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
-Running: /tmp/testcase
-pkcs15-tcos.c:235:26: runtime error: index 357 out of bounds for type 'unsigned char[256]'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pkcs15-tcos.c:235:26 in 
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2204946612
+INFO: Loaded 1 modules   (31673 inline 8-bit counters): 31673 [0xd3a900, 0xd424b9), 
+INFO: Loaded 1 PC tables (31673 PCs): 31673 [0xbc4898,0xc40428), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 100 time(s) each.
+Running: /corpus/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-use-after-return on address 0x7f0a1350e005 at pc 0x0000009cc0ce bp 0x7ffc197c3870 sp 0x7ffc197c3868
+READ of size 1 at 0x7f0a1350e005 thread T0
+    #0 0x9cc0cd in insert_pin /src/opensc/src/libopensc/pkcs15-tcos.c:235:26
+    #1 0x9c7853 in detect_idkey /src/opensc/src/libopensc/pkcs15-tcos.c:402:2
+    #2 0x9c5ca8 in sc_pkcs15emu_tcos_init_ex /src/opensc/src/libopensc/pkcs15-tcos.c:521:6
+    #3 0x60f09e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #4 0x5acdfc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #5 0x570f84 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:217:5
+    #6 0x4406a3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x42be02 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x4316ac in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x45abe2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f0a15870082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x421fcd in _start (/out/fuzz_pkcs15_reader+0x421fcd)
+
+Address 0x7f0a1350e005 is located in stack of thread T0 at offset 5 in frame
+    #0 0x9c95cf in insert_key /src/opensc/src/libopensc/pkcs15-tcos.c:102
+
+  This frame has 4 object(s):
+    [32, 40) 'f' (line 105)
+    [64, 536) 'prkey_info' (line 106)
+    [608, 3384) 'prkey_obj' (line 107)
+    [3520, 3776) 'buf' (line 126)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-use-after-return /src/opensc/src/libopensc/pkcs15-tcos.c:235:26 in insert_pin
+Shadow bytes around the buggy address:
+  0x0fe1c2699bb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe1c2699bc0: 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x0fe1c2699bd0: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe1c2699be0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe1c2699bf0: 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00
+=>0x0fe1c2699c00:[f5]f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe1c2699c10: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe1c2699c20: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe1c2699c30: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe1c2699c40: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0fe1c2699c50: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

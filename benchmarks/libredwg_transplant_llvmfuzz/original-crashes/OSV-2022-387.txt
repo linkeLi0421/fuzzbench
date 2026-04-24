@@ -1,0 +1,32 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3480285811
+INFO: Loaded 1 modules   (508694 inline 8-bit counters): 508694 [0x560a4d209b60, 0x560a4d285e76), 
+INFO: Loaded 1 PC tables (508694 PCs): 508694 [0x560a4d285e78,0x560a4da48fd8), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-387
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==7639==ERROR: AddressSanitizer: SEGV on unknown address 0x80808100800080 (pc 0x560a49d0c2c0 bp 0x7ffc50e92830 sp 0x7ffc50e92810 T0)
+==7639==The signal is caused by a READ memory access.
+    #0 0x560a49d0c2c0 in bit_write_TV /src/libredwg/src/bits.c:1839:26
+    #1 0x560a49d0caba in bit_write_T /src/libredwg/src/bits.c:1923:9
+    #2 0x560a4bf3d023 in dwg_encode_BLOCK_private /src/libredwg/src/./dwg.spec:544:5
+    #3 0x560a4beb2154 in dwg_encode_BLOCK /src/libredwg/src/./dwg.spec:528:1
+    #4 0x560a4beab479 in dwg_encode_add_object /src/libredwg/src/encode.c:4176:15
+    #5 0x560a4be23124 in dwg_encode /src/libredwg/src/encode.c:2769:16
+    #6 0x560a49d01718 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:176:11
+    #7 0x560a49b9fedd in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #8 0x560a49b8ac52 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #9 0x560a49b90b20 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #10 0x560a49bbc652 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7fb2b06af082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x560a49b83d3d in _start (/out/llvmfuzz+0xe4ad3d)
+
+==7639==Register values:
+rax = 0x0080808080808080  rbx = 0x0404040404040404  rcx = 0x000000000000003d  rdx = 0x0000560a4dc21400  
+rdi = 0x00007bb2aefdd410  rsi = 0x0404040404040404  rbp = 0x00007ffc50e92830  rsp = 0x00007ffc50e92810  
+ r8 = 0x0000000000000020   r9 = 0x00007fffffffff01  r10 = 0x00007fffffffff01  r11 = 0x0000000000000001  
+r12 = 0x00007bb2ae8d08c0  r13 = 0x0404040404040404  r14 = 0x00007bb2aefdd410  r15 = 0x00007bb2ae8d08c0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/libredwg/src/bits.c:1839:26 in bit_write_TV
+==7639==ABORTING

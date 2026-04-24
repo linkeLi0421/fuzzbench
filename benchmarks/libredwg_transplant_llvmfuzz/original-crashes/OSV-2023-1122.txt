@@ -1,0 +1,76 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 648601376
+INFO: Loaded 1 modules   (643971 inline 8-bit counters): 643971 [0x52abe60, 0x53491e3), 
+INFO: Loaded 1 PC tables (643971 PCs): 643971 [0x462db18,0x5001348), 
+/out/llvmfuzz: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2023-1122
+Warning: utf-8: BAD_CONTINUATION_BYTE ������������������������������w��M+19��7
+Warning: utf-8: BAD_CONTINUATION_BYTE ������������������������������w��M+19��7
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fe63c802d90 at pc 0x000000519c66 bp 0x7fffb767a270 sp 0x7fffb7679a38
+READ of size 1025 at 0x7fe63c802d90 thread T0
+    #0 0x519c65 in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:438:5
+    #1 0x3f2e920 in dxf_header_read /src/libredwg/src/in_dxf.c:1123:23
+    #2 0x3f28b33 in dwg_read_dxf /src/libredwg/src/in_dxf.c:12752:23
+    #3 0x56c944 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:120:11
+    #4 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7fe63e7de082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #9 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+DEDUP_TOKEN: strdup--dxf_header_read--dwg_read_dxf
+Address 0x7fe63c802d90 is located in stack of thread T0 at offset 3472 in frame
+    #0 0x3f2cb0f in dxf_header_read /src/libredwg/src/in_dxf.c:1025
+
+DEDUP_TOKEN: dxf_header_read
+  This frame has 10 object(s):
+    [32, 112) 'field' (line 1044)
+    [144, 1168) 'dest' (line 1121)
+    [1296, 2320) 'dest220' (line 1122)
+    [2448, 3472) 'dest255' (line 1123)
+    [3600, 4624) 'dest290' (line 1124) <== Memory access at offset 3472 partially underflows this variable
+    [4752, 5776) 'dest325' (line 1125)
+    [5904, 6928) 'dest360' (line 1126)
+    [7056, 7080) 'pt' (line 1170)
+    [7120, 7128) 'hdl' (line 1208)
+    [7152, 7160) 'hdl636' (line 1216)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:438:5 in strdup
+Shadow bytes around the buggy address:
+  0x0ffd478f8560: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd478f8570: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd478f8580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd478f8590: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ffd478f85a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0ffd478f85b0: 00 00[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x0ffd478f85c0: f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ffd478f85d0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ffd478f85e0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ffd478f85f0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ffd478f8600: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

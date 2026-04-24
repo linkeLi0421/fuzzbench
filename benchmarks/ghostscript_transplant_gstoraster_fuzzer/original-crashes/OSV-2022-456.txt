@@ -1,0 +1,53 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 838173245
+INFO: Loaded 3 modules   (172185 inline 8-bit counters): 11664 [0x7fc7d89bcec0, 0x7fc7d89bfc50), 878 [0x7fc7d8aa3798, 0x7fc7d8aa3b06), 159643 [0x55bec52d5be0, 0x55bec52fcb7b), 
+INFO: Loaded 3 PC tables (172185 PCs): 11664 [0x7fc7d89bfc50,0x7fc7d89ed550), 878 [0x7fc7d8aa3b08,0x7fc7d8aa71e8), 159643 [0x55bec52fcb80,0x55bec556c530), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-456
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==12262==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000000000000 bp 0x7ffdcaef18d0 sp 0x7ffdcaef1858 T0)
+==12262==Hint: pc points to the zero page.
+==12262==The signal is caused by a READ memory access.
+==12262==Hint: address points to the zero page.
+    #0 0x000000000000  (<unknown module>)
+    #1 0x55bec306f37c in load_glyph /src/ghostpdl/./base/fapi_ft.c:685:20
+    #2 0x55bec306b510 in gs_fapi_ft_get_char_raster_metrics /src/ghostpdl/./base/fapi_ft.c:1572:9
+    #3 0x55bec3062460 in gs_fapi_do_char /src/ghostpdl/./base/gxfapi.c:1570:16
+    #4 0x55bec386277c in pdfi_fapi_build_char /src/ghostpdl/./pdf/pdf_fapi.c:1398:16
+    #5 0x55bec3163c4b in show_proceed /src/ghostpdl/./base/gxchar.c:1229:12
+    #6 0x55bec35659c7 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:445:16
+    #7 0x55bec35641cb in pdfi_show_Tr_0 /src/ghostpdl/./pdf/pdf_text.c:460:12
+    #8 0x55bec355f4d4 in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:842:24
+    #9 0x55bec3560c6e in pdfi_TJ /src/ghostpdl/./pdf/pdf_text.c:1188:20
+    #10 0x55bec34b90c1 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1628:24
+    #11 0x55bec34b8080 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2081:24
+    #12 0x55bec34facb9 in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:127:20
+    #13 0x55bec34fa074 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:152:12
+    #14 0x55bec34f7fb5 in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #15 0x55bec348a8da in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1092:24
+    #16 0x55bec334c8a8 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #17 0x55bec3346eb6 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #18 0x55bec334681e in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #19 0x55bec2c0a29d in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #20 0x55bec2c09e6a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #21 0x55bec35a152f in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #22 0x55bec359e8a7 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #23 0x55bec359c7b2 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #24 0x55bec35a1304 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #25 0x55bec2c02b76 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*) /src/gs_fuzzlib.h:127:8
+    #26 0x55bec2c02ec0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:23:2
+    #27 0x55bec2aa016d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #28 0x55bec2a8aee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #29 0x55bec2a90db0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #30 0x55bec2abc8e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #31 0x7fc7d846b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+==12262==Register values:
+rax = 0x0000000000000060  rbx = 0x00007ed7d77e3e58  rcx = 0x00007ed7d77e3e78  rdx = 0x00007ed7d77e3e58  
+rdi = 0x00007ed7d77e18d8  rsi = 0x00007ed7d77e4078  rbp = 0x00007ffdcaef18d0  rsp = 0x00007ffdcaef1858  
+ r8 = 0x0000000000000001   r9 = 0x00007fffffffff01  r10 = 0x00007fffffffff01  r11 = 0x0000000000000001  
+r12 = 0x00007ed7d77e4078  r13 = 0x00007ed7d77e3e78  r14 = 0x00007ed7d77e18d8  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (<unknown module>) 
+==12262==ABORTING

@@ -1,0 +1,70 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4161649031
+INFO: Loaded 1 modules   (15628 inline 8-bit counters): 15628 [0x556e98ae3a90, 0x556e98ae779c), 
+INFO: Loaded 1 PC tables (15628 PCs): 15628 [0x556e98ae77a0,0x556e98b24860), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-1032
+=================================================================
+==9358==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b9f9cf21d60 at pc 0x556e986b3831 bp 0x7ffeae242de0 sp 0x7ffeae242568
+READ of size 17 at 0x7b9f9cf21d60 thread T0
+    #0 0x556e986b3830 in printf_common(void*, char const*, __va_list_tag*) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:567:9
+    #1 0x556e986b3ba1 in vsnprintf /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:1713:1
+    #2 0x556e986b55ed in snprintf /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:1786:1
+    #3 0x556e9880e660 in ndpi_check_http_server /src/ndpi/src/lib/protocols/http.c
+    #4 0x556e9880b209 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:744:5
+    #5 0x556e9880c3f9 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:739:7
+    #6 0x556e98809d95 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
+    #7 0x556e987a74e9 in check_ndpi_detection_func /src/ndpi/src/lib/ndpi_main.c:5580:6
+    #8 0x556e987acddb in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:6458:15
+    #9 0x556e9877277f in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:29:5
+    #10 0x556e9860fe7d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #11 0x556e985fabf2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #12 0x556e98600ac0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #13 0x556e9862c5f2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7f9f9efb8082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #15 0x556e985f3cdd in _start (/out/fuzz_process_packet+0x2bbcdd)
+
+Address 0x7b9f9cf21d60 is located in stack of thread T0 at offset 96 in frame
+    #0 0x556e9880e14f in ndpi_check_http_server /src/ndpi/src/lib/protocols/http.c:646
+
+  This frame has 5 object(s):
+    [32, 36) 'a' (line 655)
+    [48, 52) 'b' (line 655)
+    [64, 68) 'c' (line 655)
+    [80, 96) 'buf' (line 656)
+    [112, 176) 'msg' (line 664) <== Memory access at offset 96 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ndpi/src/lib/protocols/http.c in ndpi_check_http_server
+Shadow bytes around the buggy address:
+  0x7b9f9cf21a80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b9f9cf21b00: f1 f1 f1 f1 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x7b9f9cf21b80: f8 f8 f8 f8 f2 f2 f2 f2 f8 f8 f3 f3 f3 f3 f3 f3
+  0x7b9f9cf21c00: f1 f1 f1 f1 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x7b9f9cf21c80: f8 f8 f8 f8 f2 f2 f2 f2 f8 f8 f3 f3 f3 f3 f3 f3
+=>0x7b9f9cf21d00: f1 f1 f1 f1 04 f2 04 f2 04 f2 00 00[f2]f2 00 00
+  0x7b9f9cf21d80: 00 00 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b9f9cf21e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9f9cf21e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9f9cf21f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9f9cf21f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==9358==ABORTING

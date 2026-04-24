@@ -1,0 +1,27 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3344030447
+INFO: Loaded 1 modules   (32616 inline 8-bit counters): 32616 [0x56493570e1a0, 0x564935716108), 
+INFO: Loaded 1 PC tables (32616 PCs): 32616 [0x564935716108,0x564935795788), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2020-242
+fuzz_ndpi_reader: fuzz_ndpi_reader.c:111: int LLVMFuzzerTestOneInput(const uint8_t *, size_t): Assertion `ndpi_load_domain_suffixes(workflow->ndpi_struct, name) >= 0' failed.
+==8575== ERROR: libFuzzer: deadly signal
+    #0 0x56493504b0d1 in __sanitizer_print_stack_trace /src/llvm-project/compiler-rt/lib/asan/asan_stack.cpp:87:3
+    #1 0x564934f3ce78 in fuzzer::PrintStackTrace() /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerUtil.cpp:210:5
+    #2 0x564934f1f9c5 in fuzzer::Fuzzer::CrashCallback() /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:231:3
+    #3 0x7fb823a9641f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f) (BuildId: 9753720502573b97dbac595b61fd72c2df18e078)
+    #4 0x7fb82389000a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #5 0x7fb82386f858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7fb82386f728  (/lib/x86_64-linux-gnu/libc.so.6+0x22728) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #7 0x7fb823880fd5 in __assert_fail (/lib/x86_64-linux-gnu/libc.so.6+0x33fd5) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #8 0x564935084ac6 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:111:5
+    #9 0x564934f210ad in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #10 0x564934f0be22 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #11 0x564934f11cf0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #12 0x564934f3d822 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7fb823871082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #14 0x564934f04f0d in _start (/out/fuzz_ndpi_reader+0x50df0d)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal

@@ -1,0 +1,49 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2937662727
+INFO: Loaded 3 modules   (189284 inline 8-bit counters): 11664 [0x7fc1ea614ec0, 0x7fc1ea617c50), 878 [0x7fc1ea6aa798, 0x7fc1ea6aab06), 176742 [0x55e1281f7650, 0x55e1282228b6), 
+INFO: Loaded 3 PC tables (189284 PCs): 11664 [0x7fc1ea617c50,0x7fc1ea645550), 878 [0x7fc1ea6aab08,0x7fc1ea6ae1e8), 176742 [0x55e1282228b8,0x55e1284d4f18), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-523
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==12630==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x55e12595a81a bp 0x7ffdf66b1ff0 sp 0x7ffdf66b1fa0 T0)
+==12630==The signal is caused by a READ memory access.
+==12630==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x55e12595a81a in chunk_free_object /src/ghostpdl/./base/gsmchunk.c:1110:31
+    #1 0x55e12659156a in Context_Destroy /src/ghostpdl/./base/ttobjs.c:240:4
+    #2 0x55e1265868b7 in ttfFont__finit /src/ghostpdl/./base/ttfmain.c:199:13
+    #3 0x55e12625c487 in ttfFont__destroy /src/ghostpdl/./base/gxttfb.c:423:5
+    #4 0x55e125dae5e2 in gs_clean_fm_pair_attributes /src/ghostpdl/./base/gxccman.c:409:9
+    #5 0x55e125db058d in gs_purge_font_from_char_caches_forced /src/ghostpdl/./base/gxccman.c:799:17
+    #6 0x55e125c5232d in gs_font_finalize /src/ghostpdl/./base/gsfont.c:167:5
+    #7 0x55e12595a845 in chunk_free_object /src/ghostpdl/./base/gsmchunk.c:1112:13
+    #8 0x55e12618b9c0 in pdfi_free_font_truetype /src/ghostpdl/./pdf/pdf_fontTT.c:656:9
+    #9 0x55e1260d9396 in pdfi_clear_context /src/ghostpdl/./pdf/ghostpdf.c:2060:13
+    #10 0x55e1260df92f in pdfi_free_context /src/ghostpdl/./pdf/ghostpdf.c:2094:5
+    #11 0x55e1260c8c56 in zPDFclose /src/ghostpdl/./psi/zpdfops.c:617:16
+    #12 0x55e125f8ce48 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #13 0x55e125f87456 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #14 0x55e125f86dbe in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #15 0x55e12580e3ad in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #16 0x55e12580df7a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #17 0x55e1261e352f in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #18 0x55e1261e08a7 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #19 0x55e1261de7b2 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #20 0x55e1261e3304 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #21 0x55e125806c6b in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #22 0x55e125806fce in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:18:2
+    #23 0x55e1256a41dd in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #24 0x55e12568ef52 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #25 0x55e125694e20 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #26 0x55e1256c0952 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #27 0x7fc1ea072082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #28 0x55e12568803d in _start (/out/gs_device_pdfwrite_fuzzer+0x67203d)
+
+==12630==Register values:
+rax = 0x060533170af2d8b0  rbx = 0x00007cf1e93e11f0  rcx = 0x0000000000000000  rdx = 0x000055e128644600  
+rdi = 0x302998b85796c587  rsi = 0x0000000000000001  rbp = 0x00007ffdf66b1ff0  rsp = 0x00007ffdf66b1fa0  
+ r8 = 0x0000000000000001   r9 = 0x0000000000000001  r10 = 0x00000fd23d28d02f  r11 = 0x00000fd2bd285028  
+r12 = 0x0000000000000000  r13 = 0x00007e91e9468878  r14 = 0x00007e91e9468858  r15 = 0x00007e91e9468878  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/gsmchunk.c:1110:31 in chunk_free_object
+==12630==ABORTING

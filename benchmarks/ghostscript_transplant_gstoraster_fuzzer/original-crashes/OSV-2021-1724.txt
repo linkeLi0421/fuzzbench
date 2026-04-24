@@ -1,0 +1,53 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1581143176
+INFO: Loaded 3 modules   (182532 inline 8-bit counters): 13708 [0x7f997981b9e0, 0x7f997981ef6c), 959 [0x7f997987ca40, 0x7f997987cdff), 167865 [0x2d96d50, 0x2dbfd09), 
+INFO: Loaded 3 PC tables (182532 PCs): 13708 [0x7f997981ef70,0x7f9979854830), 959 [0x7f997987ce00,0x7f99798809f0), 167865 [0x24c45d0,0x2754160), 
+/out/gstoraster_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-1724
+=================================================================
+==1==ERROR: AddressSanitizer: unknown-crash on address 0x3470203662342872 at pc 0x0000004be93e bp 0x7fff284f3b40 sp 0x7fff284f3300
+READ of size 1920286312 at 0x3470203662342872 thread T0
+    #0 0x4be93d in __interceptor_memcpy /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5
+    #1 0xfb11bb in cmap_endcodespacerange_func /src/ghostpdl/./pdf/pdf_cmap.c:120:13
+    #2 0xf93760 in pdfi_pscript_interpret /src/ghostpdl/./pdf/pdf_fontps.c:362:36
+    #3 0xfae297 in pdfi_read_cmap /src/ghostpdl/./pdf/pdf_cmap.c:810:12
+    #4 0xfa5976 in pdfi_read_truetype_font /src/ghostpdl/./pdf/pdf_fontTT.c:459:20
+    #5 0xf5cddc in pdfi_load_font /src/ghostpdl/./pdf/pdf_font.c:739:40
+    #6 0xf62074 in pdfi_load_dict_font /src/ghostpdl/./pdf/pdf_font.c:824:16
+    #7 0xf666f5 in pdfi_load_resource_font /src/ghostpdl/./pdf/pdf_font.c:864:12
+    #8 0xf666f5 in pdfi_Tf /src/ghostpdl/./pdf/pdf_font.c:1310:12
+    #9 0xeda923 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1624:24
+    #10 0xed8e48 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #11 0xf33bbf in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #12 0xf33bbf in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #13 0xf33bbf in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #14 0xe9af65 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #15 0xcfe43b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #16 0xcfe43b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #17 0xcfe43b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #18 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #19 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #20 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #21 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #22 0x101c911 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #23 0x1018949 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #24 0x101582e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #25 0x101c699 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #26 0xce6ab4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #27 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #28 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #29 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #30 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #31 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #32 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #33 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #34 0x7f9979218082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #35 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: __interceptor_memcpy--cmap_endcodespacerange_func--pdfi_pscript_interpret
+Address 0x3470203662342872 is a wild pointer inside of access range of size 0x000072753e68.
+SUMMARY: AddressSanitizer: unknown-crash /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5 in __interceptor_memcpy
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

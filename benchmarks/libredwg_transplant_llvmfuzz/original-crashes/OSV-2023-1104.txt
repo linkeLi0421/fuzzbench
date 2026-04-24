@@ -1,0 +1,72 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 647950130
+INFO: Loaded 1 modules   (643971 inline 8-bit counters): 643971 [0x52abe60, 0x53491e3), 
+INFO: Loaded 1 PC tables (643971 PCs): 643971 [0x462db18,0x5001348), 
+/out/llvmfuzz: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2023-1104
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6160000008eb at pc 0x00000056fb0e bp 0x7fff2d91c060 sp 0x7fff2d91c058
+READ of size 1 at 0x6160000008eb thread T0
+    #0 0x56fb0d in bit_read_RC /src/libredwg/src/bits.c:338:18
+    #1 0x57a757 in bit_read_fixed /src/libredwg/src/bits.c:1610:21
+    #2 0x57aada in bit_read_TF /src/libredwg/src/bits.c:1632:3
+    #3 0xa8c015 in dwg_decode_PROXY_ENTITY_private /src/libredwg/src/./dwg.spec:5917:5
+    #4 0x773ff9 in dwg_decode_PROXY_ENTITY /src/libredwg/src/./dwg.spec:5872:1
+    #5 0x7639c9 in dwg_decode_add_object /src/libredwg/src/decode.c:5496:15
+    #6 0x59e605 in decode_R13_R2000 /src/libredwg/src/decode.c:832:19
+    #7 0x58f238 in dwg_decode /src/libredwg/src/decode.c:229:12
+    #8 0x56c74a in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:95:11
+    #9 0x43df03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7ff4fef27082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #14 0x41f82d in _start (/out/llvmfuzz+0x41f82d)
+
+DEDUP_TOKEN: bit_read_RC--bit_read_fixed--bit_read_TF
+0x6160000008eb is located 0 bytes to the right of 619-byte region [0x616000000680,0x6160000008eb)
+allocated by thread T0 here:
+    #0 0x52f096 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x4ada97 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x429662 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #3 0x42ef0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #4 0x458442 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7ff4fef27082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+DEDUP_TOKEN: __interceptor_malloc--operator new(unsigned long)--fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libredwg/src/bits.c:338:18 in bit_read_RC
+Shadow bytes around the buggy address:
+  0x0c2c7fff80c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff80d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff80e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff80f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c2c7fff8110: 00 00 00 00 00 00 00 00 00 00 00 00 00[03]fa fa
+  0x0c2c7fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8140: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8150: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff8160: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

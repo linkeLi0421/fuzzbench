@@ -1,0 +1,79 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2962723926
+INFO: Loaded 1 modules   (31829 inline 8-bit counters): 31829 [0xf100c0, 0xf17d15), 
+INFO: Loaded 1 PC tables (31829 PCs): 31829 [0xb9b828,0xc17d78), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2020-1844
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x602000000676 at pc 0x00000050e81d bp 0x7ffea987e090 sp 0x7ffea987d848
+READ of size 7 at 0x602000000676 thread T0
+    #0 0x50e81c in strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:482:5
+    #1 0x9f3089 in hextoint /src/opensc/src/libopensc/pkcs15-itacns.c:382:2
+    #2 0x9f281c in get_name_from_EF_DatiPersonali /src/opensc/src/libopensc/pkcs15-itacns.c:401:18
+    #3 0x9f0d32 in itacns_add_data_files /src/opensc/src/libopensc/pkcs15-itacns.c:549:6
+    #4 0x9ef113 in itacns_init /src/opensc/src/libopensc/pkcs15-itacns.c:813:6
+    #5 0x9ee2b0 in sc_pkcs15emu_itacns_init_ex /src/opensc/src/libopensc/pkcs15-itacns.c:870:9
+    #6 0x5f384e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #7 0x5915fc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #8 0x555509 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:210:5
+    #9 0x459fc3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_pkcs15_reader+0x459fc3)
+    #10 0x445892 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #11 0x44b49e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_pkcs15_reader+0x44b49e)
+    #12 0x474c32 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f85819ec82f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2082f)
+    #14 0x420b38 in _start (/out/fuzz_pkcs15_reader+0x420b38)
+
+0x602000000676 is located 0 bytes to the right of 6-byte region [0x602000000670,0x602000000676)
+allocated by thread T0 here:
+    #0 0x5228fd in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
+    #1 0xa5e460 in sc_der_copy /src/opensc/src/libopensc/asn1.c:2050:16
+    #2 0x5add30 in sc_pkcs15_read_data_object /src/opensc/src/libopensc/pkcs15-data.c:60:2
+    #3 0x9f0bdc in itacns_add_data_files /src/opensc/src/libopensc/pkcs15-itacns.c:539:7
+    #4 0x9ef113 in itacns_init /src/opensc/src/libopensc/pkcs15-itacns.c:813:6
+    #5 0x9ee2b0 in sc_pkcs15emu_itacns_init_ex /src/opensc/src/libopensc/pkcs15-itacns.c:870:9
+    #6 0x5f384e in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:125:8
+    #7 0x5915fc in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1268:8
+    #8 0x555509 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:210:5
+    #9 0x459fc3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_pkcs15_reader+0x459fc3)
+    #10 0x445892 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #11 0x44b49e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_pkcs15_reader+0x44b49e)
+    #12 0x474c32 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f85819ec82f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2082f)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:482:5 in strncpy
+Shadow bytes around the buggy address:
+  0x0c047fff8070: fa fa fd fd fa fa fd fa fa fa fd fa fa fa fd fa
+  0x0c047fff8080: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x0c047fff8090: fa fa fd fa fa fa fd fa fa fa fd fd fa fa fd fa
+  0x0c047fff80a0: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x0c047fff80b0: fa fa fd fa fa fa fd fd fa fa 00 00 fa fa 05 fa
+=>0x0c047fff80c0: fa fa 00 01 fa fa 01 fa fa fa 06 fa fa fa[06]fa
+  0x0c047fff80d0: fa fa 00 00 fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff80e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff80f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8110: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

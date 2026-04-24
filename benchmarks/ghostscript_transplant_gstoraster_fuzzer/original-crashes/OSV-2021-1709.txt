@@ -1,0 +1,116 @@
+
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1578566033
+INFO: Loaded 3 modules   (182532 inline 8-bit counters): 13708 [0x7f9ae98f19e0, 0x7f9ae98f4f6c), 959 [0x7f9ae9952a40, 0x7f9ae9952dff), 167865 [0x2d96d50, 0x2dbfd09), 
+INFO: Loaded 3 PC tables (182532 PCs): 13708 [0x7f9ae98f4f70,0x7f9ae992a830), 959 [0x7f9ae9952e00,0x7f9ae99569f0), 167865 [0x24c45d0,0x2754160), 
+/out/gstoraster_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /corpus/testcase-OSV-2021-1709
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f9ae835d134 at pc 0x0000004bea81 bp 0x7ffd2ac5c270 sp 0x7ffd2ac5ba30
+WRITE of size 121 at 0x7f9ae835d134 thread T0
+    #0 0x4bea80 in __interceptor_memcpy /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5
+    #1 0xf200d6 in pdfi_image_get_color /src/ghostpdl/./pdf/pdf_image.c:1400:13
+    #2 0xf200d6 in pdfi_do_image /src/ghostpdl/./pdf/pdf_image.c:1667:12
+    #3 0xf24bce in pdfi_do_image_or_form /src/ghostpdl/./pdf/pdf_image.c:2454:16
+    #4 0xf254cf in pdfi_Do /src/ghostpdl/./pdf/pdf_image.c:2540:12
+    #5 0xeda7f8 in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1457:24
+    #6 0xed8e48 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2103:32
+    #7 0xf33bbf in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:126:20
+    #8 0xf33bbf in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:151:12
+    #9 0xf33bbf in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:895:12
+    #10 0xe9af65 in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:910:12
+    #11 0xcfe43b in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #12 0xcfe43b in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #13 0xcfe43b in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #14 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #15 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #16 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #17 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #18 0x101c911 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #19 0x1018949 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #20 0x101582e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #21 0x101c699 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #22 0xce6ab4 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #23 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #24 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #25 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #26 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #27 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #28 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #29 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #30 0x7f9ae92ee082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #31 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: __interceptor_memcpy--pdfi_image_get_color--pdfi_do_image
+Address 0x7f9ae835d134 is located in stack of thread T0 at offset 4404 in frame
+    #0 0xf1e1ff in pdfi_do_image /src/ghostpdl/./pdf/pdf_image.c:1543
+
+DEDUP_TOKEN: pdfi_do_image
+  This frame has 30 object(s):
+    [32, 40) 'ColorSpace.i' (line 1276)
+    [64, 68) 'dummy.i' (line 1303)
+    [80, 4176) 'extra_info.i' (line 1358)
+    [4304, 4404) 'str.i' (line 1399)
+    [4448, 4456) 'item.i' (line 169) <== Memory access at offset 4404 partially underflows this variable
+    [4480, 4488) 'alt_stream.i' (line 170) <== Memory access at offset 4404 partially underflows this variable
+    [4512, 4516) 'flag.i' (line 173) <== Memory access at offset 4404 partially underflows this variable
+    [4528, 4532) 'known.i' (line 653)
+    [4544, 4552) 'new_stream' (line 1544)
+    [4576, 4584) 'SFD_stream' (line 1544)
+    [4608, 4616) 'pcs' (line 1547)
+    [4640, 5248) 't1image' (line 1548)
+    [5376, 6496) 't4image' (line 1549)
+    [6624, 7792) 't3image' (line 1550)
+    [7920, 10176) 't3ximage' (line 1551)
+    [10304, 10504) 'image_info' (line 1554)
+    [10576, 10776) 'mask_info' (line 1554)
+    [10848, 11048) 'smask_info' (line 1554)
+    [11120, 11128) 'mask_buffer' (line 1558)
+    [11152, 11160) 'mask_size' (line 1559)
+    [11184, 11204) 'trans_state' (line 1566)
+    [11248, 11256) 'EODString' (line 1570)
+    [11280, 11288) 'image_dict' (line 1583)
+    [11312, 11576) 'cc' (line 1696)
+    [11648, 11656) 'ColorSpace105' (line 1698)
+    [11680, 11684) 'has_Matte' (line 1761)
+    [11696, 11720) 'mat4' (line 1939)
+    [11760, 11784) 'inverseIM' (line 1939)
+    [11824, 11840) 'pt' (line 1940)
+    [11856, 11872) 'pt1' (line 1940)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5 in __interceptor_memcpy
+Shadow bytes around the buggy address:
+  0x0ff3dd0639d0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff3dd0639e0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff3dd0639f0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x0ff3dd063a00: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2 f2
+  0x0ff3dd063a10: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00 00 00
+=>0x0ff3dd063a20: 00 00 00 00 00 00[04]f2 f2 f2 f2 f2 f8 f2 f2 f2
+  0x0ff3dd063a30: f8 f2 f2 f2 f8 f2 f8 f2 00 f2 f2 f2 00 f2 f2 f2
+  0x0ff3dd063a40: 00 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff3dd063a50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff3dd063a60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0ff3dd063a70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
+AddressSanitizer:DEADLYSIGNAL
+AddressSanitizer: nested bug in the same thread, aborting.

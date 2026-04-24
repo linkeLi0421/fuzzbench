@@ -1,0 +1,63 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 780198313
+INFO: Loaded 1 modules   (511161 inline 8-bit counters): 511161 [0x56237f84bcc0, 0x56237f8c8979), 
+INFO: Loaded 1 PC tables (511161 PCs): 511161 [0x56237f8c8980,0x562380095510), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2022-128
+=================================================================
+==7639==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b875fbd0130 at pc 0x56237cdcd012 bp 0x7ffd13b7c030 sp 0x7ffd13b7c028
+WRITE of size 1 at 0x7b875fbd0130 thread T0
+    #0 0x56237cdcd011 in copy_bytes /src/libredwg/src/decode_r2007.c:228:12
+    #1 0x56237cdc7d43 in decompress_r2007 /src/libredwg/src/decode_r2007.c:563:11
+    #2 0x56237cda1904 in read_file_header /src/libredwg/src/decode_r2007.c:1247:13
+    #3 0x56237cda0af1 in read_r2007_meta_data /src/libredwg/src/decode_r2007.c:2354:11
+    #4 0x56237c301ae2 in decode_R2007 /src/libredwg/src/decode.c:3238:11
+    #5 0x56237c2e4304 in dwg_decode /src/libredwg/src/decode.c:218:29
+    #6 0x56237c2ce3d2 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:91:13
+    #7 0x56237c16cedd in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #8 0x56237c157c52 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #9 0x56237c15db20 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #10 0x56237c189652 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f8761655082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x56237c150d3d in _start (/out/llvmfuzz+0xe5cd3d)
+
+Address 0x7b875fbd0130 is located in stack of thread T0 at offset 304 in frame
+    #0 0x56237cda09cf in read_r2007_meta_data /src/libredwg/src/decode_r2007.c:2338
+
+  This frame has 1 object(s):
+    [32, 304) 'file_header' (line 2339) <== Memory access at offset 304 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/libredwg/src/decode_r2007.c:228:12 in copy_bytes
+Shadow bytes around the buggy address:
+  0x7b875fbcfe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbcff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbcff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbd0000: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbd0080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7b875fbd0100: 00 00 00 00 00 00[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b875fbd0180: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b875fbd0200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbd0280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbd0300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b875fbd0380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==7639==ABORTING

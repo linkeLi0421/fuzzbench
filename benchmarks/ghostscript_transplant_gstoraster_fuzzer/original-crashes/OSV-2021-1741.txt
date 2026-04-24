@@ -1,0 +1,96 @@
+vm.mmap_rnd_bits = 28
+/out/gstoraster_fuzzer -- -rss_limit_mb=2560 -timeout=25 -runs=10 /corpus/testcase-OSV-2021-1741 < /dev/null
+INFO: libFuzzer ignores flags that start with '--'
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 411937510
+INFO: Loaded 3 modules   (182736 inline 8-bit counters): 13708 [0x7fec3ae5a9e0, 0x7fec3ae5df6c), 959 [0x7fec3aebba40, 0x7fec3aebbdff), 168069 [0x2d9ae50, 0x2dc3ed5), 
+INFO: Loaded 3 PC tables (182736 PCs): 13708 [0x7fec3ae5df70,0x7fec3ae93830), 959 [0x7fec3aebbe00,0x7fec3aebf9f0), 168069 [0x24c7730,0x2757f80), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2021-1741
+=================================================================
+==15==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fec39b6c348 at pc 0x000000ba70b8 bp 0x7ffd38d75ad0 sp 0x7ffd38d75ac8
+WRITE of size 4 at 0x7fec39b6c348 thread T0
+SCARINESS: 51 (4-byte-write-stack-buffer-overflow)
+    #0 0xba70b7 in line_join_points /src/ghostpdl/./base/gxstroke.c:2470:9
+    #1 0xb9f1e8 in stroke_add_compat /src/ghostpdl/./base/gxstroke.c:2302:20
+    #2 0xb96b09 in gx_stroke_path_only_aux /src/ghostpdl/./base/gxstroke.c:1033:24
+    #3 0xb96b09 in gx_stroke_path_only /src/ghostpdl/./base/gxstroke.c:1121:12
+    #4 0xb92830 in gx_default_stroke_path_shading_or_pattern /src/ghostpdl/./base/gxstroke.c:357:12
+    #5 0xb9a915 in gx_default_stroke_path /src/ghostpdl/./base/gxstroke.c:379:16
+    #6 0x11a20cf in clist_playback_band /src/ghostpdl/./base/gxclrast.c
+    #7 0x68ef8c in clist_playback_file_bands /src/ghostpdl/./base/gxclread.c:1035:16
+    #8 0x6935e0 in clist_render_rectangle /src/ghostpdl/./base/gxclread.c:969:16
+    #9 0x6929ba in clist_rasterize_lines /src/ghostpdl/./base/gxclread.c:858:20
+    #10 0x691b7f in clist_get_bits_rectangle /src/ghostpdl/./base/gxclread.c:747:12
+    #11 0x66615a in gdev_prn_get_bits /src/ghostpdl/./base/gdevprn.c:1636:12
+    #12 0x7ed354 in cups_print_chunked /src/ghostpdl/./cups/gdevcups.c:4849:9
+    #13 0x7dbc3b in cups_print_pages /src/ghostpdl/./cups/gdevcups.c
+    #14 0x661fe9 in gdev_prn_output_page_aux /src/ghostpdl/./base/gdevprn.c:1049:27
+    #15 0x6612a5 in gdev_prn_output_page /src/ghostpdl/./base/gdevprn.c:1085:12
+    #16 0x7ecb09 in cups_output_page /src/ghostpdl/./cups/gdevcups.c:2826:15
+    #17 0x8a796f in gs_output_page /src/ghostpdl/./base/gsdevice.c:207:17
+    #18 0xdccbd2 in zoutputpage /src/ghostpdl/./psi/zdevice.c:416:12
+    #19 0xcfba9c in interp /src/ghostpdl/./psi/interp.c:1351:28
+    #20 0xcfba9c in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #21 0xcfba9c in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #22 0x56784a in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #23 0x56784a in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #24 0x56784a in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #25 0x562cf2 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #26 0x101f961 in run_string /src/ghostpdl/./psi/imainarg.c:1166:12
+    #27 0x101b999 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #28 0x101887e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #29 0x101f6e9 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #30 0xce7584 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #31 0x55f200 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #32 0x55e3d0 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:97:8
+    #33 0x55e3d0 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:114:2
+    #34 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #35 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #36 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #37 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #38 0x7fec3a856082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #39 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+DEDUP_TOKEN: line_join_points--stroke_add_compat--gx_stroke_path_only_aux
+Address 0x7fec39b6c348 is located in stack of thread T0 at offset 72 in frame
+    #0 0xb9deef in stroke_add_compat /src/ghostpdl/./base/gxstroke.c:2238
+
+DEDUP_TOKEN: stroke_add_compat
+  This frame has 1 object(s):
+    [32, 72) 'points' (line 2243) <== Memory access at offset 72 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ghostpdl/./base/gxstroke.c:2470:9 in line_join_points
+Shadow bytes around the buggy address:
+  0x0ffe07365810: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe07365820: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe07365830: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe07365840: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe07365850: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x0ffe07365860: f1 f1 f1 f1 00 00 00 00 00[f3]f3 f3 f3 f3 f3 f3
+  0x0ffe07365870: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe07365880: f1 f1 f1 f1 f8 f8 f8 f8 f2 f2 f2 f2 f8 f3 f3 f3
+  0x0ffe07365890: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe073658a0: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0ffe073658b0: f1 f1 f1 f1 f8 f2 f2 f2 f8 f3 f3 f3 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==15==ABORTING

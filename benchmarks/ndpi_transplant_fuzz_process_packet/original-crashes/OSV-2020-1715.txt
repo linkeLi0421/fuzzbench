@@ -1,0 +1,63 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 467619968
+INFO: Loaded 1 modules   (12442 inline 8-bit counters): 12442 [0x5590e99c3700, 0x5590e99c679a), 
+INFO: Loaded 1 PC tables (12442 PCs): 12442 [0x5590e99c67a0,0x5590e99f7140), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2020-1715
+=================================================================
+==7722==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7b9c04ff011e at pc 0x5590e97fe1ae bp 0x7ffe13514cb0 sp 0x7ffe13514ca8
+READ of size 1 at 0x7b9c04ff011e thread T0
+    #0 0x5590e97fe1ad in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:240:23
+    #1 0x5590e97a2e85 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4060:7
+    #2 0x5590e97a8b87 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4867:3
+    #3 0x5590e97936d6 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:25:3
+    #4 0x5590e9630e6d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #5 0x5590e961bbe2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #6 0x5590e9621ab0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #7 0x5590e964d5e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f9c06e6f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #9 0x5590e9614ccd in _start (/out/fuzz_process_packet+0x1abccd)
+
+Address 0x7b9c04ff011e is located in stack of thread T0 at offset 286 in frame
+    #0 0x5590e97f959f in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:44
+
+  This frame has 4 object(s):
+    [32, 80) 'cname_str' (line 215)
+    [112, 160) 'realm_str' (line 255)
+    [192, 240) 'realm_str' (line 296)
+    [272, 320) 'cname_str' (line 346) <== Memory access at offset 286 is inside this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-use-after-scope /src/ndpi/src/lib/protocols/kerberos.c:240:23 in ndpi_search_kerberos
+Shadow bytes around the buggy address:
+  0x7b9c04fefe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9c04feff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9c04feff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9c04ff0000: f1 f1 f1 f1 00 00 00 00 00 00 f2 f2 f2 f2 f8 f8
+  0x7b9c04ff0080: f8 f8 f8 f8 f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f2 f2
+=>0x7b9c04ff0100: f2 f2 f8[f8]f8 f8 f8 f8 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b9c04ff0180: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7b9c04ff0200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9c04ff0280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9c04ff0300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b9c04ff0380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==7722==ABORTING
