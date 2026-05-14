@@ -63,9 +63,9 @@
     "OSV-2020-999": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/htslib/./htslib/kstring.h",
-      "crash_line": 142,
-      "crash_function": "ks_resize"
+      "crash_file": "/src/htslib/vcf.c",
+      "crash_line": 2396,
+      "crash_function": "vcf_parse_format"
     },
     "OSV-2020-1121": {
       "dispatch_value": 0,

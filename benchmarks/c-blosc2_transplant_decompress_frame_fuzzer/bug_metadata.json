@@ -176,8 +176,8 @@
       "dispatch_value": 0,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 175,
-      "crash_function": "my_malloc"
+      "crash_line": 680,
+      "crash_function": "blosc_read_header"
     },
     "OSV-2021-496": {
       "dispatch_value": 0,
