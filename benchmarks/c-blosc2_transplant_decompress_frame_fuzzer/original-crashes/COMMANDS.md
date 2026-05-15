@@ -55,7 +55,7 @@ Source commits not present in `/home/user/log/c-blosc2_builds.csv` were mapped i
 | OSV-2022-4 | migration | `886d4c9b` | `dbf359cf9f0795770d391a4a4bf6b4c9bb88ad5b` |
 | OSV-2022-34 | migration | `886d4c9b` | `dbf359cf9f0795770d391a4a4bf6b4c9bb88ad5b` |
 | OSV-2022-486 | migration | `13fbe91e` | `dbf359cf9f0795770d391a4a4bf6b4c9bb88ad5b` |
-| OSV-2022-511 | migration | `95e0fd42` | `dbf359cf9f0795770d391a4a4bf6b4c9bb88ad5b` |
+| OSV-2022-511 | migration | `abb0faba` | `dbf359cf9f0795770d391a4a4bf6b4c9bb88ad5b` |
 | OSV-2022-1242 | migration | `26d05bff` | `d64b3f05953dfa943b62b81e797034dc91a58e14` |
 | OSV-2023-51 | migration | `26d05bff` | `d64b3f05953dfa943b62b81e797034dc91a58e14` |
 
@@ -103,7 +103,7 @@ OSV-2021-622	79e921d904d46fc9edc292e02a48f1aa54567a7d	79e921	/home/user/oss-fuzz
 OSV-2021-997	79e921d904d46fc9edc292e02a48f1aa54567a7d	79e921	/home/user/oss-fuzz-for-select/pocs/tmp
 OSV-2022-4	886d4c9b	886d4c	/home/user/oss-fuzz-for-select/pocs/tmp
 OSV-2022-34	886d4c9b	886d4c	/home/user/oss-fuzz-for-select/pocs/tmp
-OSV-2022-511	95e0fd42	95e0fd	/home/user/oss-fuzz-for-select/pocs/tmp
+OSV-2022-511	abb0faba	abb0fa	/home/user/oss-fuzz-for-select/pocs/tmp
 OSV-2022-1242	26d05bff	26d05b	/home/user/oss-fuzz-for-select/pocs/tmp
 OSV-2023-51	26d05bff	26d05b	/home/user/oss-fuzz-for-select/pocs/tmp
 JOBS
