@@ -17,9 +17,9 @@ WORKDIR /src/c-blosc2
 # Keep ASan stack-use-after-return detection enabled for direct testcase replay.
 ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
 
-# Raise libFuzzer's per-alloc / RSS cap from its 2048MB default. Some bugs in
-# this benchmark (e.g. OSV-2021-464) trigger a ~2.05GB malloc en route to the
-# real heap-buffer-overflow; with the default cap libFuzzer aborts with
+# Raise libFuzzer's per-alloc / RSS cap from its 2048MB default. Some transplanted
+# bugs (e.g. c-blosc2 OSV-2021-464) trigger a ~2GB malloc en route to the real
+# memory-safety error; with the default cap libFuzzer aborts with
 # `out-of-memory` and `-ignore_ooms=1` silently drops it. libFuzzer-family
 # runners in fuzzbench/fuzzers/*/fuzzer.py splice $ADDITIONAL_ARGS onto the
 # target command line, so this propagates automatically.

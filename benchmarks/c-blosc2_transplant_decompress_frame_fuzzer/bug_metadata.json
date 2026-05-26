@@ -1,94 +1,94 @@
 {
   "project": "c-blosc2",
   "target_commit": "79e921d904d46fc9edc292e02a48f1aa54567a7d",
-  "dispatch_bytes": 3,
-  "total_bugs": 28,
+  "dispatch_bytes": 2,
+  "total_bugs": 29,
   "bugs": {
     "OSV-2020-2184": {
       "dispatch_value": 1,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1327,
+      "crash_line": 1366,
       "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2021-21": {
       "dispatch_value": 2,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 680,
+      "crash_line": 685,
       "crash_function": "blosc_read_header"
     },
-    "OSV-2021-213": {
+    "OSV-2021-22": {
       "dispatch_value": 4,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1265,
+      "crash_function": "get_meta_from_header"
+    },
+    "OSV-2021-213": {
+      "dispatch_value": 8,
       "triggered": true,
       "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
       "crash_line": 215,
       "crash_function": "ZSTD_freeDDict"
     },
-    "OSV-2021-22": {
-      "dispatch_value": 8,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1226,
-      "crash_function": "get_meta_from_header"
-    },
     "OSV-2021-221": {
       "dispatch_value": 16,
       "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1484,
-      "crash_function": "blosc_d"
+      "crash_file": "/src/c-blosc2/blosc/blosc-private.h",
+      "crash_line": 90,
+      "crash_function": "sw32_"
     },
     "OSV-2021-246": {
       "dispatch_value": 32,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1429,
+      "crash_line": 1455,
       "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2021-247": {
       "dispatch_value": 64,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 680,
+      "crash_line": 685,
       "crash_function": "blosc_read_header"
     },
     "OSV-2021-274": {
       "dispatch_value": 128,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1249,
+      "crash_line": 1289,
       "crash_function": "get_meta_from_header"
     },
     "OSV-2021-369": {
       "dispatch_value": 256,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 680,
+      "crash_line": 685,
       "crash_function": "blosc_read_header"
     },
     "OSV-2021-404": {
       "dispatch_value": 512,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 680,
+      "crash_line": 685,
       "crash_function": "blosc_read_header"
     },
     "OSV-2021-429": {
       "dispatch_value": 1024,
       "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1484,
-      "crash_function": "blosc_d"
+      "crash_file": "/src/c-blosc2/blosc/blosc-private.h",
+      "crash_line": 90,
+      "crash_function": "sw32_"
     },
     "OSV-2021-639": {
       "dispatch_value": 2048,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 2646,
+      "crash_line": 2622,
       "crash_function": "_blosc_getitem"
     },
-    "OSV-2022-1242": {
+    "OSV-2022-4": {
       "dispatch_value": 4096,
       "triggered": true,
       "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
@@ -102,56 +102,28 @@
       "crash_line": 469,
       "crash_function": "LZ4_wildCopy32"
     },
-    "OSV-2022-4": {
+    "OSV-2022-486": {
       "dispatch_value": 16384,
       "triggered": true,
-      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
-      "crash_line": 134,
-      "crash_function": "ZSTD_initDDict_internal"
-    },
-    "OSV-2022-486": {
-      "dispatch_value": 32768,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1429,
-      "crash_function": "get_vlmeta_from_trailer"
-    },
-    "OSV-2022-511": {
-      "dispatch_value": 65536,
-      "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1565,
-      "crash_function": "blosc_d"
+      "crash_line": 3404,
+      "crash_function": "blosc2_get_io_cb"
     },
     "OSV-2023-51": {
-      "dispatch_value": 131072,
+      "dispatch_value": 32768,
       "triggered": true,
       "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
       "crash_line": 215,
       "crash_function": "ZSTD_freeDDict"
     },
-    "OSV-2021-622": {
+    "OSV-2021-464": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1429,
-      "crash_function": "get_vlmeta_from_trailer"
+      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
+      "crash_line": 181,
+      "crash_function": "my_malloc"
     },
-    "OSV-2021-997": {
-      "dispatch_value": 0,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
-      "crash_line": 134,
-      "crash_function": "ZSTD_initDDict_internal"
-    },
-    "OSV-2021-498": {
-      "dispatch_value": 0,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 2096,
-      "crash_function": "frame_get_lazychunk"
-    },
-    "OSV-2021-1791": {
+    "OSV-2021-481": {
       "dispatch_value": 0,
       "triggered": true,
       "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
@@ -161,44 +133,79 @@
     "OSV-2021-485": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1978,
-      "crash_function": "initialize_context_decompression"
+      "crash_file": "/src/c-blosc2/blosc/blosc-private.h",
+      "crash_line": 90,
+      "crash_function": "sw32_"
     },
-    "OSV-2021-481": {
+    "OSV-2021-487": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc-private.h",
+      "crash_line": 90,
+      "crash_function": "sw32_"
+    },
+    "OSV-2021-496": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc-private.h",
+      "crash_line": 90,
+      "crash_function": "sw32_"
+    },
+    "OSV-2021-498": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 2107,
+      "crash_function": "frame_get_lazychunk"
+    },
+    "OSV-2021-526": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/blosc-private.h",
+      "crash_line": 90,
+      "crash_function": "sw32_"
+    },
+    "OSV-2021-622": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/blosc/frame.c",
+      "crash_line": 1455,
+      "crash_function": "get_vlmeta_from_trailer"
+    },
+    "OSV-2021-997": {
       "dispatch_value": 0,
       "triggered": true,
       "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
       "crash_line": 134,
       "crash_function": "ZSTD_initDDict_internal"
     },
-    "OSV-2021-464": {
+    "OSV-2021-1791": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
+    },
+    "OSV-2022-511": {
+      "dispatch_value": 0,
+      "triggered": true,
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c",
+      "crash_line": 134,
+      "crash_function": "ZSTD_initDDict_internal"
+    },
+    "OSV-2022-1242": {
       "dispatch_value": 0,
       "triggered": true,
       "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 680,
+      "crash_line": 685,
       "crash_function": "blosc_read_header"
     },
-    "OSV-2021-496": {
+    "OSV-2021-897": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1484,
-      "crash_function": "blosc_d"
-    },
-    "OSV-2021-526": {
-      "dispatch_value": 0,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1978,
-      "crash_function": "initialize_context_decompression"
-    },
-    "OSV-2021-487": {
-      "dispatch_value": 0,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/blosc2.c",
-      "crash_line": 1978,
-      "crash_function": "initialize_context_decompression"
+      "crash_file": "/src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_decompress.c",
+      "crash_line": 596,
+      "crash_function": "ZSTD_copyRawBlock"
     }
   }
 }

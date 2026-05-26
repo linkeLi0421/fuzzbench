@@ -1,55 +1,55 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2243089328
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x556b8c52d9e0, 0x556b8c535acf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x556b8c535ad0,0x556b8c5b69c0), 
+INFO: Seed: 1944019795
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7d4e653e1854 at pc 0x556b8c0d545b bp 0x7ffe6e9055a0 sp 0x7ffe6e904d60
-READ of size 8 at 0x7d4e653e1854 thread T0
-    #0 0x556b8c0d545a in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:63:3
-    #1 0x556b8c1632ce in _blosc_getitem /src/c-blosc2/blosc/blosc2.c:2646:7
-    #2 0x556b8c167562 in blosc2_getitem_ctx /src/c-blosc2/blosc/blosc2.c:2833:12
-    #3 0x556b8c167562 in blosc2_getitem /src/c-blosc2/blosc/blosc2.c:2792:12
-    #4 0x556b8c198706 in get_coffset /src/c-blosc2/blosc/frame.c
-    #5 0x556b8c197033 in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:1972:8
-    #6 0x556b8c19d603 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2821:8
-    #7 0x556b8c185259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
-    #8 0x556b8c11b675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
-    #9 0x556b8bfb8e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #10 0x556b8bfa3bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #11 0x556b8bfa9aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #12 0x556b8bfd55d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #13 0x7fee6613e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #14 0x556b8bf9ccbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x616000001853 at pc 0x000000529f61 bp 0x7ffeea3f00d0 sp 0x7ffeea3ef898
+READ of size 8 at 0x616000001853 thread T0
+    #0 0x529f60 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x5b7add in _blosc_getitem /src/c-blosc2/blosc/blosc2.c:2622:7
+    #2 0x5bbe40 in blosc2_getitem_ctx /src/c-blosc2/blosc/blosc2.c:2806:12
+    #3 0x5bb7cd in blosc2_getitem /src/c-blosc2/blosc/blosc2.c:2765:12
+    #4 0x5f46b0 in get_coffset /src/c-blosc2/blosc/frame.c:1791:10
+    #5 0x5f2f48 in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:1983:8
+    #6 0x5fa558 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2832:8
+    #7 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #8 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
+    #9 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f64ae125082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #14 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-0x7d4e653e1854 is located 1740 bytes after 520-byte region [0x7d4e653e0f80,0x7d4e653e1188)
+0x616000001853 is located 1739 bytes to the right of 520-byte region [0x616000000f80,0x616000001188)
 allocated by thread T0 here:
-    #0 0x556b8c0d8267 in posix_memalign /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:139:3
-    #1 0x556b8c162e7a in my_malloc /src/c-blosc2/blosc/blosc2.c:175:9
-    #2 0x556b8c162e7a in blosc2_create_dctx /src/c-blosc2/blosc/blosc2.c:3513:46
-    #3 0x556b8c195bc1 in frame_to_schunk /src/c-blosc2/blosc/frame.c:1569:18
-    #4 0x556b8c187757 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:446:27
-    #5 0x556b8c11b593 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:30:27
-    #6 0x556b8bfb8e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #7 0x556b8bfa3bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #8 0x556b8bfa9aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #9 0x556b8bfd55d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7fee6613e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52b567 in posix_memalign /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:210:3
+    #1 0x5b768b in my_malloc /src/c-blosc2/blosc/blosc2.c:181:9
+    #2 0x5b768b in blosc2_create_dctx /src/c-blosc2/blosc/blosc2.c:3520:46
+    #3 0x5f19db in frame_to_schunk /src/c-blosc2/blosc/frame.c:1588:18
+    #4 0x5e0612 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:446:27
+    #5 0x5642ae in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:110:29
+    #6 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f64ae125082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow /src/c-blosc2/blosc/blosc2.c:2646:7 in _blosc_getitem
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x7d4e653e1580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-=>0x7d4e653e1800: fa fa fa fa fa fa fa fa fa fa[fa]fa fa fa fa fa
-  0x7d4e653e1880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7d4e653e1a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff82b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff82c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff82d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff82e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff82f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x0c2c7fff8300: fa fa fa fa fa fa fa fa fa fa[fa]fa fa fa fa fa
+  0x0c2c7fff8310: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8320: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8330: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8340: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff8350: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 

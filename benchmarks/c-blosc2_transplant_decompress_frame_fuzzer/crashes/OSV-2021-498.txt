@@ -1,31 +1,31 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2236936940
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x558fc5a469e0, 0x558fc5a4eacf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x558fc5a4ead0,0x558fc5acf9c0), 
+INFO: Seed: 1939268564
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: attempting free on address which was not malloc()-ed: 0x7c1cb45e0171 in thread T0
-    #0 0x558fc55f0516 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:51:3
-    #1 0x558fc56b112b in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:2096:7
-    #2 0x558fc56b6603 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2821:8
-    #3 0x558fc569e259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
-    #4 0x558fc5634675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
-    #5 0x558fc54d1e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x558fc54bcbd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x558fc54c2aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x558fc54ee5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7f4cb52d3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #10 0x558fc54b5cbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+==1==ERROR: AddressSanitizer: attempting free on address which was not malloc()-ed: 0x60d000000170 in thread T0
+    #0 0x52a8d2 in free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:111:3
+    #1 0x5f34d3 in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:2107:7
+    #2 0x5fa558 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2832:8
+    #3 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #4 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
+    #5 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f23a9c31082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #10 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-0x7c1cb45e0171 is located 97 bytes inside of 141-byte region [0x7c1cb45e0110,0x7c1cb45e019d)
+0x60d000000170 is located 96 bytes inside of 140-byte region [0x60d000000110,0x60d00000019c)
 allocated by thread T0 here:
-    #0 0x558fc55f07b4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
-    #1 0x558fc59c1323 in operator new(unsigned long) cxa_noexception.cpp
-    #2 0x558fc54bcbd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #3 0x558fc54c2aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #4 0x558fc54ee5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #5 0x7f4cb52d3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52ab3d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x43dee7 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #3 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #4 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7f23a9c31082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
 
-SUMMARY: AddressSanitizer: bad-free /src/c-blosc2/blosc/frame.c:2096:7 in frame_get_lazychunk
+SUMMARY: AddressSanitizer: bad-free /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:111:3 in free
 ==1==ABORTING

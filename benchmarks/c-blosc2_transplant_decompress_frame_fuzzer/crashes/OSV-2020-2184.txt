@@ -1,30 +1,25 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2239658083
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x557ca98039e0, 0x557ca980bacf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x557ca980bad0,0x557ca988c9c0), 
+INFO: Seed: 1941247198
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x7c601ede0181 (pc 0x557ca946ab7a bp 0x7fff85919370 sp 0x7fff85919240 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x60bf80000180 (pc 0x0000005f0a2a bp 0x7fff0959edf0 sp 0x7fff0959ed00 T0)
 ==1==The signal is caused by a READ memory access.
-    #0 0x557ca946ab7a in get_vlmeta_from_trailer /src/c-blosc2/blosc/frame.c:1327:7
-    #1 0x557ca946ab7a in frame_get_vlmetalayers /src/c-blosc2/blosc/frame.c:1497:9
-    #2 0x557ca946bec7 in frame_to_schunk /src/c-blosc2/blosc/frame.c:1727:8
-    #3 0x557ca945d757 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:446:27
-    #4 0x557ca93f1593 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:30:27
-    #5 0x557ca928ee5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #6 0x557ca9279bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #7 0x557ca927faa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #8 0x557ca92ab5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7fa09fbf4082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #10 0x557ca9272cbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+    #0 0x5f0a2a in get_vlmeta_from_trailer /src/c-blosc2/blosc/frame.c:1366:7
+    #1 0x5f0a2a in frame_get_vlmetalayers /src/c-blosc2/blosc/frame.c:1516:9
+    #2 0x5f1d3f in frame_to_schunk /src/c-blosc2/blosc/frame.c:1746:8
+    #3 0x5e0612 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:446:27
+    #4 0x5642ae in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:110:29
+    #5 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f0c80084082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #10 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-==1==Register values:
-rax = 0x0000000000000000  rbx = 0x00007fff85919240  rcx = 0x0000000000000021  rdx = 0x0000557ca9894800  
-rdi = 0x00007c601ede0181  rsi = 0x0000000200000000  rbp = 0x00007fff85919370  rsp = 0x00007fff85919240  
- r8 = 0x0000000020000000   r9 = 0x0000000000000001  r10 = 0x00007c609ede0103  r11 = 0x00007fff85919318  
-r12 = 0x00007fa09fae00c0  r13 = 0x00000ff413f5c018  r14 = 0x00007fa09fae00c0  r15 = 0x00007c601ede017b  
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/frame.c:1327:7 in get_vlmeta_from_trailer
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/frame.c:1366:7 in get_vlmeta_from_trailer
 ==1==ABORTING

@@ -1,53 +1,54 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2243764487
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x562caaeb89e0, 0x562caaec0acf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x562caaec0ad0,0x562caaf419c0), 
+INFO: Seed: 1944546056
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7c9ff79e0751 at pc 0x562caaa6045b bp 0x7ffde5f5e700 sp 0x7ffde5f5dec0
-READ of size 16 at 0x7c9ff79e0751 thread T0
-    #0 0x562caaa6045a in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:63:3
-    #1 0x562caab5f96f in LZ4_wildCopy32 /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:469:30
-    #2 0x562caab5f96f in LZ4_decompress_generic /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:1819:21
-    #3 0x562caab5f96f in LZ4_decompress_safe /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:2173:12
-    #4 0x562caaaf0fc2 in lz4_wrap_decompress /src/c-blosc2/blosc/blosc2.c:426:12
-    #5 0x562caaaf0fc2 in blosc_d /src/c-blosc2/blosc/blosc2.c:1537:18
-    #6 0x562caaae6e12 in serial_blosc /src/c-blosc2/blosc/blosc2.c:1661:16
-    #7 0x562caaae6e12 in do_job /src/c-blosc2/blosc/blosc2.c:1825:15
-    #8 0x562caaaed63d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2555:12
-    #9 0x562caab2877d in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2844:23
-    #10 0x562caab10259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
-    #11 0x562caaaa6675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
-    #12 0x562caa943e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #13 0x562caa92ebd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #14 0x562caa934aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #15 0x562caa9605d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #16 0x7f7ff87d1082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #17 0x562caa927cbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x612000000750 at pc 0x000000529f61 bp 0x7ffdf922bb60 sp 0x7ffdf922b328
+READ of size 16 at 0x612000000750 thread T0
+    #0 0x529f60 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x63e154 in LZ4_wildCopy32 /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:469:30
+    #2 0x63e154 in LZ4_decompress_generic /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:1819:21
+    #3 0x63e154 in LZ4_decompress_safe /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:2173:12
+    #4 0x5baa3b in lz4_wrap_decompress /src/c-blosc2/blosc/blosc2.c:432:12
+    #5 0x5baa3b in blosc_d /src/c-blosc2/blosc/blosc2.c:1530:18
+    #6 0x5afe5e in serial_blosc /src/c-blosc2/blosc/blosc2.c:1636:16
+    #7 0x5afe5e in do_job /src/c-blosc2/blosc/blosc2.c:1794:15
+    #8 0x5b6680 in blosc_run_decompression_with_context /src/c-blosc2/blosc/blosc2.c:2503:13
+    #9 0x5b6d4d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2523:12
+    #10 0x5fa74b in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2855:23
+    #11 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #12 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
+    #13 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #14 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #15 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #16 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #17 0x7f4a2492d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #18 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-0x7c9ff79e0751 is located 0 bytes after 273-byte region [0x7c9ff79e0640,0x7c9ff79e0751)
+0x612000000750 is located 0 bytes to the right of 272-byte region [0x612000000640,0x612000000750)
 allocated by thread T0 here:
-    #0 0x562caaa627b4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
-    #1 0x562caae33323 in operator new(unsigned long) cxa_noexception.cpp
-    #2 0x562caa92ebd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #3 0x562caa934aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #4 0x562caa9605d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #5 0x7f7ff87d1082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52ab3d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x43dee7 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #3 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #4 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7f4a2492d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow /src/c-blosc2/internal-complibs/lz4-1.9.3/lz4.c:469:30 in LZ4_wildCopy32
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x7c9ff79e0480: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
-  0x7c9ff79e0500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7c9ff79e0580: 00 00 00 00 00 00 00 00 00 00 01 fa fa fa fa fa
-  0x7c9ff79e0600: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
-  0x7c9ff79e0680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x7c9ff79e0700: 00 00 00 00 00 00 00 00 00 00[01]fa fa fa fa fa
-  0x7c9ff79e0780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c9ff79e0800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c9ff79e0880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c9ff79e0900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7c9ff79e0980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8090: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x0c247fff80a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c247fff80b0: 00 00 00 00 00 00 00 00 00 00 fa fa fa fa fa fa
+  0x0c247fff80c0: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x0c247fff80d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c247fff80e0: 00 00 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa
+  0x0c247fff80f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8110: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c247fff8130: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 

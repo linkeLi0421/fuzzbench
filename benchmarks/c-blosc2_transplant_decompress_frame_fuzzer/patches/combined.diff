@@ -1,46 +1,57 @@
+diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
+index 21ead9ee..10dc5b8c 100644
+--- a/blosc/CMakeLists.txt
++++ b/blosc/CMakeLists.txt
+@@ -52,7 +52,7 @@ include_directories(${BLOSC_INCLUDE_DIRS})
+ # library sources
+ set(SOURCES blosc2.c blosc2-common.h blosclz.c fastcopy.c fastcopy.h schunk.c frame.c btune.c btune.h
+         context.h delta.c delta.h shuffle-generic.c bitshuffle-generic.c trunc-prec.c trunc-prec.h
+-        timestamp.c sframe.c directories.c)
++        timestamp.c sframe.c directories.c ${PROJECT_SOURCE_DIR}/__bug_dispatch.c)
+ if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL arm64)
+     if(COMPILER_SUPPORT_SSE2)
+         message(STATUS "Adding run-time support for SSE2")
 diff --git a/blosc/blosc2.c b/blosc/blosc2.c
-index b30e9f05..d35278ed 100644
+index b30e9f05..bf129ed5 100644
 --- a/blosc/blosc2.c
 +++ b/blosc/blosc2.c
-@@ -19,6 +19,7 @@
- #include "blosc2.h"
+@@ -20,6 +20,7 @@
  #include "blosc-private.h"
  #include "blosc2-common.h"
-+#include "../__bug_dispatch.h"
  #include "frame.h"
++#include "../__bug_dispatch.h"
  
  
-@@ -30,6 +31,7 @@
- #include "shuffle.h"
- #include "delta.h"
- #include "trunc-prec.h"
-+#include "zfp_getcell.h"
- #include "blosclz.h"
- #include "btune.h"
+ #if defined(USING_CMAKE)
+@@ -92,7 +93,14 @@ static int g_nthreads = 1;
+ static int32_t g_force_blocksize = 0;
+ static int g_initlib = 0;
+ static blosc2_schunk* g_schunk = NULL;   /* the pointer to super-chunk */
++static blosc2_io_cb *g_io[256] = {0};
++static uint64_t g_nio = 0;
  
-@@ -658,7 +660,8 @@ typedef struct blosc_header_s {
-   int32_t cbytes;
-   // Extended Blosc2 header
-   uint8_t filter_codes[BLOSC2_MAX_FILTERS];
--  int16_t reserved1;
-+  uint8_t udcompcode;
-+  uint8_t reserved1;
-   uint8_t filter_meta[BLOSC2_MAX_FILTERS];
-   uint8_t reserved2;
-   uint8_t blosc2_flags;
-@@ -684,17 +687,31 @@ int blosc_read_header(const uint8_t* src, int32_t srcsize, bool extended_header,
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] __attribute__((weak));
++
++static bool bug_dispatch_1_4_enabled(void) {
++  return __bug_dispatch != NULL && (__bug_dispatch[1] & (1 << 4));
++}
+ 
+ // Forward declarations
+ 
+@@ -684,17 +692,39 @@ int blosc_read_header(const uint8_t* src, int32_t srcsize, bool extended_header,
      header->cbytes = bswap32_(header->cbytes);
    }
  
 -  if (header->version > BLOSC_VERSION_FORMAT) {
 -    /* Version from future */
 -    return BLOSC2_ERROR_VERSION_SUPPORT;
-+  if (__bug_dispatch[2] & (1 << 1)) {
++  if (__bug_dispatch[1] & (1 << 7)) {
 +    if (header->version > BLOSC_VERSION_FORMAT + 1) {
 +      /* Version from future */
 +      return BLOSC2_ERROR_VERSION_SUPPORT;
 +    }
-+  } else {
++  }
++  else {
 +    if (header->version > BLOSC_VERSION_FORMAT) {
 +      /* Version from future */
 +      return BLOSC2_ERROR_VERSION_SUPPORT;
@@ -53,12 +64,19 @@ index b30e9f05..d35278ed 100644
 -  if (header->blocksize <= 0 || header->blocksize > header->nbytes) {
 -    BLOSC_TRACE_ERROR("`blocksize` is zero or greater than uncompressed size");
 -    return BLOSC2_ERROR_INVALID_HEADER;
-+  if (__bug_dispatch[2] & (1 << 1)) {
++  if (bug_dispatch_1_4_enabled()) {
 +    if (header->blocksize <= 0 || (header->nbytes > 0 && (header->blocksize > header->nbytes))) {
 +      BLOSC_TRACE_ERROR("`blocksize` is zero or greater than uncompressed size");
 +      return BLOSC2_ERROR_INVALID_HEADER;
 +    }
-+  } else {
++  }
++  else if (__bug_dispatch[1] & (1 << 7)) {
++    if (header->blocksize <= 0 || (header->nbytes > 0 && (header->blocksize > header->nbytes))) {
++      BLOSC_TRACE_ERROR("`blocksize` is zero or greater than uncompressed size");
++      return BLOSC2_ERROR_INVALID_HEADER;
++    }
++  }
++  else {
 +    if (header->blocksize <= 0 || header->blocksize > header->nbytes) {
 +      BLOSC_TRACE_ERROR("`blocksize` is zero or greater than uncompressed size");
 +      return BLOSC2_ERROR_INVALID_HEADER;
@@ -66,62 +84,48 @@ index b30e9f05..d35278ed 100644
    }
    if (header->typesize <= 0 || header->typesize > BLOSC_MAX_TYPESIZE) {
      BLOSC_TRACE_ERROR("`typesize` is zero or greater than max allowed.");
-@@ -755,6 +772,15 @@ static int blosc2_initialize_context_from_header(blosc2_context* context, blosc_
-   context->sourcesize = header->nbytes;
-   context->blocksize = header->blocksize;
-   context->blosc2_flags = header->blosc2_flags;
-+  if (__bug_dispatch[2] & (1 << 0)) {
-+    context->compcode = header->flags >> 5;
-+    if (context->compcode == BLOSC_UDCODEC_FORMAT) {
-+      context->compcode = header->udcompcode;
-+    }
-+  }
-+  else {
-+    /* Original behavior: leave compcode unchanged here. */
-+  }
- 
-   blosc2_calculate_blocks(context);
- 
-@@ -1209,6 +1235,20 @@ static int blosc_d(
+@@ -1209,6 +1239,21 @@ static int blosc_d(
    int32_t compformat = (context->header_flags & (uint8_t)0xe0) >> 5u;
    int dont_split = (context->header_flags & (uint8_t)0x10) >> 4u;
    int memcpyed = context->header_flags & (uint8_t)BLOSC_MEMCPYED;
-+  if (__bug_dispatch[2] & (1 << 1)) {
-+    if (!context->do_compress && ((context->blosc2_flags >> 4) & 0x7)) {
-+      memcpyed = 1;
-+    }
-+  }
-+  int32_t runlen_type = 0;
++  int32_t runlen_type;
 +  if (__bug_dispatch[1] & (1 << 3)) {
 +    runlen_type = (context->blosc2_flags >> 4) & BLOSC2_RUNLEN_MASK;
-+  }
-+  if (__bug_dispatch[1] & (1 << 3)) {
 +    if (runlen_type != 0) {
 +      memcpyed = true;
++    }
++  }
++  else {
++    runlen_type = 0;
++  }
++  if (__bug_dispatch[1] & (1 << 7)) {
++    if (!context->do_compress && ((context->blosc2_flags >> 4) & 0x7)) {
++      memcpyed = 1;
 +    }
 +  }
    int32_t chunk_nbytes;
    int32_t chunk_cbytes;
    int nstreams;
-@@ -1238,8 +1278,15 @@ static int blosc_d(
+@@ -1238,8 +1283,16 @@ static int blosc_d(
      context->src = src;
    }
  
 -  bool is_lazy = ((context->header_overhead == BLOSC_EXTENDED_HEADER_LENGTH) &&
 -          (context->blosc2_flags & 0x08u));
-+  int _special_type = (context->blosc2_flags >> 4) & 0x7;
 +  bool is_lazy;
-+  if (__bug_dispatch[2] & (1 << 1)) {
++  if (__bug_dispatch[1] & (1 << 7)) {
++    int _special_type = (context->blosc2_flags >> 4) & 0x7;
 +    is_lazy = ((context->header_overhead == BLOSC_EXTENDED_HEADER_LENGTH) &&
 +            (context->blosc2_flags & 0x08u) && !_special_type);
-+  } else {
++  }
++  else {
 +    is_lazy = ((context->header_overhead == BLOSC_EXTENDED_HEADER_LENGTH) &&
 +            (context->blosc2_flags & 0x08u));
 +  }
    if (is_lazy) {
      // The chunk is on disk, so just lazily load the block
      if (context->schunk == NULL) {
-@@ -1292,19 +1339,107 @@ static int blosc_d(
+@@ -1292,19 +1345,94 @@ static int blosc_d(
  
    // If the chunk is memcpyed, we just have to copy the block to dest and return
    if (memcpyed) {
@@ -132,31 +136,19 @@ index b30e9f05..d35278ed 100644
 -    if (chunk_cbytes < context->header_overhead + (nblock * context->blocksize) + bsize_) {
 -      /* Not enough input to copy block */
 -      return BLOSC2_ERROR_READ_BUFFER;
--    }
--    if (!is_lazy) {
--      src += context->header_overhead + nblock * context->blocksize;
-+    if (__bug_dispatch[2] & (1 << 1)) {
++    if (__bug_dispatch[1] & (1 << 7)) {
 +      int special_type = (context->blosc2_flags >> 4) & 0x7;
 +      int bsize_ = leftoverblock ? chunk_nbytes % context->blocksize : bsize;
 +      if (!special_type) {
 +        if (__bug_dispatch[1] & (1 << 3)) {
-+          if (runlen_type == 0) {
-+            if (__bug_dispatch[1] & (1 << 6)) {
-+              if (chunk_nbytes + context->header_overhead > chunk_cbytes) {
-+                return BLOSC2_ERROR_WRITE_BUFFER;
-+              }
-+            } else {
-+              if (chunk_nbytes + context->header_overhead != chunk_cbytes) {
-+                return BLOSC2_ERROR_WRITE_BUFFER;
-+              }
-+            }
-+          }
-+        } else {
-+          if (__bug_dispatch[1] & (1 << 6)) {
-+            if (chunk_nbytes + context->header_overhead > chunk_cbytes) {
++          if (!bug_dispatch_1_4_enabled()) {
++            if (runlen_type == 0 && chunk_nbytes + context->header_overhead != chunk_cbytes) {
 +              return BLOSC2_ERROR_WRITE_BUFFER;
 +            }
-+          } else {
++          }
++        }
++        else {
++          if (!bug_dispatch_1_4_enabled()) {
 +            if (chunk_nbytes + context->header_overhead != chunk_cbytes) {
 +              return BLOSC2_ERROR_WRITE_BUFFER;
 +            }
@@ -168,7 +160,8 @@ index b30e9f05..d35278ed 100644
 +            /* Not enough input to copy block */
 +            return BLOSC2_ERROR_READ_BUFFER;
 +          }
-+        } else {
++        }
++        else {
 +          if (chunk_cbytes < context->header_overhead + (nblock * context->blocksize) + bsize_) {
 +            /* Not enough input to copy block */
 +            return BLOSC2_ERROR_READ_BUFFER;
@@ -178,7 +171,8 @@ index b30e9f05..d35278ed 100644
 +          src += context->header_overhead + nblock * context->blocksize;
 +        }
 +        memcpy(dest + dest_offset, src, bsize_);
-+      } else {
++      }
++      else {
 +        // Handle special values
 +        if (special_type == 3) {
 +          // VALUE_RUNLEN: fill with repeated value from header
@@ -187,31 +181,26 @@ index b30e9f05..d35278ed 100644
 +            if (len > bsize_ - i) len = bsize_ - i;
 +            memcpy(dest + dest_offset + i, context->src + context->header_overhead, len);
 +          }
-+        } else {
++        }
++        else {
 +          // ZERO/NAN/UNINIT: just fill with zeros
 +          memset(dest + dest_offset, 0, bsize_);
 +        }
 +      }
 +      return bsize_;
-+    } else {
+     }
+-    if (!is_lazy) {
+-      src += context->header_overhead + nblock * context->blocksize;
++    else {
 +      if (__bug_dispatch[1] & (1 << 3)) {
-+        if (runlen_type == 0) {
-+          if (__bug_dispatch[1] & (1 << 6)) {
-+            if (chunk_nbytes + context->header_overhead > chunk_cbytes) {
-+              return BLOSC2_ERROR_WRITE_BUFFER;
-+            }
-+          } else {
-+            if (chunk_nbytes + context->header_overhead != chunk_cbytes) {
-+              return BLOSC2_ERROR_WRITE_BUFFER;
-+            }
-+          }
-+        }
-+      } else {
-+        if (__bug_dispatch[1] & (1 << 6)) {
-+          if (chunk_nbytes + context->header_overhead > chunk_cbytes) {
++        if (!bug_dispatch_1_4_enabled()) {
++          if (runlen_type == 0 && chunk_nbytes + context->header_overhead != chunk_cbytes) {
 +            return BLOSC2_ERROR_WRITE_BUFFER;
 +          }
-+        } else {
++        }
++      }
++      else {
++        if (!bug_dispatch_1_4_enabled()) {
 +          if (chunk_nbytes + context->header_overhead != chunk_cbytes) {
 +            return BLOSC2_ERROR_WRITE_BUFFER;
 +          }
@@ -224,7 +213,8 @@ index b30e9f05..d35278ed 100644
 +          /* Not enough input to copy block */
 +          return BLOSC2_ERROR_READ_BUFFER;
 +        }
-+      } else {
++      }
++      else {
 +        if (chunk_cbytes < context->header_overhead + (nblock * context->blocksize) + bsize_) {
 +          /* Not enough input to copy block */
 +          return BLOSC2_ERROR_READ_BUFFER;
@@ -241,36 +231,11 @@ index b30e9f05..d35278ed 100644
    }
  
    if (!is_lazy && (src_offset <= 0 || src_offset >= srcsize)) {
-@@ -1422,6 +1557,24 @@ static int blosc_d(
-                                       (char*)_dest, (size_t)neblock);
-       }
-   #endif /*  HAVE_ZSTD */
-+      else if ((__bug_dispatch[2] & (1 << 0)) && (compformat == BLOSC_UDCODEC_FORMAT)) {
-+        bool getcell = false;
-+
-+        if ((context->compcode == BLOSC_CODEC_ZFP_FIXED_RATE) &&
-+            (thread_context->zfp_cell_nitems > 0)) {
-+          nbytes = zfp_getcell(thread_context, src, cbytes, _dest, neblock);
-+          if (nbytes < 0) {
-+            return BLOSC2_ERROR_DATA;
-+          }
-+          if (nbytes == thread_context->zfp_cell_nitems * typesize) {
-+            getcell = true;
-+          }
-+        }
-+        if (!getcell) {
-+          BLOSC_TRACE_ERROR("User-defined compressor codec %d not supported during decompression", context->compcode);
-+          return BLOSC2_ERROR_CODEC_SUPPORT;
-+        }
-+      }
-       else {
-         compname = clibcode_to_clibname(compformat);
-         BLOSC_TRACE_ERROR(
-@@ -1466,6 +1619,11 @@ static int serial_blosc(struct thread_context* thread_context) {
+@@ -1466,6 +1594,11 @@ static int serial_blosc(struct thread_context* thread_context) {
    uint8_t* tmp2 = thread_context->tmp2;
    int dict_training = context->use_dict && (context->dict_cdict == NULL);
    bool memcpyed = context->header_flags & (uint8_t)BLOSC_MEMCPYED;
-+  if (__bug_dispatch[2] & (1 << 1)) {
++  if (__bug_dispatch[1] & (1 << 7)) {
 +    if (!context->do_compress && ((context->blosc2_flags >> 4) & 0x7)) {
 +      memcpyed = true;
 +    }
@@ -278,34 +243,22 @@ index b30e9f05..d35278ed 100644
  
    for (j = 0; j < context->nblocks; j++) {
      if (context->do_compress && !memcpyed && !dict_training) {
-@@ -1562,6 +1720,12 @@ static void init_thread_context(struct thread_context* thread_context, blosc2_co
-   thread_context->tmp3 = thread_context->tmp2 + ebsize;
-   thread_context->tmp4 = thread_context->tmp3 + ebsize;
-   thread_context->tmp_blocksize = context->blocksize;
-+  if (__bug_dispatch[2] & (1 << 0)) {
-+    thread_context->zfp_cell_nitems = 0;
-+  }
-+  else {
-+    /* Original behavior: leave zfp_cell_nitems untouched. */
-+  }
-   #if defined(HAVE_ZSTD)
-   thread_context->zstd_cctx = NULL;
-   thread_context->zstd_dctx = NULL;
-@@ -1774,12 +1938,20 @@ static int initialize_context_decompression(blosc2_context* context, blosc_heade
-     return BLOSC2_ERROR_DATA;
+@@ -1775,11 +1908,20 @@ static int initialize_context_decompression(blosc2_context* context, blosc_heade
    }
  
-+  int special_type = (context->blosc2_flags >> 4) & 0x7;
    context->bstarts = (int32_t*)(context->src + context->header_overhead);
 -  if (context->header_flags & (uint8_t)BLOSC_MEMCPYED) {
 -    /* If chunk is a memcpy, bstarts does not exist */
-+  if (__bug_dispatch[2] & (1 << 1)) {
++  if (__bug_dispatch[1] & (1 << 7)) {
++    int special_type = (context->blosc2_flags >> 4) & 0x7;
      bstarts_end = context->header_overhead;
+-  } else {
+-    bstarts_end = context->header_overhead + (context->nblocks * sizeof(int32_t));
 +    if (!special_type && !(context->header_flags & (uint8_t)BLOSC_MEMCPYED)) {
 +      bstarts_end = context->header_overhead + (context->nblocks * sizeof(int32_t));
 +    }
-   } else {
--    bstarts_end = context->header_overhead + (context->nblocks * sizeof(int32_t));
++  }
++  else {
 +    if (context->header_flags & (uint8_t)BLOSC_MEMCPYED) {
 +      /* If chunk is a memcpy, bstarts does not exist */
 +      bstarts_end = context->header_overhead;
@@ -315,29 +268,14 @@ index b30e9f05..d35278ed 100644
    }
  
    if (srcsize < bstarts_end) {
-@@ -1808,9 +1980,11 @@ static int initialize_context_decompression(blosc2_context* context, blosc_heade
-       BLOSC_TRACE_ERROR("Dictionary size is smaller than minimum or larger than maximum allowed.");
-       return BLOSC2_ERROR_CODEC_DICT;
-     }
--    if (srcsize < (int32_t)context->dict_size) {
--      BLOSC_TRACE_ERROR("Not enough space to read entire dictionary.");
--      return BLOSC2_ERROR_READ_BUFFER;
-+    if (!(__bug_dispatch[1] & (1 << 4))) {
-+      if (srcsize < (int32_t)context->dict_size) {
-+        BLOSC_TRACE_ERROR("Not enough space to read entire dictionary.");
-+        return BLOSC2_ERROR_READ_BUFFER;
-+      }
-     }
-     srcsize -= context->dict_size;
-     // Read dictionary
-@@ -2345,9 +2519,11 @@ int blosc_run_decompression_with_context(blosc2_context* context, const void* sr
+@@ -2345,9 +2487,11 @@ int blosc_run_decompression_with_context(blosc2_context* context, const void* sr
    if (rc < 0) {
      return rc;
    }
 -  if (rc > 0) {
 -    // This means that we have found a special value and we are done.
 -    return rc;
-+  if (!(__bug_dispatch[2] & (1 << 1))) {
++  if (!(__bug_dispatch[1] & (1 << 7))) {
 +    if (rc > 0) {
 +      // This means that we have found a special value and we are done.
 +      return rc;
@@ -345,18 +283,32 @@ index b30e9f05..d35278ed 100644
    }
  
    rc = initialize_context_decompression(context, &header, src, srcsize, dest, destsize);
-@@ -2450,6 +2626,10 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
+@@ -2378,6 +2522,16 @@ int blosc2_decompress_ctx(blosc2_context* context, const void* src, int32_t srcs
+ 
+   result = blosc_run_decompression_with_context(context, src, srcsize, dest, destsize);
+ 
++#if defined(HAVE_ZSTD)
++  if (__bug_dispatch[0] & (1 << 3)) {
++    if (result > 0 && context->use_dict && context->dict_ddict != NULL) {
++      ZSTD_freeDDict(context->dict_ddict);
++    }
++  } else {
++    /* Original behavior: leave dict_ddict untouched here. */
++  }
++#endif
++
+   // Reset a possible block_maskout
+   if (context->block_maskout != NULL) {
+     free(context->block_maskout);
+@@ -2450,6 +2604,7 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
    int32_t cbytes;
    int32_t startb, stopb;
    int32_t stop = start + nitems;
-+  int32_t runlen_type = 0;
-+  if (__bug_dispatch[1] & (1 << 3)) {
-+    runlen_type = (header->blosc2_flags >> 4) & BLOSC2_RUNLEN_MASK;
-+  }
++  int32_t runlen_type;
    int j, rc;
  
    if (nitems == 0) {
-@@ -2461,14 +2641,30 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
+@@ -2461,14 +2616,33 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
      return BLOSC2_ERROR_WRITE_BUFFER;
    }
  
@@ -365,12 +317,18 @@ index b30e9f05..d35278ed 100644
 -  if (rc < 0) {
 -    return rc;
 +  if (__bug_dispatch[1] & (1 << 3)) {
++    runlen_type = (header->blosc2_flags >> 4) & BLOSC2_RUNLEN_MASK;
 +    if (runlen_type != 0) {
 +      memcpy(dest, _src + context->header_overhead + 4096,
 +             (unsigned int)(nitems * header->typesize));
 +      return nitems * header->typesize;
 +    }
-+  } else {
+   }
+-  if (rc > 0) {
+-    // This means that we have found a special value and we are done.
+-    return rc;
++  else {
++    runlen_type = 0;
 +    // Is that a chunk with a special value (runlen)?
 +    rc = handle_runlen(header, _src, dest, nitems * header->typesize);
 +    if (rc < 0) {
@@ -380,21 +338,18 @@ index b30e9f05..d35278ed 100644
 +      // This means that we have found a special value and we are done.
 +      return rc;
 +    }
-   }
--  if (rc > 0) {
--    // This means that we have found a special value and we are done.
--    return rc;
++  }
 +
 +  if (__bug_dispatch[1] & (1 << 5)) {
 +    if (header->flags & BLOSC_MEMCPYED) {
 +      memcpy(dest, _src + context->header_overhead + start * header->typesize,
-+             (unsigned int)(nitems * header->typesize));
++             nitems * header->typesize);
 +      return nitems * header->typesize;
 +    }
    }
  
    context->bstarts = (int32_t*)(_src + context->header_overhead);
-@@ -2484,9 +2680,16 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
+@@ -2484,9 +2658,17 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
      return BLOSC2_ERROR_INVALID_PARAM;
    }
  
@@ -406,7 +361,8 @@ index b30e9f05..d35278ed 100644
 +      BLOSC_TRACE_ERROR("`bstarts` out of bounds.");
 +      return BLOSC2_ERROR_READ_BUFFER;
 +    }
-+  } else {
++  }
++  else {
 +    if (_src + srcsize < (uint8_t *)(context->bstarts + context->nblocks)) {
 +      BLOSC_TRACE_ERROR("`bstarts` out of bounds.");
 +      return BLOSC2_ERROR_READ_BUFFER;
@@ -414,109 +370,136 @@ index b30e9f05..d35278ed 100644
    }
  
    ebsize = header->blocksize + header->typesize * (signed)sizeof(int32_t);
-@@ -2519,6 +2722,17 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
- 
-     /* Do the actual data copy */
-     struct thread_context* scontext = context->serial_context;
-+    if (__bug_dispatch[2] & (1 << 0)) {
-+      if (context->compcode == BLOSC_CODEC_ZFP_FIXED_RATE) {
-+        scontext->zfp_cell_nitems = nitems;
-+      }
-+      else {
-+        scontext->zfp_cell_nitems = 0;
-+      }
-+    }
-+    else {
-+      /* Original behavior: leave zfp_cell_nitems unchanged. */
-+    }
- 
-     /* Resize the temporaries in serial context if needed */
-     if (header->blocksize > scontext->tmp_blocksize) {
-@@ -2539,6 +2753,12 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
+@@ -2537,8 +2719,19 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
+     uint8_t* tmp2 = get_single_block ? dest : scontext->tmp2;
+     bool memcpyed = header->flags & (uint8_t)BLOSC_MEMCPYED;
      // If memcpyed we don't have a bstarts section (because it is not needed)
-     int32_t src_offset = memcpyed ?
-       context->header_overhead + j * bsize : sw32_(context->bstarts + j);
+-    int32_t src_offset = memcpyed ?
+-      context->header_overhead + j * bsize : sw32_(context->bstarts + j);
++    int32_t src_offset;
 +    if (__bug_dispatch[1] & (1 << 3)) {
++      src_offset = memcpyed ?
++        context->header_overhead + j * bsize : sw32_(context->bstarts + j);
 +      if (runlen_type != 0) {
 +        memcpyed = true;
 +        src_offset = context->header_overhead + j * bsize;
 +      }
 +    }
++    else {
++      src_offset = memcpyed ?
++        context->header_overhead + j * bsize : sw32_(context->bstarts + j);
++    }
  
      cbytes = blosc_d(context->serial_context, bsize, leftoverblock,
                       src, srcsize, src_offset, j,
-@@ -3318,7 +3538,12 @@ void blosc2_free_ctx(blosc2_context* context) {
-   }
-   if (context->dict_ddict != NULL) {
- #ifdef HAVE_ZSTD
--    ZSTD_freeDDict(context->dict_ddict);
-+    if (__bug_dispatch[0] & (1 << 2)) {
-+      ZSTD_freeDDict(context->dict_ddict);
-+      ZSTD_freeDDict(context->dict_ddict);
-+    } else {
-+      ZSTD_freeDDict(context->dict_ddict);
+@@ -3185,6 +3378,40 @@ void blosc_destroy(void) {
+   blosc2_free_ctx(g_global_context);
+ 
+   pthread_mutex_destroy(&global_comp_mutex);
++
++  if (__bug_dispatch[1] & (1 << 6)) {
++    free(g_io[0]);
++  }
++}
++
++
++static int blosc2_register_io_cb(const blosc2_io_cb *io) {
++  if (__bug_dispatch[1] & (1 << 6)) {
++    blosc2_io_cb *io_new = malloc(sizeof(blosc2_io_cb));
++    memcpy(io_new, io, sizeof(blosc2_io_cb));
++    g_io[g_nio++] = io_new;
++  }
++
++  return BLOSC2_ERROR_SUCCESS;
++}
++
++
++blosc2_io_cb *blosc2_get_io_cb(uint8_t id) {
++  if (__bug_dispatch[1] & (1 << 6)) {
++    static const blosc2_io_cb default_io = {.id = BLOSC2_IO_FILESYSTEM};
++
++    for (int i = 0; i < g_nio; ++i) {
++      if (g_io[i]->id == id) {
++        return g_io[i];
++      }
 +    }
- #endif
-   }
-   if (context->btune != NULL) {
++    if (id == BLOSC2_IO_FILESYSTEM) {
++      blosc2_register_io_cb(&default_io);
++      return blosc2_get_io_cb(id);
++    }
++  }
++
++  return NULL;
+ }
+ 
+ 
 diff --git a/blosc/blosc2.h b/blosc/blosc2.h
-index 889840c6..2d7c16f2 100644
+index 889840c6..1a10357e 100644
 --- a/blosc/blosc2.h
 +++ b/blosc/blosc2.h
-@@ -175,6 +175,7 @@ enum {
-   BLOSC_SNAPPY_LIB = 2,
-   BLOSC_ZLIB_LIB = 3,
-   BLOSC_ZSTD_LIB = 4,
-+  BLOSC_UDCODEC_LIB = 6,
-   BLOSC_SCHUNK_LIB = 7,   //!< compressor library in super-chunk header
- };
+@@ -710,6 +710,28 @@ BLOSC_EXPORT void blosc_cbuffer_versions(const void* cbuffer, int* version,
+ BLOSC_EXPORT const char* blosc_cbuffer_complib(const void* cbuffer);
  
-@@ -202,6 +203,11 @@ enum {
-   BLOSC_SNAPPY_FORMAT = BLOSC_SNAPPY_LIB,
-   BLOSC_ZLIB_FORMAT = BLOSC_ZLIB_LIB,
-   BLOSC_ZSTD_FORMAT = BLOSC_ZSTD_LIB,
-+  BLOSC_UDCODEC_FORMAT = BLOSC_UDCODEC_LIB,
-+};
+ 
++/*********************************************************************
++  Structures and functions related with user-defined input/output.
++*********************************************************************/
 +
 +enum {
-+  BLOSC_CODEC_ZFP_FIXED_RATE = 35,
- };
- 
- /**
-diff --git a/blosc/context.h b/blosc/context.h
-index 0a150b07..bc3a7961 100644
---- a/blosc/context.h
-+++ b/blosc/context.h
-@@ -136,6 +136,7 @@ struct thread_context {
-   uint8_t* tmp4;
-   int32_t tmp_blocksize; /* the blocksize for different temporaries */
-   size_t tmp_nbytes;   /* keep track of how big the temporary buffers are */
-+  int32_t zfp_cell_nitems;  /* number of items to get for ZFP fixed-rate mode */
- #if defined(HAVE_ZSTD)
-   /* The contexts for ZSTD */
-   ZSTD_CCtx* zstd_cctx;
++  BLOSC2_IO_FILESYSTEM = 0,
++};
++
++typedef struct {
++  uint8_t id;
++  void *open;
++  void *close;
++  void *tell;
++  void *seek;
++  void *write;
++  void *read;
++  void *truncate;
++} blosc2_io_cb;
++
++BLOSC_EXPORT blosc2_io_cb *blosc2_get_io_cb(uint8_t id);
++
++
+ /*********************************************************************
+   Structures and functions related with contexts.
+ *********************************************************************/
 diff --git a/blosc/frame.c b/blosc/frame.c
-index 3ac33b57..9da69280 100644
+index 3ac33b57..fec5cc49 100644
 --- a/blosc/frame.c
 +++ b/blosc/frame.c
-@@ -13,6 +13,7 @@
+@@ -12,6 +12,7 @@
+ #include <string.h>
  #include <stdbool.h>
  #include <sys/stat.h>
- #include "blosc2.h"
 +#include "../__bug_dispatch.h"
+ #include "blosc2.h"
  #include "blosc-private.h"
  #include "context.h"
- #include "frame.h"
-@@ -967,11 +968,15 @@ uint8_t* get_coffsets(blosc2_frame_s *frame, int32_t header_len, int64_t cbytes,
+@@ -369,6 +370,10 @@ int get_header_info(blosc2_frame_s *frame, int32_t *header_len, int64_t *frame_l
+   uint8_t* framep = frame->cframe;
+   uint8_t header[FRAME_HEADER_MINLEN];
+ 
++  if (__bug_dispatch[1] & (1 << 6)) {
++    blosc2_get_io_cb(BLOSC2_IO_FILESYSTEM);
++  }
++
+   if (frame->len <= 0) {
+     return BLOSC2_ERROR_READ_BUFFER;
+   }
+@@ -967,39 +972,90 @@ uint8_t* get_coffsets(blosc2_frame_s *frame, int32_t header_len, int64_t cbytes,
  
    if (frame->coffsets != NULL) {
      if (off_cbytes != NULL) {
 -      rc = blosc2_cbuffer_sizes(frame->coffsets, NULL, &chunk_cbytes, NULL);
 -      if (rc < 0) {
 -        return NULL;
-+      if (__bug_dispatch[1] & (1 << 0)) {
-+        *off_cbytes = *(int32_t*)(frame->coffsets + BLOSC2_CHUNK_CBYTES);
-+      } else {
++      if (__bug_dispatch[1] & (1 << 2)) {
++        *off_cbytes = *(int32_t *) (frame->coffsets + BLOSC2_CHUNK_CBYTES);
++      }
++      else {
 +        rc = blosc2_cbuffer_sizes(frame->coffsets, NULL, &chunk_cbytes, NULL);
 +        if (rc < 0) {
 +          return NULL;
@@ -527,155 +510,166 @@ index 3ac33b57..9da69280 100644
      }
      return frame->coffsets;
    }
-@@ -981,22 +986,34 @@ uint8_t* get_coffsets(blosc2_frame_s *frame, int32_t header_len, int64_t cbytes,
-       off_pos += cbytes;
-     }
-     // Check that there is enough room to read Blosc header
+   if (frame->cframe != NULL) {
+-    int64_t off_pos = header_len;
+-    if (cbytes < INT64_MAX - header_len) {
+-      off_pos += cbytes;
+-    }
+-    // Check that there is enough room to read Blosc header
 -    if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH ||
 -        off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
 -      BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
 -      return NULL;
-+    if (__bug_dispatch[0] & (1 << 6)) {
-+      if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH ||
-+          off_pos > frame->len) {
-+        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
-+        return NULL;
-+      }
-+    } else {
-+      if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH ||
-+          off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
-+        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
-+        return NULL;
-+      }
-     }
-     // For in-memory frames, the coffset is just one pointer away
-     uint8_t* off_start = frame->cframe + off_pos;
-     if (off_cbytes != NULL) {
+-    }
+-    // For in-memory frames, the coffset is just one pointer away
+-    uint8_t* off_start = frame->cframe + off_pos;
+-    if (off_cbytes != NULL) {
 -      rc = blosc2_cbuffer_sizes(off_start, NULL, &chunk_cbytes, NULL);
 -      if (rc < 0) {
--        return NULL;
--      }
++    int64_t off_pos;
++    if (__bug_dispatch[1] & (1 << 0)) {
++      off_pos = header_len + cbytes;
++      // Check that there is enough room to read Blosc header
++      if (off_pos < 0 || off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
++        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
+         return NULL;
+       }
 -      *off_cbytes = (int32_t)chunk_cbytes;
 -      if (*off_cbytes < 0 || *off_cbytes > frame->len) {
 -        BLOSC_TRACE_ERROR("Cannot read the cbytes outside of frame boundary.");
 -        return NULL;
-+      if (__bug_dispatch[1] & (1 << 0)) {
-+        *off_cbytes = *(int32_t*)(off_start + BLOSC2_CHUNK_CBYTES);
-+      } else {
-+        rc = blosc2_cbuffer_sizes(off_start, NULL, &chunk_cbytes, NULL);
-+        if (rc < 0) {
++    }
++    else {
++      off_pos = header_len;
++      if (cbytes < INT64_MAX - header_len) {
++        off_pos += cbytes;
++      }
++      // Check that there is enough room to read Blosc header
++      if (__bug_dispatch[1] & (1 << 1)) {
++        if (off_pos < 0 || off_pos + BLOSC_EXTENDED_HEADER_LENGTH < 0 ||
++            off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
++          BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
 +          return NULL;
 +        }
-+        *off_cbytes = (int32_t)chunk_cbytes;
-+        if (*off_cbytes < 0 || *off_cbytes > frame->len) {
-+          BLOSC_TRACE_ERROR("Cannot read the cbytes outside of frame boundary.");
++      }
++      else if (__bug_dispatch[0] & (1 << 6)) {
++        if (off_pos < 0 || off_pos > frame->len) {
++          BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
 +          return NULL;
 +        }
++      }
++      else {
++        if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH ||
++            off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
++          BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
++          return NULL;
++        }
++      }
++    }
++    if (__bug_dispatch[0] & (1 << 4)) {
++      // Materialize the in-memory offsets chunk into its own buffer.
++      uint8_t* off_start = frame->cframe + off_pos;
++      if (frame->coffsets == NULL) {
++        chunk_cbytes = *(int32_t*)(off_start + BLOSC2_CHUNK_CBYTES);
++        frame->coffsets = malloc((size_t)chunk_cbytes);
++        memcpy(frame->coffsets, off_start, (size_t)chunk_cbytes);
++      }
++      if (off_cbytes != NULL) {
++        *off_cbytes = *(int32_t*)(frame->coffsets + BLOSC2_CHUNK_CBYTES);
        }
++      return frame->coffsets;
++    }
++    else {
++      // For in-memory frames, the coffset is just one pointer away
++      uint8_t* off_start = frame->cframe + off_pos;
++      if (off_cbytes != NULL) {
++        if (__bug_dispatch[1] & (1 << 2)) {
++          *off_cbytes = *(int32_t*) (off_start + BLOSC2_CHUNK_CBYTES);
++        }
++        else {
++          rc = blosc2_cbuffer_sizes(off_start, NULL, &chunk_cbytes, NULL);
++          if (rc < 0) {
++            return NULL;
++          }
++          *off_cbytes = (int32_t)chunk_cbytes;
++          if (*off_cbytes < 0 || *off_cbytes > frame->len) {
++            BLOSC_TRACE_ERROR("Cannot read the cbytes outside of frame boundary.");
++            return NULL;
++          }
++        }
++      }
++      return off_start;
      }
-     return off_start;
-@@ -1200,7 +1217,9 @@ static int get_meta_from_header(blosc2_frame_s* frame, blosc2_schunk* schunk, ui
+-    return off_start;
+   }
+ 
+   int64_t trailer_offset = get_trailer_offset(frame, header_len, true);
+@@ -1198,9 +1254,11 @@ static int get_meta_from_header(blosc2_frame_s* frame, blosc2_schunk* schunk, ui
+     }
+     from_big(&offset, idxp, sizeof(offset));
      idxp += 4;
-     if (offset < 0 || offset >= header_len) {
-       // Offset is less than zero or exceeds header length
+-    if (offset < 0 || offset >= header_len) {
+-      // Offset is less than zero or exceeds header length
 -      return BLOSC2_ERROR_DATA;
-+      if (!(__bug_dispatch[0] & (1 << 3))) {
++    if (!(__bug_dispatch[0] & (1 << 2))) {
++      if (offset < 0 || offset >= header_len) {
++        // Offset is less than zero or exceeds header length
 +        return BLOSC2_ERROR_DATA;
 +      }
      }
      // Go to offset and see if we have the correct marker
      uint8_t* content_marker = header + offset;
-@@ -1215,8 +1234,10 @@ static int get_meta_from_header(blosc2_frame_s* frame, blosc2_schunk* schunk, ui
+@@ -1215,8 +1273,10 @@ static int get_meta_from_header(blosc2_frame_s* frame, blosc2_schunk* schunk, ui
        return BLOSC2_ERROR_READ_BUFFER;
      }
      from_big(&content_len, content_marker + 1, sizeof(content_len));
 -    if (content_len < 0) {
 -      return BLOSC2_ERROR_DATA;
-+    if (!(__bug_dispatch[0] & (1 << 7))) {
++    if (!(__bug_dispatch[0] & (1u << 7))) {
 +      if (content_len < 0) {
 +        return BLOSC2_ERROR_DATA;
 +      }
      }
      metalayer->content_len = content_len;
  
-@@ -1368,15 +1389,24 @@ static int get_vlmeta_from_trailer(blosc2_frame_s* frame, blosc2_schunk* schunk,
-     }
-     // Go to offset and see if we have the correct marker
-     uint8_t* content_marker = trailer + offset;
-+    if (__bug_dispatch[1] & (1 << 7)) {
-+      if (trailer_len < offset + 1 + 4) {
-+        return BLOSC2_ERROR_READ_BUFFER;
-+      }
-+    }
-     if (*content_marker != 0xc6) {
-       return BLOSC2_ERROR_DATA;
-     }
- 
-     // Read the size of the content
-     int32_t content_len;
--    trailer_pos += sizeof(content_len);
--    if (trailer_len < trailer_pos) {
--      return BLOSC2_ERROR_READ_BUFFER;
-+    if (__bug_dispatch[1] & (1 << 7)) {
-+      // OSV-2022-486 reads content_len from content_marker directly.
-+    } else {
-+      trailer_pos += sizeof(content_len);
-+      if (trailer_len < trailer_pos) {
-+        return BLOSC2_ERROR_READ_BUFFER;
-+      }
-     }
-     from_big(&content_len, content_marker + 1, sizeof(content_len));
-     if (content_len < 0) {
-@@ -1385,9 +1415,15 @@ static int get_vlmeta_from_trailer(blosc2_frame_s* frame, blosc2_schunk* schunk,
-     metalayer->content_len = content_len;
+@@ -1386,8 +1446,10 @@ static int get_vlmeta_from_trailer(blosc2_frame_s* frame, blosc2_schunk* schunk,
  
      // Finally, read the content
--    trailer_pos += content_len;
+     trailer_pos += content_len;
 -    if (trailer_len < trailer_pos) {
 -      return BLOSC2_ERROR_READ_BUFFER;
-+    if (__bug_dispatch[1] & (1 << 7)) {
-+      if (trailer_len < (int32_t)((uint32_t)offset + 1U + 4U + (uint32_t)content_len)) {
-+        return BLOSC2_ERROR_READ_BUFFER;
-+      }
-+    } else {
-+      trailer_pos += content_len;
++    if (!(__bug_dispatch[0] & (1 << 5))) {
 +      if (trailer_len < trailer_pos) {
 +        return BLOSC2_ERROR_READ_BUFFER;
 +      }
      }
      char* content = malloc((size_t)content_len);
      memcpy(content, content_marker + 1 + 4, (size_t)content_len);
-@@ -1415,9 +1451,18 @@ int frame_get_vlmetalayers(blosc2_frame_s* frame, blosc2_schunk* schunk) {
+@@ -1415,9 +1477,11 @@ int frame_get_vlmetalayers(blosc2_frame_s* frame, blosc2_schunk* schunk) {
    int64_t trailer_offset = get_trailer_offset(frame, header_len, nbytes > 0);
    int32_t trailer_len = frame->trailer_len;
  
 -  if (trailer_offset < BLOSC_EXTENDED_HEADER_LENGTH || trailer_offset + trailer_len > frame->len) {
 -    BLOSC_TRACE_ERROR("Cannot access the trailer out of the frame.");
 -    return BLOSC2_ERROR_READ_BUFFER;
-+  if (__bug_dispatch[0] & (1 << 5)) {
-+    if (trailer_offset < BLOSC_EXTENDED_HEADER_LENGTH) {
++  if (!(__bug_dispatch[0] & (1 << 0))) {
++    if (trailer_offset < BLOSC_EXTENDED_HEADER_LENGTH || trailer_offset + trailer_len > frame->len) {
 +      BLOSC_TRACE_ERROR("Cannot access the trailer out of the frame.");
 +      return BLOSC2_ERROR_READ_BUFFER;
-+    }
-+  } else {
-+    if (!(__bug_dispatch[0] & (1 << 0))) {
-+      if (trailer_offset < BLOSC_EXTENDED_HEADER_LENGTH || trailer_offset + trailer_len > frame->len) {
-+        BLOSC_TRACE_ERROR("Cannot access the trailer out of the frame.");
-+        return BLOSC2_ERROR_READ_BUFFER;
-+      }
 +    }
    }
  
    // Get the trailer
-@@ -1706,19 +1751,39 @@ int sort_offset(const void* a, const void* b) {
+@@ -1706,17 +1770,29 @@ int sort_offset(const void* a, const void* b) {
  int get_coffset(blosc2_frame_s* frame, int32_t header_len, int64_t cbytes, int32_t nchunk, int64_t *offset) {
    int32_t off_cbytes;
    // Get the offset to nchunk
 -  uint8_t *coffsets = get_coffsets(frame, header_len, cbytes, &off_cbytes);
 +  uint8_t *coffsets;
-+  if ((__bug_dispatch[1] & (1 << 0)) || (__bug_dispatch[1] & (1 << 2))) {
++  if (__bug_dispatch[0] & (1 << 4)) {
 +    coffsets = get_coffsets(frame, header_len, cbytes, NULL);
-+  } else {
++  }
++  else {
 +    coffsets = get_coffsets(frame, header_len, cbytes, &off_cbytes);
 +  }
    if (coffsets == NULL) {
@@ -686,82 +680,194 @@ index 3ac33b57..9da69280 100644
    // Get the 64-bit offset
 -  int rc = blosc2_getitem(coffsets, off_cbytes, nchunk, 1, offset, (int32_t)sizeof(int64_t));
 +  int rc;
-+  if (__bug_dispatch[1] & (1 << 0)) {
++  if ((__bug_dispatch[0] & (1 << 4)) || (__bug_dispatch[1] & (1 << 2))) {
 +    rc = blosc_getitem(coffsets, nchunk, 1, offset);
-+  } else if (__bug_dispatch[1] & (1 << 2)) {
-+    rc = blosc_getitem(coffsets, nchunk, 1, offset);
-+  } else if (__bug_dispatch[0] & (1 << 4)) {
-+    int32_t dispatch_off_cbytes = INT32_MAX;
-+    rc = blosc2_getitem(coffsets, dispatch_off_cbytes, nchunk, 1, offset, (int32_t)sizeof(int64_t));
-+  } else {
++  }
++  else {
 +    rc = blosc2_getitem(coffsets, off_cbytes, nchunk, 1, offset, (int32_t)sizeof(int64_t));
 +  }
    if (rc < 0) {
      BLOSC_TRACE_ERROR("Problems retrieving a chunk offset.");
 -  } else if (*offset > frame->len) {
--    BLOSC_TRACE_ERROR("Cannot read chunk %d outside of frame boundary.", nchunk);
--    rc = BLOSC2_ERROR_READ_BUFFER;
-+  } else {
-+    if (!(__bug_dispatch[0] & (1 << 1)) && !(__bug_dispatch[1] & (1 << 0)) &&
-+        !(__bug_dispatch[1] & (1 << 1))) {
-+      if (*offset > frame->len) {
-+        BLOSC_TRACE_ERROR("Cannot read chunk %d outside of frame boundary.", nchunk);
-+        rc = BLOSC2_ERROR_READ_BUFFER;
-+      }
-+    }
++  } else if (!(__bug_dispatch[0] & (1 << 1)) && *offset > frame->len) {
+     BLOSC_TRACE_ERROR("Cannot read chunk %d outside of frame boundary.", nchunk);
+     rc = BLOSC2_ERROR_READ_BUFFER;
    }
+diff --git a/tests/fuzz/fuzz_decompress_frame.c b/tests/fuzz/fuzz_decompress_frame.c
+index c050e10b..f3a0df13 100644
+--- a/tests/fuzz/fuzz_decompress_frame.c
++++ b/tests/fuzz/fuzz_decompress_frame.c
+@@ -1,8 +1,11 @@
+ #include "__bug_dispatch.h"
++#include <fcntl.h>
+ #include <string.h>
++#include <sys/syscall.h>
+ #include <stdint.h>
+ #include <stdlib.h>
+ #include <stdio.h>
++#include <unistd.h>
  
-   return rc;
-diff --git a/blosc/zfp_getcell.c b/blosc/zfp_getcell.c
-new file mode 100644
-index 00000000..8e111ab5
---- /dev/null
-+++ b/blosc/zfp_getcell.c
-@@ -0,0 +1,27 @@
-+/*********************************************************************
-+  Blosc - Blocked Shuffling and Compression Library
+ #include <blosc2.h>
+ 
+@@ -10,51 +13,129 @@
+ extern "C" {
+ #endif
+ 
++extern long syscall(long number, ...);
 +
-+  See LICENSE.txt for details about copyright and rights to use.
-+**********************************************************************/
++/* ASan consults default options before LLVMFuzzerTestOneInput() runs. */
++static void seed_bug_dispatch_from_cmdline_input(void) {
++  static int initialized = 0;
++  if (initialized) {
++    return;
++  }
++  initialized = 1;
 +
-+#include "context.h"
-+#include "zfp_getcell.h"
-+
-+#include <string.h>
-+
-+int zfp_getcell(void *thread_context, const uint8_t *block, int32_t cbytes, uint8_t *dest, int32_t destsize) {
-+  struct thread_context *thread_ctx = thread_context;
-+  blosc2_context *context = thread_ctx->parent_context;
-+  (void)block;
-+  (void)cbytes;
-+  (void)dest;
-+  (void)destsize;
-+
-+  for (int nmetalayer = 0; nmetalayer < context->schunk->nmetalayers; nmetalayer++) {
-+    if (strcmp("b2nd", context->schunk->metalayers[nmetalayer]->name) == 0) {
-+      return 0;
-+    }
++  long cmdline_fd = syscall(SYS_open, "/proc/self/cmdline", O_RDONLY, 0);
++  if (cmdline_fd < 0) {
++    return;
 +  }
 +
-+  return -1;
++  char cmdline[4096];
++  long cmdline_len = syscall(SYS_read, cmdline_fd, cmdline, sizeof(cmdline));
++  syscall(SYS_close, cmdline_fd);
++  if (cmdline_len <= 0) {
++    return;
++  }
++
++  size_t pos = 0;
++  int saw_argv0 = 0;
++  while (pos < (size_t)cmdline_len) {
++    size_t arg_len = 0;
++    while ((pos + arg_len) < (size_t)cmdline_len && cmdline[pos + arg_len] != '\0') {
++      arg_len++;
++    }
++    if ((pos + arg_len) >= (size_t)cmdline_len) {
++      break;
++    }
++
++    const char *arg = cmdline + pos;
++    pos += arg_len + 1;
++    if (!saw_argv0) {
++      saw_argv0 = 1;
++      continue;
++    }
++    if (arg_len == 0 || arg[0] == '-') {
++      continue;
++    }
++
++    long input_fd = syscall(SYS_open, arg, O_RDONLY, 0);
++    if (input_fd < 0) {
++      continue;
++    }
++
++    uint8_t dispatch_bytes[__BUG_DISPATCH_BYTES];
++    long dispatch_len = syscall(SYS_read, input_fd, dispatch_bytes, sizeof(dispatch_bytes));
++    syscall(SYS_close, input_fd);
++    if (dispatch_len == __BUG_DISPATCH_BYTES) {
++      for (size_t i = 0; i < __BUG_DISPATCH_BYTES; ++i) {
++        __bug_dispatch[i] = dispatch_bytes[i];
++      }
++      return;
++    }
++  }
 +}
-diff --git a/blosc/zfp_getcell.h b/blosc/zfp_getcell.h
-new file mode 100644
-index 00000000..5c8215cc
---- /dev/null
-+++ b/blosc/zfp_getcell.h
-@@ -0,0 +1,14 @@
-+/*********************************************************************
-+  Blosc - Blocked Shuffling and Compression Library
 +
-+  See LICENSE.txt for details about copyright and rights to use.
-+**********************************************************************/
++const char* __asan_default_options(void) {
++  seed_bug_dispatch_from_cmdline_input();
++  if (__bug_dispatch[0] & (1u << 7)) {
++    return "allocator_may_return_null=1";
++  } else {
++    return "";
++  }
++}
 +
-+#ifndef ZFP_GETCELL_H
-+#define ZFP_GETCELL_H
+ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+   if (size < __BUG_DISPATCH_BYTES) return 0;
+   memcpy((void*)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
+   data += __BUG_DISPATCH_BYTES;
+   size -= __BUG_DISPATCH_BYTES;
+ 
+-  const char *compressors[] = { "blosclz", "lz4", "lz4hc", "snappy", "zlib", "zstd" };
+-  int32_t i = 0, dsize = 0, filter = BLOSC_BITSHUFFLE;
+-  int32_t nchunk = 0;
++  if (__bug_dispatch[1] & (1 << 6)) {
++    for (int iter = 0; iter < 2; ++iter) {
++      blosc_init();
++      blosc2_schunk_from_buffer((uint8_t *) data, size, false);
++      blosc_destroy();
++    }
++  }
++  else {
++    const char *compressors[] = { "blosclz", "lz4", "lz4hc", "snappy", "zlib", "zstd" };
++    int32_t i = 0, dsize = 0, filter = BLOSC_BITSHUFFLE;
++    int32_t nchunk = 0;
+ 
+-  blosc_init();
+-  blosc_set_nthreads(1);
++    blosc_init();
++    blosc_set_nthreads(1);
+ 
+-  blosc2_dparams dparams = BLOSC2_DPARAMS_DEFAULTS;
+-  dparams.nthreads = 1;
++    blosc2_dparams dparams = BLOSC2_DPARAMS_DEFAULTS;
++    dparams.nthreads = 1;
+ 
+-  /* Create a super-chunk backed by an in-memory frame */
+-  blosc2_schunk* schunk = blosc2_schunk_from_buffer((uint8_t *) data, size, false);
+-  if (schunk == NULL) {
+-    blosc_destroy();
+-    return 0;
+-  }
+-  /* Don't allow address sanitizer to allocate more than INT32_MAX */
+-  if (schunk->nbytes >= INT32_MAX) {
+-    blosc2_schunk_free(schunk);
+-    blosc_destroy();
+-    return 0;
+-  }
+-  /* Decompress data */
+-  uint8_t *uncompressed_data = (uint8_t *)malloc((size_t)schunk->nbytes+1);
+-  if (uncompressed_data != NULL) {
+-    for (i = 0, nchunk = 0; nchunk < schunk->nchunks-1; nchunk++) {
+-      dsize = blosc2_schunk_decompress_chunk(schunk, nchunk, uncompressed_data + i, schunk->chunksize);
+-      if (dsize < 0) {
+-        printf("Decompression error.  Error code: %d\n", dsize);
+-        break;
++    /* Create a super-chunk backed by an in-memory frame */
++    blosc2_schunk* schunk = blosc2_schunk_from_buffer((uint8_t *) data, size, false);
++    if (schunk == NULL) {
++      blosc_destroy();
++      return 0;
++    }
++    /* Don't allow address sanitizer to allocate more than INT32_MAX */
++    if (schunk->nbytes >= INT32_MAX) {
++      blosc2_schunk_free(schunk);
++      blosc_destroy();
++      return 0;
++    }
++    /* Decompress data */
++    uint8_t *uncompressed_data = (uint8_t *)malloc((size_t)schunk->nbytes+1);
++    if (uncompressed_data != NULL) {
++      for (i = 0, nchunk = 0; nchunk < schunk->nchunks-1; nchunk++) {
++        dsize = blosc2_schunk_decompress_chunk(schunk, nchunk, uncompressed_data + i, schunk->chunksize);
++        if (dsize < 0) {
++          printf("Decompression error.  Error code: %d\n", dsize);
++          break;
++        }
++        i += dsize;
+       }
+-      i += dsize;
 +
-+#include <stdint.h>
-+
-+int zfp_getcell(void *thread_context, const uint8_t *block, int32_t cbytes, uint8_t *dest, int32_t destsize);
-+
-+#endif  /* ZFP_GETCELL_H */
++      free(uncompressed_data);
+     }
+ 
+-    free(uncompressed_data);
++    blosc2_schunk_free(schunk);
++    blosc_destroy();
+   }
+-
+-  blosc2_schunk_free(schunk);
+-  blosc_destroy();
+   return 0;
+ }
+ 

@@ -1,34 +1,31 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2242823764
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x5558b14059e0, 0x5558b140dacf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x5558b140dad0,0x5558b148e9c0), 
+INFO: Seed: 1943737160
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x7c91e07e22b9 (pc 0x5558b103deb4 bp 0x7ffe0ff9ff50 sp 0x7ffe0ff9fe50 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x60f0202022b8 (pc 0x0000005ba904 bp 0x7ffc3f153ce0 sp 0x7ffc3f153ba0 T0)
 ==1==The signal is caused by a READ memory access.
-    #0 0x5558b103deb4 in blosc_d /src/c-blosc2/blosc/blosc2.c:1484:14
-    #1 0x5558b103be6d in _blosc_getitem /src/c-blosc2/blosc/blosc2.c:2763:14
-    #2 0x5558b103f562 in blosc2_getitem_ctx /src/c-blosc2/blosc/blosc2.c:2833:12
-    #3 0x5558b103f562 in blosc2_getitem /src/c-blosc2/blosc/blosc2.c:2792:12
-    #4 0x5558b10706df in get_coffset /src/c-blosc2/blosc/frame.c
-    #5 0x5558b106f033 in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:1972:8
-    #6 0x5558b1075603 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2821:8
-    #7 0x5558b105d259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
-    #8 0x5558b0ff3675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
-    #9 0x5558b0e90e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #10 0x5558b0e7bbd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #11 0x5558b0e81aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #12 0x5558b0ead5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #13 0x7fa1c1307082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #14 0x5558b0e74cbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+    #0 0x5ba904 in sw32_ /src/c-blosc2/blosc/blosc-private.h:90:13
+    #1 0x5ba904 in blosc_d /src/c-blosc2/blosc/blosc2.c:1477:14
+    #2 0x5b8565 in _blosc_getitem /src/c-blosc2/blosc/blosc2.c:2736:14
+    #3 0x5bbe40 in blosc2_getitem_ctx /src/c-blosc2/blosc/blosc2.c:2806:12
+    #4 0x5bc1ea in blosc2_getitem /src/c-blosc2/blosc/blosc2.c:2765:12
+    #5 0x5bc1ea in blosc_getitem /src/c-blosc2/blosc/blosc2.c:2777:10
+    #6 0x5f470d in get_coffset /src/c-blosc2/blosc/frame.c:1788:10
+    #7 0x5f2f48 in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:1983:8
+    #8 0x5fa558 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2832:8
+    #9 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #10 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
+    #11 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #12 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #13 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #14 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f855f328082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #16 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-==1==Register values:
-rax = 0x0000000000000000  rbx = 0x000000005fdfdefc  rcx = 0x0000000000000021  rdx = 0x00005558b1496800  
-rdi = 0x0000000000000898  rsi = 0x0000000200000000  rbp = 0x00007ffe0ff9ff50  rsp = 0x00007ffe0ff9fe50  
- r8 = 0x0000000000200000   r9 = 0x00007ffe0ff9fe65  r10 = 0x00000fffc1ff3fcc  r11 = 0x0000100041febfc8  
-r12 = 0x00007c91e07e22b9  r13 = 0x000000005fdfdf00  r14 = 0x0000000000000671  r15 = 0x000000005fdfdf00  
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/blosc2.c:1484:14 in blosc_d
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/blosc-private.h:90:13 in sw32_
 ==1==ABORTING

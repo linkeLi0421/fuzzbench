@@ -1,34 +1,41 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1940766092
+INFO: Seed: 1941001713
 INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
 INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x626000005df3 at pc 0x000000529f61 bp 0x7ffd48598bf0 sp 0x7ffd485983b8
-READ of size 16 at 0x626000005df3 thread T0
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x626000005d92 at pc 0x000000529f61 bp 0x7ffca15d9d70 sp 0x7ffca15d9538
+READ of size 37536 at 0x626000005d92 thread T0
     #0 0x529f60 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0x5a9bd7 in blosc_read_header /src/c-blosc2/blosc/blosc2.c:685:3
-    #2 0x5bd8d4 in blosc2_cbuffer_sizes /src/c-blosc2/blosc/blosc2.c:3246:12
-    #3 0x5f2fff in frame_get_lazychunk /src/c-blosc2/blosc/frame.c:2098:10
-    #4 0x5fa558 in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2832:8
-    #5 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
-    #6 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
-    #7 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #8 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #9 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #10 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7f2cc1ac9082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
-    #12 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
+    #1 0x9309ab in ZSTD_copyRawBlock /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_decompress.c:596:5
+    #2 0x9309ab in ZSTD_decompressFrame /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_decompress.c:662:27
+    #3 0x9309ab in ZSTD_decompressMultiFrame /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_decompress.c:769:32
+    #4 0x931379 in ZSTD_decompress_usingDDict /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_decompress.c:1273:12
+    #5 0x5ceb05 in zstd_wrap_decompress /src/c-blosc2/blosc/blosc2.c:541:12
+    #6 0x5baba9 in blosc_d /src/c-blosc2/blosc/blosc2.c:1548:18
+    #7 0x5afe5e in serial_blosc /src/c-blosc2/blosc/blosc2.c:1636:16
+    #8 0x5afe5e in do_job /src/c-blosc2/blosc/blosc2.c:1794:15
+    #9 0x5b6680 in blosc_run_decompression_with_context /src/c-blosc2/blosc/blosc2.c:2503:13
+    #10 0x5b6d4d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2523:12
+    #11 0x5fa74b in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2855:23
+    #12 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #13 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
+    #14 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #15 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #16 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #17 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #18 0x7eff3b253082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #19 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-0x626000005df3 is located 97 bytes to the right of 11410-byte region [0x626000003100,0x626000005d92)
+0x626000005d92 is located 0 bytes to the right of 11410-byte region [0x626000003100,0x626000005d92)
 allocated by thread T0 here:
     #0 0x52ab3d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
     #1 0x43dee7 in operator new(unsigned long) cxa_noexception.cpp
     #2 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #3 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #4 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #5 0x7f2cc1ac9082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #5 0x7eff3b253082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
@@ -37,7 +44,7 @@ Shadow bytes around the buggy address:
   0x0c4c7fff8b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c4c7fff8b90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c4c7fff8ba0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x0c4c7fff8bb0: 00 00 02 fa fa fa fa fa fa fa fa fa fa fa[fa]fa
+=>0x0c4c7fff8bb0: 00 00[02]fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c4c7fff8bc0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c4c7fff8bd0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
   0x0c4c7fff8be0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa

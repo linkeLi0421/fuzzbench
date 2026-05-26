@@ -1,51 +1,51 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2236564767
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x56468d6ed9e0, 0x56468d6f5acf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x56468d6f5ad0,0x56468d7769c0), 
+INFO: Seed: 1940050324
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7e403b5ed01a at pc 0x56468d29545b bp 0x7ffeb08d4650 sp 0x7ffeb08d3e10
-READ of size 61951 at 0x7e403b5ed01a thread T0
-    #0 0x56468d29545a in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:63:3
-    #1 0x56468d5adb2a in ZSTD_initDDict_internal /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:134:9
-    #2 0x56468d5adb2a in ZSTD_createDDict_advanced /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:155:39
-    #3 0x56468d5adb2a in ZSTD_createDDict /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:173:12
-    #4 0x56468d32225e in initialize_context_decompression /src/c-blosc2/blosc/blosc2.c:1992:27
-    #5 0x56468d32225e in blosc_run_decompression_with_context /src/c-blosc2/blosc/blosc2.c:2529:8
-    #6 0x56468d32263d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2555:12
-    #7 0x56468d35d77d in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2844:23
-    #8 0x56468d345259 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
-    #9 0x56468d2db675 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:45:15
-    #10 0x56468d178e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #11 0x56468d163bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #12 0x56468d169aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #13 0x56468d1955d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #14 0x7f903c3c6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #15 0x56468d15ccbd in _start (/out/decompress_frame_fuzzer+0x10acbd)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x62b00000d019 at pc 0x000000529f61 bp 0x7ffdebe1d990 sp 0x7ffdebe1d158
+READ of size 61951 at 0x62b00000d019 thread T0
+    #0 0x529f60 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x92b7b4 in ZSTD_initDDict_internal /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:134:9
+    #2 0x92b7b4 in ZSTD_createDDict_advanced /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:155:39
+    #3 0x92b7b4 in ZSTD_createDDict /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:173:12
+    #4 0x5b6980 in initialize_context_decompression /src/c-blosc2/blosc/blosc2.c:1960:27
+    #5 0x5b6980 in blosc_run_decompression_with_context /src/c-blosc2/blosc/blosc2.c:2497:8
+    #6 0x5b6d4d in blosc2_decompress_ctx /src/c-blosc2/blosc/blosc2.c:2523:12
+    #7 0x5fa74b in frame_decompress_chunk /src/c-blosc2/blosc/frame.c:2855:23
+    #8 0x5de036 in blosc2_schunk_decompress_chunk /src/c-blosc2/blosc/schunk.c:804:17
+    #9 0x5643c6 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:125:17
+    #10 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #11 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #12 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #13 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7fdabc1fd082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #15 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-0x7e403b5ed01a is located 0 bytes after 24090-byte region [0x7e403b5e7200,0x7e403b5ed01a)
+0x62b00000d019 is located 0 bytes to the right of 24089-byte region [0x62b000007200,0x62b00000d019)
 allocated by thread T0 here:
-    #0 0x56468d2977b4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
-    #1 0x56468d668323 in operator new(unsigned long) cxa_noexception.cpp
-    #2 0x56468d163bd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #3 0x56468d169aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #4 0x56468d1955d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #5 0x7f903c3c6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #0 0x52ab3d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x43dee7 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #3 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #4 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7fdabc1fd082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow /src/c-blosc2/internal-complibs/zstd-1.4.8/decompress/zstd_ddict.c:134:9 in ZSTD_initDDict_internal
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x7e403b5ecd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7e403b5ece00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7e403b5ece80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7e403b5ecf00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7e403b5ecf80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x7e403b5ed000: 00 00 00[02]fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7e403b5ed080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7e403b5ed100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7e403b5ed180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7e403b5ed200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7e403b5ed280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c567fff99b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c567fff99c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c567fff99d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c567fff99e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c567fff99f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c567fff9a00: 00 00 00[01]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c567fff9a10: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c567fff9a20: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c567fff9a30: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c567fff9a40: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c567fff9a50: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 

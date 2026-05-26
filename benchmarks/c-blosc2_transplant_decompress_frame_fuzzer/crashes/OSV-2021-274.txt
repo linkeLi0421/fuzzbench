@@ -1,23 +1,34 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2241885529
-INFO: Loaded 1 modules   (33007 inline 8-bit counters): 33007 [0x55a9331169e0, 0x55a93311eacf), 
-INFO: Loaded 1 PC tables (33007 PCs): 33007 [0x55a93311ead0,0x55a93319f9c0), 
+INFO: Seed: 1942990374
+INFO: Loaded 1 modules   (39110 inline 8-bit counters): 39110 [0xb24640, 0xb2df06), 
+INFO: Loaded 1 PC tables (39110 PCs): 39110 [0xa34660,0xacd2c0), 
 /out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
+==1==WARNING: AddressSanitizer failed to allocate 0xffffffffffff20ff bytes
 =================================================================
-==1==ERROR: AddressSanitizer: requested allocation size 0xffffffffff20ffff (0xffffffffff211000 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0x10000000000 (thread T0)
-    #0 0x55a932cc07b4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
-    #1 0x55a932d7d1ac in get_meta_from_header /src/c-blosc2/blosc/frame.c:1249:21
-    #2 0x55a932d7d1ac in frame_get_metalayers /src/c-blosc2/blosc/frame.c:1298:9
-    #3 0x55a932d7eea8 in frame_to_schunk /src/c-blosc2/blosc/frame.c:1720:8
-    #4 0x55a932d70757 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:446:27
-    #5 0x55a932d04593 in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:30:27
-    #6 0x55a932ba1e5d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
-    #7 0x55a932b8cbd2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
-    #8 0x55a932b92aa0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
-    #9 0x55a932bbe5d2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7f9b89bdb082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+==1==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x000000000000,0xffffffffffff20ff) and [0x60d000000117, 0x60cfffff2216) overlap
+    #0 0x529e5e in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x5effca in get_meta_from_header /src/c-blosc2/blosc/frame.c:1289:5
+    #2 0x5effca in frame_get_metalayers /src/c-blosc2/blosc/frame.c:1337:9
+    #3 0x5f1d23 in frame_to_schunk /src/c-blosc2/blosc/frame.c:1739:8
+    #4 0x5e0612 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:446:27
+    #5 0x5642ae in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:110:29
+    #6 0x45c253 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f7d8d7e6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #11 0x42670d in _start (/out/decompress_frame_fuzzer+0x42670d)
 
-==1==HINT: if you don't care about these errors you may set allocator_may_return_null=1
-SUMMARY: AddressSanitizer: allocation-size-too-big /src/c-blosc2/blosc/frame.c:1249:21 in get_meta_from_header
+Address 0x000000000000 is a wild pointer inside of access range of size 0xffffffffffff20ff.
+0x60d000000117 is located 7 bytes inside of 136-byte region [0x60d000000110,0x60d000000198)
+allocated by thread T0 here:
+    #0 0x52ab3d in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:129:3
+    #1 0x43dee7 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x447ee2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #3 0x44d72c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #4 0x476322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7f7d8d7e6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 ==1==ABORTING
