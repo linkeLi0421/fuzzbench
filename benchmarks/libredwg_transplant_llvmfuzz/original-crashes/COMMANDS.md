@@ -18,13 +18,20 @@ Each `OSV-*.txt` is a crash on the pristine source tree:
 - **Migration bugs** copied from `/mnt/nas/linke/new_migrate/libredwg/llvmfuzz/crash/`,
   captured per-bug by the migration pipeline with era-matched runner per source commit.
 
-Note: 2 bugs (`OSV-2021-495`, `OSV-2023-416`) have no entry in the benchmark's
-`crashes/` directory because they were flagged as already-triggering at target by
-the migration pipeline but did not survive into the final merged benchmark binary's
-triggering set. The `original-crashes/` entries here are captured at each bug's
-*introduced* commit (`749923e4` and `a954ad92` respectively) — see
-`collect_crash_builds.csv` and the rerun command below — so the reference crash
-signature is recorded for triage even though the merged-binary side cannot reproduce.
+Note: 2 bugs (`OSV-2021-495`, `OSV-2023-416`) were **dropped** from
+`bug_metadata.json` on 2026-05-26 (`total_bugs` 65 → 63). The migration pipeline
+misclassified them as already-triggering at target (CSV cell `0.5|0`), but the
+PoCs execute cleanly in <50 ms on both the unpatched target `a67ea97d` and the
+merged benchmark binary — the bugs only trigger at their *introduced* commits
+(`749923e4` and `a954ad92`). A 2026-05-26 transplant retry timed out for
+`OSV-2021-495` and hit the ChatGPT account's usage limit for `OSV-2023-416`,
+so they were dropped rather than retried again. See `bug_metadata.json`'s
+`dropped_bugs` field for the previous entries.
+
+`original-crashes/OSV-2021-495.txt` and `original-crashes/OSV-2023-416.txt`
+are **retained as historical references** of each bug at its introduced commit
+(double-free in `bit_chain_free` and a SEGV inside libc respectively); they are
+not part of the active benchmark.
 
 Note: `libredwg_builds.csv` contains 409 rows but does not cover every source commit
 used here; rows in `collect_crash_builds.csv` with `oss_fuzz_commit=auto` defer to

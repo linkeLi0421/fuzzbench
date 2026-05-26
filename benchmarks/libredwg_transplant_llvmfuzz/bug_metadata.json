@@ -2,7 +2,7 @@
   "project": "libredwg",
   "target_commit": "a67ea97d93998f35d6494c96118c60c5f1aee4e9",
   "dispatch_bytes": 4,
-  "total_bugs": 65,
+  "total_bugs": 63,
   "bugs": {
     "OSV-2021-493": {
       "dispatch_value": 1,
@@ -221,10 +221,6 @@
       "crash_line": 944,
       "crash_function": "free_preR13_object"
     },
-    "OSV-2021-495": {
-      "dispatch_value": 0,
-      "triggered": false
-    },
     "OSV-2022-656": {
       "dispatch_value": 0,
       "triggered": true,
@@ -280,10 +276,6 @@
       "crash_file": "/src/libredwg/src/encode.c",
       "crash_line": 3517,
       "crash_function": "dwg_encode"
-    },
-    "OSV-2023-416": {
-      "dispatch_value": 0,
-      "triggered": false
     },
     "OSV-2023-452": {
       "dispatch_value": 0,
@@ -452,6 +444,22 @@
       "crash_file": "/usr/include/x86_64-linux-gnu/bits/string_fortified.h",
       "crash_line": 34,
       "crash_function": "memcpy"
+    }
+  },
+  "dropped_bugs": {
+    "OSV-2021-495": {
+      "previous_entry": {
+        "dispatch_value": 0,
+        "triggered": false
+      },
+      "reason": "Migration pipeline misclassified as 'already-triggering at target' (CSV cell 0.5|0). Verified PoC executes cleanly in <50ms on both unpatched a67ea97d and merged binary; bug only triggers at its introduced commit. Phase 1 transplant attempt (2026-05-26) timed out for OSV-2021-495 and hit the ChatGPT account usage limit for OSV-2023-416; dropped rather than retried. original-crashes/<bug>.txt retained as historical reference of the bug at its introduced commit."
+    },
+    "OSV-2023-416": {
+      "previous_entry": {
+        "dispatch_value": 0,
+        "triggered": false
+      },
+      "reason": "Migration pipeline misclassified as 'already-triggering at target' (CSV cell 0.5|0). Verified PoC executes cleanly in <50ms on both unpatched a67ea97d and merged binary; bug only triggers at its introduced commit. Phase 1 transplant attempt (2026-05-26) timed out for OSV-2021-495 and hit the ChatGPT account usage limit for OSV-2023-416; dropped rather than retried. original-crashes/<bug>.txt retained as historical reference of the bug at its introduced commit."
     }
   }
 }
