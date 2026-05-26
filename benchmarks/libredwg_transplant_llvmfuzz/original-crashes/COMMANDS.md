@@ -18,11 +18,13 @@ Each `OSV-*.txt` is a crash on the pristine source tree:
 - **Migration bugs** copied from `/mnt/nas/linke/new_migrate/libredwg/llvmfuzz/crash/`,
   captured per-bug by the migration pipeline with era-matched runner per source commit.
 
-Note: 2 bugs in `bug_metadata.json` (`OSV-2021-495`, `OSV-2023-416`) have no entry
-in the benchmark's `crashes/` directory and are therefore also absent from this
-`original-crashes/` directory. They were flagged as already-triggering at target by
+Note: 2 bugs (`OSV-2021-495`, `OSV-2023-416`) have no entry in the benchmark's
+`crashes/` directory because they were flagged as already-triggering at target by
 the migration pipeline but did not survive into the final merged benchmark binary's
-triggering set.
+triggering set. The `original-crashes/` entries here are captured at each bug's
+*introduced* commit (`749923e4` and `a954ad92` respectively) — see
+`collect_crash_builds.csv` and the rerun command below — so the reference crash
+signature is recorded for triage even though the merged-binary side cannot reproduce.
 
 Note: `libredwg_builds.csv` contains 409 rows but does not cover every source commit
 used here; rows in `collect_crash_builds.csv` with `oss_fuzz_commit=auto` defer to
