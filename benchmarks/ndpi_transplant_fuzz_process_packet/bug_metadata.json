@@ -2,7 +2,7 @@
   "project": "ndpi",
   "target_commit": "e695dd6eade754b2d50bdf297ca8bdc4105f93ff",
   "dispatch_bytes": 2,
-  "total_bugs": 43,
+  "total_bugs": 42,
   "bugs": {
     "OSV-2020-342": {
       "dispatch_value": 1,
@@ -59,13 +59,6 @@
       "crash_file": "/src/ndpi/src/lib/protocols/http.c",
       "crash_line": 238,
       "crash_function": "check_content_type_and_change_protocol"
-    },
-    "OSV-2023-102": {
-      "dispatch_value": 256,
-      "triggered": true,
-      "crash_file": "/src/ndpi/fuzz/fuzz_process_packet.c",
-      "crash_line": 33,
-      "crash_function": "LLVMFuzzerTestOneInput"
     },
     "OSV-2023-436": {
       "dispatch_value": 512,
@@ -304,6 +297,18 @@
       "crash_file": "/src/ndpi/src/lib/third_party/src/ndpi_sha1.c",
       "crash_line": 192,
       "crash_function": "SHA1Update"
+    }
+  },
+  "dropped_bugs": {
+    "OSV-2023-102": {
+      "previous_entry": {
+        "dispatch_value": 256,
+        "triggered": true,
+        "crash_file": "/src/ndpi/fuzz/fuzz_process_packet.c",
+        "crash_line": 33,
+        "crash_function": "LLVMFuzzerTestOneInput"
+      },
+      "reason": "Lost at merge (not transplant). Agent's transplant was correct in isolation (SEGV in ndpi_free_flow_data via union-poisoned negotiated_alpn), but the merge consolidated 4 softether bugs' struct fields, shifting softether.hostname from union offset 22-23 to 29-30 and destroying the alias with tls_quic.negotiated_alpn (offset 16-23). With the alias gone the bug cannot fire on the merged binary regardless of dispatch. See /mnt/nas/linke/new_migrate/ndpi/fuzz_process_packet/dropped_bugs.md."
     }
   }
 }
