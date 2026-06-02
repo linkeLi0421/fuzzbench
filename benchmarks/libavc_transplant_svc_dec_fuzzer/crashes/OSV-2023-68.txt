@@ -1,259 +1,85 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 3686591350
-INFO: Loaded 1 modules   (16698 inline 8-bit counters): 16698 [0x8a2000, 0x8a613a), 
-INFO: Loaded 1 PC tables (16698 PCs): 16698 [0x804f48,0x8462e8), 
+INFO: Seed: 2766022378
+INFO: Loaded 1 modules   (16702 inline 8-bit counters): 16702 [0x8a2000, 0x8a613e), 
+INFO: Loaded 1 PC tables (16702 PCs): 16702 [0x804f48,0x846328), 
 /out/svc_dec_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
-AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: stack-overflow on address 0x7ffcc4f03dd8 (pc 0x00000052e615 bp 0x7ffcc4f04610 sp 0x7ffcc4f03de0 T0)
-    #0 0x52e615 in __asan_memset /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:26:3
-    #1 0x5f8f65 in isvcd_populate_res_prms /src/libavc/decoder/svc/isvcd_intra_resamp.c:4786:9
-    #2 0x5a3702 in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3220:15
-    #3 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #4 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #5 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #6 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #7 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #8 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #9 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #10 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #11 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #12 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #13 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #14 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #15 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #16 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #17 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #18 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #19 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #20 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #21 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #22 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #23 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #24 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #25 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #26 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #27 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #28 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #29 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #30 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #31 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #32 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #33 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #34 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #35 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #36 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #37 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #38 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #39 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #40 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #41 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #42 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #43 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #44 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #45 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #46 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #47 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #48 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #49 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #50 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #51 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #52 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #53 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #54 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #55 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #56 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #57 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #58 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #59 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #60 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #61 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #62 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #63 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #64 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #65 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #66 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #67 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #68 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #69 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #70 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #71 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #72 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #73 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #74 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #75 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #76 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #77 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #78 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #79 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #80 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #81 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #82 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #83 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #84 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #85 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #86 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #87 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #88 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #89 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #90 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #91 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #92 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #93 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #94 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #95 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #96 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #97 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #98 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #99 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #100 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #101 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #102 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #103 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #104 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #105 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #106 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #107 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #108 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #109 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #110 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #111 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #112 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #113 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #114 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #115 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #116 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #117 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #118 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #119 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #120 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #121 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #122 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #123 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #124 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #125 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #126 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #127 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #128 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #129 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #130 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #131 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #132 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #133 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #134 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #135 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #136 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #137 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #138 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #139 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #140 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #141 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #142 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #143 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #144 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #145 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #146 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #147 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #148 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #149 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #150 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #151 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #152 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #153 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #154 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #155 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #156 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #157 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #158 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #159 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #160 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #161 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #162 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #163 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #164 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #165 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #166 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #167 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #168 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #169 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #170 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #171 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #172 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #173 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #174 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #175 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #176 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #177 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #178 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #179 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #180 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #181 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #182 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #183 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #184 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #185 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #186 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #187 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #188 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #189 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #190 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #191 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #192 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #193 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #194 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #195 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #196 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #197 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #198 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #199 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #200 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #201 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #202 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #203 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #204 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #205 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #206 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #207 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #208 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #209 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #210 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #211 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #212 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #213 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #214 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #215 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #216 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #217 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #218 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #219 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #220 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #221 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #222 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #223 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #224 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #225 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #226 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #227 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #228 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #229 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #230 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #231 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #232 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #233 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #234 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #235 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #236 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #237 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #238 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #239 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #240 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #241 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #242 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #243 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #244 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
-    #245 0x5b0dd9 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:2973:11
-    #246 0x5a39aa in isvcd_parse_interlayer_resamp_func_init /src/libavc/decoder/svc/isvcd_parse_epslice.c:3258:20
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x61300000a052 at pc 0x00000060d073 bp 0x7f022bce2870 sp 0x7f022bce2868
+READ of size 2 at 0x61300000a052 thread T2
+    #0 0x60d072 in isvcd_residual_samp_mb_dyadic /src/libavc/decoder/svc/isvcd_residual_resamp.c:2031:50
+    #1 0x5d875a in isvcd_process_residual_resample_mb /src/libavc/decoder/svc/isvcd_process_epslice.c:1927:11
+    #2 0x5dd1ab in isvcd_process_inter_mb_rsd_pred_target_lyr /src/libavc/decoder/svc/isvcd_process_epslice.c:1992:11
+    #3 0x5e2b7e in isvcd_decode_recon_tfr_nmb_thread /src/libavc/decoder/svc/isvcd_thread_parse_decode.c:264:31
+    #4 0x5e3fdc in isvcd_decode_slice_thread /src/libavc/decoder/svc/isvcd_thread_parse_decode.c:519:19
+    #5 0x5e4334 in isvcd_decode_picture_thread /src/libavc/decoder/svc/isvcd_thread_parse_decode.c:571:19
+    #6 0x7f0233e92608 in start_thread (/lib/x86_64-linux-gnu/libpthread.so.0+0x8608) (BuildId: 7b4536f41cdaa5888408e82d0836e33dcf436466)
+    #7 0x7f0233d8c132 in __clone (/lib/x86_64-linux-gnu/libc.so.6+0x11f132) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
-SUMMARY: AddressSanitizer: stack-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:26:3 in __asan_memset
+0x61300000a052 is located 18 bytes to the right of 192-byte region [0x613000009f80,0x61300000a040)
+allocated by thread T0 here:
+    #0 0x52fb17 in posix_memalign /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
+    #1 0x56c4d5 in iv_aligned_malloc(void*, int, int) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:86:13
+    #2 0x5e4fce in isvcd_allocate_dynamic_bufs /src/libavc/decoder/svc/isvcd_utils.c:178:14
+    #3 0x5e8505 in isvcd_init_pic /src/libavc/decoder/svc/isvcd_utils.c:843:15
+    #4 0x5be784 in isvcd_start_of_pic /src/libavc/decoder/svc/isvcd_parse_slice.c:283:11
+    #5 0x5cbf34 in isvcd_parse_decode_slice /src/libavc/decoder/svc/isvcd_parse_slice.c:2390:19
+    #6 0x5b995b in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:1006:40
+    #7 0x5840ae in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5291:27
+    #8 0x5910ff in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7285:26
+    #9 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:376:11
+    #10 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:446:22
+    #11 0x43de33 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #12 0x429592 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #13 0x42ee3c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #14 0x458372 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f0233c91082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+Thread T2 created by T0 here:
+    #0 0x5186bc in pthread_create /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:208:3
+    #1 0x640331 in ithread_create /src/libavc/common/ithread.c:80:12
+    #2 0x5c4df7 in isvcd_parse_decode_slice_ext_nal /src/libavc/decoder/svc/isvcd_parse_slice.c:1210:17
+    #3 0x5b9a35 in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:1064:44
+    #4 0x5840ae in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5291:27
+    #5 0x5910ff in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7285:26
+    #6 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:376:11
+    #7 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:446:22
+    #8 0x43de33 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #9 0x429592 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #10 0x42ee3c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #11 0x458372 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f0233c91082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libavc/decoder/svc/isvcd_residual_resamp.c:2031:50 in isvcd_residual_samp_mb_dyadic
+Shadow bytes around the buggy address:
+  0x0c267fff93b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff93c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c267fff93d0: 00 00 00 00 fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff93e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff93f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c267fff9400: 00 00 00 00 00 00 00 00 fa fa[fa]fa fa fa fa fa
+  0x0c267fff9410: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9420: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c267fff9430: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c267fff9440: 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa fa
+  0x0c267fff9450: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
 ==1==ABORTING

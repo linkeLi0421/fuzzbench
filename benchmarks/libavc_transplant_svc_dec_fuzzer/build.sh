@@ -3,31 +3,52 @@
 
 cd /src/libavc
 
+# Drop stale build artifacts from the merge container so `git checkout`
+# is not blocked by untracked files that would be overwritten.
+git clean -fdx >/dev/null 2>&1 || true
+git reset --hard HEAD >/dev/null 2>&1 || true
+
 # Checkout target commit
 git checkout c38af025abf0040f6693d15f4ce2e878a728cfee
 
-# Restore harness sources that live outside the project git repository.
+# Restore harness sources that live outside the project git repository,
+# and compute --exclude flags so harness.diff doesn't re-modify files
+# that have already been restored to their post-dispatch state by the
+# snapshot copy (which would fail with "does not match index").
+HARNESS_EXCLUDES=""
 if [ -f /src/patches/harness_sources/manifest.json ]; then
-    python3 - <<'PY'
+    HARNESS_EXCLUDES=$(python3 - <<'PY'
 import json
 import shutil
 from pathlib import Path
 
 root = Path("/src/patches/harness_sources")
-for entry in json.loads((root / "manifest.json").read_text()):
+manifest = json.loads((root / "manifest.json").read_text())
+excludes = []
+for entry in manifest:
     source = root / entry["snapshot"]
     destination = Path(entry["container_path"])
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, destination)
+    # Convert /src/<repo>/<rel> to <rel> (git apply paths are repo-relative).
+    parts = destination.parts
+    if len(parts) >= 3 and parts[1] == "src":
+        rel = Path(*parts[3:])
+    else:
+        rel = destination
+    excludes.append(f"--exclude={rel}")
+print(" ".join(excludes))
 PY
+)
 fi
 
-# Apply dispatch harness first (modifies build system), then bug patches
-if ! git apply --check /src/patches/harness.diff 2>/dev/null; then
+# Apply dispatch harness first (modifies build system), then bug patches.
+# $HARNESS_EXCLUDES is empty when no snapshots were restored.
+if ! git apply --check $HARNESS_EXCLUDES /src/patches/harness.diff 2>/dev/null; then
     echo "Trying git apply --3way for harness.diff..."
-    git apply --3way /src/patches/harness.diff
+    git apply --3way $HARNESS_EXCLUDES /src/patches/harness.diff
 else
-    git apply /src/patches/harness.diff
+    git apply $HARNESS_EXCLUDES /src/patches/harness.diff
 fi
 
 if ! git apply --check /src/patches/combined.diff 2>/dev/null; then
@@ -50,23 +71,6 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
     done
 fi
 
-# --- Strip UBSan from build flags ---
-# libavc's project.yaml enables SANITIZER=undefined alongside address, which
-# bakes -fsanitize=array-bounds,...,shift,signed-integer-overflow,... plus
-# -fno-sanitize-recover=... into CFLAGS. That makes shallow integer UB in
-# the H.264 parser (ih264d_parse_cavlc.c shift-by-31, etc.) unrecoverable
-# and dominate the crash dir, drowning out the transplanted OSV bugs.
-# Strip the undefined sanitizer bits; keep ASan and fuzzer-no-link.
-strip_ubsan() {
-    echo "$1" \
-        | sed -E 's/-fsanitize=array-bounds,[^ ]+//g' \
-        | sed -E 's/-fno-sanitize-recover=[^ ]+//g' \
-        | sed -E 's/  +/ /g'
-}
-export CFLAGS="$(strip_ubsan "$CFLAGS")"
-export CXXFLAGS="$(strip_ubsan "$CXXFLAGS")"
-export SANITIZER_FLAGS_undefined=""
-
 # --- Original build commands ---
 $SRC/libavc/fuzzer/ossfuzz.sh
 
@@ -82,22 +86,6 @@ mkdir -p /tmp/seeds_dispatch /tmp/original_seeds /tmp/benchmark_seed_candidates
 
 if [ -f "$seed_zip" ]; then
     unzip -q -o "$seed_zip" -d /tmp/original_seeds 2>/dev/null || true
-fi
-# svc_dec_fuzzer has no upstream corpus, but SVC decodes AVC as a subset, so
-# borrow avc_dec_fuzzer's 21 MB H.264 corpus as structural seed material.
-avc_zip="$OUT/avc_dec_fuzzer_seed_corpus.zip"
-if [ -f "$avc_zip" ]; then
-    unzip -q -o "$avc_zip" -d /tmp/original_seeds_raw 2>/dev/null || true
-    # Corpus may have subdirs (e.g. h264/); flatten into /tmp/original_seeds.
-    find /tmp/original_seeds_raw -type f -exec cp -n {} /tmp/original_seeds/ \; 2>/dev/null || true
-    rm -rf /tmp/original_seeds_raw
-fi
-# Cap to 500 original seeds to keep total corpus manageable after 9x dispatch fanout.
-orig_count=$(find /tmp/original_seeds -maxdepth 1 -type f 2>/dev/null | wc -l)
-if [ "$orig_count" -gt 500 ]; then
-    find /tmp/original_seeds -maxdepth 1 -type f | shuf -n $((orig_count - 500)) | xargs -r rm -f
-fi
-if [ "$(find /tmp/original_seeds -maxdepth 1 -type f 2>/dev/null | wc -l)" -gt 0 ]; then
     for f in /tmp/original_seeds/*; do
         [ -f "$f" ] || continue
         base=$(basename "$f")
@@ -145,7 +133,7 @@ fi
 if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
     for f in /tmp/benchmark_seed_candidates/*; do
         [ -f "$f" ] || continue
-        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" UBSAN_OPTIONS="${UBSAN_OPTIONS:-halt_on_error=0:print_stacktrace=0}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
+        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
             cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
         fi
     done

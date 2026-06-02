@@ -1,5 +1,27 @@
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+index 6450a25..d127365 100644
+--- a/__bug_dispatch.h
++++ b/__bug_dispatch.h
+@@ -1,6 +1,17 @@
+ #ifndef __BUG_DISPATCH_H
+ #define __BUG_DISPATCH_H
++
+ #include <stdint.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ #define __BUG_DISPATCH_BYTES 1
+ extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++
++#ifdef __cplusplus
++}
++#endif
++
+ #endif
 diff --git a/decoder/ih264d_defs.h b/decoder/ih264d_defs.h
-index 894fc78..214d173 100644
+index 894fc78..a2457e4 100644
 --- a/decoder/ih264d_defs.h
 +++ b/decoder/ih264d_defs.h
 @@ -36,7 +36,10 @@
@@ -9,7 +31,7 @@ index 894fc78..214d173 100644
 -#define H264_MAX_FRAME_WIDTH                4080
 +#include "../__bug_dispatch.h"
 +
-+#define H264_MAX_FRAME_WIDTH \
++#define H264_MAX_FRAME_WIDTH                \
 +    ((__bug_dispatch[0] & (1 << 3)) ? 4096 : ((__bug_dispatch[0] & (1 << 4)) ? 4096 : 4080))
  #define H264_MAX_FRAME_HEIGHT               4080
  #define H264_MAX_FRAME_SIZE                 (4096 * 2048)
@@ -27,8 +49,32 @@ index bcab1ea..bc81d56 100644
      UWORD8 u1_recon_mb_grp_pair;
      /* Variables to handle Cabac */
      decoding_envirnoment_t s_cab_dec_env; /* < Structure for decoding_envirnoment_t */
+diff --git a/decoder/libavcdec.cmake b/decoder/libavcdec.cmake
+index 911c328..6be665f 100644
+--- a/decoder/libavcdec.cmake
++++ b/decoder/libavcdec.cmake
+@@ -2,6 +2,7 @@
+ list(
+   APPEND
+   LIBAVCDEC_SRCS
++  "${AVC_ROOT}/__bug_dispatch.c"
+   "${AVC_ROOT}/decoder/ih264d_api.c"
+   "${AVC_ROOT}/decoder/ih264d_bitstrm.c"
+   "${AVC_ROOT}/decoder/ih264d_cabac.c"
+diff --git a/decoder/mvc/libmvcdec.cmake b/decoder/mvc/libmvcdec.cmake
+index 4eb7643..daa6cbe 100644
+--- a/decoder/mvc/libmvcdec.cmake
++++ b/decoder/mvc/libmvcdec.cmake
+@@ -2,6 +2,7 @@
+ list(
+   APPEND
+   LIBMVCDEC_SRCS
++  "${AVC_ROOT}/__bug_dispatch.c"
+   "${AVC_ROOT}/decoder/ih264d_api.c"
+   "${AVC_ROOT}/decoder/ih264d_bitstrm.c"
+   "${AVC_ROOT}/decoder/ih264d_cabac.c"
 diff --git a/decoder/svc/isvcd_api.c b/decoder/svc/isvcd_api.c
-index 3ac3984..103a67f 100644
+index 3ac3984..c005fd5 100644
 --- a/decoder/svc/isvcd_api.c
 +++ b/decoder/svc/isvcd_api.c
 @@ -87,6 +87,7 @@
@@ -39,12 +85,22 @@ index 3ac3984..103a67f 100644
  #include "ih264_defs.h"
  #include "ih264_typedefs.h"
  #include "ih264_macros.h"
-@@ -5288,7 +5289,15 @@ WORD32 isvcd_video_decode(iv_obj_t *dec_hdl, void *pv_api_ip, void *pv_api_op)
+@@ -5288,10 +5289,29 @@ WORD32 isvcd_video_decode(iv_obj_t *dec_hdl, void *pv_api_ip, void *pv_api_op)
  
                      ps_dec_op->u4_frame_decoded_flag = 0;
                      ret = isvcd_parse_nal_unit(ps_svc_lyr_dec, ps_cur_node->i4_nal_ref_idc);
 -                    if(ret != OK)
-+                    if(__bug_dispatch[0] & (1 << 1))
++                    if(__bug_dispatch[0] & (1 << 0))
+                     {
+-                        ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
+-                        break;
++                        if(((ret != OK)) && (u1_res_id != (u1_num_res_lyrs - 1)))
++                        {
++                            ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
++                            break;
++                        }
++                    }
++                    else if(__bug_dispatch[0] & (1 << 1))
 +                    {
 +                        if(((ret != OK)) && (u1_res_id != (u1_num_res_lyrs - 1)))
 +                        {
@@ -52,10 +108,16 @@ index 3ac3984..103a67f 100644
 +                            break;
 +                        }
 +                    }
-+                    else if(ret != OK)
-                     {
-                         ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
-                         break;
++                    else
++                    {
++                        if(ret != OK)
++                        {
++                            ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
++                            break;
++                        }
+                     }
+ 
+                     /* go to the next slice */
 diff --git a/decoder/svc/isvcd_defs.h b/decoder/svc/isvcd_defs.h
 index 4162713..cb356fc 100644
 --- a/decoder/svc/isvcd_defs.h
@@ -80,24 +142,22 @@ index 4162713..cb356fc 100644
  #define SVCD_MAX_FRAME_SIZE (4096 * 2048)
  
 diff --git a/decoder/svc/isvcd_parse_epslice.c b/decoder/svc/isvcd_parse_epslice.c
-index 8d8c449..9961198 100644
+index 8d8c449..65f5955 100644
 --- a/decoder/svc/isvcd_parse_epslice.c
 +++ b/decoder/svc/isvcd_parse_epslice.c
-@@ -44,8 +44,8 @@
-  *
-  *******************************************************************************
+@@ -46,6 +46,7 @@
   */
--
+ 
  #include <string.h>
 +#include "../../__bug_dispatch.h"
  #include "ih264_defs.h"
  #include "ih264d_bitstrm.h"
  #include "ih264d_defs.h"
-@@ -3194,7 +3194,12 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+@@ -3194,7 +3195,12 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
  {
      dec_struct_t *ps_dec = &ps_svc_lyr_dec->s_dec;
      dec_slice_params_t *ps_slice = ps_dec->ps_cur_slice;
-+    svc_dec_ctxt_t *ps_svcd_ctxt;
++    svc_dec_ctxt_t *ps_svcd_ctxt = ps_svc_lyr_dec->ps_svcd_ctxt;
      WORD32 ret = OK;
 +    WORD32 num_mb_skipped;
 +    WORD32 prev_slice_err;
@@ -106,13 +166,12 @@ index 8d8c449..9961198 100644
  
      if(TARGET_LAYER != ps_svc_lyr_dec->u1_layer_identifier)
      {
-@@ -3203,6 +3208,13 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+@@ -3203,6 +3209,12 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
          ps_slice->i1_slice_beta_offset = ps_svc_lyr_dec->i1_inter_lyr_slice_beta_offset;
      }
  
 +    if(__bug_dispatch[0] & (1 << 1))
 +    {
-+        ps_svcd_ctxt = ps_svc_lyr_dec->ps_svcd_ctxt;
 +        ht_in_mbs = ps_dec->u2_pic_ht >> (4 + ps_dec->ps_cur_slice->u1_field_pic_flag);
 +        num_mb_skipped = (ht_in_mbs * ps_dec->u2_frm_wd_in_mbs) - ps_dec->u2_total_mbs_coded;
 +    }
@@ -120,10 +179,28 @@ index 8d8c449..9961198 100644
      if(0 == u2_first_mb_in_slice)
      {
          ret = isvcd_populate_res_prms(ps_svc_lyr_dec);
-@@ -3218,6 +3230,35 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+@@ -3218,6 +3230,43 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
          if(ret != OK) return NOT_OK;
      }
  
++    if(__bug_dispatch[0] & (1 << 0))
++    {
++        ps_svcd_ctxt = ps_svc_lyr_dec->ps_svcd_ctxt;
++        num_mb_skipped =
++            ((ps_dec->u2_pic_ht >> (4 + ps_dec->ps_cur_slice->u1_field_pic_flag)) *
++             ps_dec->u2_frm_wd_in_mbs) - ps_dec->u2_total_mbs_coded;
++        prev_slice_err =
++            (ps_dec->u4_first_slice_in_pic && (ps_dec->u2_total_mbs_coded == 0)) ? 1 : 2;
++
++        if((ps_svc_lyr_dec->u1_layer_identifier == TARGET_LAYER) &&
++           (ps_svcd_ctxt->u1_parse_nal_unit_error == 1))
++        {
++            return isvcd_mark_err_slice_skip(
++                ps_svc_lyr_dec, num_mb_skipped, ps_dec->u1_nal_unit_type == IDR_SLICE_NAL,
++                ps_dec->ps_cur_slice->u2_frame_num, &temp_poc, prev_slice_err);
++        }
++    }
++
 +    if(__bug_dispatch[0] & (1 << 1))
 +    {
 +        if(ps_dec->u4_first_slice_in_pic && (ps_dec->u4_pic_buf_got == 0))
@@ -143,31 +220,21 @@ index 8d8c449..9961198 100644
 +        }
 +    }
 +
-+    if(__bug_dispatch[0] & (1 << 0))
-+    {
-+        svc_dec_ctxt_t *ps_svcd_ctxt = ps_svc_lyr_dec->ps_svcd_ctxt;
-+
-+        if(ps_svcd_ctxt->u1_parse_nal_unit_error)
-+        {
-+            return isvcd_mark_err_slice_skip(ps_svc_lyr_dec, 0, 0, 0, 0, 0);
-+        }
-+    }
-+
      return ret;
  }
  
 diff --git a/decoder/svc/isvcd_parse_headers.c b/decoder/svc/isvcd_parse_headers.c
-index 6c3e9fb..536aaea 100644
+index 6c3e9fb..30b1f38 100644
 --- a/decoder/svc/isvcd_parse_headers.c
 +++ b/decoder/svc/isvcd_parse_headers.c
-@@ -45,6 +45,7 @@
- #include <string.h>
- #include <assert.h>
- 
+@@ -75,6 +75,7 @@
+ #include "ih264d_process_bslice.h"
+ #include "ih264d_process_pslice.h"
+ #include "isvcd_vui.h"
 +#include "../../__bug_dispatch.h"
- #include "ih264_typedefs.h"
- #include "ih264_defs.h"
- #include "ih264_macros.h"
+ 
+ WORD32 ih264d_access_unit_delimiter_rbsp(dec_struct_t *ps_dec);
+ void ih264d_get_pre_sei_params(dec_struct_t *ps_dec, UWORD8 u1_nal_unit_type);
 @@ -1175,12 +1176,15 @@ WORD32 isvcd_parse_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stream_t *p
      ps_seq = ps_dec->pv_scratch_sps_pps;
      memset(ps_seq, 0, sizeof(dec_seq_params_t));
@@ -189,7 +256,7 @@ index 6c3e9fb..536aaea 100644
      }
  
      if((ps_dec->i4_header_decoded & 1) &&
-@@ -1628,31 +1632,35 @@ WORD32 isvcd_parse_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stream_t *p
+@@ -1628,31 +1632,34 @@ WORD32 isvcd_parse_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stream_t *p
      ps_subset_seq->u2_crop_offset_y = u2_crop_offset_y;
      ps_subset_seq->u2_crop_offset_uv = u2_crop_offset_uv;
  
@@ -229,8 +296,7 @@ index 6c3e9fb..536aaea 100644
 +            ps_dec->u2_disp_width = ps_subset_seq->u2_disp_width;
 +            ps_dec->u2_pic_wd = ps_subset_seq->u2_pic_wd;
 +            ps_dec->u2_pic_ht = ps_subset_seq->u2_pic_ht;
-+            ps_dec->u4_total_mbs =
-+                ps_seq->u2_total_num_of_mbs << (1 - ps_seq->u1_frame_mbs_only_flag);
++            ps_dec->u4_total_mbs = ps_seq->u2_total_num_of_mbs << (1 - ps_seq->u1_frame_mbs_only_flag);
 +
 +            /* Determining the Width and Height of Frame from that of Picture */
 +            ps_dec->u2_frm_wd_y = ps_subset_seq->u2_frm_wd_y;
@@ -249,3 +315,151 @@ index 6c3e9fb..536aaea 100644
      }
  
      ps_seq->u1_is_valid = TRUE;
+diff --git a/decoder/svc/libsvcdec.cmake b/decoder/svc/libsvcdec.cmake
+index d088426..8a4b06c 100644
+--- a/decoder/svc/libsvcdec.cmake
++++ b/decoder/svc/libsvcdec.cmake
+@@ -2,6 +2,7 @@
+ list(
+   APPEND
+   LIBSVCDEC_SRCS
++  "${AVC_ROOT}/__bug_dispatch.c"
+   "${AVC_ROOT}/decoder/ih264d_api.c"
+   "${AVC_ROOT}/decoder/ih264d_bitstrm.c"
+   "${AVC_ROOT}/decoder/ih264d_cabac.c"
+diff --git a/fuzzer/avc_dec_fuzzer.cmake b/fuzzer/avc_dec_fuzzer.cmake
+index c20aaed..825c413 100644
+--- a/fuzzer/avc_dec_fuzzer.cmake
++++ b/fuzzer/avc_dec_fuzzer.cmake
+@@ -1,2 +1,4 @@
+-libavc_add_fuzzer(avc_dec_fuzzer libavcdec SOURCES
+-                  ${AVC_ROOT}/fuzzer/avc_dec_fuzzer.cpp)
++libavc_add_fuzzer(
++  avc_dec_fuzzer libavcdec SOURCES
++  ${AVC_ROOT}/fuzzer/avc_dec_fuzzer.cpp
++  ${AVC_ROOT}/__bug_dispatch.c)
+diff --git a/fuzzer/avc_dec_fuzzer.cpp b/fuzzer/avc_dec_fuzzer.cpp
+index 4e0876e..e8a6327 100644
+--- a/fuzzer/avc_dec_fuzzer.cpp
++++ b/fuzzer/avc_dec_fuzzer.cpp
+@@ -27,6 +27,7 @@
+ #include <algorithm>
+ #include <memory>
+ 
++#include "../__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ih264d.h"
+ #include "iv.h"
+@@ -329,6 +330,13 @@ IV_API_CALL_STATUS_T Codec::decodeFrame(const uint8_t *data, size_t size,
+ }
+ 
+ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
++  if (size < __BUG_DISPATCH_BYTES) {
++    return 0;
++  }
++  memcpy((void *)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++  data += __BUG_DISPATCH_BYTES;
++  size -= __BUG_DISPATCH_BYTES;
++
+   if (size < 1) {
+     return 0;
+   }
+diff --git a/fuzzer/mvc_dec_fuzzer.cmake b/fuzzer/mvc_dec_fuzzer.cmake
+index 469d62e..be94e59 100644
+--- a/fuzzer/mvc_dec_fuzzer.cmake
++++ b/fuzzer/mvc_dec_fuzzer.cmake
+@@ -1,2 +1,4 @@
+-libavc_add_fuzzer(mvc_dec_fuzzer libmvcdec SOURCES
+-                  "${AVC_ROOT}/fuzzer/mvc_dec_fuzzer.cpp")
++libavc_add_fuzzer(
++  mvc_dec_fuzzer libmvcdec SOURCES
++  "${AVC_ROOT}/fuzzer/mvc_dec_fuzzer.cpp"
++  "${AVC_ROOT}/__bug_dispatch.c")
+diff --git a/fuzzer/mvc_dec_fuzzer.cpp b/fuzzer/mvc_dec_fuzzer.cpp
+index 8bb1330..7ac44bd 100644
+--- a/fuzzer/mvc_dec_fuzzer.cpp
++++ b/fuzzer/mvc_dec_fuzzer.cpp
+@@ -22,6 +22,8 @@
+ #include <cstring>
+ #include <algorithm>
+ 
++#include "../__bug_dispatch.h"
++
+ #ifdef __cplusplus
+ extern "C"
+ {
+@@ -355,6 +357,14 @@ IV_API_CALL_STATUS_T Codec::decodeFrame(const uint8_t *data, size_t size, size_t
+ 
+ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+ {
++    if(size < __BUG_DISPATCH_BYTES)
++    {
++        return 0;
++    }
++    memcpy((void *) __bug_dispatch, data, __BUG_DISPATCH_BYTES);
++    data += __BUG_DISPATCH_BYTES;
++    size -= __BUG_DISPATCH_BYTES;
++
+     if(size < 1)
+     {
+         return 0;
+diff --git a/fuzzer/svc_dec_fuzzer.cmake b/fuzzer/svc_dec_fuzzer.cmake
+index a25bef5..67dc5fe 100644
+--- a/fuzzer/svc_dec_fuzzer.cmake
++++ b/fuzzer/svc_dec_fuzzer.cmake
+@@ -1,6 +1,5 @@
+ libavc_add_fuzzer(
+   svc_dec_fuzzer libsvcdec SOURCES
+   "${AVC_ROOT}/fuzzer/svc_dec_fuzzer.cpp"
+-  "${AVC_ROOT}/__bug_dispatch.c"
+   INCLUDES
+   "${AVC_ROOT}")
+diff --git a/fuzzer/svc_dec_fuzzer.cpp b/fuzzer/svc_dec_fuzzer.cpp
+index f16052b..f32764b 100644
+--- a/fuzzer/svc_dec_fuzzer.cpp
++++ b/fuzzer/svc_dec_fuzzer.cpp
+@@ -43,7 +43,7 @@
+ #include <algorithm>
+ #include <memory>
+ 
+-#include "__bug_dispatch.h"
++#include "../__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ithread.h"
+ #include "iv.h"
+diff --git a/test/decoder/avcdec.cmake b/test/decoder/avcdec.cmake
+index c244131..35c5564 100644
+--- a/test/decoder/avcdec.cmake
++++ b/test/decoder/avcdec.cmake
+@@ -1,2 +1,5 @@
+-libavc_add_executable(avcdec libavcdec SOURCES ${AVC_ROOT}/test/decoder/main.c)
++libavc_add_executable(
++  avcdec libavcdec SOURCES
++  ${AVC_ROOT}/test/decoder/main.c
++  ${AVC_ROOT}/__bug_dispatch.c)
+ target_compile_definitions(avcdec PRIVATE PROFILE_ENABLE MD5_DISABLE)
+diff --git a/test/mvcdec/mvcdec.cmake b/test/mvcdec/mvcdec.cmake
+index 8f3e6c2..37da397 100644
+--- a/test/mvcdec/mvcdec.cmake
++++ b/test/mvcdec/mvcdec.cmake
+@@ -1,4 +1,5 @@
+-list(APPEND MVC_DEC_APP_SRCS "${AVC_ROOT}/test/mvcdec/main.c")
++list(APPEND MVC_DEC_APP_SRCS "${AVC_ROOT}/test/mvcdec/main.c"
++     "${AVC_ROOT}/__bug_dispatch.c")
+ 
+ libavc_add_executable(mvcdec libmvcdec SOURCES ${MVC_DEC_APP_SRCS})
+ target_compile_definitions(mvcdec PRIVATE PROFILE_ENABLE MD5_DISABLE)
+diff --git a/test/svcdec/svcdec.cmake b/test/svcdec/svcdec.cmake
+index 53e1457..db2545b 100644
+--- a/test/svcdec/svcdec.cmake
++++ b/test/svcdec/svcdec.cmake
+@@ -1,4 +1,8 @@
+-list(APPEND SVC_DEC_APP_SRCS "${AVC_ROOT}/test/svcdec/main.c")
++list(
++  APPEND
++  SVC_DEC_APP_SRCS
++  "${AVC_ROOT}/test/svcdec/main.c"
++  "${AVC_ROOT}/__bug_dispatch.c")
+ 
+ libavc_add_executable(svcdec libsvcdec SOURCES ${SVC_DEC_APP_SRCS})
+ target_compile_definitions(svcdec PRIVATE PROFILE_ENABLE MD5_DISABLE)

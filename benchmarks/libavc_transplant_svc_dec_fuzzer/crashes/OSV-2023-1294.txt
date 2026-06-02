@@ -1,45 +1,45 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 3686031222
-INFO: Loaded 1 modules   (16698 inline 8-bit counters): 16698 [0x8a2000, 0x8a613a), 
-INFO: Loaded 1 PC tables (16698 PCs): 16698 [0x804f48,0x8462e8), 
+INFO: Seed: 2764286159
+INFO: Loaded 1 modules   (16702 inline 8-bit counters): 16702 [0x8a2000, 0x8a613e), 
+INFO: Loaded 1 PC tables (16702 PCs): 16702 [0x804f48,0x846328), 
 /out/svc_dec_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6110000023d0 at pc 0x000000686590 bp 0x7ffc8488d880 sp 0x7ffc8488d878
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6110000023d0 at pc 0x000000686800 bp 0x7ffdc61e41a0 sp 0x7ffdc61e4198
 READ of size 1 at 0x6110000023d0 thread T0
-    #0 0x68658f in ih264d_compute_bs_non_mbaff /src/libavc/decoder/ih264d_compute_bs.c:1181:38
-    #1 0x7044d9 in ih264d_mv_pred_ref_tfr_nby2_pmb /src/libavc/decoder/ih264d_process_pslice.c:321:17
-    #2 0x5b1b91 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:3126:13
-    #3 0x5847ba in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5363:28
-    #4 0x59105f in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7274:26
-    #5 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:377:11
-    #6 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:444:22
+    #0 0x6867ff in ih264d_compute_bs_non_mbaff /src/libavc/decoder/ih264d_compute_bs.c:1181:38
+    #1 0x704749 in ih264d_mv_pred_ref_tfr_nby2_pmb /src/libavc/decoder/ih264d_process_pslice.c:321:17
+    #2 0x5b1e01 in isvcd_mark_err_slice_skip /src/libavc/decoder/svc/isvcd_parse_epslice.c:3127:13
+    #3 0x584846 in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5374:28
+    #4 0x5910ff in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7285:26
+    #5 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:376:11
+    #6 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:446:22
     #7 0x43de33 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #8 0x429592 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #9 0x42ee3c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #10 0x458372 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7fe73c0f4082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x7f54271cc082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #12 0x41f75d in _start (/out/svc_dec_fuzzer+0x41f75d)
 
 0x6110000023d0 is located 0 bytes to the right of 80-byte region [0x611000002380,0x6110000023d0)
 allocated by thread T0 here:
     #0 0x52fb17 in posix_memalign /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
-    #1 0x56c4d5 in iv_aligned_malloc(void*, int, int) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:87:13
-    #2 0x71761b in ih264d_allocate_dynamic_bufs /src/libavc/decoder/ih264d_utils.c:1975:14
-    #3 0x5e4a33 in isvcd_allocate_dynamic_bufs /src/libavc/decoder/svc/isvcd_utils.c:126:18
-    #4 0x5e8295 in isvcd_init_pic /src/libavc/decoder/svc/isvcd_utils.c:843:15
-    #5 0x5be514 in isvcd_start_of_pic /src/libavc/decoder/svc/isvcd_parse_slice.c:283:11
-    #6 0x5cbcc4 in isvcd_parse_decode_slice /src/libavc/decoder/svc/isvcd_parse_slice.c:2390:19
-    #7 0x5b96eb in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:1006:40
+    #1 0x56c4d5 in iv_aligned_malloc(void*, int, int) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:86:13
+    #2 0x71788b in ih264d_allocate_dynamic_bufs /src/libavc/decoder/ih264d_utils.c:1975:14
+    #3 0x5e4ca3 in isvcd_allocate_dynamic_bufs /src/libavc/decoder/svc/isvcd_utils.c:126:18
+    #4 0x5e8505 in isvcd_init_pic /src/libavc/decoder/svc/isvcd_utils.c:843:15
+    #5 0x5be784 in isvcd_start_of_pic /src/libavc/decoder/svc/isvcd_parse_slice.c:283:11
+    #6 0x5cbf34 in isvcd_parse_decode_slice /src/libavc/decoder/svc/isvcd_parse_slice.c:2390:19
+    #7 0x5b995b in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:1006:40
     #8 0x5840ae in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5291:27
-    #9 0x59105f in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7274:26
-    #10 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:377:11
-    #11 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:444:22
+    #9 0x5910ff in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7285:26
+    #10 0x56f07b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:376:11
+    #11 0x5701fc in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:446:22
     #12 0x43de33 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #13 0x429592 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #14 0x42ee3c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #15 0x458372 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #16 0x7fe73c0f4082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #16 0x7f54271cc082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/libavc/decoder/ih264d_compute_bs.c:1181:38 in ih264d_compute_bs_non_mbaff
 Shadow bytes around the buggy address:
