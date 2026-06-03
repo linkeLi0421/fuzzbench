@@ -1,0 +1,127 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 000000000..8b8ff0ce2
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 000000000..a42a4058f
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 3
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
+diff --git a/fuzz/Makefile.am b/fuzz/Makefile.am
+index 0e56172b4..a70152133 100644
+--- a/fuzz/Makefile.am
++++ b/fuzz/Makefile.am
+@@ -1,6 +1,8 @@
+ bin_PROGRAMS = fuzz_process_packet fuzz_ndpi_reader
++BUG_DISPATCH_SOURCE = ../__bug_dispatch.c
+ 
+-fuzz_process_packet_SOURCES = fuzz_process_packet.c
++fuzz_process_packet_SOURCES = fuzz_process_packet.c $(BUG_DISPATCH_SOURCE)
++fuzz_process_packet_CFLAGS = -I..
+ fuzz_process_packet_LDFLAGS = ../src/lib/libndpi.a $(ADDITIONAL_LIBS)
+ if HAS_FUZZLDFLAGS
+     fuzz_process_packet_LDFLAGS += $(LIB_FUZZING_ENGINE)
+@@ -12,8 +14,8 @@ fuzz_process_packet_LINK=$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+     $(LIBTOOLFLAGS) --mode=link $(CXX) $(AM_CXXFLAGS) $(CXXFLAGS) \
+     $(fuzz_process_packet_LDFLAGS) $(LDFLAGS) -o $@
+ 
+-fuzz_ndpi_reader_SOURCES = fuzz_ndpi_reader.c
+-fuzz_ndpi_reader_CFLAGS = -I../example/
++fuzz_ndpi_reader_SOURCES = fuzz_ndpi_reader.c $(BUG_DISPATCH_SOURCE)
++fuzz_ndpi_reader_CFLAGS = -I.. -I../example/
+ fuzz_ndpi_reader_LDFLAGS = ../example/libndpiReader.a ../src/lib/libndpi.a $(PCAP_LIB) $(ADDITIONAL_LIBS)
+ if HAS_FUZZLDFLAGS
+     fuzz_ndpi_reader_LDFLAGS += $(LIB_FUZZING_ENGINE)
+diff --git a/fuzz/fuzz_ndpi_reader.c b/fuzz/fuzz_ndpi_reader.c
+index 7de3d45f4..e15f5205e 100644
+--- a/fuzz/fuzz_ndpi_reader.c
++++ b/fuzz/fuzz_ndpi_reader.c
+@@ -1,3 +1,4 @@
++#include "__bug_dispatch.h"
+ #include "reader_util.h"
+ #include "ndpi_api.h"
+ 
+@@ -6,6 +7,7 @@
+ #include <errno.h>
+ #include <stdint.h>
+ #include <stdio.h>
++#include <string.h>
+ 
+ struct ndpi_workflow_prefs *prefs = NULL;
+ 
+@@ -38,7 +40,7 @@ int bufferToFile(const char * name, const uint8_t *Data, size_t Size) {
+   return 0;
+ }
+ 
+-int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
++int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+   pcap_t * pkts;
+   const u_char *pkt;
+   struct pcap_pkthdr *header;
+@@ -46,6 +48,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+   char errbuf[PCAP_ERRBUF_SIZE];
+   NDPI_PROTOCOL_BITMASK all;
+ 
++  if (size < __BUG_DISPATCH_BYTES) return 0;
++  memcpy((void *)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++  data += __BUG_DISPATCH_BYTES;
++  size -= __BUG_DISPATCH_BYTES;
++
+   if (prefs == NULL) {
+     prefs = calloc(sizeof(struct ndpi_workflow_prefs), 1);
+     if (prefs == NULL) {
+@@ -57,7 +64,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+     prefs->max_ndpi_flows = 1024;
+     prefs->quiet_mode = 0;
+   }
+-  bufferToFile("/tmp/fuzz.pcap", Data, Size);
++  bufferToFile("/tmp/fuzz.pcap", data, size);
+ 
+   pkts = pcap_open_offline("/tmp/fuzz.pcap", errbuf);
+   if (pkts == NULL) {
+diff --git a/fuzz/fuzz_process_packet.c b/fuzz/fuzz_process_packet.c
+index 5af15afba..b4d81146b 100644
+--- a/fuzz/fuzz_process_packet.c
++++ b/fuzz/fuzz_process_packet.c
+@@ -1,13 +1,20 @@
++#include "__bug_dispatch.h"
+ #include "ndpi_api.h"
+ 
+ #include <stdint.h>
+ #include <stdio.h>
++#include <string.h>
+ 
+ struct ndpi_detection_module_struct *ndpi_info_mod = NULL;
+ struct ndpi_id_struct *src;
+ struct ndpi_id_struct *dst;
+ 
+-int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
++int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
++  if (size < __BUG_DISPATCH_BYTES) return 0;
++  memcpy((void *)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++  data += __BUG_DISPATCH_BYTES;
++  size -= __BUG_DISPATCH_BYTES;
++
+   if (ndpi_info_mod == NULL) {
+     ndpi_info_mod = ndpi_init_detection_module(ndpi_no_prefs);
+     NDPI_PROTOCOL_BITMASK all;
+@@ -21,7 +28,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+   memset(ndpi_flow, 0, SIZEOF_FLOW_STRUCT);
+   memset(src, 0, SIZEOF_ID_STRUCT);
+   memset(dst, 0, SIZEOF_ID_STRUCT);
+-  ndpi_detection_process_packet(ndpi_info_mod, ndpi_flow, Data, Size, 0, src, dst);
++  ndpi_detection_process_packet(ndpi_info_mod, ndpi_flow, data, size, 0, src, dst);
+   ndpi_free_flow(ndpi_flow);
+ 
+   return 0;
