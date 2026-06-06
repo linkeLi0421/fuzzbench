@@ -1,0 +1,61 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1193113085
+INFO: Loaded 3 modules   (138566 inline 8-bit counters): 11664 [0x7f9d503bcec0, 0x7f9d503bfc50), 878 [0x7f9d505ed798, 0x7f9d505edb06), 126024 [0x55bc5e6e30f0, 0x55bc5e701d38), 
+INFO: Loaded 3 PC tables (138566 PCs): 11664 [0x7f9d503bfc50,0x7f9d503ed550), 878 [0x7f9d505edb08,0x7f9d505f11e8), 126024 [0x55bc5e701d38,0x55bc5e8ee1b8), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /corpus/testcase-OSV-2020-1876
+INFO: Start rendering...
+INFO: Processing page 1...
+
+
+ Transparency operations ignored - probably due to using -dSAFER
+
+INFO: Rendering completed
+INFO: Start rendering...
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==12020==ERROR: AddressSanitizer: SEGV on unknown address 0x55bc615ee6bc (pc 0x55bc5cf8e2d4 bp 0x7ffd364f06b0 sp 0x7ffd364f0670 T0)
+==12020==The signal is caused by a READ memory access.
+    #0 0x55bc5cf8e2d4 in mem_mapped4_fill_rectangle /src/ghostpdl/./base/gdevm4.c:60:25
+    #1 0x55bc5ceb150c in gx_dc_pure_fill_rectangle /src/ghostpdl/./base/gxdcolor.c:800:16
+    #2 0x55bc5cf5b795 in gx_default_fillpage /src/ghostpdl/./base/gdevddrw.c:1091:16
+    #3 0x55bc5d2a5c52 in clist_playback_band /src/ghostpdl/./base/gxclrast.c
+    #4 0x55bc5cb6482b in clist_playback_file_bands /src/ghostpdl/./base/gxclread.c:920:16
+    #5 0x55bc5cb680e2 in clist_render_rectangle /src/ghostpdl/./base/gxclread.c:854:16
+    #6 0x55bc5cb67645 in clist_rasterize_lines /src/ghostpdl/./base/gxclread.c:743:20
+    #7 0x55bc5cb66a8c in clist_get_bits_rectangle /src/ghostpdl/./base/gxclread.c:632:12
+    #8 0x55bc5cf6d869 in gx_default_get_bits /src/ghostpdl/./base/gdevdgbr.c:54:12
+    #9 0x55bc5cb48efd in gdev_prn_get_bits /src/ghostpdl/./base/gdevprn.c:1689:16
+    #10 0x55bc5cc67998 in cups_print_chunked /src/ghostpdl/./cups/gdevcups.c:4902:9
+    #11 0x55bc5cc61c97 in cups_print_pages /src/ghostpdl/./cups/gdevcups.c
+    #12 0x55bc5cb45b4a in gdev_prn_output_page_aux /src/ghostpdl/./base/gdevprn.c:1135:27
+    #13 0x55bc5cc568b4 in cups_output_page /src/ghostpdl/./cups/gdevcups.c:2887:15
+    #14 0x55bc5cf7522c in gx_forward_output_page /src/ghostpdl/./base/gdevnfwd.c:186:10
+    #15 0x55bc5ccfc150 in gs_output_page /src/ghostpdl/./base/gsdevice.c:212:17
+    #16 0x55bc5d1027a7 in zoutputpage /src/ghostpdl/./psi/zdevice.c:416:12
+    #17 0x55bc5d05f872 in interp /src/ghostpdl/./psi/interp.c:1300:28
+    #18 0x55bc5d05cc89 in gs_call_interp /src/ghostpdl/./psi/interp.c:520:12
+    #19 0x55bc5d05c61e in gs_interpret /src/ghostpdl/./psi/interp.c:477:12
+    #20 0x55bc5ca7b4dd in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:797:12
+    #21 0x55bc5ca7b0aa in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:741:12
+    #22 0x55bc5d1a0e4f in run_string /src/ghostpdl/./psi/imainarg.c:1121:12
+    #23 0x55bc5d19e3da in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #24 0x55bc5d19c332 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #25 0x55bc5d1a0c24 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #26 0x55bc5ca769c7 in gs_to_raster_fuzz(unsigned char const*, unsigned long) /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:97:8
+    #27 0x55bc5ca7681b in LLVMFuzzerTestOneInput /src/ghostpdl/fuzz/gstoraster_fuzzer.cc:114:2
+    #28 0x55bc5c91414d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #29 0x55bc5c8feec2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #30 0x55bc5c904d90 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #31 0x55bc5c9308c2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #32 0x7f9d4fee3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #33 0x55bc5c8f7fad in _start (/out/gstoraster_fuzzer+0x42afad)
+
+==12020==Register values:
+rax = 0x000055bc615ee6bc  rbx = 0x00000000000006a4  rcx = 0x0000000000000000  rdx = 0x0000000000000358  
+rdi = 0x00007b9d4d799d30  rsi = 0x0000000200000000  rbp = 0x00007ffd364f06b0  rsp = 0x00007ffd364f0670  
+ r8 = 0x0000000000000004   r9 = 0x0000000000ffffff  r10 = 0x00007fffffffff01  r11 = 0xfffffffffffff001  
+r12 = 0x0000000000000000  r13 = 0x000000000000000b  r14 = 0x000000000000000b  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/gdevm4.c:60:25 in mem_mapped4_fill_rectangle
+==12020==ABORTING

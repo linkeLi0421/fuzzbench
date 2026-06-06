@@ -14,6 +14,43 @@ index 2a926cc75..f863f0b6f 100644
                  .pdfinkpath
                  stroke
                } forall
+diff --git a/Resource/Init/pdf_main.ps b/Resource/Init/pdf_main.ps
+index 934e47457..86822f48e 100644
+--- a/Resource/Init/pdf_main.ps
++++ b/Resource/Init/pdf_main.ps
+@@ -4959,6 +4959,25 @@ systemdict /ALLOWPSTRANSPARENCY get
+ 
+ % The following are split out allowing control via ALLOWPSTRANSPARENCY command line param
+ % The examples/transparency_example.ps uses some of these (on the first line).
++2 64 .bug_dispatch_bit
++{
++[
++  /.currentblendmode /.currenttextknockout /.begintransparencytextgroup
++  /.endtransparencytextgroup /.begintransparencymaskgroup /.begintransparencymaskimage /.begintransparencypagegroup
++  /.endtransparencymask /.image3x /.abortpdf14devicefilter /.setstrokeconstantalpha /.currentalphaisshape
++  %/.pushpdf14devicefilter    % transparency-example.ps
++  %/.poppdf14devicefilter     % transparency-example.ps
++  %/.setfillconstantalpha            % transparency-example.ps
++  %/.endtransparencygroup     % transparency-example.ps
++  %/.setalphaisshape                % mutated testcase-OSV-2020-1876
++  % undefining these causes errors/incorrect output
++  %/.setblendmode /.begintransparencygroup /.settextknockout /.setstrokeoverprint /.setfilloverprint
++  %/.currentstrokeoverprint /.currentfilloverprint /.currentfillconstantalpha /.currentstrokeconstantalpha
++  %/.setSMask /.currentSMask
++
++]
++}
++{
+ [
+   /.pushpdf14devicefilter /.poppdf14devicefilter /.setstrokeconstantalpha /.setfillconstantalpha /.endtransparencygroup
+   /.currentblendmode /.currenttextknockout /.begintransparencytextgroup
+@@ -4969,4 +4988,5 @@ systemdict /ALLOWPSTRANSPARENCY get
+   %/.currentstrokeoverprint /.currentfilloverprint /.currentfillconstantalpha /.currentstrokeconstantalpha
+   %/.setSMask /.currentSMask
+ 
+-] systemdict dup /ALLOWPSTRANSPARENCY get {pop pop}{.undefinternalnames}ifelse
++]
++} ifelse systemdict dup /ALLOWPSTRANSPARENCY get {pop pop}{.undefinternalnames}ifelse
 diff --git a/base/fapi_ft.c b/base/fapi_ft.c
 index 85903d5ab..0992dfbf4 100644
 --- a/base/fapi_ft.c
@@ -41,17 +78,17 @@ index 85903d5ab..0992dfbf4 100644
              return index + 1;
          }
 diff --git a/base/gdevp14.c b/base/gdevp14.c
-index 861e23786..0e30ac86a 100644
+index 861e23786..1168e0045 100644
 --- a/base/gdevp14.c
 +++ b/base/gdevp14.c
-@@ -70,6 +70,7 @@
- #endif
- #include "assert_.h"
- #include "gxgetbit.h"
+@@ -62,6 +62,7 @@
+ #include "gsmatrix.h"
+ #include "gxdevsop.h"
+ #include "gsicc.h"
 +#include "../__bug_dispatch.h"
- 
- #if RAW_DUMP
- unsigned int global_index = 0;
+ #ifdef WITH_CAL
+ #include "cal.h"
+ #define CAL_SLOP 16
 @@ -1893,7 +1894,12 @@ static void pdf14_free_mask_stack(pdf14_ctx *ctx, gs_memory_t *memory)
          pdf14_mask_t *curr_mask = mask_stack;
          pdf14_mask_t *old_mask;
@@ -77,6 +114,17 @@ index 861e23786..0e30ac86a 100644
          set_dev_proc(pdev, get_color_mapping_procs, local_device.procs.get_color_mapping_procs);
          set_dev_proc(pdev, get_color_comp_index, local_device.procs.get_color_comp_index);
      }
+@@ -10148,6 +10158,10 @@ pdf14_recreate_clist_device(gs_memory_t	*mem, gs_gstate *	pgs,
+                                         pgs, pdf14pct, false);
+     if (code < 0)
+         return code;
++    if (__bug_dispatch[2] & (1 << 6)) {
++        if (dev_proto.initialize_device_procs != NULL)
++            dev_proto.initialize_device_procs((gx_device *)&dev_proto);
++    }
+     pdev->color_info = dev_proto.color_info;
+     pdev->procs = dev_proto.procs;
+     pdev->pad = target->pad;
 diff --git a/base/gxstroke.c b/base/gxstroke.c
 index 6fc63eea2..f28f77102 100644
 --- a/base/gxstroke.c
@@ -148,7 +196,7 @@ index dbe8b37cc..907800352 100644
              } else
                  leftover = 0;
 diff --git a/pdf/pdf_colour.c b/pdf/pdf_colour.c
-index 63d7a9ee6..3578bfe93 100644
+index 63d7a9ee6..dd795a654 100644
 --- a/pdf/pdf_colour.c
 +++ b/pdf/pdf_colour.c
 @@ -15,6 +15,7 @@
@@ -170,7 +218,7 @@ index 63d7a9ee6..3578bfe93 100644
 +            if (__bug_dispatch[1] & (1 << 4)) {
 +                goto cleanupExit;
 +            } else {
-+                goto cleanupExitOriginal;
++                goto cleanupExitOld;
 +            }
 +        }
      }
@@ -187,7 +235,7 @@ index 63d7a9ee6..3578bfe93 100644
 +                if (__bug_dispatch[1] & (1 << 4)) {
 +                    goto cleanupExit;
 +                } else {
-+                    goto cleanupExitOriginal;
++                    goto cleanupExitOld;
 +                }
 +            }
          }
@@ -204,7 +252,7 @@ index 63d7a9ee6..3578bfe93 100644
 +                if (__bug_dispatch[1] & (1 << 4)) {
 +                    goto cleanupExit;
 +                } else {
-+                    goto cleanupExitOriginal;
++                    goto cleanupExitOld;
 +                }
 +            }
          }
@@ -223,7 +271,7 @@ index 63d7a9ee6..3578bfe93 100644
 +            if (__bug_dispatch[1] & (1 << 4)) {
 +                goto cleanupExit;
 +            } else {
-+                goto cleanupExitOriginal;
++                goto cleanupExitOld;
 +            }
 +        }
 +    }
@@ -1193,3 +1241,64 @@ index a21ccb360..b82ae4f12 100644
      {"0.pdfinkpath", zpdfinkpath},
      {"1.pdfFormName", zpdfFormName},
      {"3.setscreenphase", zsetscreenphase},
+diff --git a/psi/ztrans.c b/psi/ztrans.c
+index 3a5563ef5..df487040f 100644
+--- a/psi/ztrans.c
++++ b/psi/ztrans.c
+@@ -39,6 +39,7 @@
+ #include "gxblend.h"
+ #include "gdevp14.h"
+ #include "gsicc_cms.h"
++#include "../__bug_dispatch.h"
+ 
+ /* ------ Utilities ------ */
+ 
+@@ -72,6 +73,25 @@ enum_param(const gs_memory_t *mem, const ref *pnref,
+     return_error(gs_error_rangecheck);
+ }
+ 
++static int
++zbug_dispatch_bit(i_ctx_t *i_ctx_p)
++{
++    os_ptr op = osp;
++    int byte_index;
++    int mask;
++
++    check_type(op[-1], t_integer);
++    check_type(*op, t_integer);
++    byte_index = (int)op[-1].value.intval;
++    mask = (int)op->value.intval;
++    if (byte_index < 0 || byte_index >= __BUG_DISPATCH_BYTES ||
++        mask < 0 || mask > 0xff)
++        return_error(gs_error_rangecheck);
++    make_bool(op - 1, (__bug_dispatch[byte_index] & mask) != 0);
++    pop(1);
++    return 0;
++}
++
+ /* ------ Graphics state operators ------ */
+ 
+ static const char *const blend_mode_names[] = {
+@@ -484,8 +504,13 @@ zpushpdf14devicefilter(i_ctx_t *i_ctx_p)
+     check_type(*op, t_integer);
+     depth = (int)op->value.intval;
+ 
+-    if (dev_proc(cdev, dev_spec_op)(cdev, gxdso_is_pdf14_device, NULL, 0) > 0)
+-        return 0;		/* ignore push_device if already is pdf14 device */
++    if (dev_proc(cdev, dev_spec_op)(cdev, gxdso_is_pdf14_device, NULL, 0) > 0) {
++        if (__bug_dispatch[2] & (1 << 6)) {
++            /* OSV-2020-1876 continues through the push path. */
++        } else {
++            return 0;		/* ignore push_device if already is pdf14 device */
++        }
++    }
+ 
+     /* Bug 698087: In case some program uses our .pushpdf14devicefilter  make	*/
+     /*             sure that the device knows that we are using the pdf14	*/
+@@ -688,5 +713,6 @@ const op_def ztrans3_op_defs[] = {
+     {"0.currentalphaisshape", zgetalphaisshape},
+     {"1.setSMask", zsetSMask},
+     {"0.currentSMask", zcurrentSMask},
++    {"2.bug_dispatch_bit", zbug_dispatch_bit},
+     op_def_end(0)
+ };

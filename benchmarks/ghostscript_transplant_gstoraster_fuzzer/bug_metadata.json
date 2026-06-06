@@ -2,7 +2,7 @@
   "project": "ghostscript",
   "target_commit": "2be8b436910cfc8b013a13df000c3c854cf3c5c5",
   "dispatch_bytes": 3,
-  "total_bugs": 89,
+  "total_bugs": 90,
   "bugs": {
     "OSV-2020-1875": {
       "dispatch_value": 1,
@@ -157,6 +157,13 @@
       "crash_file": "/src/ghostpdl/./pdf/pdf_font.c",
       "crash_line": 111,
       "crash_function": "pdfi_font_match_glyph_widths"
+    },
+    "OSV-2020-1876": {
+      "dispatch_value": 4194304,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gdevm4.c",
+      "crash_line": 70,
+      "crash_function": "mem_mapped4_fill_rectangle"
     },
     "OSV-2021-1681": {
       "dispatch_value": 0,
@@ -625,7 +632,8 @@
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_fapi.c",
       "crash_line": 1187,
-      "crash_function": "pdfi_fapi_get_glyph"
+      "crash_function": "pdfi_fapi_get_glyph",
+      "crash_line_backfilled": true
     }
   }
 }

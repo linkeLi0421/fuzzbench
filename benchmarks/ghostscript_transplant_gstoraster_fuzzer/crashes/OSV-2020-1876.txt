@@ -1,0 +1,52 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4189674944
+INFO: Loaded 3 modules   (183112 inline 8-bit counters): 13708 [0x7f2478ae89e0, 0x7f2478aebf6c), 959 [0x7f2478b49a40, 0x7f2478b49dff), 168445 [0x2dac780, 0x2dd597d), 
+INFO: Loaded 3 PC tables (183112 PCs): 13708 [0x7f2478aebf70,0x7f2478b21830), 959 [0x7f2478b49e00,0x7f2478b4d9f0), 168445 [0x24d6cd0,0x2768ca0), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000005667e1c (pc 0x000000bfb420 bp 0x7ffffcbbef90 sp 0x7ffffcbbef50 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0xbfb420 in mem_mapped4_fill_rectangle /src/ghostpdl/./base/gdevm4.c:70:25
+    #1 0xad494c in gx_dc_pure_fill_rectangle /src/ghostpdl/./base/gxdcolor.c:842:16
+    #2 0xbc13fa in gx_default_fillpage /src/ghostpdl/./base/gdevddrw.c:1004:16
+    #3 0x11a4f68 in clist_playback_band /src/ghostpdl/./base/gxclrast.c
+    #4 0x68e6ec in clist_playback_file_bands /src/ghostpdl/./base/gxclread.c:1035:16
+    #5 0x692d40 in clist_render_rectangle /src/ghostpdl/./base/gxclread.c:969:16
+    #6 0x69211a in clist_rasterize_lines /src/ghostpdl/./base/gxclread.c:858:20
+    #7 0x6912df in clist_get_bits_rectangle /src/ghostpdl/./base/gxclread.c:747:12
+    #8 0x6658ba in gdev_prn_get_bits /src/ghostpdl/./base/gdevprn.c:1636:12
+    #9 0x7ec8c4 in cups_print_chunked /src/ghostpdl/./cups/gdevcups.c:4849:9
+    #10 0x7db1ab in cups_print_pages /src/ghostpdl/./cups/gdevcups.c
+    #11 0x661749 in gdev_prn_output_page_aux /src/ghostpdl/./base/gdevprn.c:1049:27
+    #12 0x660a05 in gdev_prn_output_page /src/ghostpdl/./base/gdevprn.c:1085:12
+    #13 0x7ec079 in cups_output_page /src/ghostpdl/./cups/gdevcups.c:2826:15
+    #14 0xbdb38e in gx_forward_output_page /src/ghostpdl/./base/gdevnfwd.c:171:10
+    #15 0x8a6edf in gs_output_page /src/ghostpdl/./base/gsdevice.c:207:17
+    #16 0xdcc172 in zoutputpage /src/ghostpdl/./psi/zdevice.c:416:12
+    #17 0xcfb03c in interp /src/ghostpdl/./psi/interp.c:1351:28
+    #18 0xcfb03c in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #19 0xcfb03c in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #20 0x5678ca in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #21 0x5678ca in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #22 0x5678ca in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #23 0x562d72 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #24 0x1020431 in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #25 0x101c3d9 in swproc /src/ghostpdl/./psi/imainarg.c:375:20
+    #26 0x10192be in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:225:24
+    #27 0x102012c in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:290:16
+    #28 0xce6b24 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #29 0x55f280 in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:247:12
+    #30 0x55e422 in gs_to_raster_fuzz /src/gstoraster_fuzzer.cc:99:8
+    #31 0x55e422 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:121:2
+    #32 0x456543 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #33 0x4421d2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #34 0x447a1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #35 0x470612 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #36 0x7f24784e2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #37 0x4209fd in _start (/out/gstoraster_fuzzer+0x4209fd)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/gdevm4.c:70:25 in mem_mapped4_fill_rectangle
+==1==ABORTING
