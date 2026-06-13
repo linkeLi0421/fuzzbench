@@ -13,7 +13,10 @@ RUN git clone --branch branch-2.2 --single-branch --depth 1 \
         https://github.com/apple/cups.git /src/cups
 RUN git clone --branch VER-2-11-1 --single-branch --depth 1 \
         https://git.savannah.gnu.org/git/freetype/freetype2.git /src/freetype
-RUN git clone https://git.ghostscript.com/ghostpdl.git /src/ghostpdl \
+# Upstream git.ghostscript.com intermittently auth-walls anonymous clones
+# (fatal: could not read Username). Use the official Artifex GitHub mirror,
+# which carries full history (verified to contain the build.sh checkout commit).
+RUN git clone https://github.com/ArtifexSoftware/ghostpdl.git /src/ghostpdl \
     && mkdir /src/ghostpdl/fuzz
 
 # OSS-Fuzz harness seed corpora, dictionaries, and the .cc sources the build
