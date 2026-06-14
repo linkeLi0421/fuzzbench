@@ -1,0 +1,60 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 0000000..8b8ff0c
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 0000000..6450a25
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
+diff --git a/fuzzer/svc_dec_fuzzer.cmake b/fuzzer/svc_dec_fuzzer.cmake
+index 8f0d14c..a25bef5 100644
+--- a/fuzzer/svc_dec_fuzzer.cmake
++++ b/fuzzer/svc_dec_fuzzer.cmake
+@@ -1,2 +1,6 @@
+-libavc_add_fuzzer(svc_dec_fuzzer libsvcdec SOURCES
+-                  "${AVC_ROOT}/fuzzer/svc_dec_fuzzer.cpp")
++libavc_add_fuzzer(
++  svc_dec_fuzzer libsvcdec SOURCES
++  "${AVC_ROOT}/fuzzer/svc_dec_fuzzer.cpp"
++  "${AVC_ROOT}/__bug_dispatch.c"
++  INCLUDES
++  "${AVC_ROOT}")
+diff --git a/fuzzer/svc_dec_fuzzer.cpp b/fuzzer/svc_dec_fuzzer.cpp
+index 6ae8747..f16052b 100644
+--- a/fuzzer/svc_dec_fuzzer.cpp
++++ b/fuzzer/svc_dec_fuzzer.cpp
+@@ -43,6 +43,7 @@
+ #include <algorithm>
+ #include <memory>
+ 
++#include "__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ithread.h"
+ #include "iv.h"
+@@ -404,6 +405,14 @@ IV_API_CALL_STATUS_T Codec::decodeFrame(const uint8_t *data, size_t size, size_t
+ 
+ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+ {
++    if(size < __BUG_DISPATCH_BYTES)
++    {
++        return 0;
++    }
++    memcpy((void *) __bug_dispatch, data, __BUG_DISPATCH_BYTES);
++    data += __BUG_DISPATCH_BYTES;
++    size -= __BUG_DISPATCH_BYTES;
++
+     if(size < 1)
+     {
+         return 0;

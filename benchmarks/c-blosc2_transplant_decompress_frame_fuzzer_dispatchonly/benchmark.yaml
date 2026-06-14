@@ -1,0 +1,5 @@
+project: c-blosc2
+fuzz_target: decompress_frame_fuzzer
+commit: 79e921d904d46fc9edc292e02a48f1aa54567a7d
+commit_date: 2021-08-24T14:27:56+00:00
+type: bug

@@ -1,0 +1,25 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 00000000..d99d52f8
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,7 @@
++#include "__bug_dispatch.h"
++#if defined(__GNUC__)
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES]
++    __attribute__((section(".data"))) = {0};
++#else
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
++#endif
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 00000000..311cb203
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 4
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
