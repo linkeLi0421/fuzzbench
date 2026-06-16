@@ -35,18 +35,25 @@ else
     git apply /src/patches/harness.diff
 fi
 
-# [dispatch-only variant] combined.diff intentionally NOT applied (no bug patches)
-
+# [dispatch-only variant] combined.diff intentionally NOT applied (no bug patches).
+# Only harness.diff is applied, giving the dispatch-instrumented harness plus the
+# __bug_dispatch infrastructure, but none of the transplanted bugs. This is the
+# baseline for measuring the harness/dispatch wrapper without injected bugs.
 
 # --- Original build commands ---
 autoconf
 autoheader
-./configure
+# Disable libcurl/S3/GCS: hts_open_fuzzer only reads local testcases, so remote
+# file access is unnecessary. Crucially, the FuzzBench runner/coverage images
+# (benchmark-runner) do not ship libcurl-gnutls.so.4, so a curl-linked binary
+# fails at runtime with "error while loading shared libraries". Disabling curl
+# removes that dynamic dependency (the transplanted format-parsing bugs are
+# unaffected) and lets the fuzzer and coverage binary run in the stock images.
+./configure --disable-libcurl --disable-s3 --disable-gcs
 make -j$(nproc) libhts.a test/fuzz/hts_open_fuzzer.o __bug_dispatch.o
 
-# build fuzzers
-$CXX $CXXFLAGS -o "$OUT/hts_open_fuzzer" test/fuzz/hts_open_fuzzer.o __bug_dispatch.o $LIB_FUZZING_ENGINE libhts.a -lz -lbz2 -llzma -lcurl -lcrypto -lpthread
-
+# build fuzzers (no -lcurl/-lcrypto: libcurl disabled above)
+$CXX $CXXFLAGS -o "$OUT/hts_open_fuzzer" test/fuzz/hts_open_fuzzer.o __bug_dispatch.o $LIB_FUZZING_ENGINE libhts.a -lz -lbz2 -llzma -lpthread
 
 # --- Seed corpus: expand original seeds and per-bug testcase candidates ---
 # FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.
