@@ -91,7 +91,7 @@ if [ -f "$seed_zip" ]; then
         done
     done
 fi
-f [ -d /src/benchmark_seeds ]; then
+if [ -d /src/benchmark_seeds ]; then
     for f in /src/benchmark_seeds/*; do
         [ -f "$f" ] || continue
         base=$(basename "$f")
@@ -128,8 +128,7 @@ fi
 if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
     for f in /tmp/benchmark_seed_candidates/*; do
         [ -f "$f" ] || continue
-        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 
-2>&1; then
+        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
             cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
         fi
     done
