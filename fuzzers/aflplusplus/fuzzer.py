@@ -283,7 +283,13 @@ def fuzz(input_corpus,
         flags += ['-x', './afl++.dict']
 
     # Move the following to skip for upcoming _double tests:
-    if os.path.exists(cmplog_target_binary) and no_cmplog is False:
+    # CMPLOG disabled by default: the cmplog-instrumented binary can segfault at
+    # fork-server startup (observed signal 11 on the c-blosc2 transplant
+    # benchmark under this build toolchain), which aborts the entire run even
+    # though the main instrumented binary fuzzes fine. Opt back in by setting
+    # AFL_ENABLE_CMPLOG=1 once the cmplog build is fixed.
+    if (os.environ.get('AFL_ENABLE_CMPLOG') == '1' and
+            os.path.exists(cmplog_target_binary) and no_cmplog is False):
         flags += ['-c', cmplog_target_binary]
 
     #os.environ['AFL_IGNORE_TIMEOUTS'] = '1'
