@@ -1,0 +1,53 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 000000000..8b8ff0ce2
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 000000000..6450a2593
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
+diff --git a/fuzz/fuzz_dissect_packet.cpp b/fuzz/fuzz_dissect_packet.cpp
+index 8b71db438..4abd4de77 100644
+--- a/fuzz/fuzz_dissect_packet.cpp
++++ b/fuzz/fuzz_dissect_packet.cpp
+@@ -19,6 +19,9 @@
+  *
+  */
+ 
++#include "__bug_dispatch.h"
++#include <string.h>
++
+ #ifdef FUZZ_WITH_PROTOBUF
+ #include <bits/types/struct_timeval.h>
+ #include <src/libfuzzer/libfuzzer_macro.h>
+@@ -170,10 +173,15 @@ DEFINE_PROTO_FUZZER(const ntopng_fuzz::Pcap &message) {
+ 
+ #else
+ 
+-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
+-    if (len == 0) return -1;
++extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
++    if (size < __BUG_DISPATCH_BYTES) return 0;
++    memcpy((void *)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++    data += __BUG_DISPATCH_BYTES;
++    size -= __BUG_DISPATCH_BYTES;
++
++    if (size == 0) return -1;
+ 
+-    FILE *fd = fmemopen((void *)buf, len, "r");
++    FILE *fd = fmemopen((void *)data, size, "r");
+     if (fd == NULL) {
+         std::cerr << "Cannot create the file descriptor with fmemopen"
+                   << std::endl;

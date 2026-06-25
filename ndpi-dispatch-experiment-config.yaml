@@ -1,0 +1,11 @@
+# Local FuzzBench experiment: ndpi dispatch-merged fuzz_process_packet
+# 24h x 10 trials x 6 fuzzers. Results under ./fuzzingoutput.
+trials: 10
+max_total_time: 86400  # 24 hours per trial
+
+docker_registry: gcr.io/fuzzbench
+
+experiment_filestore: /mydata/auto-bug-migration/fuzzingoutput
+report_filestore: /mydata/auto-bug-migration/fuzzingoutput/reports
+
+local_experiment: true
