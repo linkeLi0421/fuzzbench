@@ -479,7 +479,9 @@ class LocalDispatcher(BaseDispatcher):
 
     def start(self):
         """Start the experiment on the dispatcher."""
-        container_name = 'dispatcher-container'
+        # Unique per experiment so multiple local experiments can run
+        # concurrently (the default fixed name collides on `docker run --name`).
+        container_name = 'dispatcher-container-' + self.config['experiment']
         experiment_filestore_path = os.path.abspath(
             self.config['experiment_filestore'])
         filesystem.create_directory(experiment_filestore_path)

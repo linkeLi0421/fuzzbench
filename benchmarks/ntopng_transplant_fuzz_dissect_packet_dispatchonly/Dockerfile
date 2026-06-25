@@ -43,4 +43,5 @@ ADD https://github.com/maxmind/libmaxminddb/releases/download/1.7.1/libmaxminddb
 
 # Bug transplant patches (re-applied by build.sh after checkout resets source).
 COPY patches/ /src/patches/
+COPY seeds/ /src/benchmark_seeds/
 COPY build.sh $SRC/

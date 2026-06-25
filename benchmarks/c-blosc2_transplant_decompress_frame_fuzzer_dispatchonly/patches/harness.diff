@@ -1,0 +1,58 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 00000000..8b8ff0ce
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 00000000..1caecb4c
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,6 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 2
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
+diff --git a/tests/fuzz/CMakeLists.txt b/tests/fuzz/CMakeLists.txt
+index 9330ca3c..3bde43ba 100644
+--- a/tests/fuzz/CMakeLists.txt
++++ b/tests/fuzz/CMakeLists.txt
+@@ -58,6 +58,11 @@ foreach(source ${SOURCES})
+ 
+     add_executable(${target} ${source} ${FUZZER_SRC})
+ 
++    if(target STREQUAL "fuzz_decompress_frame")
++        target_sources(${target} PRIVATE ${PROJECT_SOURCE_DIR}/__bug_dispatch.c)
++        target_include_directories(${target} PRIVATE ${PROJECT_SOURCE_DIR})
++    endif()
++
+     # OSS-Fuzz expect fuzzers to end with _fuzzer
+     string(REPLACE "fuzz_" "" output_name ${target})
+     set_target_properties(${target} PROPERTIES OUTPUT_NAME ${output_name}_fuzzer)
+diff --git a/tests/fuzz/fuzz_decompress_frame.c b/tests/fuzz/fuzz_decompress_frame.c
+index 25479807..c050e10b 100644
+--- a/tests/fuzz/fuzz_decompress_frame.c
++++ b/tests/fuzz/fuzz_decompress_frame.c
+@@ -1,3 +1,5 @@
++#include "__bug_dispatch.h"
++#include <string.h>
+ #include <stdint.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+@@ -9,6 +11,11 @@ extern "C" {
+ #endif
+ 
+ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
++  if (size < __BUG_DISPATCH_BYTES) return 0;
++  memcpy((void*)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++  data += __BUG_DISPATCH_BYTES;
++  size -= __BUG_DISPATCH_BYTES;
++
+   const char *compressors[] = { "blosclz", "lz4", "lz4hc", "snappy", "zlib", "zstd" };
+   int32_t i = 0, dsize = 0, filter = BLOSC_BITSHUFFLE;
+   int32_t nchunk = 0;

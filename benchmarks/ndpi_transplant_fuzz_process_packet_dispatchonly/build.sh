@@ -32,6 +32,7 @@ fi
 
 # [dispatch-only variant] combined.diff intentionally NOT applied (no bug patches)
 
+
 # --- Original build commands ---
 cd /src
 tar -xvzf /src/libpcap-1.9.1.tar.gz

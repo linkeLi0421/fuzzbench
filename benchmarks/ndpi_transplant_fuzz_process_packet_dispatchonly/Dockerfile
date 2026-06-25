@@ -29,4 +29,5 @@ COPY libpcap-1.9.1.tar.gz /src/libpcap-1.9.1.tar.gz
 
 # Bug transplant patches (re-applied by build.sh after checkout resets source).
 COPY patches/ /src/patches/
+COPY seeds/ /src/benchmark_seeds/
 COPY build.sh $SRC/
