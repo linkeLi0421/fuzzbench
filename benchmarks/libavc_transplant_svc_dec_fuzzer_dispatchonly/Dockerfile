@@ -18,6 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # (c38af025abf0040f6693d15f4ce2e878a728cfee).
 RUN git clone https://android.googlesource.com/platform/external/libavc /src/libavc
 
+# libavc's fuzzer/ossfuzz.sh unconditionally copies this seed corpus into $OUT;
+# the OSS-Fuzz libavc Dockerfile provides it the same way. Without it the build
+# aborts (`cp: cannot stat .../avc_dec_fuzzer_seed_corpus.zip`). The transplant
+# benchmark fuzzes svc_dec_fuzzer and repackages its own seeds, so this file is
+# only needed to satisfy that copy.
+ADD https://storage.googleapis.com/android_media/external/libavc/fuzzer/avc_dec_fuzzer_seed_corpus.zip $SRC/
+
 WORKDIR /src/libavc
 
 # Keep ASan stack-use-after-return detection enabled for direct testcase replay.
