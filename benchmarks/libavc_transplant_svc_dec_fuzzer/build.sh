@@ -133,7 +133,27 @@ fi
 if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
     for f in /tmp/benchmark_seed_candidates/*; do
         [ -f "$f" ] || continue
-        if timeout 10s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}" "$seed_target" "$f" >/tmp/seed_replay.log 2>&1; then
+        # Never ship the exact crash reproducer as a seed.
+        case "$(basename "$f")" in
+            *.exact) continue ;;
+        esac
+        # Replay each candidate under the SAME configuration the fuzzers use at
+        # run time (ADDITIONAL_ARGS="-rss_limit_mb=8192" from the Dockerfile).
+        # Some memory errors are flaky across process invocations (heap layout /
+        # ASan redzone placement) and surface in only a fraction of runs, so a
+        # single replay can miss them and leak a crashing seed. Replay across
+        # several independent invocations and keep the candidate ONLY if it never
+        # crashes. Matching the run-time rss cap is essential: some bugs (e.g.
+        # OSV-2023-68) allocate >2GB before the real error, so under the default
+        # 2048MB cap libFuzzer OOM-aborts *before* crashing and the seed leaks.
+        keep=1
+        for _attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if ! timeout 60s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}:max_uar_stack_size_log=16" "$seed_target" -rss_limit_mb=8192 -runs=100 "$f" >/tmp/seed_replay.log 2>&1; then
+                keep=0
+                break
+            fi
+        done
+        if [ "$keep" = 1 ]; then
             cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
         fi
     done
