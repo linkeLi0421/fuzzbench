@@ -68,8 +68,18 @@ else
             -c "$target_src" -o "$target_obj"
     fi
 
+    # dispatch-only: harness.diff creates __bug_dispatch.c but combined.diff
+    # (which normally wires it into the build) is not applied here, so the
+    # manual fallback link must compile and link the dispatch symbol itself,
+    # otherwise fuzz_pkcs15_reader.c has an undefined reference to __bug_dispatch.
+    dispatch_obj=""
+    if [ -f __bug_dispatch.c ]; then
+        $CC $CFLAGS -I. -c __bug_dispatch.c -o __bug_dispatch.o
+        dispatch_obj="__bug_dispatch.o"
+    fi
+
     $CXX $CXXFLAGS -o "$OUT/fuzz_pkcs15_reader" \
-        "$target_obj" \
+        "$target_obj" $dispatch_obj \
         src/libopensc/.libs/libopensc.a \
         src/common/.libs/libscdl.a \
         src/common/.libs/libcompat.a \
