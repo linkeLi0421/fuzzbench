@@ -54,28 +54,53 @@ fi
 # [dispatch-only variant] combined.diff intentionally NOT applied (no bug patches)
 
 
+# --- Suppress untracked UBSAN noise ---------------------------------------
+# FuzzBench's bug-benchmark sanitizer set is ASAN plus a curated UBSAN check
+# list (shift, signed-integer-overflow, array-bounds, ...) built with
+# -fno-sanitize-recover, so every shallow integer-UB in libavc's H.264 base
+# decoder *aborts* the process. libavc trips these trivially (CAVLC exp-golomb
+# left-shifts 1 by up to 31, NAL de-emulation shifts by 31, slice parsers shift
+# negative values, isvcd_ii_pred indexes at -1), which floods the run with
+# crashes unrelated to the study. This dispatch-only control shares the same
+# libavc base decoder, so it hits the identical noise; keep it consistent with
+# the bug benchmark. Append -fno-sanitize last so it wins over the earlier
+# -fsanitize in $CFLAGS/$CXXFLAGS (cmake reads these at configure time and
+# libavc does not re-add -fsanitize since SANITIZE is undefined here).
+UBSAN_OFF="-fno-sanitize=undefined,integer,bounds"
+export CFLAGS="${CFLAGS:-} ${UBSAN_OFF}"
+export CXXFLAGS="${CXXFLAGS:-} ${UBSAN_OFF}"
+
 # --- Original build commands ---
 $SRC/libavc/fuzzer/ossfuzz.sh
 
 
-# --- Seed corpus: expand original seeds and per-bug testcase candidates ---
-# FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.
-# Create one seed variant for the default path plus one for each dispatch bit.
-# Per-bug reproducers are used only as source material: exact crashing inputs
-# are filtered out before packaging.
+# --- Seed corpus: real H.264 corpus + dispatch-zeroed SVC reproducers ---
+# FuzzBench packages $OUT/svc_dec_fuzzer_seed_corpus.zip as the initial corpus.
+# svc_dec_fuzzer input layout: [1 dispatch byte][H.264/SVC Annex-B stream].
+# Same two seed sources as the bug benchmark (kept in sync):
+#   1. The real avc_dec_fuzzer corpus (628 x264-encoded H.264 streams) with a
+#      0x00 dispatch byte prepended, to exercise the shared ih264d_* base-layer
+#      decode paths.
+#   2. Each per-bug reproducer with its dispatch byte (byte 0) zeroed, giving
+#      valid SVC streams that reach the isvcd_* enhancement-layer code. The
+#      replay filter below drops any candidate that still crashes, so no exact
+#      crashing input is shipped as a seed.
 seed_zip="$OUT/svc_dec_fuzzer_seed_corpus.zip"
 seed_target="$OUT/svc_dec_fuzzer"
 mkdir -p /tmp/seeds_dispatch /tmp/original_seeds /tmp/benchmark_seed_candidates
 
-if [ -f "$seed_zip" ]; then
-    unzip -q -o "$seed_zip" -d /tmp/original_seeds 2>/dev/null || true
-    for f in /tmp/original_seeds/*; do
-        [ -f "$f" ] || continue
-        base=$(basename "$f")
-        for dispatch in '\x00' '\x01' '\x02' '\x04' '\x08' '\x10' '\x20' '\x40' '\x80'; do
-            dispatch_name=$(printf '%s' "$dispatch" | tr -d '\x')
-            printf '%b' "$dispatch" | cat - "$f" > "/tmp/seeds_dispatch/${base}.dispatch_${dispatch_name}"
-        done
+# ossfuzz.sh copies the real corpus to $OUT under the avc_dec_fuzzer name; fall
+# back to the copy the Dockerfile fetched into $SRC.
+orig_corpus="$OUT/avc_dec_fuzzer_seed_corpus.zip"
+if [ ! -f "$orig_corpus" ] && [ -f "$SRC/avc_dec_fuzzer_seed_corpus.zip" ]; then
+    orig_corpus="$SRC/avc_dec_fuzzer_seed_corpus.zip"
+fi
+
+if [ -f "$orig_corpus" ]; then
+    unzip -q -o "$orig_corpus" -d /tmp/original_seeds 2>/dev/null || true
+    # The corpus stores files under a subdir (e.g. h264/), so recurse.
+    find /tmp/original_seeds -type f | while IFS= read -r f; do
+        printf '\000' | cat - "$f" > "/tmp/seeds_dispatch/avc_$(basename "$f")"
     done
 fi
 
@@ -86,40 +111,15 @@ if [ -d /src/benchmark_seeds ]; then
         size=$(wc -c < "$f")
         [ "$size" -gt 0 ] || continue
 
-        cp "$f" "/tmp/benchmark_seed_candidates/${base}.exact"
-        # Zero the dispatch byte (byte 0): deactivates dispatch-gated patches
-        # while keeping the full APDU conversation and card driver routing intact.
+        # Valid SVC stream with the transplant dispatch byte (byte 0) zeroed.
         cp "$f" "/tmp/benchmark_seed_candidates/${base}.dispatch_zero"
         printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.dispatch_zero" bs=1 seek=0 conv=notrunc 2>/dev/null || true
-        for keep in 1 2 8 16 64 256 1024; do
-            if [ "$size" -gt "$keep" ]; then
-                head -c "$keep" "$f" > "/tmp/benchmark_seed_candidates/${base}.head_${keep}"
-            fi
-        done
-        if [ "$size" -gt 1 ]; then
-            head -c "$((size - 1))" "$f" > "/tmp/benchmark_seed_candidates/${base}.trim_1"
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_last"
-            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_last"
-            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
-        fi
-        if [ "$size" -gt 4 ]; then
-            mid=$((size / 2))
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_mid"
-            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_mid"
-            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
-        fi
     done
 fi
 
 if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
     for f in /tmp/benchmark_seed_candidates/*; do
         [ -f "$f" ] || continue
-        # Never ship the exact crash reproducer as a seed.
-        case "$(basename "$f")" in
-            *.exact) continue ;;
-        esac
         # Replay each candidate under the SAME configuration the fuzzers use at
         # run time (ADDITIONAL_ARGS="-rss_limit_mb=8192" from the Dockerfile).
         # Some memory errors are flaky across process invocations (heap layout /
