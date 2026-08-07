@@ -41,4 +41,6 @@ ENV ADDITIONAL_ARGS="-rss_limit_mb=8192"
 # Bug transplant patches (re-applied by build.sh after git checkout resets source)
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
+# Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) as initial seeds.
+COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/

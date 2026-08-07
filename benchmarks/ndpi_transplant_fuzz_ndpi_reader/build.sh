@@ -154,7 +154,15 @@ if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1
     done
 fi
 
+# Inject the filtered public ClusterFuzz corpus (already dispatch-zero prefixed
+# and crash-filtered against this benchmark) as initial seeds.
+for _z in /src/corpus_seeds*.zip; do
+    [ -f "$_z" ] || continue
+    echo "Unpacking initial corpus: $_z"
+    unzip -q -o "$_z" -d /tmp/seeds_dispatch
+done
+
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
     rm -f "$seed_zip"
-    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
+    find /tmp/seeds_dispatch -maxdepth 1 -type f -print0 | xargs -0 zip -j -q "$seed_zip"
 fi

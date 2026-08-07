@@ -59,12 +59,52 @@ fi
 # (already in /src/libredwg; original OSS-Fuzz build.sh's `cd libredwg` is
 # redundant here.)
 sh ./autogen.sh
+# libredwg compiles with -Werror. honggfuzz's hfuzz-clang (clang-15) emits
+# warnings the other fuzzers' compilers do not (e.g. out_dxf.c -Wsign-compare),
+# which turns into a hard error, so src/.libs/libredwg.a is never produced and
+# the fuzzer link fails with "no such file or directory". Disable -Werror both
+# via flags and in the generated makefiles (configure re-adds it independently).
+export CFLAGS="${CFLAGS:-} -Wno-error"
+export CXXFLAGS="${CXXFLAGS:-} -Wno-error"
+
+# --- libafl compatibility: exit() -> abort() ---
+# libredwg's parser calls exit(1) on some malformed input (src/in_dxf.c,
+# src/in_json.c). libafl's respawner cannot recover from a child that exit()s
+# ("Storing state in crashed fuzzer instance did not work ... Child exited
+# with: 1") and the whole fuzzer dies after a few cycles. abort() gives SIGABRT,
+# which libafl handles as a normal crash. Gated on $FUZZER so every other
+# fuzzer builds byte-identically to the completed 6-fuzzer run.
+if [ "${FUZZER:-}" = "libafl" ]; then
+    echo "libafl build: converting library exit() calls to abort()"
+    # Patch every library/harness .c file, not just in_dxf.c/in_json.c: libredwg
+    # has ~50 further exit() calls that would kill libafl's respawner later in
+    # the run. programs/ and examples other than the harness are not linked in,
+    # but patching them is harmless.
+    find src examples -name '*.c' -print0 2>/dev/null \
+      | xargs -0 sed -i 's/\bexit (1);/abort ();/g; s/\bexit(1);/abort();/g; s/\bexit (EXIT_FAILURE);/abort ();/g; s/\bexit(EXIT_FAILURE);/abort();/g' 2>/dev/null || true
+    echo "remaining exit() in src+examples: $(grep -rn '\bexit *(' --include='*.c' src examples 2>/dev/null | wc -l)"
+fi
+
 # enable-release to skip unstable preR13. bindings are not fuzzed.
 ./configure --disable-shared --disable-bindings --enable-release
 
+# Strip -Werror from everything configure generated.
+find . -name Makefile -o -name 'Makefile.in' | xargs sed -i 's/-Werror//g' 2>/dev/null || true
+
 $CC $CFLAGS -c __bug_dispatch.c -o __bug_dispatch.o
 
-make -k 2>&1 || true
+make -k 2>&1 | tee /tmp/libredwg_make.log || true
+
+# Diagnostics: `make -k ... || true` masks library build failures, which only
+# surface later as "no such file or directory: src/.libs/libredwg.a" (this is
+# how the honggfuzz build failed). Surface the real errors here.
+if [ ! -f src/.libs/libredwg.a ]; then
+    echo "=== BUILD DIAG: src/.libs/libredwg.a MISSING — first errors from make ==="
+    grep -nE "error:|Error [0-9]|\*\*\* \[" /tmp/libredwg_make.log | head -40
+    echo "=== BUILD DIAG: any .a anywhere? ==="
+    find . -name '*.a' -newer configure 2>/dev/null | head -10
+    echo "=== BUILD DIAG END ==="
+fi
 
 $CC $CFLAGS src/.libs/libredwg.a -I. -I./include -I./src -c examples/llvmfuzz.c
 
@@ -138,7 +178,15 @@ if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1
     done
 fi
 
+# Inject the filtered public ClusterFuzz corpus (already dispatch-zero prefixed
+# and crash-filtered against this benchmark) as initial seeds.
+for _z in /src/corpus_seeds*.zip; do
+    [ -f "$_z" ] || continue
+    echo "Unpacking initial corpus: $_z"
+    unzip -q -o "$_z" -d /tmp/seeds_dispatch
+done
+
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
     rm -f "$seed_zip"
-    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
+    find /tmp/seeds_dispatch -maxdepth 1 -type f -print0 | xargs -0 zip -j -q "$seed_zip"
 fi

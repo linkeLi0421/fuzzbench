@@ -773,7 +773,7 @@ index c050e10b..f3a0df13 100644
 +  }
 +}
 +
-+const char* __asan_default_options(void) {
++__attribute__((weak)) const char* __asan_default_options(void) {
 +  seed_bug_dispatch_from_cmdline_input();
 +  if (__bug_dispatch[0] & (1u << 7)) {
 +    return "allocator_may_return_null=1";

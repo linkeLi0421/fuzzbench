@@ -38,6 +38,8 @@ COPY ghostscript_files/dicts /src/dicts
 # which build.sh copies into /src before the compile step.
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
+# Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) as initial seeds.
+COPY corpus_seeds/ /src/corpus_seeds/
 COPY build.sh $SRC/
 
 WORKDIR /src/ghostpdl

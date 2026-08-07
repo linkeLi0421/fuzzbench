@@ -19,4 +19,6 @@ ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
 # Bug transplant patches (re-applied by build.sh after checkout resets source).
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
+# Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) as initial seeds.
+COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/

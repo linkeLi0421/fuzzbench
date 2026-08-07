@@ -9,5 +9,7 @@ ENV ASAN_OPTIONS="detect_leaks=0:detect_stack_use_after_return=1"
 ENV ADDITIONAL_ARGS="-rss_limit_mb=8192"
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
+# Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) as initial seeds.
+COPY corpus_seeds*.zip /src/
 COPY llvmfuzz.options $SRC/
 COPY build.sh $SRC/

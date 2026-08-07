@@ -39,4 +39,7 @@ ENV ADDITIONAL_ARGS="-rss_limit_mb=8192"
 # the source tree).
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
+# Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) used as the
+# benchmark's initial seed corpus.
+COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/

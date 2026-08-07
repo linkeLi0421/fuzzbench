@@ -34,6 +34,18 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
     done
 fi
 
+# --- libafl compatibility: weaken __asan_default_options ---
+# OpenSC's upstream fuzz harness defines __asan_default_options, which collides
+# with the identical strong symbol in libafl's libfuzzbench.a ("multiple
+# definition" -> link failure -> no target binary). Marking ours weak lets
+# libafl's definition win, while every other fuzzer (no competing definition)
+# still links and uses ours unchanged.
+if [ -f src/tests/fuzzing/fuzz_pkcs15_reader.c ]; then
+    sed -i 's/^const char \*__asan_default_options()/__attribute__((weak)) const char *__asan_default_options()/' \
+        src/tests/fuzzing/fuzz_pkcs15_reader.c
+    grep -n "__asan_default_options" src/tests/fuzzing/fuzz_pkcs15_reader.c | head -2
+fi
+
 # --- Original build commands ---
 # Clean stale build artifacts from the merge container (if any).
 # Without this, make reuses .o/.a files compiled with a different compiler
@@ -163,7 +175,15 @@ if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1
     done
 fi
 
+# Inject the filtered public ClusterFuzz corpus (already dispatch-zero prefixed
+# and crash-filtered against this benchmark) as initial seeds.
+for _z in /src/corpus_seeds*.zip; do
+    [ -f "$_z" ] || continue
+    echo "Unpacking initial corpus: $_z"
+    unzip -q -o "$_z" -d /tmp/seeds_dispatch
+done
+
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
     rm -f "$seed_zip"
-    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
+    find /tmp/seeds_dispatch -maxdepth 1 -type f -print0 | xargs -0 zip -j -q "$seed_zip"
 fi

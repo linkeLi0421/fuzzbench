@@ -55,6 +55,25 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
     done
 fi
 
+# --- libafl compatibility: exit() -> abort() ---
+# htslib library code calls exit(1) on some fatal paths (bgzf.c, hts.c,
+# bcf_sr_sort.c, synced_bcf_reader.c). libafl's respawner cannot recover from a
+# child that exit()s ("Storing state in crashed fuzzer instance did not work ...
+# Child exited with: 1") and the whole fuzzer dies after a few cycles. abort()
+# gives SIGABRT, which libafl handles as a normal crash. Gated on $FUZZER so
+# every other fuzzer builds byte-identically to the completed 6-fuzzer run.
+if [ "${FUZZER:-}" = "libafl" ]; then
+    echo "libafl build: converting library exit() calls to abort()"
+    # htslib has ~58 exit() calls spread across the library (vcf.c, vcfutils.c,
+    # cram/, thread_pool.c, ...). hts_open_fuzzer parses VCF/BCF, so the
+    # "Unexpected type -> exit(1)" paths in vcf.c are readily reachable. Patch
+    # every library .c file; test/ is excluded since it is not linked into the
+    # fuzz target.
+    find . -name '*.c' -not -path './test/*' -print0 \
+      | xargs -0 sed -i 's/\bexit(1);/abort();/g; s/\bexit(EXIT_FAILURE);/abort();/g' 2>/dev/null || true
+    echo "remaining exit() in library: $(grep -rn '\bexit *(' --include='*.c' . 2>/dev/null | grep -v '^\./test/' | wc -l)"
+fi
+
 # --- Original build commands ---
 autoconf
 autoheader
@@ -134,7 +153,15 @@ if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1
     done
 fi
 
+# Inject the filtered public ClusterFuzz corpus (already dispatch-zero prefixed
+# and crash-filtered against this benchmark) as initial seeds.
+for _z in /src/corpus_seeds*.zip; do
+    [ -f "$_z" ] || continue
+    echo "Unpacking initial corpus: $_z"
+    unzip -q -o "$_z" -d /tmp/seeds_dispatch
+done
+
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
     rm -f "$seed_zip"
-    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
+    find /tmp/seeds_dispatch -maxdepth 1 -type f -print0 | xargs -0 zip -j -q "$seed_zip"
 fi

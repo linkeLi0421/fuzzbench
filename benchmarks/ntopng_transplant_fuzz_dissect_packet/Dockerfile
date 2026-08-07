@@ -44,4 +44,6 @@ ADD https://github.com/maxmind/libmaxminddb/releases/download/1.7.1/libmaxminddb
 # Bug transplant patches (re-applied by build.sh after checkout resets source).
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
+# Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) as initial seeds.
+COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/

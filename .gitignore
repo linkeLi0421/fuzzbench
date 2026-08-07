@@ -47,3 +47,8 @@ docker/generated.mk
 
 # Diff files from matplotlib
 *-failed-diff.png
+
+# Transplant benchmark seed corpora: only the packaged corpus_seeds*.zip is
+# tracked; the unpacked directory and the local corpus staging area are not.
+benchmarks/*/corpus_seeds/
+corpora/
