@@ -219,10 +219,11 @@ fi
 
 # Inject the filtered public ClusterFuzz corpus (already dispatch-zero prefixed
 # and crash-filtered against this benchmark) as initial seeds.
-if [ -d /src/corpus_seeds ]; then
-    cp -a /src/corpus_seeds/. /tmp/seeds_dispatch/ 2>/dev/null || \
-      find /src/corpus_seeds -maxdepth 1 -type f -print0 | xargs -0 -I{} cp {} /tmp/seeds_dispatch/ 2>/dev/null || true
-fi
+for _z in /src/corpus_seeds*.zip; do
+    [ -f "$_z" ] || continue
+    echo "Unpacking initial corpus: $_z"
+    unzip -q -o "$_z" -d /tmp/seeds_dispatch
+done
 
 if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
     rm -f "$seed_zip"

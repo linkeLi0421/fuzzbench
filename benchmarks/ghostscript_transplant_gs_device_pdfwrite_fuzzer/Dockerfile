@@ -39,7 +39,7 @@ COPY ghostscript_files/dicts /src/dicts
 COPY patches/ /src/patches/
 COPY seeds/ /src/benchmark_seeds/
 # Filtered public ClusterFuzz corpus (dispatch-zero, crash-filtered) as initial seeds.
-COPY corpus_seeds/ /src/corpus_seeds/
+COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/
 
 WORKDIR /src/ghostpdl
