@@ -1,24 +1,23 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2368487925
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
+INFO: Seed: 1915098338
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6040000000f8 at pc 0x00000051a1dd bp 0x7fffef29da90 sp 0x7fffef29d250
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6040000000f8 at pc 0x00000051a1dd bp 0x7fff561075b0 sp 0x7fff56106d70
 READ of size 4 at 0x6040000000f8 thread T0
     #0 0x51a1dc in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5
-    #1 0x6193ad in dissect_softether_ip_port /src/ndpi/src/lib/protocols/softether.c:85:5
-    #2 0x6193ad in ndpi_search_softether /src/ndpi/src/lib/protocols/softether.c:124:5
-    #3 0x58c264 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
-    #4 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #1 0x6151c4 in dissect_softether_ip_port /src/ndpi/src/lib/protocols/softether.c:85:5
+    #2 0x6151c4 in ndpi_search_softether /src/ndpi/src/lib/protocols/softether.c:124:5
+    #3 0x58acd9 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
+    #4 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #5 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #6 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #7 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #8 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #9 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7f5518acd082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x7fac3f2cb082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #11 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
 0x6040000000f8 is located 0 bytes to the right of 40-byte region [0x6040000000d0,0x6040000000f8)
@@ -29,7 +28,7 @@ allocated by thread T0 here:
     #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f5518acd082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7fac3f2cb082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5 in __interceptor_strncpy
 Shadow bytes around the buggy address:
@@ -64,5 +63,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

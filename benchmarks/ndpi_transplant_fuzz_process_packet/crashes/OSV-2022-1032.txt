@@ -1,30 +1,29 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2368000850
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
+INFO: Seed: 1915882228
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f50d6d000b0 at pc 0x0000004cf51d bp 0x7fff05a84290 sp 0x7fff05a83a18
-READ of size 17 at 0x7f50d6d000b0 thread T0
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fff92046bb0 at pc 0x0000004cf51d bp 0x7fff92046190 sp 0x7fff92045918
+READ of size 19 at 0x7fff92046bb0 thread T0
     #0 0x4cf51c in printf_common(void*, char const*, __va_list_tag*) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:553:9
     #1 0x4d0d70 in __interceptor_snprintf /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:1736:1
-    #2 0x5ef126 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:238:5
-    #3 0x5edcf5 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
-    #4 0x5edcf5 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:886:3
-    #5 0x590d16 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4049:2
-    #6 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #2 0x5eae6d in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:238:5
+    #3 0x5e9e81 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
+    #4 0x5e9e81 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:886:3
+    #5 0x5943ea in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4049:2
+    #6 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #7 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #8 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #9 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #10 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #11 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #12 0x7f50d903e082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x7fc3e551b082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #13 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
-Address 0x7f50d6d000b0 is located in stack of thread T0 at offset 176 in frame
-    #0 0x5eebff in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:158
+Address 0x7fff92046bb0 is located in stack of thread T0 at offset 176 in frame
+    #0 0x5ea94f in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:158
 
   This frame has 9 object(s):
     [32, 44) 'ret_match.i' (line 117)
@@ -33,24 +32,24 @@ Address 0x7f50d6d000b0 is located in stack of thread T0 at offset 176 in frame
     [192, 448) 'ua' (line 252) <== Memory access at offset 176 partially underflows this variable
     [512, 520) 'parent' (line 259)
     [544, 556) 'ret_match' (line 334)
-    [576, 588) 'ret_match1033' (line 387)
-    [608, 620) 'ret_match1101' (line 407)
-    [640, 652) 'ret_match1295' (line 450)
+    [576, 588) 'ret_match476' (line 387)
+    [608, 620) 'ret_match508' (line 407)
+    [640, 652) 'ret_match590' (line 450)
 HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:553:9 in printf_common(void*, char const*, __va_list_tag*)
 Shadow bytes around the buggy address:
-  0x0fea9ad97fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fea9ad97fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fea9ad97fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fea9ad97ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fea9ad98000: f1 f1 f1 f1 f8 f8 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8
-=>0x0fea9ad98010: f2 f2 f2 f2 00 00[f2]f2 f8 f8 f8 f8 f8 f8 f8 f8
-  0x0fea9ad98020: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
-  0x0fea9ad98030: f8 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2 f2 f2 f2
-  0x0fea9ad98040: f8 f2 f2 f2 f8 f8 f2 f2 f8 f8 f2 f2 f8 f8 f2 f2
-  0x0fea9ad98050: f8 f8 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fea9ad98060: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100072400d20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100072400d30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100072400d40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100072400d50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100072400d60: f1 f1 f1 f1 f8 f8 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8
+=>0x100072400d70: f2 f2 f2 f2 00 00[f2]f2 f8 f8 f8 f8 f8 f8 f8 f8
+  0x100072400d80: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x100072400d90: f8 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2 f2 f2 f2
+  0x100072400da0: f8 f2 f2 f2 f8 f8 f2 f2 f8 f8 f2 f2 f8 f8 f2 f2
+  0x100072400db0: f8 f8 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100072400dc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -71,5 +70,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

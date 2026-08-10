@@ -1,23 +1,22 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2361994622
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
+INFO: Seed: 1923361911
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6060000001e3 at pc 0x000000603dd6 bp 0x7ffe0ef25230 sp 0x7ffe0ef25228
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6060000001e3 at pc 0x000000600e48 bp 0x7ffe25f12bf0 sp 0x7ffe25f12be8
 READ of size 16 at 0x6060000001e3 thread T0
-    #0 0x603dd5 in ndpi_int_check_stun /src/ndpi/src/lib/protocols/stun.c:354:43
-    #1 0x601036 in ndpi_search_stun /src/ndpi/src/lib/protocols/stun.c:512:6
-    #2 0x58c264 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
-    #3 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #0 0x600e47 in ndpi_int_check_stun /src/ndpi/src/lib/protocols/stun.c:354:43
+    #1 0x5fdf5d in ndpi_search_stun /src/ndpi/src/lib/protocols/stun.c:512:6
+    #2 0x58acd9 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4018:7
+    #3 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #4 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #5 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #6 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #7 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #8 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7f8981047082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #9 0x7f1916a64082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #10 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
 0x6060000001e3 is located 9 bytes to the right of 58-byte region [0x6060000001a0,0x6060000001da)
@@ -28,7 +27,7 @@ allocated by thread T0 here:
     #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f8981047082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7f1916a64082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/stun.c:354:43 in ndpi_int_check_stun
 Shadow bytes around the buggy address:
@@ -63,5 +62,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

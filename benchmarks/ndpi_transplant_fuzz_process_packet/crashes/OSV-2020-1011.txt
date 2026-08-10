@@ -1,41 +1,38 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2359622617
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
-ndpi_utils.c:218:18: runtime error: shift exponent 32 is too large for 32-bit type 'u_int32_t' (aka 'unsigned int')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior ndpi_utils.c:218:18 in 
+INFO: Seed: 1921146029
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x602000045593 at pc 0x0000004cf51d bp 0x7ffd032360f0 sp 0x7ffd03235878
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x602000045593 at pc 0x0000004cf51d bp 0x7ffe5284e5f0 sp 0x7ffe5284dd78
 READ of size 4 at 0x602000045593 thread T0
     #0 0x4cf51c in printf_common(void*, char const*, __va_list_tag*) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:553:9
     #1 0x4d0d70 in __interceptor_snprintf /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:1736:1
-    #2 0x62f89c in ndpi_search_mail_smtp_tcp /src/ndpi/src/lib/protocols/mail_smtp.c:177:5
-    #3 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #4 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #2 0x62b486 in ndpi_search_mail_smtp_tcp /src/ndpi/src/lib/protocols/mail_smtp.c:177:5
+    #3 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #4 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #5 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #6 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #7 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #8 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #9 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7f7f28244082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x7fd3b5b90082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #11 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
 0x602000045593 is located 0 bytes to the right of 3-byte region [0x602000045590,0x602000045593)
 allocated by thread T0 here:
     #0 0x52efb6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0x661cf4 in ndpi_base64_decode /src/ndpi/src/lib/ndpi_utils.c:811:15
-    #2 0x62f86d in ndpi_search_mail_smtp_tcp /src/ndpi/src/lib/protocols/mail_smtp.c:174:9
-    #3 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #4 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #1 0x65b3d9 in ndpi_base64_decode /src/ndpi/src/lib/ndpi_utils.c:811:15
+    #2 0x62b457 in ndpi_search_mail_smtp_tcp /src/ndpi/src/lib/protocols/mail_smtp.c:174:9
+    #3 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #4 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #5 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #6 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #7 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #8 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #9 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7f7f28244082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x7fd3b5b90082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:553:9 in printf_common(void*, char const*, __va_list_tag*)
 Shadow bytes around the buggy address:
@@ -70,5 +67,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

@@ -1,26 +1,25 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2369496201
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
+INFO: Seed: 1916146004
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000080 at pc 0x00000065df11 bp 0x7ffee852e2d0 sp 0x7ffee852e2c8
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000080 at pc 0x0000006577d1 bp 0x7fffa909fbd0 sp 0x7fffa909fbc8
 READ of size 1 at 0x604000000080 thread T0
-    #0 0x65df10 in ndpi_check_punycode_string /src/ndpi/src/lib/ndpi_utils.c:63:12
-    #1 0x598113 in ndpi_match_host_subprotocol /src/ndpi/src/lib/ndpi_main.c:6292:5
-    #2 0x5f01be in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:409:5
-    #3 0x5ee192 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c:769:7
-    #4 0x5ee192 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:886:3
-    #5 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #6 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #0 0x6577d0 in ndpi_check_punycode_string /src/ndpi/src/lib/ndpi_utils.c:63:12
+    #1 0x596b3b in ndpi_match_host_subprotocol /src/ndpi/src/lib/ndpi_main.c:6292:5
+    #2 0x5ebf0b in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:409:5
+    #3 0x5e9d4b in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c:769:7
+    #4 0x5e9d4b in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:886:3
+    #5 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #6 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #7 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #8 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #9 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #10 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #11 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #12 0x7f8d8fd45082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x7f6ba080c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #13 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
 0x604000000080 is located 0 bytes to the right of 48-byte region [0x604000000050,0x604000000080)
@@ -31,7 +30,7 @@ allocated by thread T0 here:
     #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f8d8fd45082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7f6ba080c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/ndpi_utils.c:63:12 in ndpi_check_punycode_string
 Shadow bytes around the buggy address:
@@ -66,5 +65,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

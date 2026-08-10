@@ -1,27 +1,24 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2367750380
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
-ndpi_utils.c:218:18: runtime error: shift exponent 32 is too large for 32-bit type 'u_int32_t' (aka 'unsigned int')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior ndpi_utils.c:218:18 in 
+INFO: Seed: 1920905246
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6110000003b8 at pc 0x00000051a1dd bp 0x7ffd3238baf0 sp 0x7ffd3238b2b0
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6110000003b8 at pc 0x00000051a1dd bp 0x7fff15fa2310 sp 0x7fff15fa1ad0
 READ of size 6 at 0x6110000003b8 thread T0
     #0 0x51a1dc in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5
-    #1 0x5bd0a1 in getTLScertificate /src/ndpi/src/lib/protocols/tls.c:430:8
-    #2 0x5c1d5d in tlsDetectProtocolFromCertificate /src/ndpi/src/lib/protocols/tls.c:1140:12
-    #3 0x5c30d1 in ndpi_search_tls_tcp_udp /src/ndpi/src/lib/protocols/tls.c:1501:8
-    #4 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #5 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #1 0x5ba3d9 in getTLScertificate /src/ndpi/src/lib/protocols/tls.c:430:8
+    #2 0x5bf616 in tlsDetectProtocolFromCertificate /src/ndpi/src/lib/protocols/tls.c:1140:12
+    #3 0x5c093b in ndpi_search_tls_tcp_udp /src/ndpi/src/lib/protocols/tls.c:1501:8
+    #4 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #5 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #6 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #7 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #8 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #9 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #10 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7f26ba36c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x7fa502739082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #12 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
 0x6110000003b8 is located 0 bytes to the right of 248-byte region [0x6110000002c0,0x6110000003b8)
@@ -32,7 +29,7 @@ allocated by thread T0 here:
     #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f26ba36c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7fa502739082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5 in __interceptor_strncpy
 Shadow bytes around the buggy address:
@@ -67,5 +64,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

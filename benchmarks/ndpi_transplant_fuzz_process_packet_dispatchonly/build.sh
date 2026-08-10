@@ -59,20 +59,16 @@ cd ..
 
 # build project
 cd /src/ndpi
-# Promote common UB classes to non-recoverable so fuzzers register them as
-# crashes. Without this, UBSan just prints "runtime error:" and keeps going,
-# so shallow UB bugs (e.g. shift-exponent) are invisible to libfuzzer/AFL.
+# UBSan is intentionally NOT enabled for this benchmark: every bug counted
+# here is an ASan-detectable memory-safety bug, and UB instrumentation only
+# added noise. ndpi's protocol walk has a shallow recoverable shift UB in
+# ndpi_utils.c:218 (ndpi_net_match called from starcraft/etc.) that fired on
+# almost every testcase.
 #
-# Exception: `shift` is kept recoverable. ndpi's protocol walk has a shallow
-# shift UB in ndpi_utils.c:218 (ndpi_net_match called from starcraft/etc.)
-# that fires on almost every testcase. Making it non-recoverable aborts the
-# process before the transplanted target bug can trigger — 16/43 crashes
-# in this benchmark's crashes/ were formerly masked by it. The UB is still
-# instrumented and logged at runtime; execution just continues past it.
-UB_CLASSES_INSTRUMENT=shift,integer-divide-by-zero,null,bounds,vla-bound,return,unreachable
-UB_CLASSES_NORECOVER=integer-divide-by-zero,null,bounds,vla-bound,return,unreachable
-export CFLAGS="${CFLAGS:-} -fsanitize=$UB_CLASSES_INSTRUMENT -fno-sanitize-recover=$UB_CLASSES_NORECOVER"
-export CXXFLAGS="${CXXFLAGS:-} -fsanitize=$UB_CLASSES_INSTRUMENT -fno-sanitize-recover=$UB_CLASSES_NORECOVER"
+# Kept in sync with ndpi_transplant_fuzz_process_packet/build.sh, where
+# dropping UB instrumentation cost no bugs: the three findings previously
+# reported as UBSan `bounds` aborts are caught by ASan one step later as
+# stack-buffer-overflow / stack-use-after-scope.
 sh autogen.sh
 ./configure --enable-fuzztargets --disable-json-c CC="$CC" CXX="$CXX"
 make -k CC="$CC" CXX="$CXX" 2>&1 || true

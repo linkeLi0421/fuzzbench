@@ -1,29 +1,28 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2370012362
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
+INFO: Seed: 1916665961
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60800000007f at pc 0x00000051a1dd bp 0x7ffc9c2b1a90 sp 0x7ffc9c2b1250
-READ of size 3 at 0x60800000007f thread T0
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60800000017f at pc 0x00000051a1dd bp 0x7fff8aeff5f0 sp 0x7fff8aefedb0
+READ of size 3 at 0x60800000017f thread T0
     #0 0x51a1dc in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5
-    #1 0x5f0622 in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:134:5
-    #2 0x5f0622 in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:459:5
-    #3 0x5edcf5 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
-    #4 0x5edcf5 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:886:3
-    #5 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #6 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #1 0x5ec35d in ndpi_http_check_content /src/ndpi/src/lib/protocols/http.c:134:5
+    #2 0x5ec35d in check_content_type_and_change_protocol /src/ndpi/src/lib/protocols/http.c:459:5
+    #3 0x5e9e81 in ndpi_check_http_tcp /src/ndpi/src/lib/protocols/http.c
+    #4 0x5e9e81 in ndpi_search_http_tcp /src/ndpi/src/lib/protocols/http.c:886:3
+    #5 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #6 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #7 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #8 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #9 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #10 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #11 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #12 0x7fa6172c0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #12 0x7f90e4d83082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #13 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
-0x60800000007f is located 0 bytes to the right of 95-byte region [0x608000000020,0x60800000007f)
+0x60800000017f is located 0 bytes to the right of 95-byte region [0x608000000120,0x60800000017f)
 allocated by thread T0 here:
     #0 0x52efb6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
     #1 0x56c52e in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:19:39
@@ -31,21 +30,21 @@ allocated by thread T0 here:
     #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7fa6172c0082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7f90e4d83082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:470:5 in __interceptor_strncpy
 Shadow bytes around the buggy address:
-  0x0c107fff7fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0c107fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c107fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c107fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x0c107fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x0c107fff8000: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00[07]
-  0x0c107fff8010: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 fa
-  0x0c107fff8020: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 fa
+  0x0c107fff8000: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c107fff8010: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c107fff8020: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00[07]
   0x0c107fff8030: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 fa
   0x0c107fff8040: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 fa
-  0x0c107fff8050: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
+  0x0c107fff8050: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 fa
+  0x0c107fff8060: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 fa
+  0x0c107fff8070: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -66,5 +65,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

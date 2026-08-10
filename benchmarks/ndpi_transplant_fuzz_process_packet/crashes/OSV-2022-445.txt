@@ -1,31 +1,28 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2368248172
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
-ndpi_utils.c:218:18: runtime error: shift exponent 32 is too large for 32-bit type 'u_int32_t' (aka 'unsigned int')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior ndpi_utils.c:218:18 in 
+INFO: Seed: 1914830415
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7f5ca0f00ad0 at pc 0x00000051a31d bp 0x7fffb6c68e50 sp 0x7fffb6c68610
-WRITE of size 191 at 0x7f5ca0f00ad0 thread T0
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fff57861970 at pc 0x00000051a31d bp 0x7fff57860e90 sp 0x7fff57860650
+WRITE of size 191 at 0x7fff57861970 thread T0
     #0 0x51a31c in __interceptor_strncpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:471:5
-    #1 0x5bc690 in getTLScertificate /src/ndpi/src/lib/protocols/tls.c:361:3
-    #2 0x5c1d5d in tlsDetectProtocolFromCertificate /src/ndpi/src/lib/protocols/tls.c:1140:12
-    #3 0x5c30d1 in ndpi_search_tls_tcp_udp /src/ndpi/src/lib/protocols/tls.c:1501:8
-    #4 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #5 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #1 0x5b9710 in getTLScertificate /src/ndpi/src/lib/protocols/tls.c:361:3
+    #2 0x5bf616 in tlsDetectProtocolFromCertificate /src/ndpi/src/lib/protocols/tls.c:1140:12
+    #3 0x5c093b in ndpi_search_tls_tcp_udp /src/ndpi/src/lib/protocols/tls.c:1501:8
+    #4 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #5 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #6 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #7 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #8 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #9 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #10 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #11 0x7f5ca2ffe082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #11 0x7fe1cd8ec082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #12 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
-Address 0x7f5ca0f00ad0 is located in stack of thread T0 at offset 2768 in frame
-    #0 0x5bb85f in getTLScertificate /src/ndpi/src/lib/protocols/tls.c:204
+Address 0x7fff57861970 is located in stack of thread T0 at offset 2768 in frame
+    #0 0x5b88ff in getTLScertificate /src/ndpi/src/lib/protocols/tls.c:204
 
   This frame has 8 object(s):
     [32, 938) 'ja3' (line 206)
@@ -40,17 +37,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:471:5 in __interceptor_strncpy
 Shadow bytes around the buggy address:
-  0x0fec141d8100: 00 00 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
-  0x0fec141d8110: f2 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00
-  0x0fec141d8120: 00 f2 f2 f2 f2 f2 00 00 f2 f2 00 00 00 00 00 00
-  0x0fec141d8130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec141d8140: 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2 f2 f2
-=>0x0fec141d8150: f2 f2 00 00 00 00 00 00 00 00[f2]f2 f2 f2 00 f2
-  0x0fec141d8160: f2 f2 f8 f8 f3 f3 f3 f3 00 00 00 00 00 00 00 00
-  0x0fec141d8170: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec141d8180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec141d8190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x0fec141d81a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10006af042d0: 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2 f2 f2
+  0x10006af042e0: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00 00 00
+  0x10006af042f0: 00 00 00 00 00 f2 f2 f2 f2 f2 00 00 f2 f2 00 00
+  0x10006af04300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10006af04310: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2
+=>0x10006af04320: f2 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00[f2]f2
+  0x10006af04330: f2 f2 00 f2 f2 f2 f8 f8 f3 f3 f3 f3 00 00 00 00
+  0x10006af04340: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10006af04350: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10006af04360: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10006af04370: f1 f1 f1 f1 00 00 00 00 00 00 00 00 f2 f2 f2 f2
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -71,5 +68,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.

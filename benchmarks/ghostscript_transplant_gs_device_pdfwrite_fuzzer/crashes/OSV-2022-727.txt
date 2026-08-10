@@ -1,370 +1,68 @@
-INFO: Seed: 2744880927
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2634763717
+INFO: Loaded 3 modules   (222717 inline 8-bit counters): 13672 [0x7f4d211e79e0, 0x7f4d211eaf48), 959 [0x7f4d21248a40, 0x7f4d21248dff), 208086 [0x380e980, 0x3841656), 
+INFO: Loaded 3 PC tables (222717 PCs): 13672 [0x7f4d211eaf48,0x7f4d212205c8), 959 [0x7f4d21248e00,0x7f4d2124c9f0), 208086 [0x2a78f10,0x2da5c70), 
 /out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
-base/gsiorom.c:94:14: runtime error: left shift of 128 by 24 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsiorom.c:94:14 in 
-psi/imainarg.c:684:43: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/imainarg.c:684:43 in 
-base/gxpath.c:114:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpath.c:114:23 in 
-base/gxpath.c:115:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpath.c:115:23 in 
-base/gxpath.c:116:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpath.c:116:23 in 
-base/gxpath.c:117:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpath.c:117:23 in 
-base/gxcpath.c:530:29: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxcpath.c:530:29 in 
-base/gxcpath.c:531:29: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxcpath.c:531:29 in 
-base/gxcpath.c:532:29: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxcpath.c:532:29 in 
-base/gxcpath.c:533:29: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxcpath.c:533:29 in 
-base/gspath.c:604:17: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gspath.c:604:17 in 
-base/gspath.c:605:17: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gspath.c:605:17 in 
-base/gspath.c:606:17: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gspath.c:606:17 in 
-base/gspath.c:607:17: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gspath.c:607:17 in 
-base/gxpcmap.c:839:9: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpcmap.c:839:9 in 
-base/gxccman.c:139:9: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxccman.c:139:9 in 
-base/gsiorom.c:122:21: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsiorom.c:122:21 in 
-base/gsiorom.c:201:25: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsiorom.c:201:25 in 
-psi/iscannum.c:103:58: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/iscannum.c:103:58 in 
-psi/iscannum.c:103:73: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/iscannum.c:103:73 in 
-psi/iscannum.c:104:58: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/iscannum.c:104:58 in 
-psi/iscannum.c:104:73: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/iscannum.c:104:73 in 
-psi/interp.c:1123:13: runtime error: member access within null pointer of type 'ref' (aka 'struct ref_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/interp.c:1123:13 in 
-psi/interp.c:1123:13: runtime error: member access within null pointer of type 'struct tas_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/interp.c:1123:13 in 
-psi/interp.c:1401:21: runtime error: member access within null pointer of type 'ref' (aka 'struct ref_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/interp.c:1401:21 in 
-psi/interp.c:1401:21: runtime error: member access within null pointer of type 'struct tas_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/interp.c:1401:21 in 
-psi/ziodevsc.c:153:25: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/ziodevsc.c:153:25 in 
-psi/ziodevsc.c:230:25: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/ziodevsc.c:230:25 in 
-psi/ziodevsc.c:301:25: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/ziodevsc.c:301:25 in 
-psi/iscannum.c:278:13: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/iscannum.c:278:13 in 
-psi/zarith.c:415:64: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zarith.c:415:64 in 
-psi/zusparam.c:440:11: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zusparam.c:440:11 in 
-psi/zusparam.c:440:11: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zusparam.c:440:11 in 
-base/gsalloc.c:1068:20: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsalloc.c:1068:20 in 
-psi/zusparam.c:202:11: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zusparam.c:202:11 in 
-psi/zusparam.c:202:11: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zusparam.c:202:11 in 
-psi/idparam.c:378:9: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/idparam.c:378:9 in 
-base/gsicc_manage.c:2166:23: runtime error: member access within null pointer of type 'cmm_profile_t' (aka 'struct cmm_profile_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsicc_manage.c:2166:23 in 
-base/gsicc_cache.c:465:41: runtime error: left shift of 229 by 56 places cannot be represented in type 'int64_t' (aka 'long')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsicc_cache.c:465:41 in 
-base/sfxstdio.c:199:21: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sfxstdio.c:199:21 in 
-devices/vector/gdevpdf.c:879:36: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:879:36 in 
-base/gsicc_cache.c:464:39: runtime error: left shift of 184 by 56 places cannot be represented in type 'int64_t' (aka 'long')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsicc_cache.c:464:39 in 
-base/gshtscr.c:353:48: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gshtscr.c:353:48 in 
-base/gshtscr.c:387:27: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gshtscr.c:387:27 in 
-base/gshtscr.c:392:57: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gshtscr.c:392:57 in 
-base/gsht.c:1051:26: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsht.c:1051:26 in 
-base/gsht.c:1052:27: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsht.c:1052:27 in 
-base/sjpege.c:37:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:37:9 in 
-base/sjpege.c:37:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:37:9 in 
-base/sjpege.c:52:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:52:9 in 
-base/sjpege.c:52:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:52:9 in 
-base/sjpege.c:72:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:72:9 in 
-base/sjpege.c:72:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:72:9 in 
-base/sjpegc.c:143:28: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpegc.c:143:28 in 
-base/sjpegc.c:143:28: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpegc.c:143:28 in 
-psi/ireclaim.c:110:36: runtime error: member access within null pointer of type 'i_ctx_t' (aka 'struct gs_context_state_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/ireclaim.c:110:36 in 
-psi/igc.c:268:9: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:268:9 in 
-psi/zbfont.c:44:40: runtime error: member access within null pointer of type 'font_data' (aka 'struct font_data_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zbfont.c:44:40 in 
-psi/igc.c:306:9: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:306:9 in 
-psi/zbfont.c:49:44: runtime error: member access within null pointer of type 'font_data' (aka 'struct font_data_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zbfont.c:49:44 in 
-psi/isave.c:591:37: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/isave.c:591:37 in 
-psi/igc.c:1150:9: runtime error: member access within null pointer of type 'clump_head_t' (aka 'struct clump_head_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:1150:9 in 
-psi/igc.c:430:5: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:430:5 in 
-psi/igc.c:451:5: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:451:5 in 
-psi/zbfont.c:55:33: runtime error: member access within null pointer of type 'font_data' (aka 'struct font_data_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zbfont.c:55:33 in 
-psi/igc.c:478:9: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:478:9 in 
-psi/igc.c:495:9: runtime error: member access within null pointer of type 'struct alloc_save_s'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/igc.c:495:9 in 
-base/sfxstdio.c:73:48: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sfxstdio.c:73:48 in 
-base/sfxstdio.c:167:25: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sfxstdio.c:167:25 in 
-psi/zmedia2.c:56:34: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zmedia2.c:56:34 in 
-psi/zmedia2.c:240:36: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zmedia2.c:240:36 in 
-base/gsdparam.c:2476:36: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsdparam.c:2476:36 in 
-base/gsdparam.c:2476:68: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsdparam.c:2476:68 in 
-psi/zarith.c:460:41: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zarith.c:460:41 in 
-base/seexec.c:72:20: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/seexec.c:72:20 in 
-base/gscrypt1.c:52:9: runtime error: signed integer overflow: 55898 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gscrypt1.c:52:9 in 
-pdf/pdf_font1.c:680:13: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font1.c:680:13 in 
-base/wrfont.c:47:61: runtime error: signed integer overflow: 55794 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/wrfont.c:47:61 in 
-pdf/pdf_fapi.c:666:30: runtime error: signed integer overflow: 49136 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_fapi.c:666:30 in 
-pdf/pdf_font1.c:868:5: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font1.c:868:5 in 
-base/gstype1.c:403:33: runtime error: signed integer overflow: 49136 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gstype1.c:403:33 in 
-base/gsfont.c:924:31: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsfont.c:924:31 in 
-base/gxtype1.c:386:13: runtime error: signed integer overflow: 49136 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxtype1.c:386:13 in 
-base/gxtype1.c:407:17: runtime error: left shift of negative value -45
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxtype1.c:407:17 in 
-base/gxtype1.c:409:17: runtime error: left shift of negative value -249
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxtype1.c:409:17 in 
-base/gxtype1.c:530:13: runtime error: signed integer overflow: 42785 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxtype1.c:530:13 in 
-base/gxtype1.c:413:17: runtime error: signed integer overflow: 57489 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxtype1.c:413:17 in 
-base/gxtype1.c:415:26: runtime error: left shift of negative value -1141
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxtype1.c:415:26 in 
-devices/vector/gdevpdtd.c:216:27: runtime error: member access within null pointer of type 'pdf_font_descriptor_t' (aka 'struct pdf_font_descriptor_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtd.c:216:27 in 
-devices/vector/gdevpdtd.c:216:27: runtime error: member access within null pointer of type 'pdf_font_descriptor_common_t' (aka 'struct pdf_font_descriptor_common_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtd.c:216:27 in 
-base/gscrypt1.c:52:9: runtime error: signed integer overflow: 2147462265 + 22719 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gscrypt1.c:52:9 in 
-base/gscoord.c:607:32: runtime error: shift exponent 42 is too large for 32-bit type 'fixed' (aka 'int')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gscoord.c:607:32 in 
-base/gstype1.c:582:17: runtime error: left shift of negative value -99
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gstype1.c:582:17 in 
-base/gstype1.c:584:17: runtime error: left shift of negative value -202
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gstype1.c:584:17 in 
-base/gstype1.c:350:17: runtime error: signed integer overflow: 42785 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gstype1.c:350:17 in 
-base/gsfcmap.c:299:5: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsfcmap.c:299:5 in 
-pdf/pdf_font1C.c:2198:5: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font1C.c:2198:5 in 
-pdf/pdf_font1C.c:2125:5: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font1C.c:2125:5 in 
-pdf/pdf_font1C.c:2041:5: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font1C.c:2041:5 in 
-pdf/pdf_font1C.c:2451:17: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font1C.c:2451:17 in 
-devices/vector/gdevpdfu.c:696:16: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdfu.c:696:16 in 
-base/gxchar.c:454:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxchar.c:454:23 in 
-base/gxccache.c:99:13: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxccache.c:99:13 in 
-base/gxchar.c:1588:27: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxchar.c:1588:27 in 
-base/gxchar.c:1589:27: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxchar.c:1589:27 in 
-base/gxchar.c:627:24: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxchar.c:627:24 in 
-base/gxchar.c:628:24: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxchar.c:628:24 in 
-base/gsimage.c:553:45: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsimage.c:553:45 in 
-base/sjpege.c:94:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:94:9 in 
-base/sjpege.c:94:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:94:9 in 
-base/sjpege.c:105:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:105:9 in 
-base/sjpege.c:105:9: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/sjpege.c:105:9 in 
-obj/jchuff.c:335:16: runtime error: left shift of 68849393633067008 by 8 places cannot be represented in type 'INT32' (aka 'long')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior obj/jchuff.c:335:16 in 
-obj/jfdctint.c:198:65: runtime error: left shift of negative value -514
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior obj/jfdctint.c:198:65 in 
-obj/jfdctint.c:199:45: runtime error: left shift of negative value -255
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior obj/jfdctint.c:199:45 in 
-pdf/pdf_font11.c:452:5: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_font11.c:452:5 in 
-base/gxpath.c:978:12: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpath.c:978:12 in 
-base/gxpflat.c:272:22: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxpflat.c:272:22 in 
-devices/vector/gdevpsft.c:802:24: runtime error: member access within null pointer of type 'ttf_OS_2_t' (aka 'struct ttf_OS_2_s')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsft.c:802:24 in 
-base/ttfinp.c:57:27: runtime error: left shift of 173 by 24 places cannot be represented in type 'int32' (aka 'int')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfinp.c:57:27 in 
-base/ttfmain.c:275:36: runtime error: member access within null pointer of type 'sfnt_FontHeader'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:275:36 in 
-base/ttfmain.c:277:36: runtime error: member access within null pointer of type 'sfnt_FontHeader'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:277:36 in 
-base/ttfmain.c:281:36: runtime error: member access within null pointer of type 'sfnt_FontHeader'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:281:36 in 
-base/ttfmain.c:283:36: runtime error: member access within null pointer of type 'sfnt_maxProfileTable'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:283:36 in 
-base/ttfmain.c:285:36: runtime error: member access within null pointer of type 'sfnt_maxProfileTable'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:285:36 in 
-base/ttfmain.c:289:36: runtime error: member access within null pointer of type 'sfnt_MetricsHeader'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:289:36 in 
-base/ttfmain.c:50:23: runtime error: left shift of negative value -25
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:50:23 in 
-base/ttinterp.c:5076:14: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttinterp.c:5076:14 in 
-base/ttinterp.c:5076:14: runtime error: member access within null pointer of type 'gsfix_jmp_buf_test'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttinterp.c:5076:14 in 
-base/ttfmain.c:1011:95: runtime error: left shift of negative value -1600
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:1011:95 in 
-base/ttfmain.c:1012:95: runtime error: left shift of negative value -1600
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/ttfmain.c:1012:95 in 
-base/gsdparam.c:1710:33: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsdparam.c:1710:33 in 
-base/gsdparam.c:1710:61: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gsdparam.c:1710:61 in 
-pdf/pdf_int.c:299:34: runtime error: signed integer overflow: 595199996 * 10 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pdf/pdf_int.c:299:34 in 
-base/scfe.c:511:13: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:511:13 in 
-base/scfe.c:511:13: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:511:13 in 
-base/scfe.c:526:13: runtime error: left shift of 91 by 27 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:526:13 in 
-base/scfe.c:527:13: runtime error: left shift of 3 by 31 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:527:13 in 
-base/scfe.c:519:9: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:519:9 in 
-base/scfe.c:499:17: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:499:17 in 
-base/scfe.c:99:5: runtime error: left shift of 55 by 31 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:99:5 in 
-base/scfe.c:532:13: runtime error: left shift of 19 by 30 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:532:13 in 
-base/scfe.c:531:13: runtime error: left shift of 3 by 30 places cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/scfe.c:531:13 in 
 gsapi_init_with_args: error -25
-devices/vector/gdevpdtd.c:416:49: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtd.c:416:49 in 
-devices/vector/gdevpdtd.c:417:49: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtd.c:417:49 in 
-devices/vector/gdevpdtd.c:499:27: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtd.c:499:27 in 
-devices/vector/gdevpsfx.c:69:9: runtime error: signed integer overflow: 49136 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:69:9 in 
-devices/vector/gdevpsfx.c:166:19: runtime error: index -1 out of bounds for type 'fixed[48]' (aka 'int[48]')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:166:19 in 
-devices/vector/gdevpsfx.c:183:9: runtime error: signed integer overflow: 62183 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:183:9 in 
-devices/vector/gdevpsfx.c:493:23: runtime error: index -1 out of bounds for type 'fixed[48]' (aka 'int[48]')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:493:23 in 
-devices/vector/gdevpsfx.c:189:17: runtime error: left shift of negative value -147
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:189:17 in 
-devices/vector/gdevpsfx.c:569:23: runtime error: index -1 out of bounds for type 'fixed[48]' (aka 'int[48]')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:569:23 in 
-devices/vector/gdevpsfx.c:254:13: runtime error: signed integer overflow: 42785 * 52845 cannot be represented in type 'int'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:254:13 in 
-devices/vector/gdevpsfx.c:187:17: runtime error: left shift of negative value -33
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsfx.c:187:17 in 
-devices/vector/gdevpsft.c:495:22: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpsft.c:495:22 in 
-devices/vector/gdevpdtb.c:169:60: runtime error: left shift of negative value -8
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtb.c:169:60 in 
-devices/vector/gdevpdtf.c:981:9: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdtf.c:981:9 in 
-devices/vector/gdevpdf.c:1581:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1581:23 in 
-devices/vector/gdevpdf.c:1582:39: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1582:39 in 
-devices/vector/gdevpdf.c:1582:37: runtime error: signed integer overflow: 512 - -9223372036854775808 cannot be represented in type 'long'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1582:37 in 
-devices/vector/gdevpdf.c:1582:21: runtime error: signed integer overflow: -9223372036854596633 + -9223372036854775296 cannot be represented in type 'long'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1582:21 in 
-devices/vector/gdevpdf.c:1607:23: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1607:23 in 
-devices/vector/gdevpdf.c:1608:39: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1608:39 in 
-devices/vector/gdevpdf.c:1608:37: runtime error: signed integer overflow: 512 - -9223372036854775808 cannot be represented in type 'long'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1608:37 in 
-devices/vector/gdevpdf.c:1608:21: runtime error: signed integer overflow: -9223372036854596633 + -9223372036854775296 cannot be represented in type 'long'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior devices/vector/gdevpdf.c:1608:21 in 
-base/gxccman.c:798:27: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxccman.c:798:27 in 
-base/gxccman.c:451:9: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior base/gxccman.c:451:9 in 
-psi/zfont.c:510:18: runtime error: left shift of negative value -1
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior psi/zfont.c:510:18 in 
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x61100001ed58 at pc 0x000000a15687 bp 0x7ffe0f558e70 sp 0x7ffe0f558e68
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x61100001ed58 at pc 0x00000091b32d bp 0x7ffc23ae9220 sp 0x7ffc23ae9218
 READ of size 8 at 0x61100001ed58 thread T0
-    #0 0xa15686 in gp_fflush /src/ghostpdl/./base/gp.h:296:16
-    #1 0xa15686 in s_file_write_flush /src/ghostpdl/./base/sfxstdio.c:232:5
-    #2 0x7150c1 in sclose /src/ghostpdl/./base/stream.c:445:18
-    #3 0x712236 in __covrec_E41827ADD4171695u /src/ghostpdl/./base/stream.c:91:9
-    #4 0x12e985e in restore_finalize /src/ghostpdl/./psi/isave.c:954:13
-    #5 0x12ea5dc in alloc_restore_all /src/ghostpdl/./psi/isave.c:901:13
-    #6 0x5221c1 in __covrec_2501B5FECECCD151u /src/ghostpdl/./psi/imain.c:1391:20
-    #7 0x52362e in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1434:12
-    #8 0x52367e in gs_to_exit /src/ghostpdl/./psi/imain.c:1439:12
-    #9 0x119c0d8 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
-    #10 0x515aef in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
-    #11 0x4e5ad3 in __covrec_673F6603978DF04Bu /src/gs_fuzzlib.h:135:8
-    #12 0x4e5e7b in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:26:2
-    #13 0x4f432c in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /tmp/libfuzzer/./FuzzerLoop.cpp:532:15
-    #14 0x4e6285 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /tmp/libfuzzer/./FuzzerDriver.cpp:284:6
-    #15 0x4eaf31 in __covrec_6990238F142DEEC4u /tmp/libfuzzer/./FuzzerDriver.cpp:713:9
-    #16 0x4e5f52 in main /tmp/libfuzzer/./FuzzerMain.cpp:19:10
-    #17 0x7f254148a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
-    #18 0x426d0d in _start (/out/gs_device_pdfwrite_fuzzer+0x426d0d)
+    #0 0x91b32c in gp_fflush /src/ghostpdl/./base/gp.h:296:16
+    #1 0x91b32c in s_file_write_flush /src/ghostpdl/./base/sfxstdio.c:232:5
+    #2 0x6ca97a in sclose /src/ghostpdl/./base/stream.c:445:18
+    #3 0x6c808d in stream_finalize /src/ghostpdl/./base/stream.c:91:9
+    #4 0xf801d8 in restore_finalize /src/ghostpdl/./psi/isave.c:954:13
+    #5 0xf801d8 in alloc_restore_all /src/ghostpdl/./psi/isave.c:901:13
+    #6 0x579f64 in gs_main_finit /src/ghostpdl/./psi/imain.c:1391:20
+    #7 0x57aa92 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1434:12
+    #8 0x57aa92 in gs_to_exit /src/ghostpdl/./psi/imain.c:1439:12
+    #9 0xe6e2d3 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
+    #10 0x56f03a in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
+    #11 0x56dd2c in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:135:8
+    #12 0x56e126 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:26:2
+    #13 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #14 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #15 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #16 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #17 0x7f4d20be8082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #18 0x420aed in _start (/out/gs_device_pdfwrite_fuzzer+0x420aed)
 
 0x61100001ed58 is located 224 bytes to the right of 248-byte region [0x61100001eb80,0x61100001ec78)
 allocated by thread T0 here:
-    #0 0x4a8146 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
-    #1 0xc623d0 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:192:34
+    #0 0x530356 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0xaba5f8 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:192:34
+    #2 0xac3d25 in gs_raw_alloc_struct_immovable /src/ghostpdl/./base/gsmemory.c:128:12
+    #3 0x1593e68 in alloc_acquire_clump /src/ghostpdl/./base/gsalloc.c:2423:10
+    #4 0x1592efc in alloc_add_clump /src/ghostpdl/./base/gsalloc.c:2395:19
+    #5 0x1592efc in alloc_obj /src/ghostpdl/./base/gsalloc.c:2004:17
+    #6 0x158b529 in i_alloc_bytes /src/ghostpdl/./base/gsalloc.c:1162:15
+    #7 0xa7a401 in gx_device_open_output_file /src/ghostpdl/./base/gsdevice.c:1264:28
+    #8 0x90ef85 in gdev_vector_open_file_options /src/ghostpdl/./base/gdevvec.c:282:13
+    #9 0x80bc99 in pdf_open /src/ghostpdl/./devices/vector/gdevpdf.c:787:12
+    #10 0xa7500c in gs_opendevice /src/ghostpdl/./base/gsdevice.c:461:20
+    #11 0xa7500c in gs_setdevice_no_erase /src/ghostpdl/./base/gsdevice.c:580:28
+    #12 0xf4898a in zsetdevice_no_safer /src/ghostpdl/./psi/zdevice.c:594:12
+    #13 0xf4898a in zsetdevice /src/ghostpdl/./psi/zdevice.c:637:12
+    #14 0xe84999 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #15 0xe84999 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #16 0xe84999 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #17 0x572423 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #18 0x572423 in gs_run_init_file /src/ghostpdl/./psi/imain.c:861:12
+    #19 0x572423 in gs_main_init2aux /src/ghostpdl/./psi/imain.c:305:16
+    #20 0x573cb1 in gs_main_init2 /src/ghostpdl/./psi/imain.c:491:12
+    #21 0x11b2be8 in swproc /src/ghostpdl/./psi/imainarg.c:363:20
+    #22 0x11afb7e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #23 0x11b6898 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #24 0xe6d4a2 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #25 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #26 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #27 0x56e126 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:26:2
+    #28 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #29 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #30 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #31 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #32 0x7f4d20be8082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ghostpdl/./base/gp.h:296:16 in gp_fflush
 Shadow bytes around the buggy address:

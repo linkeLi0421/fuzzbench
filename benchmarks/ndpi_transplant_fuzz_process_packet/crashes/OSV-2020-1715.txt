@@ -1,34 +1,68 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2363892359
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
-protocols/kerberos.c:240:23: runtime error: index 254 out of bounds for type 'char[48]'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior protocols/kerberos.c:240:23 in 
-==1== ERROR: libFuzzer: deadly signal
-    #0 0x539091 in __sanitizer_print_stack_trace /src/llvm-project/compiler-rt/lib/asan/asan_stack.cpp:87:3
-    #1 0x457ba8 in fuzzer::PrintStackTrace() /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerUtil.cpp:210:5
-    #2 0x43c883 in fuzzer::Fuzzer::CrashCallback() /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:233:3
-    #3 0x7fc2a1ef041f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f) (BuildId: 9753720502573b97dbac595b61fd72c2df18e078)
-    #4 0x7fc2a1d0000a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #5 0x7fc2a1cdf858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #6 0x5532b6 in __sanitizer::Abort() /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_posix_libcdep.cpp:143:3
-    #7 0x551160 in __sanitizer::Die() /src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_termination.cpp:58:5
-    #8 0x567342 in __ubsan_handle_out_of_bounds_abort /src/llvm-project/compiler-rt/lib/ubsan/ubsan_handlers.cpp:405:3
-    #9 0x5fdf1b in ndpi_search_kerberos_osv_2020_1715 /src/ndpi/src/lib/protocols/kerberos.c:240:23
-    #10 0x5fdf1b in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:573:5
-    #11 0x58a050 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:4005:2
-    #12 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
-    #13 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
-    #14 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
-    #15 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
-    #16 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
-    #17 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #18 0x7fc2a1ce1082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
-    #19 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
+INFO: Seed: 1914578050
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7ffcbc36a07e at pc 0x0000005fa9a7 bp 0x7ffcbc369e50 sp 0x7ffcbc369e48
+READ of size 1 at 0x7ffcbc36a07e thread T0
+    #0 0x5fa9a6 in ndpi_search_kerberos_osv_2020_1715 /src/ndpi/src/lib/protocols/kerberos.c:240:23
+    #1 0x5fa9a6 in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:573:5
+    #2 0x588d27 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c
+    #3 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #4 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
+    #5 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f91950fa082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
-NOTE: libFuzzer has rudimentary signal handlers.
-      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
-SUMMARY: libFuzzer: deadly signal
+Address 0x7ffcbc36a07e is located in stack of thread T0 at offset 542 in frame
+    #0 0x5f313f in ndpi_search_kerberos /src/ndpi/src/lib/protocols/kerberos.c:571
+
+  This frame has 8 object(s):
+    [32, 56) 'cname_str.i3' (line 443)
+    [96, 120) 'realm_str.i4' (line 461)
+    [160, 184) 'cname_str369.i' (line 513)
+    [224, 248) 'realm_str418.i' (line 531)
+    [288, 336) 'cname_str.i' (line 215)
+    [368, 416) 'realm_str.i' (line 255)
+    [448, 496) 'realm_str626.i' (line 296)
+    [528, 576) 'cname_str727.i' (line 346) <== Memory access at offset 542 is inside this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-use-after-scope /src/ndpi/src/lib/protocols/kerberos.c:240:23 in ndpi_search_kerberos_osv_2020_1715
+Shadow bytes around the buggy address:
+  0x1000178653b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000178653c0: 00 00 00 00 00 00 00 00 00 00 00 00 f1 f1 f1 f1
+  0x1000178653d0: f8 f8 f8 f2 f2 f2 f2 f2 f8 f8 f8 f2 f2 f2 f2 f2
+  0x1000178653e0: f8 f8 f8 f2 f2 f2 f2 f2 f8 f8 f8 f2 f2 f2 f2 f2
+  0x1000178653f0: 00 00 00 00 00 00 f2 f2 f2 f2 f8 f8 f8 f8 f8 f8
+=>0x100017865400: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f8[f8]
+  0x100017865410: f8 f8 f8 f8 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x100017865420: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100017865430: 00 00 00 00 00 00 00 00 f1 f1 f1 f1 00 00 00 00
+  0x100017865440: 00 00 00 00 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x100017865450: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

@@ -30,7 +30,7 @@
       "triggered": true,
       "crash_file": "/src/ghostpdl/./devices/vector/gdevpdfg.c",
       "crash_line": 73,
-      "crash_function": "__covrec_5D5B21D96B32D4F9u"
+      "crash_function": "pdf_save_viewer_state"
     },
     "OSV-2022-772": {
       "dispatch_value": 0,
@@ -43,7 +43,7 @@
       "dispatch_value": 0,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./base/gstype2.c",
-      "crash_line": 774,
+      "crash_line": 181,
       "crash_function": "gs_type2_interpret"
     },
     "OSV-2022-1148": {

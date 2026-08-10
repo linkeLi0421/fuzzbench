@@ -93,8 +93,27 @@ CPPFLAGS="${CPPFLAGS:-} $CUPS_CFLAGS -DPACIFY_VALGRIND" ./autogen.sh \
 # ghostpdl's autogen.sh auto-adds `-fno-sanitize-recover=...,shift,signed-integer-overflow,...`
 # when UBSAN is detected. That makes pre-existing shift UB in base/gsiorom.c
 # abort the binary on every run, masking the real bug crashes we need to
-# locate. Strip that flag so UBSAN_OPTIONS=halt_on_error=0 can take effect.
+# locate. Strip that flag.
 find . -name Makefile -exec sed -i 's/-fno-sanitize-recover=[^ ]*//g' {} +
+
+# autogen also injects a per-check UBSAN list into every Makefile compile
+# rule, of the form:
+#   -fsanitize=array-bounds,bool,builtin,enum,float-divide-by-zero,
+#     function,integer-divide-by-zero,null,object-size,return,
+#     returns-nonnull-attribute,shift,signed-integer-overflow,
+#     unreachable,vla-bound,vptr
+# (NOT the umbrella -fsanitize=undefined form, so matching "undefined"
+# does nothing.)  Left in place it only produces recoverable "runtime
+# error:" noise -- base/gsiorom.c, psi/imainarg.c, base/gxpath.c and
+# base/gxcpath.c fire on effectively every input, polluting all 26 crash
+# logs -- and under afl++, which pins ASAN_OPTIONS=abort_on_error=1, it
+# turns each report into SIGABRT and kills seeds during calibration.
+# Every transplanted bug here is an ASAN heap/stack/UAF error, so strip
+# the UBSAN per-check list. The leading `-fsanitize=address` stays, so
+# ASAN instrumentation is unaffected. Mirrors gstoraster's build.sh.
+find . -name Makefile -exec sed -i 's/-fsanitize=array-bounds[^ ]*//g' {} +
+# Safety net for the umbrella form in case any future check uses it.
+find . -name Makefile -exec sed -i 's/-fsanitize=undefined//g' {} +
 
 make -j$(nproc) libgs
 

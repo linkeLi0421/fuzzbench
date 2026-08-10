@@ -112,9 +112,9 @@
     "OSV-2020-59": {
       "dispatch_value": 0,
       "triggered": true,
-      "crash_file": "/src/ndpi/src/lib/ndpi_main.c",
-      "crash_line": 4061,
-      "crash_function": "check_ndpi_tcp_flow_func"
+      "crash_file": "/src/ndpi/src/lib/protocols/bittorrent.c",
+      "crash_line": 76,
+      "crash_function": "ndpi_add_connection_as_bittorrent"
     },
     "OSV-2020-78": {
       "dispatch_value": 0,

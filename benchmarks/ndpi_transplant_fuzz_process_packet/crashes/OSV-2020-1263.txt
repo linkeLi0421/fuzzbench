@@ -1,26 +1,23 @@
-
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2362835261
-INFO: Loaded 1 modules   (14626 inline 8-bit counters): 14626 [0x7a3c30, 0x7a7552), 
-INFO: Loaded 1 PC tables (14626 PCs): 14626 [0x7a7558,0x7e0778), 
-/out/fuzz_process_packet: Running 1 inputs 1 time(s) each.
-Running: /corpus/testcase
-ndpi_utils.c:218:18: runtime error: shift exponent 32 is too large for 32-bit type 'u_int32_t' (aka 'unsigned int')
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior ndpi_utils.c:218:18 in 
+INFO: Seed: 1924146030
+INFO: Loaded 1 modules   (13014 inline 8-bit counters): 13014 [0x78f0f0, 0x7923c6), 
+INFO: Loaded 1 PC tables (13014 PCs): 13014 [0x7923c8,0x7c5128), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000002bd at pc 0x0000005c07f3 bp 0x7ffc2f0c66a0 sp 0x7ffc2f0c6698
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000002bd at pc 0x0000005be17c bp 0x7ffc1daf2800 sp 0x7ffc1daf27f8
 READ of size 2 at 0x60b0000002bd thread T0
-    #0 0x5c07f2 in getSSCertificateFingerprint /src/ndpi/src/lib/protocols/tls.c:894:21
-    #1 0x5c1ce8 in tlsDetectProtocolFromCertificate /src/ndpi/src/lib/protocols/tls.c:1129:7
-    #2 0x5c30d1 in ndpi_search_tls_tcp_udp /src/ndpi/src/lib/protocols/tls.c:1501:8
-    #3 0x592e1c in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
-    #4 0x59c6f2 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
+    #0 0x5be17b in getSSCertificateFingerprint /src/ndpi/src/lib/protocols/tls.c:894:21
+    #1 0x5bf5a1 in tlsDetectProtocolFromCertificate /src/ndpi/src/lib/protocols/tls.c:1129:7
+    #2 0x5c093b in ndpi_search_tls_tcp_udp /src/ndpi/src/lib/protocols/tls.c:1501:8
+    #3 0x58e9f8 in check_ndpi_tcp_flow_func /src/ndpi/src/lib/ndpi_main.c:4061:4
+    #4 0x59afb5 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:4804:3
     #5 0x56c65c in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:36:5
     #6 0x43de23 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
     #7 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #8 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #9 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #10 0x7f4c52a0c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x7fcb463fd082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #11 0x41f74d in _start (/out/fuzz_process_packet+0x41f74d)
 
 0x60b0000002be is located 0 bytes to the right of 110-byte region [0x60b000000250,0x60b0000002be)
@@ -31,7 +28,7 @@ allocated by thread T0 here:
     #3 0x429582 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #4 0x42ee2c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #5 0x458362 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #6 0x7f4c52a0c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #6 0x7fcb463fd082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ndpi/src/lib/protocols/tls.c:894:21 in getSSCertificateFingerprint
 Shadow bytes around the buggy address:
@@ -66,5 +63,3 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     ca
   Right alloca redzone:    cb
 ==1==ABORTING
-AddressSanitizer:DEADLYSIGNAL
-AddressSanitizer: nested bug in the same thread, aborting.
