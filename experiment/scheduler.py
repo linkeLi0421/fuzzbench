@@ -753,6 +753,7 @@ def render_startup_script_template(  # pylint: disable=too-many-arguments
     docker_image_url = benchmark_utils.get_runner_image_url(
         experiment, benchmark, fuzzer, experiment_config['docker_registry'])
     fuzz_target = benchmark_utils.get_fuzz_target(benchmark)
+    additional_args = benchmark_utils.get_additional_args(benchmark)
 
     local_experiment = experiment_utils.is_local_experiment()
     template = JINJA_ENV.get_template('runner-startup-script-template.sh')
@@ -769,6 +770,7 @@ def render_startup_script_template(  # pylint: disable=too-many-arguments
         'experiment_filestore': experiment_config['experiment_filestore'],
         'report_filestore': experiment_config['report_filestore'],
         'fuzz_target': fuzz_target,
+        'additional_args': additional_args,
         'docker_image_url': docker_image_url,
         'docker_registry': experiment_config['docker_registry'],
         'local_experiment': local_experiment,

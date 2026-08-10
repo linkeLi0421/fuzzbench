@@ -44,6 +44,31 @@ SANITIZER_FLAGS = [
     'vla-bound,vptr',
 ]
 
+# ASan only, no UB instrumentation. Used for the bug-transplant benchmarks.
+#
+# The UBSan entries above are built with -fno-sanitize-recover, so undefined
+# behaviour *aborts* the process. For the transplant benchmarks that is
+# actively harmful: every one of the 355 catalogued bugs is an ASan-detectable
+# memory-safety bug, while shallow integer/shift UB in the surrounding target
+# code aborts before the transplanted bug can trigger. Two measured cases:
+#   * htslib -- 3 of 11 bugs' own PoCs abort on an unrelated shift/overflow
+#     check and never reach the documented crash, so no fuzzer can find them.
+#   * ndpi_process_packet -- a shallow shift UB in ndpi_utils.c:218 masked
+#     16 of 43 crash logs (see the note in that benchmark's build.sh).
+# ASan instrumentation is untouched, so no catalogued bug can be hidden.
+#
+# Upstream FuzzBench bug benchmarks keep the standard flag set so their results
+# stay comparable with published FuzzBench numbers.
+TRANSPLANT_SANITIZER_FLAGS = ['-fsanitize=address']
+
+
+def get_sanitizer_flags():
+    """Sanitizer flags for this benchmark: ASan-only for transplant ones."""
+    benchmark = os.getenv('BENCHMARK') or ''
+    if '_transplant_' in benchmark:
+        return TRANSPLANT_SANITIZER_FLAGS
+    return SANITIZER_FLAGS
+
 # Use these flags when compiling benchmark code without a sanitizer (e.g. when
 # using eclipser). This is necessary because many OSS-Fuzz targets cannot
 # otherwise be compiled without a sanitizer because they implicitly depend on
@@ -185,12 +210,13 @@ def set_compilation_flags(env=None):
     env['CXXFLAGS'] = ''
 
     if get_config_value('type') == 'bug':
+        sanitizer_flags = get_sanitizer_flags()
         append_flags('CFLAGS',
-                     FUZZING_CFLAGS + SANITIZER_FLAGS +
+                     FUZZING_CFLAGS + sanitizer_flags +
                      [BUGS_OPTIMIZATION_LEVEL],
                      env=env)
         append_flags('CXXFLAGS',
-                     FUZZING_CFLAGS + SANITIZER_FLAGS +
+                     FUZZING_CFLAGS + sanitizer_flags +
                      [LIBCPLUSPLUS_FLAG, BUGS_OPTIMIZATION_LEVEL],
                      env=env)
     else:

@@ -48,6 +48,26 @@ def get_fuzz_target(benchmark):
         'fuzz_target', environment.get('FUZZ_TARGET'))
 
 
+def get_additional_args(benchmark):
+    """Returns the ADDITIONAL_ARGS the benchmark's Dockerfile declares, or ''.
+
+    script/fuzzbench_generate.py writes `ENV ADDITIONAL_ARGS="..."` (typically
+    "-rss_limit_mb=8192") into each generated benchmark Dockerfile, and the
+    fuzzers splice $ADDITIONAL_ARGS onto the target command line.  But that ENV
+    lands only in the *builder* image: runner.Dockerfile is `FROM
+    gcr.io/fuzzbench/base-image` and copies /out, so it never reaches the
+    runner and the fuzzers' `if 'ADDITIONAL_ARGS' in os.environ` was always
+    False.  Read it here so the runner startup script can pass it through.
+    """
+    dockerfile = os.path.join(BENCHMARKS_DIR, benchmark, 'Dockerfile')
+    if not os.path.isfile(dockerfile):
+        return ''
+    with open(dockerfile, encoding='utf-8') as file_handle:
+        match = re.search(r'^ENV\s+ADDITIONAL_ARGS=(.*)$', file_handle.read(),
+                          re.MULTILINE)
+    return match.group(1).strip().strip('"\'') if match else ''
+
+
 def get_project(benchmark):
     """Returns the project of |benchmark|"""
     return benchmark_config.get_config(benchmark)['project']
