@@ -14,9 +14,9 @@
     "OSV-2022-523": {
       "dispatch_value": 2,
       "triggered": true,
-      "crash_file": "/src/ghostpdl/./base/gsmchunk.c",
-      "crash_line": 1110,
-      "crash_function": "chunk_free_object"
+      "crash_file": "/src/ghostpdl/./base/gxttfb.c",
+      "crash_line": 337,
+      "crash_function": "gx_ttfMemory__free"
     },
     "OSV-2022-757": {
       "dispatch_value": 4,

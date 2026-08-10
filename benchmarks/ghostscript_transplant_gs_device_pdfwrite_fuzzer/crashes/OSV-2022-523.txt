@@ -1,10 +1,52 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2624870690
-INFO: Loaded 3 modules   (222717 inline 8-bit counters): 13672 [0x7f23403989e0, 0x7f234039bf48), 959 [0x7f23403f9a40, 0x7f23403f9dff), 208086 [0x380e980, 0x3841656), 
-INFO: Loaded 3 PC tables (222717 PCs): 13672 [0x7f234039bf48,0x7f23403d15c8), 959 [0x7f23403f9e00,0x7f23403fd9f0), 208086 [0x2a78f10,0x2da5c70), 
+INFO: Seed: 2823615742
+INFO: Loaded 3 modules   (222717 inline 8-bit counters): 13672 [0x7fb9c4a5c9e0, 0x7fb9c4a5ff48), 959 [0x7fb9c4abda40, 0x7fb9c4abddff), 208086 [0x380e980, 0x3841656), 
+INFO: Loaded 3 PC tables (222717 PCs): 13672 [0x7fb9c4a5ff48,0x7fb9c4a955c8), 959 [0x7fb9c4abde00,0x7fb9c4ac19f0), 208086 [0x2a78f10,0x2da5c70), 
 /out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0xffffffffff000087 (pc 0xffffffffff000087 bp 0x7fff3bede010 sp 0x7fff3beddf98 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0xffffffffff000087 (pc 0xffffffffff000087 bp 0x7ffe3712cbb0 sp 0x7ffe3712cb38 T0)
 ==1==The signal is caused by a READ memory access.
+    #0 0xffffffffff000087  (<unknown module>)
+    #1 0x1267975 in gx_ttfMemory__free /src/ghostpdl/./base/gxttfb.c:337:5
+    #2 0x165e08e in Context_Destroy /src/ghostpdl/./base/ttobjs.c:237:4
+    #3 0x1652aa6 in ttfFont__finit /src/ghostpdl/./base/ttfmain.c:199:13
+    #4 0x1267a17 in ttfFont__destroy /src/ghostpdl/./base/gxttfb.c:423:5
+    #5 0xc34d53 in gs_clean_fm_pair_attributes /src/ghostpdl/./base/gxccman.c:409:9
+    #6 0xc34d53 in gs_purge_fm_pair /src/ghostpdl/./base/gxccman.c:435:5
+    #7 0xc3863e in gs_purge_font_from_char_caches_forced /src/ghostpdl/./base/gxccman.c:801:28
+    #8 0xc38491 in gs_purge_font_from_char_caches /src/ghostpdl/./base/gxccman.c:832:12
+    #9 0xa96bd4 in gs_font_finalize /src/ghostpdl/./base/gsfont.c:167:5
+    #10 0x7038be in chunk_free_object /src/ghostpdl/./base/gsmchunk.c:1112:13
+    #11 0x1135bf7 in pdfi_free_font_truetype /src/ghostpdl/./pdf/pdf_fontTT.c:768:9
+    #12 0x10ee430 in pdfi_free_font /src/ghostpdl/./pdf/pdf_font.c:1435:20
+    #13 0x119aff4 in pdfi_free_object /src/ghostpdl/./pdf/pdf_obj.c:296:13
+    #14 0x10245f1 in pdfi_countdown_impl /src/ghostpdl/./pdf/pdf_stack.h:100:5
+    #15 0x10245f1 in pdfi_clear_context /src/ghostpdl/./pdf/ghostpdf.c:2074:13
+    #16 0x102d792 in pdfi_free_context /src/ghostpdl/./pdf/ghostpdf.c:2110:5
+    #17 0x101134b in zPDFclose /src/ghostpdl/./psi/zpdfops.c:618:16
+    #18 0xe84999 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #19 0xe84999 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #20 0xe84999 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #21 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #22 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #23 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #24 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #25 0x11b6b0c in run_string /src/ghostpdl/./psi/imainarg.c:1169:12
+    #26 0x11b2c32 in swproc /src/ghostpdl/./psi/imainarg.c:367:20
+    #27 0x11afb7e in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:224:24
+    #28 0x11b6898 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:289:16
+    #29 0xe6d4a2 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #30 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #31 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #32 0x56e126 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:26:2
+    #33 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #34 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #35 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #36 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #37 0x7fb9c445d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (<unknown module>) 
+==1==ABORTING
