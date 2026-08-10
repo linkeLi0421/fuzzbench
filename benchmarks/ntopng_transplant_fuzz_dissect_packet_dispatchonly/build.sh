@@ -234,7 +234,11 @@ if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1
     done
 fi
 
-if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
+# NOTE: do not use `ls /tmp/seeds_dispatch/*` here. With a large corpus the
+# glob exceeds ARG_MAX (ndpi_reader: 35k seeds ~= 2.06MB > 2MB limit), the
+# test silently fails, the seed zip is never written, and FuzzBench starts
+# the fuzzers from a 2-byte fake seed. `find -quit` has no such limit.
+if [ -n "$(find /tmp/seeds_dispatch -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
     rm -f "$seed_zip"
     zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
 fi
