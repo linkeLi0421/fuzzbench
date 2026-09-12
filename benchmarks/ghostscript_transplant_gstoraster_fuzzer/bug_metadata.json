@@ -127,8 +127,12 @@
       "dispatch_value": 131072,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./psi/igc.c",
-      "crash_line": 1091,
-      "crash_function": "ptr_struct_mark"
+      "crash_line": 915,
+      "crash_function": "gc_trace",
+      "reach_file": "/src/ghostpdl/./psi/zpdfops.c",
+      "reach_line": 816,
+      "reach_function": "PDFarray_to_PSarray",
+      "reach_rationale": "Crash site is the GC marking loop, which runs at every interpreter teardown, so it is not a usable coverage probe. reach_* points at the defect itself: the ref_assign_old that writes an uninitialized ref into PostScript VM, reachable only with dispatch bit 17. See case_study_ghostscript_osv_2022_422_crash_site_drift.md."
     },
     "OSV-2022-429": {
       "dispatch_value": 262144,
