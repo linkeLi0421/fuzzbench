@@ -1,0 +1,30 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3540423272
+INFO: Loaded 1 modules   (46145 inline 8-bit counters): 46145 [0x56295a8ca650, 0x56295a8d5a91), 
+INFO: Loaded 1 PC tables (46145 PCs): 46145 [0x56295a8d5a98,0x56295a989ea8), 
+/out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x7c3747cc01dc (pc 0x56295a340d5c bp 0x7ffecaaa98b0 sp 0x7ffecaaa9780 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x56295a340d5c in get_meta_from_header /src/c-blosc2/blosc/frame.c:1466:9
+    #1 0x56295a340d5c in frame_get_metalayers /src/c-blosc2/blosc/frame.c:1560:9
+    #2 0x56295a34350c in frame_to_schunk /src/c-blosc2/blosc/frame.c:2062:8
+    #3 0x56295a32eed0 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:577:27
+    #4 0x56295a2f8cbb in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:27:27
+    #5 0x56295a19656d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #6 0x56295a1812e2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #7 0x56295a1871b0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #8 0x56295a1b2ce2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f6769ce2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+    #10 0x56295a17a3cd in _start (/out/decompress_frame_fuzzer+0x1633cd)
+
+==1==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ffecaaa9780  rcx = 0x0000000000000023  rdx = 0x000056295a999400  
+rdi = 0x00000000000012f8  rsi = 0x0000000800000000  rbp = 0x00007ffecaaa98b0  rsp = 0x00007ffecaaa9780  
+ r8 = 0x0000000000002000   r9 = 0x0000000000000001  r10 = 0x00000f70ed1fc012  r11 = 0x0000000000000002  
+r12 = 0x00007f6769bd0040  r13 = 0x0000000000000080  r14 = 0x00000000dece00cb  r15 = 0x00007c3747cc01dc  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/c-blosc2/blosc/frame.c:1466:9 in get_meta_from_header
+==1==ABORTING

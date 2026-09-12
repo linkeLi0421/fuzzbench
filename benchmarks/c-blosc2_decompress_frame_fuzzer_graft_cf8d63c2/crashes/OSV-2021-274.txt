@@ -1,0 +1,23 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3541899390
+INFO: Loaded 1 modules   (46145 inline 8-bit counters): 46145 [0x56249d986650, 0x56249d991a91), 
+INFO: Loaded 1 PC tables (46145 PCs): 46145 [0x56249d991a98,0x56249da45ea8), 
+/out/decompress_frame_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: requested allocation size 0xffffffffff623266 (0xffffffffff624268 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0x10000000000 (thread T0)
+    #0 0x56249d370ec4 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:67:3
+    #1 0x56249d3fcefc in get_meta_from_header /src/c-blosc2/blosc/frame.c:1484:21
+    #2 0x56249d3fcefc in frame_get_metalayers /src/c-blosc2/blosc/frame.c:1560:9
+    #3 0x56249d3ff50c in frame_to_schunk /src/c-blosc2/blosc/frame.c:2062:8
+    #4 0x56249d3eaed0 in blosc2_schunk_from_buffer /src/c-blosc2/blosc/schunk.c:577:27
+    #5 0x56249d3b4cbb in LLVMFuzzerTestOneInput /src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c:27:27
+    #6 0x56249d25256d in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:619:13
+    #7 0x56249d23d2e2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:329:6
+    #8 0x56249d2431b0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:865:9
+    #9 0x56249d26ece2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f1de0aa5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 5792732f783158c66fb4f3756458ca24e46e827d)
+
+==1==HINT: if you don't care about these errors you may set allocator_may_return_null=1
+SUMMARY: AddressSanitizer: allocation-size-too-big /src/c-blosc2/blosc/frame.c:1484:21 in get_meta_from_header
+==1==ABORTING

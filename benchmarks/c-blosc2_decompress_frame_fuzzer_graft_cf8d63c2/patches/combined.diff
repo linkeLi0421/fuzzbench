@@ -1,0 +1,404 @@
+diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
+index bea51b7d..d88ae50b 100644
+--- a/blosc/CMakeLists.txt
++++ b/blosc/CMakeLists.txt
+@@ -266,6 +266,7 @@ list(APPEND SOURCES
+     blosc/blosc2-stdio.c
+     blosc/b2nd.c
+     blosc/b2nd_utils.c
++    ${PROJECT_SOURCE_DIR}/__bug_dispatch.c
+ )
+ if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL arm64)
+     if(COMPILER_SUPPORT_SSE2)
+diff --git a/blosc/blosc2.c b/blosc/blosc2.c
+index b0890021..16910ce6 100644
+--- a/blosc/blosc2.c
++++ b/blosc/blosc2.c
+@@ -11,6 +11,7 @@
+ 
+ #include "blosc2.h"
+ #include "blosc-private.h"
++#include "../__bug_dispatch.h"
+ #include "../plugins/codecs/zfp/blosc2-zfp.h"
+ #include "frame.h"
+ #include "b2nd-private.h"
+@@ -727,7 +728,17 @@ int read_chunk_header(const uint8_t* src, int32_t srcsize, bool extended_header,
+     if (special_type != 0) {
+       if (special_type == BLOSC2_SPECIAL_VALUE) {
+         // In this case, the actual type size must be derived from the cbytes
+-        int32_t typesize = header->cbytes - BLOSC_EXTENDED_HEADER_LENGTH;
++        int32_t typesize;
++        if (__BUG_ACTIVE(22)) {
++          // OSV-2021-897: use the typesize encoded in the header
++          typesize = header->typesize;
++        } else if (__BUG_ACTIVE(29)) {
++          // OSV-2022-1242's version: use the (untrusted) typesize from the header
++          typesize = header->typesize;
++        } else {
++          // Original version: derive the actual type size from the cbytes
++          typesize = header->cbytes - BLOSC_EXTENDED_HEADER_LENGTH;
++        }
+         if (header->nbytes % typesize != 0) {
+           BLOSC_TRACE_ERROR("`nbytes` is not a multiple of typesize");
+           return BLOSC2_ERROR_INVALID_HEADER;
+@@ -766,7 +777,9 @@ static int blosc2_initialize_context_from_header(blosc2_context* context, blosc_
+   context->typesize = header->typesize;
+   context->sourcesize = header->nbytes;
+   context->blocksize = header->blocksize;
+-  context->blosc2_flags = header->blosc2_flags;
++  if (!__BUG_ACTIVE(5)) {
++    context->blosc2_flags = header->blosc2_flags;
++  }
+   context->compcode = header->flags >> 5;
+   if (context->compcode == BLOSC_UDCODEC_FORMAT) {
+     context->compcode = header->udcompcode;
+@@ -778,6 +791,9 @@ static int blosc2_initialize_context_from_header(blosc2_context* context, blosc_
+       (context->header_flags & BLOSC_DOBITSHUFFLE)) {
+     /* Extended header */
+     context->header_overhead = BLOSC_EXTENDED_HEADER_LENGTH;
++    if (__BUG_ACTIVE(5)) {
++      context->blosc2_flags = header->blosc2_flags;
++    }
+ 
+     memcpy(context->filters, header->filters, BLOSC2_MAX_FILTERS);
+     memcpy(context->filters_meta, header->filters_meta, BLOSC2_MAX_FILTERS);
+@@ -1587,7 +1603,12 @@ static int blosc_d(
+   }
+   if (context->special_type == BLOSC2_SPECIAL_VALUE) {
+     // We need the actual typesize in this case, but it cannot be encoded in the header, so derive it from cbytes
+-    typesize = chunk_cbytes - context->header_overhead;
++    if (__BUG_ACTIVE(22)) {
++      // OSV-2021-897: use the typesize stored in the context
++      typesize = context->typesize;
++    } else {
++      typesize = chunk_cbytes - context->header_overhead;
++    }
+   }
+ 
+   // In some situations (lazychunks) the context can arrive uninitialized
+@@ -2327,9 +2348,29 @@ static int initialize_context_decompression(blosc2_context* context, blosc_heade
+ 
+   context->bstarts = (int32_t *) (context->src + context->header_overhead);
+   bstarts_end = context->header_overhead;
+-  if (!context->special_type && !memcpyed) {
+-    /* If chunk is not special or a memcpyed, we do have a bstarts section */
+-    bstarts_end = (int32_t)(context->header_overhead + (context->nblocks * sizeof(int32_t)));
++  if (__BUG_ACTIVE(16)) {
++    /* OSV-2021-487: do not skip bstarts section for special (but not memcpyed) chunks */
++    if (!memcpyed) {
++      /* If chunk is not special or a memcpyed, we do have a bstarts section */
++      bstarts_end = (int32_t)(context->header_overhead + (context->nblocks * sizeof(int32_t)));
++    }
++  } else if (__BUG_ACTIVE(4)) {
++    /* OSV-2021-27 (NEW): buggy version ignores special_type */
++    if (!memcpyed) {
++      /* If chunk is not special or a memcpyed, we do have a bstarts section */
++      bstarts_end = (int32_t)(context->header_overhead + (context->nblocks * sizeof(int32_t)));
++    }
++  } else if (__BUG_ACTIVE(14)) {
++    if (!memcpyed) {
++      /* If chunk is not special or a memcpyed, we do have a bstarts section */
++      bstarts_end = (int32_t)(context->header_overhead + (context->nblocks * sizeof(int32_t)));
++    }
++  } else {
++    /* OSV-2021-27 (OLD): original version */
++    if (!context->special_type && !memcpyed) {
++      /* If chunk is not special or a memcpyed, we do have a bstarts section */
++      bstarts_end = (int32_t)(context->header_overhead + (context->nblocks * sizeof(int32_t)));
++    }
+   }
+ 
+   if (srcsize < bstarts_end) {
+@@ -3066,7 +3107,15 @@ int _blosc_getitem(blosc2_context* context, blosc_header* header, const void* sr
+ 
+   bool is_lazy = ((context->header_overhead == BLOSC_EXTENDED_HEADER_LENGTH) &&
+                   (context->blosc2_flags & 0x08u) && !context->special_type);
+-  if (memcpyed && !is_lazy && !context->postfilter) {
++  bool do_shortcut;
++  if (__BUG_ACTIVE(21)) {
++    // OSV-2021-639: also skip the short-circuit for special values
++    do_shortcut = memcpyed && !is_lazy && !context->special_type && !context->postfilter;
++  } else {
++    // Original version (before the patch)
++    do_shortcut = memcpyed && !is_lazy && !context->postfilter;
++  }
++  if (do_shortcut) {
+     // Short-circuit for (non-lazy) memcpyed or special values
+     ntbytes = nitems * header->typesize;
+     switch (context->special_type) {
+diff --git a/blosc/frame.c b/blosc/frame.c
+index 08b7b5c8..52d99e83 100644
+--- a/blosc/frame.c
++++ b/blosc/frame.c
+@@ -8,6 +8,7 @@
+   See LICENSE.txt for details about copyright and rights to use.
+ **********************************************************************/
+ 
++#include "../__bug_dispatch.h"
+ #include "frame.h"
+ #include "sframe.h"
+ #include "context.h"
+@@ -1092,10 +1093,31 @@ uint8_t* get_coffsets(blosc2_frame_s *frame, int32_t header_len, int64_t cbytes,
+       off_pos += cbytes;
+     }
+     // Check that there is enough room to read Blosc header
+-    if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH ||
+-        off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
+-      BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
+-      return NULL;
++    if (__BUG_ACTIVE(8)) {
++      // OSV-2021-247's version (NEW -- from the patch)
++      if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH) {
++        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
++        return NULL;
++      }
++    } else if (__BUG_ACTIVE(10)) {
++      if (off_pos < 0 ||
++          off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
++        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
++        return NULL;
++      }
++    } else if (__BUG_ACTIVE(11)) {
++      if (off_pos < 0 ||
++          off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
++        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
++        return NULL;
++      }
++    } else {
++      // Original version (OLD -- before the patch)
++      if (off_pos < 0 || off_pos > INT64_MAX - BLOSC_EXTENDED_HEADER_LENGTH ||
++          off_pos + BLOSC_EXTENDED_HEADER_LENGTH > frame->len) {
++        BLOSC_TRACE_ERROR("Cannot read the offsets outside of frame boundary.");
++        return NULL;
++      }
+     }
+     // For in-memory frames, the coffset is just one pointer away
+     uint8_t* off_start = frame->cframe + off_pos;
+@@ -1107,14 +1129,28 @@ uint8_t* get_coffsets(blosc2_frame_s *frame, int32_t header_len, int64_t cbytes,
+         return NULL;
+       }
+       *off_cbytes = (int32_t)chunk_cbytes;
+-      if (*off_cbytes < 0 || off_pos + *off_cbytes > frame->len) {
+-        BLOSC_TRACE_ERROR("Cannot read the cbytes outside of frame boundary.");
+-        return NULL;
++      if (__BUG_ACTIVE(15)) {
++        /* OSV-2021-485: vulnerable version (NEW) */
++        if (*off_cbytes < 0 || *off_cbytes > frame->len) {
++          BLOSC_TRACE_ERROR("Cannot read the cbytes outside of frame boundary.");
++          return NULL;
++        }
++      } else if (!__BUG_ACTIVE(6)) {
++        if (!__BUG_ACTIVE(12)) {
++          if (*off_cbytes < 0 || off_pos + *off_cbytes > frame->len) {
++            BLOSC_TRACE_ERROR("Cannot read the cbytes outside of frame boundary.");
++            return NULL;
++          }
++        }
+       }
+-      if ((uint64_t)chunk_nbytes != nchunks * sizeof(int64_t)) {
+-        BLOSC_TRACE_ERROR("The number of chunks in offset idx "
+-                          "does not match the ones in the header frame.");
+-        return NULL;
++      if (!__BUG_ACTIVE(17)) {
++        if (!__BUG_ACTIVE(19)) {
++          if ((uint64_t)chunk_nbytes != nchunks * sizeof(int64_t)) {
++            BLOSC_TRACE_ERROR("The number of chunks in offset idx "
++                              "does not match the ones in the header frame.");
++            return NULL;
++          }
++        }
+       }
+ 
+     }
+@@ -1416,9 +1452,11 @@ static int get_meta_from_header(blosc2_frame_s* frame, blosc2_schunk* schunk, ui
+     }
+     from_big(&offset, idxp, sizeof(offset));
+     idxp += 4;
+-    if (offset < 0 || offset >= header_len) {
+-      // Offset is less than zero or exceeds header length
+-      return BLOSC2_ERROR_DATA;
++    if (!__BUG_ACTIVE(3)) {
++      if (offset < 0 || offset >= header_len) {
++        // Offset is less than zero or exceeds header length
++        return BLOSC2_ERROR_DATA;
++      }
+     }
+     // Go to offset and see if we have the correct marker
+     uint8_t* content_marker = header + offset;
+@@ -1432,8 +1470,10 @@ static int get_meta_from_header(blosc2_frame_s* frame, blosc2_schunk* schunk, ui
+     // Read the size of the content
+     int32_t content_len;
+     from_big(&content_len, content_marker + 1, sizeof(content_len));
+-    if (content_len < 0) {
+-      return BLOSC2_ERROR_DATA;
++    if (!__BUG_ACTIVE(9)) {
++      if (content_len < 0) {
++        return BLOSC2_ERROR_DATA;
++      }
+     }
+     metalayer->content_len = content_len;
+ 
+@@ -1628,8 +1668,20 @@ static int get_vlmeta_from_trailer(blosc2_frame_s* frame, blosc2_schunk* schunk,
+     metalayer->content_len = content_len;
+ 
+     // Finally, read the content
+-    if (trailer_len < offset + 1 + 4 + content_len) {
+-      return BLOSC2_ERROR_READ_BUFFER;
++    if (__BUG_ACTIVE(20)) {
++      trailer_pos += content_len;
++      if (trailer_len < trailer_pos) {
++        return BLOSC2_ERROR_READ_BUFFER;
++      }
++    } else if (__BUG_ACTIVE(28)) {
++      if (trailer_len < (int32_t)((uint32_t)offset + 1 + 4 + (uint32_t)content_len)) {
++        return BLOSC2_ERROR_READ_BUFFER;
++      }
++    } else if (!__BUG_ACTIVE(7)) {
++      // Original code (skipped when OSV-2021-246 is active)
++      if (trailer_len < offset + 1 + 4 + content_len) {
++        return BLOSC2_ERROR_READ_BUFFER;
++      }
+     }
+     char* content = malloc((size_t)content_len);
+     memcpy(content, content_marker + 1 + 4, (size_t)content_len);
+@@ -1658,9 +1710,11 @@ int frame_get_vlmetalayers(blosc2_frame_s* frame, blosc2_schunk* schunk) {
+   int64_t trailer_offset = get_trailer_offset(frame, header_len, nbytes > 0);
+   int32_t trailer_len = (int32_t) frame->trailer_len;
+ 
+-  if (trailer_offset < BLOSC_EXTENDED_HEADER_LENGTH || trailer_offset + trailer_len > frame->len) {
+-    BLOSC_TRACE_ERROR("Cannot access the trailer out of the frame.");
+-    return BLOSC2_ERROR_READ_BUFFER;
++  if (!__BUG_ACTIVE(1)) {
++    if (trailer_offset < BLOSC_EXTENDED_HEADER_LENGTH || trailer_offset + trailer_len > frame->len) {
++      BLOSC_TRACE_ERROR("Cannot access the trailer out of the frame.");
++      return BLOSC2_ERROR_READ_BUFFER;
++    }
+   }
+ 
+   // Get the trailer
+@@ -2055,9 +2109,13 @@ int get_coffset(blosc2_frame_s* frame, int32_t header_len, int64_t cbytes,
+   int rc = blosc2_getitem(coffsets, off_cbytes, (int32_t)nchunk, 1, offset, (int32_t)sizeof(int64_t));
+   if (rc < 0) {
+     BLOSC_TRACE_ERROR("Problems retrieving a chunk offset.");
+-  } else if (!frame->sframe && *offset > frame->len) {
+-    BLOSC_TRACE_ERROR("Cannot read chunk %" PRId64 " outside of frame boundary.", nchunk);
+-    rc = BLOSC2_ERROR_READ_BUFFER;
++  } else {
++    if (!__BUG_ACTIVE(2)) {
++      if (!frame->sframe && *offset > frame->len) {
++        BLOSC_TRACE_ERROR("Cannot read chunk %" PRId64 " outside of frame boundary.", nchunk);
++        rc = BLOSC2_ERROR_READ_BUFFER;
++      }
++    }
+   }
+ 
+   return rc;
+@@ -2461,19 +2519,33 @@ int frame_get_lazychunk(blosc2_frame_s *frame, int64_t nchunk, uint8_t **chunk,
+     free(block_csizes);
+   } else {
+     // The chunk is in memory and just one pointer away
+-    int64_t chunk_header_offset = header_len + offset;
+-    int64_t chunk_cbytes_offset = chunk_header_offset + BLOSC_MIN_HEADER_LENGTH;
++    if (__BUG_ACTIVE(2)) {
++      *chunk = frame->cframe + header_len + offset;
++      lazychunk_cbytes = sw32_(*chunk + BLOSC2_CHUNK_CBYTES);
++    } else {
++      int64_t chunk_header_offset = header_len + offset;
++      int64_t chunk_cbytes_offset = chunk_header_offset + BLOSC_MIN_HEADER_LENGTH;
+ 
+-    *chunk = frame->cframe + chunk_header_offset;
++      *chunk = frame->cframe + chunk_header_offset;
+ 
+-    if (chunk_cbytes_offset > frame->len) {
+-      BLOSC_TRACE_ERROR("Cannot read the header for chunk in the (contiguous) frame.");
+-      rc = BLOSC2_ERROR_READ_BUFFER;
+-    } else {
+-      rc = blosc2_cbuffer_sizes(*chunk, NULL, &lazychunk_cbytes, NULL);
+-      if (rc && chunk_cbytes_offset + lazychunk_cbytes > frame_len) {
+-        BLOSC_TRACE_ERROR("Compressed bytes exceed beyond frame length.");
+-        rc = BLOSC2_ERROR_READ_BUFFER;
++      if (__BUG_ACTIVE(13)) {
++        rc = blosc2_cbuffer_sizes(*chunk, NULL, &lazychunk_cbytes, NULL);
++        if (rc && chunk_cbytes_offset + lazychunk_cbytes > frame_len) {
++          BLOSC_TRACE_ERROR("Compressed bytes exceed beyond frame length.");
++          rc = BLOSC2_ERROR_READ_BUFFER;
++        }
++      }
++      else {
++        if (chunk_cbytes_offset > frame->len) {
++          BLOSC_TRACE_ERROR("Cannot read the header for chunk in the (contiguous) frame.");
++          rc = BLOSC2_ERROR_READ_BUFFER;
++        } else {
++          rc = blosc2_cbuffer_sizes(*chunk, NULL, &lazychunk_cbytes, NULL);
++          if (rc && chunk_cbytes_offset + lazychunk_cbytes > frame_len) {
++            BLOSC_TRACE_ERROR("Compressed bytes exceed beyond frame length.");
++            rc = BLOSC2_ERROR_READ_BUFFER;
++          }
++        }
+       }
+     }
+   }
+@@ -2483,10 +2555,18 @@ int frame_get_lazychunk(blosc2_frame_s *frame, int64_t nchunk, uint8_t **chunk,
+     io_cb->close(fp);
+   }
+   if (rc < 0) {
+-    if (*needs_free) {
+-      free(*chunk);
+-      *chunk = NULL;
+-      *needs_free = false;
++    if (__BUG_ACTIVE(18)) {
++      if (needs_free) {
++        free(*chunk);
++        *chunk = NULL;
++        *needs_free = false;
++      }
++    } else {
++      if (*needs_free) {
++        free(*chunk);
++        *chunk = NULL;
++        *needs_free = false;
++      }
+     }
+     return rc;
+   }
+diff --git a/blosc/schunk.c b/blosc/schunk.c
+index faf84266..05b74105 100644
+--- a/blosc/schunk.c
++++ b/blosc/schunk.c
+@@ -13,6 +13,7 @@
+ #include "blosc-private.h"
+ #include "blosc2/tuners-registry.h"
+ #include "blosc2.h"
++#include "../__bug_dispatch.h"
+ 
+ #if defined(_WIN32)
+ #include <windows.h>
+@@ -556,12 +557,22 @@ blosc2_schunk* blosc2_schunk_from_buffer(uint8_t *cframe, int64_t len, bool copy
+   if (frame == NULL) {
+     return NULL;
+   }
+-  // Check that the buffer actually comes from a cframe
+-  char *magic_number = (char *)cframe;
+-  magic_number += FRAME_HEADER_MAGIC;
+-  if (strcmp(magic_number, "b2frame\0") != 0) {
+-    frame_free(frame);
+-    return NULL;
++  if (!__BUG_ACTIVE(23)) {
++    if (!__BUG_ACTIVE(24)) {
++      if (!__BUG_ACTIVE(25)) {
++        if (!__BUG_ACTIVE(26)) {
++          // Check that the buffer actually comes from a cframe
++          if (!__BUG_ACTIVE(27)) {
++            char *magic_number = (char *)cframe;
++            magic_number += FRAME_HEADER_MAGIC;
++            if (strcmp(magic_number, "b2frame\0") != 0) {
++              frame_free(frame);
++              return NULL;
++            }
++          }
++        }
++      }
++    }
+   }
+   blosc2_schunk* schunk = frame_to_schunk(frame, copy, &BLOSC2_IO_DEFAULTS);
+   if (schunk && copy) {

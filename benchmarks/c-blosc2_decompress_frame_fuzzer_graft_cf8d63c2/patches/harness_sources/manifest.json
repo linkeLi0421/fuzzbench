@@ -1,0 +1,6 @@
+[
+  {
+    "container_path": "/src/c-blosc2/tests/fuzz/fuzz_decompress_frame.c",
+    "snapshot": "src__c-blosc2__tests__fuzz__fuzz_decompress_frame.c"
+  }
+]

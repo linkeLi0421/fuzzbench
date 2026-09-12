@@ -5,13 +5,13 @@ trials: 3
 max_total_time: 86400  # 24 hours per trial
 
 local_experiment: true
-experiment_filestore: fuzzbench/benchmarks/fuzzbench-data
-report_filestore: fuzzbench/benchmarks/fuzzbench-reports
+experiment_filestore: /home/user/oss-fuzz-build/fuzzbench/benchmarks/fuzzbench-data
+report_filestore: /home/user/oss-fuzz-build/fuzzbench/benchmarks/fuzzbench-reports
 docker_registry: gcr.io/fuzzbench
 
 # Sample run command:
 # PYTHONPATH=. python3 experiment/run_experiment.py \
 #   --experiment-config experiment_config.yaml \
-#   --benchmarks ndpi_transplant_fuzz_ndpi_reader \
+#   --benchmarks c-blosc2_decompress_frame_fuzzer_graft_cf8d63c2 \
 #   --fuzzers afl aflplusplus honggfuzz libfuzzer \
 #   --experiment-name transplant-eval
