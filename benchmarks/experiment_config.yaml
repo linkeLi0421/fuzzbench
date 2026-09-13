@@ -12,6 +12,6 @@ docker_registry: gcr.io/fuzzbench
 # Sample run command:
 # PYTHONPATH=. python3 experiment/run_experiment.py \
 #   --experiment-config experiment_config.yaml \
-#   --benchmarks c-blosc2_decompress_frame_fuzzer_graft_cf8d63c2 \
+#   --benchmarks htslib_hts_open_fuzzer_graft_dcd4b730 \
 #   --fuzzers afl aflplusplus honggfuzz libfuzzer \
 #   --experiment-name transplant-eval
