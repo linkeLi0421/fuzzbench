@@ -102,10 +102,10 @@ if [ -f "$seed_zip" ]; then
     for f in /tmp/original_seeds/*; do
         [ -f "$f" ] || continue
         base=$(basename "$f")
-        for dispatch in '\x00' '\x0c' '\x14' '\x1c' '\x24' '\x2c' '\x34' '\x3c' '\x44' '\x4c' '\x54' '\x5c' '\x64' '\x6c' '\x74' '\x7c' '\x84' '\x8c' '\x94' '\x9c' '\xa4' '\xac' '\xb4' '\xbc' '\xc4' '\xcc' '\xd4' '\xdc' '\xe4' '\xec'; do
-            dispatch_name=$(printf '%s' "$dispatch" | tr -d '\x')
-            printf '%b' "$dispatch" | cat - "$f" > "/tmp/seeds_dispatch/${base}.dispatch_${dispatch_name}"
-        done
+        # Dispatch-zero ONLY. Expanding the project corpus across every slot
+        # would hand the fuzzer inputs that already open a bug's gate, so the
+        # selector byte would not have to be discovered. Slot 0 = no bug.
+        printf '\000' | cat - "$f" > "/tmp/seeds_dispatch/${base}.dispatch_00"
     done
 fi
 
