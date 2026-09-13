@@ -33,5 +33,7 @@ ENV ADDITIONAL_ARGS="-rss_limit_mb=8192"
 
 # Bug transplant patches
 COPY patches/ /src/patches/
-COPY seeds/ /src/benchmark_seeds/
+# Public ClusterFuzz corpus (dispatch-zero, crash-filtered): the
+# benchmark's initial seeds. No PoC-derived seeds are shipped.
+COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/

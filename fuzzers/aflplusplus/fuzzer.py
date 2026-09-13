@@ -300,8 +300,14 @@ def fuzz(input_corpus,
     if not skip:
         os.environ['AFL_DISABLE_TRIM'] = '1'
         os.environ['AFL_CMPLOG_ONLY_NEW'] = '1'
-        if 'ADDITIONAL_ARGS' in os.environ:
-            flags += os.environ['ADDITIONAL_ARGS'].split(' ')
+        # Deliberately do NOT splice $ADDITIONAL_ARGS here. It carries
+        # libFuzzer target flags (e.g. -rss_limit_mb=8192 from the transplant
+        # benchmarks), and `flags` is passed to afl-fuzz itself, before the
+        # `--`. afl-fuzz rejects the unknown option and exits 1, killing every
+        # trial at startup. The flag is also redundant for this fuzzer: afl
+        # already runs with `-m none` (no memory limit) and the target is
+        # built against /libfuzzer-harness.o, afl++'s own shim rather than
+        # libFuzzer's driver, so it would not parse the option anyway.
 
     afl_fuzzer.run_afl_fuzz(input_corpus,
                             output_corpus,

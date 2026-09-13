@@ -95,7 +95,7 @@ find . -name '*_fuzzer_seed_corpus.zip' -exec cp -v '{}' $OUT ';'
 # are filtered out before packaging.
 seed_zip="$OUT/decompress_frame_fuzzer_seed_corpus.zip"
 seed_target="$OUT/decompress_frame_fuzzer"
-mkdir -p /tmp/seeds_dispatch /tmp/original_seeds /tmp/benchmark_seed_candidates
+mkdir -p /tmp/seeds_dispatch /tmp/original_seeds
 
 if [ -f "$seed_zip" ]; then
     unzip -q -o "$seed_zip" -d /tmp/original_seeds 2>/dev/null || true
@@ -109,70 +109,19 @@ if [ -f "$seed_zip" ]; then
     done
 fi
 
-if [ -d /src/benchmark_seeds ]; then
-    for f in /src/benchmark_seeds/*; do
-        [ -f "$f" ] || continue
-        base=$(basename "$f")
-        size=$(wc -c < "$f")
-        [ "$size" -gt 0 ] || continue
+# Initial corpus: the project's public ClusterFuzz corpus, already
+# dispatch-zero prefixed (head byte 0x00 = slot 0 = no bug) and
+# crash-filtered. Fuzzers must mutate the selector byte themselves to reach
+# any gated bug, so no seed opens a bug's gate. PoC derivatives are NOT used.
+for _z in /src/corpus_seeds*.zip; do
+    [ -f "$_z" ] || continue
+    echo "Unpacking initial corpus: $_z"
+    unzip -q -o "$_z" -d /tmp/seeds_dispatch
+done
 
-        cp "$f" "/tmp/benchmark_seed_candidates/${base}.exact"
-        # Zero the dispatch byte (byte 0): deactivates dispatch-gated patches
-        # while keeping the full APDU conversation and card driver routing intact.
-        cp "$f" "/tmp/benchmark_seed_candidates/${base}.dispatch_zero"
-        printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.dispatch_zero" bs=1 seek=0 conv=notrunc 2>/dev/null || true
-        for keep in 1 2 8 16 64 256 1024; do
-            if [ "$size" -gt "$keep" ]; then
-                head -c "$keep" "$f" > "/tmp/benchmark_seed_candidates/${base}.head_${keep}"
-            fi
-        done
-        if [ "$size" -gt 1 ]; then
-            head -c "$((size - 1))" "$f" > "/tmp/benchmark_seed_candidates/${base}.trim_1"
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_last"
-            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_last"
-            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_last" bs=1 seek="$((size - 1))" conv=notrunc 2>/dev/null || true
-        fi
-        if [ "$size" -gt 4 ]; then
-            mid=$((size / 2))
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.zero_mid"
-            printf '\000' | dd of="/tmp/benchmark_seed_candidates/${base}.zero_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
-            cp "$f" "/tmp/benchmark_seed_candidates/${base}.ff_mid"
-            printf '\377' | dd of="/tmp/benchmark_seed_candidates/${base}.ff_mid" bs=1 seek="$mid" conv=notrunc 2>/dev/null || true
-        fi
-    done
-fi
-
-if [ -x "$seed_target" ] && ls /tmp/benchmark_seed_candidates/* 1>/dev/null 2>&1; then
-    for f in /tmp/benchmark_seed_candidates/*; do
-        [ -f "$f" ] || continue
-        # Never ship the exact crash reproducer as a seed.
-        case "$(basename "$f")" in
-            *.exact) continue ;;
-        esac
-        # Replay each candidate under the SAME configuration the fuzzers use at
-        # run time (ADDITIONAL_ARGS="-rss_limit_mb=8192" from the Dockerfile).
-        # Some memory errors are flaky across process invocations (heap layout /
-        # ASan redzone placement) and surface in only a fraction of runs, so a
-        # single replay can miss them and leak a crashing seed. Replay across
-        # several independent invocations and keep the candidate ONLY if it never
-        # crashes. Matching the run-time rss cap is essential: some bugs allocate
-        # >2GB before the real error, so under the default 2048MB cap libFuzzer
-        # OOM-aborts *before* crashing and the crashing seed would slip through.
-        keep=1
-        for _attempt in 1 2 3 4 5 6 7 8 9 10; do
-            if ! timeout 60s env ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:detect_stack_use_after_return=1}:max_uar_stack_size_log=16" "$seed_target" -rss_limit_mb=8192 -runs=100 "$f" >/tmp/seed_replay.log 2>&1; then
-                keep=0
-                break
-            fi
-        done
-        if [ "$keep" = 1 ]; then
-            cp "$f" "/tmp/seeds_dispatch/poc_$(basename "$f")"
-        fi
-    done
-fi
-
-if ls /tmp/seeds_dispatch/* 1>/dev/null 2>&1; then
+# Avoid ARG_MAX: a glob over a large corpus silently fails and the seed zip
+# never gets written, leaving fuzzers with a fake 2-byte seed.
+if [ -n "$(find /tmp/seeds_dispatch -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
     rm -f "$seed_zip"
-    zip -j -q "$seed_zip" /tmp/seeds_dispatch/*
+    find /tmp/seeds_dispatch -maxdepth 1 -type f -print0 | xargs -0 zip -j -q "$seed_zip"
 fi
