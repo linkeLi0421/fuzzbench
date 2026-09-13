@@ -1,0 +1,29 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1827568303
+INFO: Loaded 1 modules   (18462 inline 8-bit counters): 18462 [0x9db6c0, 0x9dfede), 
+INFO: Loaded 1 PC tables (18462 PCs): 18462 [0x722bc0,0x76ada0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::vcf_parse] Contig '@SQ222' is not defined in the header. (Quick workaround: index the file with tabix.)
+[W::vcf_parse_filter] FILTER '*' is not defined in the header
+[W::vcf_parse_info] INFO '+0' is not defined in the header, assuming Type=String
+[W::vcf_parse_format] FORMAT '000000' at @SQ222:0 is not defined in the header, assuming Type=String
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x605a05a69a70 (pc 0x0000005f5843 bp 0x7ffd4200dea0 sp 0x7ffd4200ddf0 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x5f5843 in vcf_format /src/htslib/vcf.c:3131:53
+    #1 0x5e6265 in vcf_write /src/htslib/vcf.c:3237:9
+    #2 0x5e5ade in bcf_write /src/htslib/vcf.c:1758:16
+    #3 0x55539d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:123:13
+    #4 0x554fb4 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:164:13
+    #5 0x459573 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x459573)
+    #6 0x444e42 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #7 0x44aa4e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44aa4e)
+    #8 0x4741e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f874592783f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #10 0x4200e8 in _start (/out/hts_open_fuzzer+0x4200e8)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/htslib/vcf.c:3131:53 in vcf_format
+==1==ABORTING
