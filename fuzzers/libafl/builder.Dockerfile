@@ -34,7 +34,7 @@ RUN rm -f /usr/local/bin/cargo /usr/local/bin/rustc /usr/local/bin/rustup && \
 
 # Install dependencies.
 RUN apt-get update && \
-    apt-get remove -y llvm-10 && \
+    (apt-get remove -y llvm-10 || true) && \
     apt-get install -y \
         build-essential \
         lsb-release wget software-properties-common gnupg && \

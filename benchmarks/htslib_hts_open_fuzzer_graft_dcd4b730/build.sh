@@ -74,15 +74,21 @@ fi
 # --- Original build commands ---
 autoconf
 autoheader
-./configure
+# Disable libcurl/S3/GCS: hts_open_fuzzer only reads local testcases, so remote
+# transports are dead weight -- and the FuzzBench runner images do not ship
+# libcurl-gnutls.so.4, so a curl-linked binary dies at startup with "error
+# while loading shared libraries". That kills every trial before it fuzzes:
+# AFL reports "Fork server handshake failed" and libFuzzer never starts, so
+# the whole experiment sits at cycle 0.
+./configure --disable-libcurl --disable-s3 --disable-gcs
 
 # build the input-driven dispatch object
 $CC $CFLAGS -fno-zero-initialized-in-bss -I. -c __bug_dispatch.c -o __bug_dispatch.o
 
 make -j$(nproc) libhts.a test/fuzz/hts_open_fuzzer.o
 
-# build fuzzers
-$CXX $CXXFLAGS -o "$OUT/hts_open_fuzzer" test/fuzz/hts_open_fuzzer.o __bug_dispatch.o $LIB_FUZZING_ENGINE libhts.a -lz -lbz2 -llzma -lcurl -lcrypto -lpthread
+# build fuzzers (no -lcurl/-lcrypto: libcurl disabled above)
+$CXX $CXXFLAGS -o "$OUT/hts_open_fuzzer" test/fuzz/hts_open_fuzzer.o __bug_dispatch.o $LIB_FUZZING_ENGINE libhts.a -lz -lbz2 -llzma -lpthread
 
 
 # --- Seed corpus: expand original seeds and per-bug testcase candidates ---

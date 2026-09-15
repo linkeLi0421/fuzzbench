@@ -62,10 +62,18 @@ SANITIZER_FLAGS = [
 TRANSPLANT_SANITIZER_FLAGS = ['-fsanitize=address']
 
 
+# Benchmark-name markers for the bug-transplant family.  '_graft_' is the
+# newer naming (<project>_<fuzzer>_graft_<commit>); matching only
+# '_transplant_' silently rebuilt every grafted benchmark with UBSan on, which
+# is how the c-blosc2 graft campaign ended up with 3,576 UBSan crash rows that
+# no replay could ever confirm.
+TRANSPLANT_BENCHMARK_MARKERS = ('_transplant_', '_graft_')
+
+
 def get_sanitizer_flags():
     """Sanitizer flags for this benchmark: ASan-only for transplant ones."""
     benchmark = os.getenv('BENCHMARK') or ''
-    if '_transplant_' in benchmark:
+    if any(marker in benchmark for marker in TRANSPLANT_BENCHMARK_MARKERS):
         return TRANSPLANT_SANITIZER_FLAGS
     return SANITIZER_FLAGS
 
