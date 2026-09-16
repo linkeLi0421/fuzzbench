@@ -1,0 +1,353 @@
+diff --git a/decoder/svc/isvcd_api.c b/decoder/svc/isvcd_api.c
+index 2befebd..8666281 100644
+--- a/decoder/svc/isvcd_api.c
++++ b/decoder/svc/isvcd_api.c
+@@ -87,6 +87,7 @@
+ #include <limits.h>
+ #include <stddef.h>
+ #include <assert.h>
++#include "../../__bug_dispatch.h"
+ #include "ih264_defs.h"
+ #include "ih264_typedefs.h"
+ #include "ih264_macros.h"
+@@ -4457,12 +4458,22 @@ WORD32 isvcd_dec_non_vcl(void *pv_out_non_vcl, void *pv_seq_params, void *pv_pic
+                     ps_dec->i4_header_decoded |= 0x2;
+                     ps_svcd_ctxt->u4_num_pps_ctr++;
+                 }
+-                if(i_status) return i_status;
++                if(__BUG_ACTIVE(12))
++                {
++                    if(i_status == ERROR_INV_SPS_PPS_T) return i_status;
++                }
++                else
++                {
++                    if(i_status) return i_status;
++                }
+                 break;
+             case SEI_NAL:
+             {
+                 i_status = ih264d_parse_sei_message(ps_dec, ps_bitstrm);
+-                if(i_status) return i_status;
++                if(!__BUG_ACTIVE(13))
++                {
++                    if(i_status) return i_status;
++                }
+                 ih264d_parse_sei(ps_dec, ps_bitstrm);
+             }
+             break;
+@@ -4524,8 +4535,16 @@ WORD32 isvcd_seq_hdr_dec(svc_dec_ctxt_t *ps_svcd_ctxt, ivd_video_decode_ip_t *ps
+     /*          2. Picture parameter set                      */
+     /*          3. SEI message                                */
+     /* ------------------------------------------------------ */
+-    i4_status = isvcd_dec_non_vcl(&ps_svcd_ctxt->s_non_vcl_nal, ps_svcd_ctxt->ps_sps, ps_svcd_ctxt->ps_pps,
++    if(__BUG_ACTIVE(14))
++    {
++        isvcd_dec_non_vcl(&ps_svcd_ctxt->s_non_vcl_nal, ps_svcd_ctxt->ps_sps, ps_svcd_ctxt->ps_pps,
++                      ps_svcd_ctxt);
++    }
++    else
++    {
++        i4_status = isvcd_dec_non_vcl(&ps_svcd_ctxt->s_non_vcl_nal, ps_svcd_ctxt->ps_sps, ps_svcd_ctxt->ps_pps,
+                       ps_svcd_ctxt);
++    }
+ 
+     return (i4_status);
+ }
+@@ -5290,10 +5309,21 @@ WORD32 isvcd_video_decode(iv_obj_t *dec_hdl, void *pv_api_ip, void *pv_api_op)
+ 
+                     ps_dec_op->u4_frame_decoded_flag = 0;
+                     ret = isvcd_parse_nal_unit(ps_svc_lyr_dec, ps_cur_node->i4_nal_ref_idc);
+-                    if(ret != OK)
++                    if(__BUG_ACTIVE(1) || __BUG_ACTIVE(2))
+                     {
+-                        ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
+-                        break;
++                        if(((ret != OK)) && (u1_res_id != (u1_num_res_lyrs - 1)))
++                        {
++                            ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
++                            break;
++                        }
++                    }
++                    else
++                    {
++                        if(ret != OK)
++                        {
++                            ps_svcd_ctxt->u1_parse_nal_unit_error = 1;
++                            break;
++                        }
+                     }
+ 
+                     /* go to the next slice */
+@@ -5320,13 +5350,27 @@ WORD32 isvcd_video_decode(iv_obj_t *dec_hdl, void *pv_api_ip, void *pv_api_op)
+                     ps_svc_lyr_dec = ps_svcd_ctxt->ps_svc_dec_lyr + u1_num_res_lyrs - 1;
+                     ps_dec = &ps_svc_lyr_dec->s_dec;
+ 
+-                    if((0 == ps_svcd_ctxt->u4_num_sps_ctr) || (0 == ps_svcd_ctxt->u4_num_pps_ctr) ||
+-                       (NULL == ps_dec->ps_cur_pps) || (ps_svc_lyr_dec->u1_res_init_done == 0))
++                    if(__BUG_ACTIVE(7) || __BUG_ACTIVE(9))
+                     {
+-                        ps_svcd_ctxt->u1_exit_till_next_IDR = 1;
+-                        ps_dec_op->u4_error_code = ERROR_UNKNOWN_NAL;
+-                        ih264d_signal_decode_thread(ps_dec);
+-                        return IV_FAIL;
++                        if((0 == ps_svcd_ctxt->u4_num_sps_ctr) || (0 == ps_svcd_ctxt->u4_num_pps_ctr) ||
++                           (NULL == ps_dec->ps_cur_pps))
++                        {
++                            ps_svcd_ctxt->u1_exit_till_next_IDR = 1;
++                            ps_dec_op->u4_error_code = ERROR_UNKNOWN_NAL;
++                            ih264d_signal_decode_thread(ps_dec);
++                            return IV_FAIL;
++                        }
++                    }
++                    else
++                    {
++                        if((0 == ps_svcd_ctxt->u4_num_sps_ctr) || (0 == ps_svcd_ctxt->u4_num_pps_ctr) ||
++                           (NULL == ps_dec->ps_cur_pps) || (ps_svc_lyr_dec->u1_res_init_done == 0))
++                        {
++                            ps_svcd_ctxt->u1_exit_till_next_IDR = 1;
++                            ps_dec_op->u4_error_code = ERROR_UNKNOWN_NAL;
++                            ih264d_signal_decode_thread(ps_dec);
++                            return IV_FAIL;
++                        }
+                     }
+                 }
+                 ps_cur_node = ps_cur_node->ps_top_node;
+diff --git a/decoder/svc/isvcd_parse_epslice.c b/decoder/svc/isvcd_parse_epslice.c
+index e63c2a4..4b6fe9e 100644
+--- a/decoder/svc/isvcd_parse_epslice.c
++++ b/decoder/svc/isvcd_parse_epslice.c
+@@ -46,6 +46,7 @@
+  */
+ 
+ #include <string.h>
++#include "../../__bug_dispatch.h"
+ #include "ih264_defs.h"
+ #include "ih264d_bitstrm.h"
+ #include "ih264d_defs.h"
+@@ -3185,8 +3186,11 @@ WORD32 isvcd_parse_interlayer_resamp_func_init(svc_dec_lyr_struct_t *ps_svc_lyr_
+     dec_struct_t *ps_dec = &ps_svc_lyr_dec->s_dec;
+     dec_slice_params_t *ps_slice = ps_dec->ps_cur_slice;
+     WORD32 ret = OK;
+-    if(ps_svc_lyr_dec->u1_res_init_done == 1)
+-        return ret;
++    if(!__BUG_ACTIVE(1) && !__BUG_ACTIVE(2))
++    {
++        if(ps_svc_lyr_dec->u1_res_init_done == 1)
++            return ret;
++    }
+ 
+     if(TARGET_LAYER != ps_svc_lyr_dec->u1_layer_identifier)
+     {
+diff --git a/decoder/svc/isvcd_parse_headers.c b/decoder/svc/isvcd_parse_headers.c
+index 74004fd..531021a 100644
+--- a/decoder/svc/isvcd_parse_headers.c
++++ b/decoder/svc/isvcd_parse_headers.c
+@@ -45,6 +45,7 @@
+ #include <string.h>
+ #include <assert.h>
+ 
++#include "../../__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ih264_defs.h"
+ #include "ih264_macros.h"
+@@ -678,9 +679,12 @@ WORD32 isvcd_parse_subset_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stre
+             COPYTHECONTEXT("SPS_EXt: i4_seq_scaled_ref_layer_top_offset",
+                            ps_seq_svc_ext->i4_seq_scaled_ref_layer_top_offset);
+ 
+-            if(ps_seq_svc_ext->i4_seq_scaled_ref_layer_top_offset != 0)
++            if(!__BUG_ACTIVE(3))
+             {
+-                return ERROR_SVC_INV_SUBSET_SPS;
++                if(ps_seq_svc_ext->i4_seq_scaled_ref_layer_top_offset != 0)
++                {
++                    return ERROR_SVC_INV_SUBSET_SPS;
++                }
+             }
+ 
+             if(ps_seq_svc_ext->i4_seq_scaled_ref_layer_top_offset >= MAX_SCLD_REF_LAYER_OFFSET ||
+@@ -1611,6 +1615,15 @@ WORD32 isvcd_parse_sps(svc_dec_lyr_struct_t *ps_svc_lyr_dec, dec_bit_stream_t *p
+     ps_subset_seq->u2_crop_offset_y = u2_crop_offset_y;
+     ps_subset_seq->u2_crop_offset_uv = u2_crop_offset_uv;
+ 
++    if(__BUG_ACTIVE(6) || __BUG_ACTIVE(7) || __BUG_ACTIVE(8) || __BUG_ACTIVE(9) ||
++       __BUG_ACTIVE(10) || __BUG_ACTIVE(11) || __BUG_ACTIVE(12) || __BUG_ACTIVE(13))
++    {
++        ps_dec->u2_disp_height = ps_subset_seq->u2_disp_height;
++        ps_dec->u2_disp_width = ps_subset_seq->u2_disp_width;
++        ps_dec->u2_frm_wd_in_mbs = ps_seq->u2_frm_wd_in_mbs;
++        ps_dec->u2_frm_ht_in_mbs = ps_seq->u2_frm_ht_in_mbs;
++    }
++
+     ps_seq->u1_is_valid = TRUE;
+     ps_dec->ps_sps[u1_seq_parameter_set_id] = *ps_seq;
+     ps_svc_lyr_dec->ps_subset_sps[u1_seq_parameter_set_id] = *ps_subset_seq;
+diff --git a/decoder/svc/isvcd_parse_slice.c b/decoder/svc/isvcd_parse_slice.c
+index 495e8f5..56fbb8e 100644
+--- a/decoder/svc/isvcd_parse_slice.c
++++ b/decoder/svc/isvcd_parse_slice.c
+@@ -36,6 +36,7 @@
+ 
+ #include <string.h>
+ #include <assert.h>
++#include "../../__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ih264_macros.h"
+ #include "ih264_platform_macros.h"
+@@ -151,7 +152,10 @@ WORD32 isvcd_start_of_pic(svc_dec_lyr_struct_t *ps_svc_lyr_dec, WORD32 i4_poc,
+     }
+ 
+     /* check output buffer size given by the application */
+-    if(check_app_out_buf_size(ps_dec) != IV_SUCCESS) return IVD_DISP_FRM_ZERO_OP_BUF_SIZE;
++    if(!__BUG_ACTIVE(5))
++    {
++        if(check_app_out_buf_size(ps_dec) != IV_SUCCESS) return IVD_DISP_FRM_ZERO_OP_BUF_SIZE;
++    }
+ 
+     ps_prev_poc->i4_pic_order_cnt_lsb = ps_cur_poc->i4_pic_order_cnt_lsb;
+     ps_prev_poc->i4_pic_order_cnt_msb = ps_cur_poc->i4_pic_order_cnt_msb;
+@@ -703,11 +707,14 @@ WORD32 isvcd_parse_decode_slice_ext_nal(UWORD8 u1_is_idr_slice, UWORD8 u1_nal_re
+         return ERROR_CORRUPTED_SLICE;
+     }
+ 
+-    if(ps_dec->u4_first_slice_in_pic == 1)
++    if(!__BUG_ACTIVE(5))
+     {
+-        if(u2_first_mb_in_slice != 0)
++        if(ps_dec->u4_first_slice_in_pic == 1)
+         {
+-            return ERROR_CORRUPTED_SLICE;
++            if(u2_first_mb_in_slice != 0)
++            {
++                return ERROR_CORRUPTED_SLICE;
++            }
+         }
+     }
+ 
+@@ -766,10 +773,13 @@ WORD32 isvcd_parse_decode_slice_ext_nal(UWORD8 u1_is_idr_slice, UWORD8 u1_nal_re
+         if(ps_dec->u2_frm_ht_in_mbs != ps_seq->u2_frm_ht_in_mbs) return ERROR_INV_SLICE_HDR_T;
+     }
+ 
+-    if(ps_dec->u1_init_dec_flag == 1)
++    if(!__BUG_ACTIVE(14))
+     {
+-        if(ps_dec->u2_disp_height != ps_subset_seq->u2_disp_height) return ERROR_INV_SLICE_HDR_T;
+-        if(ps_dec->u2_disp_width != ps_subset_seq->u2_disp_width) return ERROR_INV_SLICE_HDR_T;
++        if(ps_dec->u1_init_dec_flag == 1)
++        {
++            if(ps_dec->u2_disp_height != ps_subset_seq->u2_disp_height) return ERROR_INV_SLICE_HDR_T;
++            if(ps_dec->u2_disp_width != ps_subset_seq->u2_disp_width) return ERROR_INV_SLICE_HDR_T;
++        }
+     }
+ 
+     ps_dec->i4_reorder_depth = ps_subset_seq->i4_reorder_depth;
+@@ -1953,11 +1963,14 @@ WORD32 isvcd_parse_decode_slice(UWORD8 u1_is_idr_slice, UWORD8 u1_nal_ref_idc,
+         return ERROR_CORRUPTED_SLICE;
+     }
+ 
+-    if(ps_dec->u4_first_slice_in_pic == 1)
++    if(!__BUG_ACTIVE(7) && !__BUG_ACTIVE(9) && !__BUG_ACTIVE(11))
+     {
+-        if(u2_first_mb_in_slice != 0)
++        if(ps_dec->u4_first_slice_in_pic == 1)
+         {
+-            return ERROR_CORRUPTED_SLICE;
++            if(u2_first_mb_in_slice != 0)
++            {
++                return ERROR_CORRUPTED_SLICE;
++            }
+         }
+     }
+ 
+@@ -2013,7 +2026,10 @@ WORD32 isvcd_parse_decode_slice(UWORD8 u1_is_idr_slice, UWORD8 u1_nal_ref_idc,
+     if(ps_dec->u1_init_dec_flag == 1)
+     {
+         if(ps_dec->u2_disp_height != ps_subset_seq->u2_disp_height) return ERROR_INV_SLICE_HDR_T;
+-        if(ps_dec->u2_disp_width != ps_subset_seq->u2_disp_width) return ERROR_INV_SLICE_HDR_T;
++        if(!__BUG_ACTIVE(15))
++        {
++            if(ps_dec->u2_disp_width != ps_subset_seq->u2_disp_width) return ERROR_INV_SLICE_HDR_T;
++        }
+     }
+ 
+     if(ps_seq->u1_profile_idc == BASE_PROFILE_IDC)
+@@ -2025,8 +2041,11 @@ WORD32 isvcd_parse_decode_slice(UWORD8 u1_is_idr_slice, UWORD8 u1_nal_ref_idc,
+     }
+ 
+     ps_dec->i4_reorder_depth = ps_subset_seq->i4_reorder_depth;
+-    ps_dec->u2_disp_height = ps_subset_seq->u2_disp_height;
+-    ps_dec->u2_disp_width = ps_subset_seq->u2_disp_width;
++    if(!__BUG_ACTIVE(8))
++    {
++        ps_dec->u2_disp_height = ps_subset_seq->u2_disp_height;
++        ps_dec->u2_disp_width = ps_subset_seq->u2_disp_width;
++    }
+ 
+     if(ps_svc_lyr_dec->u1_layer_id > 0)
+     {
+diff --git a/decoder/svc/isvcd_process_epslice.c b/decoder/svc/isvcd_process_epslice.c
+index 73996ba..64f07f8 100644
+--- a/decoder/svc/isvcd_process_epslice.c
++++ b/decoder/svc/isvcd_process_epslice.c
+@@ -64,6 +64,7 @@
+ #include "ih264d_process_intra_mb.h"
+ #include "isvcd_mode_mv_resamp.h"
+ #include "ih264_debug.h"
++#include "../../__bug_dispatch.h"
+ 
+ /*!
+  **************************************************************************
+@@ -1473,6 +1474,18 @@ WORD32 isvcd_decode_recon_tfr_nmb_base_lyr(svc_dec_lyr_struct_t *ps_svc_lyr_dec,
+     const UWORD32 u1_ipcm_th = ((u1_slice_type != I_SLICE) ? (ps_dec->u1_B ? 23 : 5) : 0);
+     WORD32 ret = OK;
+ 
++    if(__BUG_ACTIVE(17) || __BUG_ACTIVE(18))
++    {
++        /* OSV-2025-584: the buggy build declares u4_num_mbs as UWORD8 here,
++         * truncating the count (e.g. a full 256-MB row becomes 0). */
++        /* OSV-2025-589: same defect wrapped at the same site. */
++        u4_num_mbs = (UWORD8) u4_num_mbs;
++    }
++    else
++    {
++        /* Original (fixed) build: keep the full UWORD32 count. */
++    }
++
+     if(1 != ps_svc_lyr_dec->u1_base_res_flag)
+     {
+         return NOT_OK;
+diff --git a/decoder/svc/isvcd_utils.c b/decoder/svc/isvcd_utils.c
+index 94661c5..6e69ab2 100644
+--- a/decoder/svc/isvcd_utils.c
++++ b/decoder/svc/isvcd_utils.c
+@@ -35,6 +35,7 @@
+  */
+ 
+ #include <string.h>
++#include "../../__bug_dispatch.h"
+ #include "ih264_typedefs.h"
+ #include "ithread.h"
+ #include "ih264d_deblocking.h"
+@@ -98,7 +99,10 @@ WORD16 isvcd_free_dynamic_bufs(svc_dec_lyr_struct_t *ps_svc_lyr_dec)
+     memset(ps_dec->ps_pic_buf_base, 0, sizeof(struct pic_buffer_t) * (H264_MAX_REF_PICS * 2));
+     for(i = 0; i < MAX_DISP_BUFS_NEW; i++)
+     {
+-        ps_dec->apv_buf_id_pic_buf_map[i] = NULL;
++        if(!__BUG_ACTIVE(4) && !__BUG_ACTIVE(16))
++        {
++            ps_dec->apv_buf_id_pic_buf_map[i] = NULL;
++        }
+     }
+     return 0;
+ }
+@@ -764,7 +768,10 @@ void isvcd_init_dpb_ref_bufs(dec_struct_t *ps_dec)
+     ps_init_dpb = ps_dec->ps_dpb_mgr->ps_init_dpb[0][0];
+     for(i = 0; i < 2 * MAX_REF_BUFS; i++)
+     {
+-        memset(ps_init_dpb, 0, sizeof(struct pic_buffer_t));
++        if(!__BUG_ACTIVE(4) && !__BUG_ACTIVE(16))
++        {
++            memset(ps_init_dpb, 0, sizeof(struct pic_buffer_t));
++        }
+         ps_init_dpb->pu1_buf1 = NULL;
+         ps_init_dpb->u1_long_term_frm_idx = MAX_REF_BUFS + 1;
+         ps_dec->ps_dpb_mgr->ps_init_dpb[0][i] = ps_init_dpb;

@@ -1,0 +1,77 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2194669587
+INFO: Loaded 1 modules   (16950 inline 8-bit counters): 16950 [0x8a7190, 0x8ab3c6), 
+INFO: Loaded 1 PC tables (16950 PCs): 16950 [0x809268,0x84b5c8), 
+/out/svc_dec_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x615000000691 at pc 0x00000052e64e bp 0x7ffd96f0d9b0 sp 0x7ffd96f0d180
+WRITE of size 920 at 0x615000000691 thread T0
+    #0 0x52e64d in __asan_memset /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:26:3
+    #1 0x5bd32b in isvcd_start_of_pic /src/libavc/decoder/svc/isvcd_parse_slice.c:302:13
+    #2 0x5cb05a in isvcd_parse_decode_slice /src/libavc/decoder/svc/isvcd_parse_slice.c:2460:19
+    #3 0x5b84fb in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:991:40
+    #4 0x583740 in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5311:27
+    #5 0x5909af in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7303:26
+    #6 0x56f10b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:380:11
+    #7 0x57028c in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:447:22
+    #8 0x43de43 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #9 0x4295a2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #10 0x42ee4c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #11 0x458382 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f3fbed97082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x41f76d in _start (/out/svc_dec_fuzzer+0x41f76d)
+
+0x615000000691 is located 0 bytes to the right of 273-byte region [0x615000000580,0x615000000691)
+allocated by thread T0 here:
+    #0 0x52fb27 in posix_memalign /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
+    #1 0x56c4e5 in iv_aligned_malloc(void*, int, int) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:88:13
+    #2 0x71b308 in ih264d_allocate_dynamic_bufs /src/libavc/decoder/ih264d_utils.c:1935:14
+    #3 0x5e4272 in isvcd_allocate_dynamic_bufs /src/libavc/decoder/svc/isvcd_utils.c:137:18
+    #4 0x5e7e9e in isvcd_init_pic /src/libavc/decoder/svc/isvcd_utils.c:900:15
+    #5 0x5bd104 in isvcd_start_of_pic /src/libavc/decoder/svc/isvcd_parse_slice.c:287:11
+    #6 0x5cb05a in isvcd_parse_decode_slice /src/libavc/decoder/svc/isvcd_parse_slice.c:2460:19
+    #7 0x5b84fb in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:991:40
+    #8 0x583740 in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5311:27
+    #9 0x5909af in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7303:26
+    #10 0x56f10b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:380:11
+    #11 0x57028c in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:447:22
+    #12 0x43de43 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #13 0x4295a2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #14 0x42ee4c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #15 0x458382 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #16 0x7f3fbed97082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:26:3 in __asan_memset
+Shadow bytes around the buggy address:
+  0x0c2a7fff8080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2a7fff8090: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2a7fff80a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2a7fff80b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2a7fff80c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c2a7fff80d0: 00 00[01]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2a7fff80e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2a7fff80f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2a7fff8100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2a7fff8110: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2a7fff8120: 00 00 01 fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

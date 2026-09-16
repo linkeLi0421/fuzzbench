@@ -1,0 +1,5 @@
+project: libavc
+fuzz_target: svc_dec_fuzzer
+commit: 6f5a49da5db207a149a3f0cc43fd850502017012
+commit_date: 2025-09-10T10:43:05+10:00
+type: bug

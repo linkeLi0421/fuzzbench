@@ -1,0 +1,30 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2192065093
+INFO: Loaded 1 modules   (16950 inline 8-bit counters): 16950 [0x8a7190, 0x8ab3c6), 
+INFO: Loaded 1 PC tables (16950 PCs): 16950 [0x809268,0x84b5c8), 
+/out/svc_dec_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000000000000 bp 0x7fff15c62500 sp 0x7fff15c62218 T0)
+==1==Hint: pc points to the zero page.
+==1==The signal is caused by a READ memory access.
+==1==Hint: address points to the zero page.
+    #0 0x0  (<unknown module>)
+    #1 0x5a8edd in isvcd_parse_inter_slice_data_cavlc_enh_lyr /src/libavc/decoder/svc/isvcd_parse_epslice.c:1904:19
+    #2 0x5a2a3b in isvcd_parse_epslice /src/libavc/decoder/svc/isvcd_parse_epslice.c:471:11
+    #3 0x5c4b6e in isvcd_parse_decode_slice_ext_nal /src/libavc/decoder/svc/isvcd_parse_slice.c:1525:15
+    #4 0x5b85d5 in isvcd_parse_nal_unit /src/libavc/decoder/svc/isvcd_parse_headers.c:1049:44
+    #5 0x583740 in isvcd_video_decode /src/libavc/decoder/svc/isvcd_api.c:5311:27
+    #6 0x5909af in isvcd_api_function /src/libavc/decoder/svc/isvcd_api.c:7303:26
+    #7 0x56f10b in Codec::decodeFrame(unsigned char const*, unsigned long, unsigned long*) /src/libavc/fuzzer/svc_dec_fuzzer.cpp:380:11
+    #8 0x57028c in LLVMFuzzerTestOneInput /src/libavc/fuzzer/svc_dec_fuzzer.cpp:447:22
+    #9 0x43de43 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0x4295a2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0x42ee4c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0x458382 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f55e8ac3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (<unknown module>) 
+==1==ABORTING

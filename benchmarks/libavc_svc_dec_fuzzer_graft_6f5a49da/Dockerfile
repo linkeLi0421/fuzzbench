@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2019 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
 #
 ################################################################################
 
-# base-builder 4af21949 (Ubuntu 20.04 focal, clang 15), not the 859b694f
-# that fuzzbench_generate.py picked from this commit's oss_fuzz_commit
-# date. That one is Ubuntu 16.04 xenial, and libafl's builder runs
-# `llvm.sh 17`, which has no xenial support -- so libafl silently fails
-# to build and the experiment quietly runs five fuzzers instead of six.
-# htslib_transplant_hts_open_fuzzer and the c-blosc2 graft benchmark both
-# pin this same digest and build libafl fine.
 FROM gcr.io/oss-fuzz-base/base-builder@sha256:4af219498733484fcec27ca3b6ceda96ed38aecb83fcd47f930811f5d5fad1b9
-RUN apt-get update && apt-get install -y make autoconf automake zlib1g-dev libbz2-dev liblzma-dev libcurl4-gnutls-dev libssl-dev wget unzip
-RUN git clone  https://github.com/samtools/htslib.git htslib
-WORKDIR htslib
+RUN apt-get update && apt-get install -y wget cmake wget unzip
+RUN git clone https://github.com/ittiam-systems/libavc.git
+ADD https://storage.googleapis.com/android_media/external/libavc/fuzzer/avc_dec_fuzzer_seed_corpus.zip $SRC/
 # Keep ASan stack-use-after-return detection enabled for direct
 # testcase replay; some transplanted bugs are stack-use-after-return
 # and are invisible without it.
@@ -44,3 +37,4 @@ COPY patches/ /src/patches/
 # the benchmark's initial seeds.
 COPY corpus_seeds*.zip /src/
 COPY build.sh $SRC/
+WORKDIR libavc
