@@ -1,59 +1,59 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1827822091
-INFO: Loaded 1 modules   (18462 inline 8-bit counters): 18462 [0x9db6c0, 0x9dfede), 
-INFO: Loaded 1 PC tables (18462 PCs): 18462 [0x722bc0,0x76ada0), 
+INFO: Seed: 629971952
+INFO: Loaded 1 modules   (22857 inline 8-bit counters): 22857 [0x8560e0, 0x85ba29), 
+INFO: Loaded 1 PC tables (22857 PCs): 22857 [0x793e38,0x7ed2c8), 
 /out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000873 at pc 0x000000521267 bp 0x7ffc428720b0 sp 0x7ffc42871878
-READ of size 36 at 0x604000000873 thread T0
-    #0 0x521266 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #1 0x6c690f in hts_md5_update /src/htslib/md5.c
-    #2 0x61d97e in cram_decode_slice /src/htslib/cram/cram_decode.c:2313:17
-    #3 0x6281f0 in cram_decode_slice_mt /src/htslib/cram/cram_decode.c:2807:16
-    #4 0x628daa in cram_next_slice /src/htslib/cram/cram_decode.c:3193:13
-    #5 0x628572 in cram_get_seq /src/htslib/cram/cram_decode.c:3290:23
-    #6 0x62a21c in cram_get_bam_seq /src/htslib/cram/cram_decode.c:3352:16
-    #7 0x5b59c3 in sam_read1 /src/htslib/sam.c:2898:19
-    #8 0x55520d in view_sam /src/htslib/test/fuzz/hts_open_fuzzer.c:88:12
-    #9 0x555003 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:161:13
-    #10 0x459573 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x459573)
-    #11 0x444e42 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #12 0x44aa4e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44aa4e)
-    #13 0x4741e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #14 0x7f96de9f983f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
-    #15 0x4200e8 in _start (/out/hts_open_fuzzer+0x4200e8)
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x604000000573 at pc 0x00000052f571 bp 0x7ffdc6900d90 sp 0x7ffdc6900560
+READ of size 36 at 0x604000000573 thread T0
+    #0 0x52f570 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x71abb3 in hts_md5_update /src/htslib/md5.c
+    #2 0x66d1ef in cram_decode_slice /src/htslib/cram/cram_decode.c:2313:17
+    #3 0x679c94 in cram_decode_slice_mt /src/htslib/cram/cram_decode.c:2807:16
+    #4 0x679c94 in cram_next_slice /src/htslib/cram/cram_decode.c:3193:13
+    #5 0x679c94 in cram_get_seq /src/htslib/cram/cram_decode.c:3290:23
+    #6 0x67b058 in cram_get_bam_seq /src/htslib/cram/cram_decode.c:3352:16
+    #7 0x5dee21 in sam_read1 /src/htslib/sam.c:2898:19
+    #8 0x56db8a in view_sam /src/htslib/test/fuzz/hts_open_fuzzer.c:88:12
+    #9 0x56db8a in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:161:13
+    #10 0x43f053 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #11 0x42a7b2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #12 0x43005c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #13 0x459592 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #14 0x7f842a1e3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #15 0x42097d in _start (/out/hts_open_fuzzer+0x42097d)
 
-0x604000000873 is located 0 bytes to the right of 35-byte region [0x604000000850,0x604000000873)
+0x604000000573 is located 0 bytes to the right of 35-byte region [0x604000000550,0x604000000573)
 allocated by thread T0 here:
-    #0 0x521ead in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3
-    #1 0x65f37c in cram_read_block /src/htslib/cram/cram_io.c:952:25
-    #2 0x670f48 in cram_read_slice /src/htslib/cram/cram_io.c:3839:29
-    #3 0x629567 in cram_next_slice /src/htslib/cram/cram_decode.c:3150:44
-    #4 0x628572 in cram_get_seq /src/htslib/cram/cram_decode.c:3290:23
-    #5 0x62a21c in cram_get_bam_seq /src/htslib/cram/cram_decode.c:3352:16
-    #6 0x5b59c3 in sam_read1 /src/htslib/sam.c:2898:19
-    #7 0x55520d in view_sam /src/htslib/test/fuzz/hts_open_fuzzer.c:88:12
-    #8 0x555003 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:161:13
-    #9 0x459573 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x459573)
-    #10 0x444e42 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #11 0x44aa4e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44aa4e)
-    #12 0x4741e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #13 0x7f96de9f983f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #0 0x5301e6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x6bb0b9 in cram_read_block /src/htslib/cram/cram_io.c:952:25
+    #2 0x6d5968 in cram_read_slice /src/htslib/cram/cram_io.c:3839:29
+    #3 0x679e1e in cram_next_slice /src/htslib/cram/cram_decode.c:3150:44
+    #4 0x679e1e in cram_get_seq /src/htslib/cram/cram_decode.c:3290:23
+    #5 0x67b058 in cram_get_bam_seq /src/htslib/cram/cram_decode.c:3352:16
+    #6 0x5dee21 in sam_read1 /src/htslib/sam.c:2898:19
+    #7 0x56db8a in view_sam /src/htslib/test/fuzz/hts_open_fuzzer.c:88:12
+    #8 0x56db8a in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:161:13
+    #9 0x43f053 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0x42a7b2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0x43005c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0x459592 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f842a1e3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
 Shadow bytes around the buggy address:
-  0x0c087fff80b0: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
-  0x0c087fff80c0: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
-  0x0c087fff80d0: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
-  0x0c087fff80e0: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
-  0x0c087fff80f0: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
-=>0x0c087fff8100: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00[03]fa
-  0x0c087fff8110: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c087fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c087fff8130: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c087fff8140: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x0c087fff8150: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8050: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x0c087fff8060: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x0c087fff8070: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x0c087fff8080: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+  0x0c087fff8090: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00 fa
+=>0x0c087fff80a0: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00[03]fa
+  0x0c087fff80b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff80c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff80d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff80e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff80f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -73,5 +73,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-  Shadow gap:              cc
 ==1==ABORTING

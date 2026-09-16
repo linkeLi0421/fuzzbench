@@ -1,7 +1,7 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1827568303
-INFO: Loaded 1 modules   (18462 inline 8-bit counters): 18462 [0x9db6c0, 0x9dfede), 
-INFO: Loaded 1 PC tables (18462 PCs): 18462 [0x722bc0,0x76ada0), 
+INFO: Seed: 629725390
+INFO: Loaded 1 modules   (22857 inline 8-bit counters): 22857 [0x8560e0, 0x85ba29), 
+INFO: Loaded 1 PC tables (22857 PCs): 22857 [0x793e38,0x7ed2c8), 
 /out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 [W::vcf_parse] Contig '@SQ222' is not defined in the header. (Quick workaround: index the file with tabix.)
@@ -10,19 +10,19 @@ Running: /tmp/testcase
 [W::vcf_parse_format] FORMAT '000000' at @SQ222:0 is not defined in the header, assuming Type=String
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x605a05a69a70 (pc 0x0000005f5843 bp 0x7ffd4200dea0 sp 0x7ffd4200ddf0 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x605a05a69890 (pc 0x000000637b52 bp 0x7fff482798f0 sp 0x7fff48279700 T0)
 ==1==The signal is caused by a READ memory access.
-    #0 0x5f5843 in vcf_format /src/htslib/vcf.c:3131:53
-    #1 0x5e6265 in vcf_write /src/htslib/vcf.c:3237:9
-    #2 0x5e5ade in bcf_write /src/htslib/vcf.c:1758:16
-    #3 0x55539d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:123:13
-    #4 0x554fb4 in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:164:13
-    #5 0x459573 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/hts_open_fuzzer+0x459573)
-    #6 0x444e42 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
-    #7 0x44aa4e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/hts_open_fuzzer+0x44aa4e)
-    #8 0x4741e2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #9 0x7f874592783f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
-    #10 0x4200e8 in _start (/out/hts_open_fuzzer+0x4200e8)
+    #0 0x637b52 in vcf_format /src/htslib/vcf.c:3131:53
+    #1 0x61e8f1 in vcf_write /src/htslib/vcf.c:3237:9
+    #2 0x61dba3 in bcf_write /src/htslib/vcf.c:1758:16
+    #3 0x56d9ed in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:123:13
+    #4 0x56d9ed in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:164:13
+    #5 0x43f053 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x42a7b2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x43005c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x459592 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f7e52c55082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x42097d in _start (/out/hts_open_fuzzer+0x42097d)
 
 AddressSanitizer can not provide additional info.
 SUMMARY: AddressSanitizer: SEGV /src/htslib/vcf.c:3131:53 in vcf_format
