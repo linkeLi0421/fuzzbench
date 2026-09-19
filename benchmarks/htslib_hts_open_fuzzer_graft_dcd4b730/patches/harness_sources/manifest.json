@@ -1,6 +1,0 @@
-[
-  {
-    "container_path": "/src/htslib/test/fuzz/hts_open_fuzzer.c",
-    "snapshot": "src__htslib__test__fuzz__hts_open_fuzzer.c"
-  }
-]
