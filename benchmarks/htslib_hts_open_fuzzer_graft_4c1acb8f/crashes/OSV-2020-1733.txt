@@ -1,0 +1,75 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 917268323
+INFO: Loaded 1 modules   (35626 inline 8-bit counters): 35626 [0x9cc810, 0x9d533a), 
+INFO: Loaded 1 PC tables (35626 PCs): 35626 [0x8c9230,0x9544d0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::bcf_hdr_parse] The first line should be ##fileformat; is the VCF/BCF header broken?
+[W::bcf_record_check] Bad BCF record at 15794177: Invalid CONTIG id 39424
+[W::bcf_record_check] Bad BCF record at (unknown):15794177: Invalid ID type 3 (int (32 bit))
+[W::bcf_record_check] Bad BCF record at (unknown):15794177: No REF allele
+[W::bcf_record_check] Bad BCF record at (unknown):15794177: Invalid FILTER id 858993459
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x602000004ed4 at pc 0x000000654a6f bp 0x7ffe27840a30 sp 0x7ffe27840a28
+READ of size 4 at 0x602000004ed4 thread T0
+    #0 0x654a6e in le_to_u32 /src/htslib/./htslib/hts_endian.h:144:12
+    #1 0x654a6e in le_to_i32 /src/htslib/./htslib/hts_endian.h:252:18
+    #2 0x654a6e in bcf_dec_typed_int1_safe /src/htslib/vcf.c:1696:20
+    #3 0x654a6e in bcf_record_check /src/htslib/vcf.c:1862:13
+    #4 0x64fc3b in bcf_read /src/htslib/vcf.c:1952:25
+    #5 0x56e43d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:162:12
+    #6 0x56df4b in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:214:13
+    #7 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f0d35bbe082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x42117d in _start (/out/hts_open_fuzzer+0x42117d)
+
+0x602000004ed4 is located 0 bytes to the right of 4-byte region [0x602000004ed0,0x602000004ed4)
+allocated by thread T0 here:
+    #0 0x530dec in __interceptor_realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3
+    #1 0x650092 in ks_resize /src/htslib/./htslib/kstring.h:160:19
+    #2 0x650092 in bcf_read1_core /src/htslib/vcf.c:1650:9
+    #3 0x64fc0b in bcf_read /src/htslib/vcf.c:1951:15
+    #4 0x56e43d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:162:12
+    #5 0x56df4b in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:214:13
+    #6 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f0d35bbe082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/htslib/./htslib/hts_endian.h:144:12 in le_to_u32
+Shadow bytes around the buggy address:
+  0x0c047fff8980: fa fa fd fa fa fa fd fa fa fa fd fa fa fa 00 00
+  0x0c047fff8990: fa fa fd fa fa fa fd fd fa fa 05 fa fa fa 00 00
+  0x0c047fff89a0: fa fa 00 02 fa fa 07 fa fa fa fd fa fa fa fd fa
+  0x0c047fff89b0: fa fa 03 fa fa fa 05 fa fa fa fd fd fa fa fd fd
+  0x0c047fff89c0: fa fa 00 04 fa fa 05 fa fa fa 00 00 fa fa 04 fa
+=>0x0c047fff89d0: fa fa 03 fa fa fa 00 fa fa fa[04]fa fa fa fa fa
+  0x0c047fff89e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff89f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8a10: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c047fff8a20: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

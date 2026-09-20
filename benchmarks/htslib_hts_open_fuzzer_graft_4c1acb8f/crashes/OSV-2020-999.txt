@@ -1,0 +1,83 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 910716206
+INFO: Loaded 1 modules   (35626 inline 8-bit counters): 35626 [0x9cc810, 0x9d533a), 
+INFO: Loaded 1 PC tables (35626 PCs): 35626 [0x8c9230,0x9544d0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::vcf_parse] Contig '@SQ' is not defined in the header. (Quick workaround: index the file with tabix.)
+[W::vcf_parse_filter] FILTER 'AF:dx##' is not defined in the header
+[W::vcf_parse_info] INFO 'L�:S�Q' is not defined in the header, assuming Type=String
+[W::bcf_hrec_check] Invalid tag name: "L�:S�Q"
+[W::vcf_parse_format_dict2] FORMAT 'AN' at @SQ:1 is not defined in the header, assuming Type=String
+[W::vcf_parse_format_dict2] FORMAT '՛*��AN' at @SQ:1 is not defined in the header, assuming Type=String
+[W::bcf_hrec_check] Invalid tag name: "՛*��AN"
+[W::vcf_parse_format_dict2] FORMAT '՛*�@S�' at @SQ:1 is not defined in the header, assuming Type=String
+[W::bcf_hrec_check] Invalid tag name: "՛*�@S�"
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7f3fbda4a82e at pc 0x00000053005e bp 0x7ffc67975e30 sp 0x7ffc67975600
+WRITE of size 641519 at 0x7f3fbda4a82e thread T0
+    #0 0x53005d in __asan_memset /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:26:3
+    #1 0x66cd01 in vcf_parse_format_fill5 /src/htslib/vcf.c:3273:25
+    #2 0x66cd01 in vcf_parse_format /src/htslib/vcf.c:3405:9
+    #3 0x661a78 in vcf_parse /src/htslib/vcf.c:3823:16
+    #4 0x64fbe0 in vcf_read /src/htslib/vcf.c:3856:12
+    #5 0x64fbe0 in bcf_read /src/htslib/vcf.c:1950:42
+    #6 0x56e43d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:162:12
+    #7 0x56df4b in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:214:13
+    #8 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #9 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #10 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #11 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f3fc2857082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x42117d in _start (/out/hts_open_fuzzer+0x42117d)
+
+0x7f3fbda4a82e is located 0 bytes to the right of 622638-byte region [0x7f3fbd9b2800,0x7f3fbda4a82e)
+allocated by thread T0 here:
+    #0 0x530dec in __interceptor_realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3
+    #1 0x66933e in ks_resize /src/htslib/./htslib/kstring.h:160:19
+    #2 0x66933e in vcf_parse_format_alloc4 /src/htslib/vcf.c:3016:17
+    #3 0x66933e in vcf_parse_format /src/htslib/vcf.c:3401:9
+    #4 0x661a78 in vcf_parse /src/htslib/vcf.c:3823:16
+    #5 0x64fbe0 in vcf_read /src/htslib/vcf.c:3856:12
+    #6 0x64fbe0 in bcf_read /src/htslib/vcf.c:1950:42
+    #7 0x56e43d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:162:12
+    #8 0x56df4b in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:214:13
+    #9 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f3fc2857082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:26:3 in __asan_memset
+Shadow bytes around the buggy address:
+  0x0fe877b414b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe877b414c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe877b414d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe877b414e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0fe877b414f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0fe877b41500: 00 00 00 00 00[06]fa fa fa fa fa fa fa fa fa fa
+  0x0fe877b41510: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe877b41520: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe877b41530: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe877b41540: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0fe877b41550: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

@@ -1,0 +1,81 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 926818173
+INFO: Loaded 1 modules   (35626 inline 8-bit counters): 35626 [0x9cc810, 0x9d533a), 
+INFO: Loaded 1 PC tables (35626 PCs): 35626 [0x8c9230,0x9544d0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::bam_hdr_read] EOF marker is absent. The input is probably truncated
+[E::sam_format1_append] Corrupted aux data for read    flag 8447
+[W::bam_hdr_read] EOF marker is absent. The input is probably truncated
+[W::bam_hdr_read] EOF marker is absent. The input is probably truncated
+[W::cram_encode_aux] =================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x616000009ba0 at pc 0x0000004d0f4d bp 0x7ffcdae2d580 sp 0x7ffcdae2cd08
+READ of size 264 at 0x616000009ba0 thread T0
+    #0 0x4d0f4c in printf_common(void*, char const*, __va_list_tag*) /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:553:9
+    #1 0x5a4d88 in hts_log /src/htslib/hts.c:5146:9
+    #2 0x6cf605 in cram_encode_aux /src/htslib/cram/cram_encode.c:2839:17
+    #3 0x6cf605 in process_one_read /src/htslib/cram/cram_encode.c:3736:9
+    #4 0x6cf605 in cram_encode_container /src/htslib/cram/cram_encode.c:2052:17
+    #5 0x7164f5 in cram_flush_container /src/htslib/cram/cram_io.c:4154:14
+    #6 0x7164f5 in cram_flush_container_mt /src/htslib/cram/cram_io.c:4306:16
+    #7 0x71f75d in cram_close /src/htslib/cram/cram_io.c:5595:19
+    #8 0x5a9f08 in hts_close /src/htslib/hts.c:1652:15
+    #9 0x56e276 in view_sam /src/htslib/test/fuzz/hts_open_fuzzer.c
+    #10 0x56dfdd in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:211:13
+    #11 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #12 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #13 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #14 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7f869ae3d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #16 0x42117d in _start (/out/hts_open_fuzzer+0x42117d)
+
+0x616000009ba0 is located 0 bytes to the right of 544-byte region [0x616000009980,0x616000009ba0)
+allocated by thread T0 here:
+    #0 0x530dec in __interceptor_realloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:85:3
+    #1 0x5dda01 in sam_realloc_bam_data /src/htslib/sam.c:451:20
+    #2 0x5de02c in realloc_bam_data /src/htslib/./sam_internal.h:50:12
+    #3 0x5de02c in bam_copy1 /src/htslib/sam.c:485:9
+    #4 0x5de02c in bam_dup1 /src/htslib/sam.c:498:9
+    #5 0x6e8751 in cram_put_bam_seq /src/htslib/cram/cram_encode.c:4180:34
+    #6 0x6099f6 in sam_write1 /src/htslib/sam.c:4629:16
+    #7 0x56e1ff in view_sam /src/htslib/test/fuzz/hts_open_fuzzer.c:110:13
+    #8 0x56dfdd in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:211:13
+    #9 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f869ae3d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors_format.inc:553:9 in printf_common(void*, char const*, __va_list_tag*)
+Shadow bytes around the buggy address:
+  0x0c2c7fff9320: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff9330: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff9340: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff9350: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff9360: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c2c7fff9370: 00 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff9380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c2c7fff9390: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff93a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff93b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c2c7fff93c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

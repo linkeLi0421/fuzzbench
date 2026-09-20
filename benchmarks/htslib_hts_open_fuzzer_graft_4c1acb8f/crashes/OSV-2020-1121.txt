@@ -1,0 +1,29 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 912996263
+INFO: Loaded 1 modules   (35626 inline 8-bit counters): 35626 [0x9cc810, 0x9d533a), 
+INFO: Loaded 1 PC tables (35626 PCs): 35626 [0x8c9230,0x9544d0), 
+/out/hts_open_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+[W::vcf_parse] Contig '@SQ222' is not defined in the header. (Quick workaround: index the file with tabix.)
+[W::vcf_parse_filter] FILTER '*' is not defined in the header
+[W::vcf_parse_info] INFO '+0' is not defined in the header, assuming Type=String
+[W::bcf_hrec_check] Invalid tag name: "+0"
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x605a05a698f0 (pc 0x00000067668e bp 0x7ffce6d00760 sp 0x7ffce6d00560 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x67668e in vcf_format /src/htslib/vcf.c:4090:29
+    #1 0x6589a2 in vcf_write /src/htslib/vcf.c:4269:9
+    #2 0x657c03 in bcf_write /src/htslib/vcf.c:2212:16
+    #3 0x56e45d in view_vcf /src/htslib/test/fuzz/hts_open_fuzzer.c:163:13
+    #4 0x56df4b in LLVMFuzzerTestOneInput /src/htslib/test/fuzz/hts_open_fuzzer.c:214:13
+    #5 0x43f853 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x42afb2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x43085c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x459d92 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f130409d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x42117d in _start (/out/hts_open_fuzzer+0x42117d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/htslib/vcf.c:4090:29 in vcf_format
+==1==ABORTING

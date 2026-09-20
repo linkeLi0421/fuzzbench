@@ -1,0 +1,61 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 00000000..8b8ff0ce
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#include "__bug_dispatch.h"
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 00000000..56fc1ded
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,21 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++#define __BUG_DISPATCH_SLOTS 12
++#define __BUG_DISPATCH_SLICE 21
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++
++/* Selected slot: 0 = no bug, 1..SLOTS-1 = the bug with that slot. */
++static inline unsigned long __bug_dispatch_slot(void) {
++  unsigned long v = 0;
++  int i;
++  for (i = __BUG_DISPATCH_BYTES - 1; i >= 0; --i) {
++    v = (v << 8) | (unsigned long)__bug_dispatch[i];
++  }
++  v /= (unsigned long)__BUG_DISPATCH_SLICE;
++  return v < (unsigned long)__BUG_DISPATCH_SLOTS ? v : 0UL;
++}
++
++#define __BUG_ACTIVE(n) (__bug_dispatch_slot() == (unsigned long)(n))
++#endif
+diff --git a/test/fuzz/hts_open_fuzzer.c b/test/fuzz/hts_open_fuzzer.c
+index 2818eb1a..c95dd6e6 100644
+--- a/test/fuzz/hts_open_fuzzer.c
++++ b/test/fuzz/hts_open_fuzzer.c
+@@ -25,6 +25,9 @@ DEALINGS IN THE SOFTWARE.  */
+ 
+ #include <config.h>
+ 
++#include "__bug_dispatch.h"
++#include <string.h>
++
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <stdio.h>
+@@ -169,6 +172,11 @@ static void view_vcf(const uint8_t *data, size_t size, char *mode) {
+ }
+ 
+ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
++    if (size < __BUG_DISPATCH_BYTES) return 0;
++    memcpy((void*)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++    data += __BUG_DISPATCH_BYTES;
++    size -= __BUG_DISPATCH_BYTES;
++
+     // Only data as a mem file purely for purposes of determining format
+     hFILE *memfile;
+     uint8_t *copy = malloc(size);
