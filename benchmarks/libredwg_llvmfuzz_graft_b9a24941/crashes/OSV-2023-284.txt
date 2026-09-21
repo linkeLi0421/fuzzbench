@@ -1,0 +1,55 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4174988264
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: global-buffer-overflow on address 0x0000057b0dd0 at pc 0x0000043d5a6c bp 0x7ffd7b1ff6e0 sp 0x7ffd7b1ff6d8
+READ of size 8 at 0x0000057b0dd0 thread T0
+    #0 0x43d5a6b in dwg_codepage_dxfstr /src/libredwg/src/codepages.c:282:16
+    #1 0x156d4d2 in dxf_codepage /src/libredwg/src/out_dxf.c:3170:21
+    #2 0x156d4d2 in dxf_header_write /src/libredwg/src/out_dxf.c:3197:26
+    #3 0x1569dff in dwg_write_dxf /src/libredwg/src/out_dxf.c:3931:3
+    #4 0x56d7fa in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:310:7
+    #5 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #6 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #7 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #8 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #9 0x7f76759e2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #10 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+Address 0x0000057b0dd0 is a wild pointer inside of access range of size 0x000000000008.
+SUMMARY: AddressSanitizer: global-buffer-overflow /src/libredwg/src/codepages.c:282:16 in dwg_codepage_dxfstr
+Shadow bytes around the buggy address:
+  0x000080aee160: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x000080aee170: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x000080aee180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x000080aee190: 00 00 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x000080aee1a0: 00 00 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+=>0x000080aee1b0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9[f9]f9 f9 f9 f9 f9
+  0x000080aee1c0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x000080aee1d0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x000080aee1e0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x000080aee1f0: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x000080aee200: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

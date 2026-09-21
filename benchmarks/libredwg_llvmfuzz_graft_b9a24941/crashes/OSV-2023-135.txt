@@ -1,0 +1,72 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4173825476
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6040000002c0 at pc 0x0000004c3e29 bp 0x7ffcc1470ff0 sp 0x7ffcc14707b8
+READ of size 51 at 0x6040000002c0 thread T0
+    #0 0x4c3e28 in strlen /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:389:5
+    #1 0x2391740 in json_write_TFv /src/libredwg/src/out_json.c:1436:29
+    #2 0x28255f5 in dwg_json_LTYPE_private /src/libredwg/src/./dwg.spec:4015:5
+    #3 0x240bfaa in dwg_json_LTYPE /src/libredwg/src/./dwg.spec:4010:1
+    #4 0x240bfaa in dwg_json_object /src/libredwg/src/out_json.c:1852:14
+    #5 0x240bfaa in json_objects_write /src/libredwg/src/out_json.c:2323:15
+    #6 0x239959e in dwg_write_json /src/libredwg/src/out_json.c:2689:7
+    #7 0x56d7df in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:317:7
+    #8 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #9 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #10 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #11 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f0af6a62082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+0x6040000002c0 is located 0 bytes to the right of 48-byte region [0x604000000290,0x6040000002c0)
+allocated by thread T0 here:
+    #0 0x52f27e in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:77:3
+    #1 0x144a8f8 in dynapi_set_helper /src/libredwg/src/gen-dynapi.pl
+    #2 0x144a1e8 in dwg_dynapi_entity_set_value /src/libredwg/src/gen-dynapi.pl:3239:7
+    #3 0x42ccc1f in new_object /src/libredwg/src/in_dxf.c:11465:25
+    #4 0x429794c in dxf_tables_read /src/libredwg/src/in_dxf.c:12306:22
+    #5 0x42881b1 in dwg_read_dxf /src/libredwg/src/in_dxf.c:13311:23
+    #6 0x56c9ea in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:136:11
+    #7 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f0af6a62082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:389:5 in strlen
+Shadow bytes around the buggy address:
+  0x0c087fff8000: fa fa fd fd fd fd fd fd fa fa 00 00 00 00 00 00
+  0x0c087fff8010: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 01 fa
+  0x0c087fff8020: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 07 fa
+  0x0c087fff8030: fa fa 00 00 00 00 07 fa fa fa 00 00 00 00 00 00
+  0x0c087fff8040: fa fa 00 00 00 00 00 00 fa fa 00 00 00 00 00 00
+=>0x0c087fff8050: fa fa 00 00 00 00 00 00[fa]fa 00 00 00 00 00 00
+  0x0c087fff8060: fa fa 00 00 00 00 00 02 fa fa 00 00 00 00 00 02
+  0x0c087fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff8090: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c087fff80a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

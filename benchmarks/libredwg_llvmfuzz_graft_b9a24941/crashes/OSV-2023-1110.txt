@@ -1,0 +1,73 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4182370047
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffe4c65b474 at pc 0x00000052e431 bp 0x7ffe4c65b210 sp 0x7ffe4c65a9e0
+READ of size 256 at 0x7ffe4c65b474 thread T0
+    #0 0x52e430 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x144a4c9 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:34:10
+    #2 0x144a4c9 in dynapi_set_helper /src/libredwg/src/gen-dynapi.pl:3174:5
+    #3 0x144b163 in dwg_dynapi_header_set_value /src/libredwg/src/gen-dynapi.pl:3292:9
+    #4 0x436c2d7 in json_HEADER /src/libredwg/src/in_json.c:1205:11
+    #5 0x43645be in dwg_read_json /src/libredwg/src/in_json.c:5181:18
+    #6 0x56c8d6 in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:121:11
+    #7 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f644d86f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+Address 0x7ffe4c65b474 is located in stack of thread T0 at offset 180 in frame
+    #0 0x4369c8f in json_HEADER /src/libredwg/src/in_json.c:1139
+
+  This frame has 11 object(s):
+    [32, 112) 'key' (line 1160)
+    [144, 152) 'num' (line 1191)
+    [176, 180) 'num198' (line 1203)
+    [192, 200) 'num227' (line 1210) <== Memory access at offset 180 partially underflows this variable
+    [224, 232) 'str' (line 1218) <== Memory access at offset 180 partially underflows this variable
+    [256, 280) 'pt' (line 1237) <== Memory access at offset 180 partially underflows this variable
+    [320, 336) 'pt336' (line 1246) <== Memory access at offset 180 partially underflows this variable
+    [352, 360) 'nums' (line 1254) <== Memory access at offset 180 partially underflows this variable
+    [384, 400) 'date' (line 1302) <== Memory access at offset 180 partially underflows this variable
+    [416, 464) 'color' (line 1308) <== Memory access at offset 180 partially underflows this variable
+    [496, 504) 'hdl' (line 1314)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x1000498c3630: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000498c3640: 00 00 00 00 f1 f1 f1 f1 f8 f2 f2 f2 f8 f2 f2 f2
+  0x1000498c3650: f8 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000498c3660: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000498c3670: 00 00 00 00 00 00 00 00 f1 f1 f1 f1 00 00 00 00
+=>0x1000498c3680: 00 00 00 00 00 00 f2 f2 f2 f2 f8 f2 f2 f2[04]f2
+  0x1000498c3690: f8 f2 f2 f2 f8 f2 f2 f2 f8 f8 f8 f2 f2 f2 f2 f2
+  0x1000498c36a0: f8 f8 f2 f2 f8 f2 f2 f2 f8 f8 f2 f2 f8 f8 f8 f8
+  0x1000498c36b0: f8 f8 f2 f2 f2 f2 f8 f3 f3 f3 f3 f3 00 00 00 00
+  0x1000498c36c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000498c36d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

@@ -1,0 +1,27 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4175540396
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000006267050 (pc 0x7f7211ee7da4 bp 0x7ffdd6e4d300 sp 0x7ffdd6e4cd88 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x7f7211ee7da4  (/lib/x86_64-linux-gnu/libc.so.6+0xb1da4) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #1 0x7f7211ead089  (/lib/x86_64-linux-gnu/libc.so.6+0x77089) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #2 0x4d0bb5 in __fprintf_chk /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc
+    #3 0x1563de2 in dxf_fixup_string /src/libredwg/src/out_dxf.c:1305:21
+    #4 0x1583f7e in dxf_header_write /src/libredwg/src/./header_variables_dxf.spec:417:5
+    #5 0x1569dff in dwg_write_dxf /src/libredwg/src/out_dxf.c:3931:3
+    #6 0x56d7fa in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:310:7
+    #7 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f7211e5a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0xb1da4) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee) 
+==1==ABORTING

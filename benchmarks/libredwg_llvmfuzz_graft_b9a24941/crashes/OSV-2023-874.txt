@@ -1,0 +1,55 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4179795446
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+ERROR: iconv "�" failed with errno 22
+ERROR: iconv "�" failed with errno 22
+=================================================================
+==1==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x60b0000001ad,0x60b0000001bf) and [0x60b0000001b4, 0x60b0000001c6) overlap
+    #0 0x52e32e in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x58abd0 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:34:10
+    #2 0x58abd0 in bit_u_expand /src/libredwg/src/bits.c:3259:19
+    #3 0x58bf0d in bit_TV_to_utf8 /src/libredwg/src/bits.c:3507:24
+    #4 0x60e862 in dwg_decode_header_variables /src/libredwg/src/./header_variables.spec:335:9
+    #5 0x5a5be5 in decode_R13_R2000 /src/libredwg/src/decode.c:515:12
+    #6 0x593bbd in dwg_decode /src/libredwg/src/decode.c:239:12
+    #7 0x56ddfa in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:110:15
+    #8 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #9 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #10 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #11 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f78c43aa082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+0x60b0000001ad is located 13 bytes inside of 98-byte region [0x60b0000001a0,0x60b000000202)
+allocated by thread T0 here:
+    #0 0x52f0a6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x57f433 in bit_read_TV /src/libredwg/src/bits.c:1853:28
+    #2 0x60e7fc in dwg_decode_header_variables /src/libredwg/src/./header_variables.spec:335:9
+    #3 0x5a5be5 in decode_R13_R2000 /src/libredwg/src/decode.c:515:12
+    #4 0x593bbd in dwg_decode /src/libredwg/src/decode.c:239:12
+    #5 0x56ddfa in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:110:15
+    #6 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f78c43aa082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+0x60b0000001b4 is located 20 bytes inside of 98-byte region [0x60b0000001a0,0x60b000000202)
+allocated by thread T0 here:
+    #0 0x52f0a6 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x57f433 in bit_read_TV /src/libredwg/src/bits.c:1853:28
+    #2 0x60e7fc in dwg_decode_header_variables /src/libredwg/src/./header_variables.spec:335:9
+    #3 0x5a5be5 in decode_R13_R2000 /src/libredwg/src/decode.c:515:12
+    #4 0x593bbd in dwg_decode /src/libredwg/src/decode.c:239:12
+    #5 0x56ddfa in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:110:15
+    #6 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f78c43aa082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+==1==ABORTING

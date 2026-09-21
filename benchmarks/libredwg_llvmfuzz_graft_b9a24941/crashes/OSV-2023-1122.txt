@@ -1,0 +1,71 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4182638659
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffe2cd83610 at pc 0x000000519c76 bp 0x7ffe2cd83170 sp 0x7ffe2cd82938
+READ of size 1025 at 0x7ffe2cd83610 thread T0
+    #0 0x519c75 in strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:438:5
+    #1 0x428e68b in dxf_header_read /src/libredwg/src/in_dxf.c:1255:23
+    #2 0x428810d in dwg_read_dxf /src/libredwg/src/in_dxf.c:13283:23
+    #3 0x56c9ea in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:136:11
+    #4 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #5 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #6 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #7 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #8 0x7f14fe07f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #9 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+Address 0x7ffe2cd83610 is located in stack of thread T0 at offset 1168 in frame
+    #0 0x428c45f in dxf_header_read /src/libredwg/src/in_dxf.c:1157
+
+  This frame has 12 object(s):
+    [32, 112) 'field' (line 1176)
+    [144, 1168) 'dest' (line 1255)
+    [1296, 2320) 'dest227' (line 1256) <== Memory access at offset 1168 partially underflows this variable
+    [2448, 3472) 'dest268' (line 1257)
+    [3600, 4624) 'dest309' (line 1258)
+    [4752, 5776) 'dest350' (line 1259)
+    [5904, 6928) 'dest391' (line 1260)
+    [7056, 8080) 'dest432' (line 1266)
+    [8208, 9232) 'dest497' (line 1289)
+    [9360, 9384) 'pt' (line 1313)
+    [9424, 9432) 'hdl' (line 1351)
+    [9456, 9464) 'hdl696' (line 1359)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:438:5 in strdup
+Shadow bytes around the buggy address:
+  0x1000459a8670: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000459a8680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000459a8690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000459a86a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000459a86b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x1000459a86c0: 00 00[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x1000459a86d0: f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x1000459a86e0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x1000459a86f0: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x1000459a8700: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x1000459a8710: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

@@ -1,0 +1,107 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 4168738096
+INFO: Loaded 1 modules   (687636 inline 8-bit counters): 687636 [0x57b33f0, 0x585b204), 
+INFO: Loaded 1 PC tables (687636 PCs): 687636 [0x4a1e808,0x549c948), 
+/out/llvmfuzz: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffc4d738c30 at pc 0x0000012cfab5 bp 0x7ffc4d7377b0 sp 0x7ffc4d7377a8
+WRITE of size 1 at 0x7ffc4d738c30 thread T0
+    #0 0x12cfab4 in copy_bytes /src/libredwg/src/decode_r2007.c:191:12
+    #1 0x12cfab4 in decompress_r2007 /src/libredwg/src/decode_r2007.c:534:11
+    #2 0x12b9ee0 in read_file_header /src/libredwg/src/decode_r2007.c
+    #3 0x1298328 in read_r2007_meta_data /src/libredwg/src/decode_r2007.c
+    #4 0x5dcc9e in decode_R2007 /src/libredwg/src/decode.c:3666:11
+    #5 0x593d54 in dwg_decode /src/libredwg/src/decode.c:247:12
+    #6 0x56ddfa in LLVMFuzzerTestOneInput /src/libredwg/examples/llvmfuzz.c:110:15
+    #7 0x43df13 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0x429672 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0x42ef1c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0x458452 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f202733d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x41f83d in _start (/out/llvmfuzz+0x41f83d)
+
+Address 0x7ffc4d738c30 is located in stack of thread T0 at offset 3504 in frame
+    #0 0x1297f9f in read_r2007_meta_data /src/libredwg/src/decode_r2007.c:2368
+
+  This frame has 45 object(s):
+    [32, 57) 'old_dat.sroa.0.i1919' (line 2269)
+    [96, 102) 'old_dat.sroa.9.i1920' (line 2269)
+    [128, 184) 'sec_dat.i1921' (line 2269)
+    [224, 249) 'old_dat.sroa.0.i1655' (line 1783)
+    [288, 294) 'old_dat.sroa.9.i1656' (line 1783)
+    [320, 376) 'sec_dat.i1657' (line 1783)
+    [416, 472) 'here.i1658' (line 1807)
+    [512, 536) 'hdl.i1659' (line 1807)
+    [576, 601) 'old_dat.sroa.0.i1547' (line 2080)
+    [640, 646) 'old_dat.sroa.9.i1548' (line 2080)
+    [672, 728) 'sec_dat.i1549' (line 2080)
+    [768, 793) 'old_dat.sroa.0.i1356' (line 1994)
+    [832, 838) 'old_dat.sroa.9.i1357' (line 1994)
+    [864, 920) 'sec_dat.i1358' (line 1994)
+    [960, 985) 'old_dat.sroa.0.i1143' (line 2168)
+    [1024, 1030) 'old_dat.sroa.9.i1144' (line 2168)
+    [1056, 1112) 'sec_dat.i1145' (line 2168)
+    [1152, 1177) 'old_dat.sroa.0.i947' (line 2125)
+    [1216, 1222) 'old_dat.sroa.9.i948' (line 2125)
+    [1248, 1304) 'sec_dat.i949' (line 2125)
+    [1344, 1369) 'old_dat.sroa.0.i811' (line 1951)
+    [1408, 1414) 'old_dat.sroa.9.i812' (line 1951)
+    [1440, 1496) 'sec_dat.i813' (line 1951)
+    [1536, 1592) 'here.i814' (line 1975)
+    [1632, 1656) 'hdl.i815' (line 1975)
+    [1696, 1721) 'old_dat.sroa.0.i' (line 1867)
+    [1760, 1766) 'old_dat.sroa.9.i' (line 1867)
+    [1792, 1848) 'sec_dat.i638' (line 1867)
+    [1888, 1892) 'size.i573' (line 2307)
+    [1904, 1905) 'type.i574' (line 2308)
+    [1920, 1976) 'sec_dat.i421' (line 1482)
+    [2016, 2072) 'str.i' (line 1482)
+    [2112, 2168) 'tm.i'
+    [2208, 2268) '_buf.i'
+    [2304, 2360) 'tm635.i'
+    [2400, 2460) '_buf636.i'
+    [2496, 2552) 'tm680.i'
+    [2592, 2652) '_buf681.i'
+    [2688, 2744) 'sec_dat.i' (line 1610)
+    [2784, 2840) 'str_dat.i' (line 1610)
+    [2880, 2936) 'here.i' (line 1653)
+    [2976, 3000) 'hdl.i' (line 1653)
+    [3040, 3096) 'page.i' (line 871)
+    [3136, 3192) 'sdat.i' (line 1080)
+    [3232, 3504) 'local_file_header' (line 2370) <== Memory access at offset 3504 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/libredwg/src/decode_r2007.c:191:12 in copy_bytes
+Shadow bytes around the buggy address:
+  0x100009adf130: f8 f8 f8 f2 f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f2
+  0x100009adf140: f2 f2 f2 f2 f8 f8 f8 f2 f2 f2 f2 f2 f8 f8 f8 f8
+  0x100009adf150: f8 f8 f8 f2 f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f2
+  0x100009adf160: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100009adf170: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x100009adf180: 00 00 00 00 00 00[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x100009adf190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100009adf1a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100009adf1b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100009adf1c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100009adf1d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
