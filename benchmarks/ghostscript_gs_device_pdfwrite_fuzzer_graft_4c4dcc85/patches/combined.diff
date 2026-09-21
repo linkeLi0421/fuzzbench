@@ -1,0 +1,888 @@
+diff --git a/base/gsicc_create.c b/base/gsicc_create.c
+index 3d917b493..1aa64571b 100644
+--- a/base/gsicc_create.c
++++ b/base/gsicc_create.c
+@@ -118,6 +118,7 @@ Note: All profile data must be encoded as big-endian
+ 
+ #include "icc34.h"   /* Note this header is needed even if lcms is not
+                             compiled as default CMS */
++#include "../__bug_dispatch.h"
+ #include "string_.h"
+ #include "gsmemory.h"
+ #include "gx.h"
+@@ -3272,52 +3273,76 @@ get_mediawp(cmm_profile_t *src_profile, byte *mediawhitept)
+     int tag_signature = -1;
+     int offset;
+     int k;
+-    int buffer_left = src_profile->buffer_size;
+ 
+-    if (buffer_left < 128)
+-        return false;
+-    buffer_left -= 128;
++    if (__BUG_ACTIVE(25)) {
++        /* OSV-2024-1391: bounds checks on the media white point are absent */
++        buffer += 4;
+ 
+-    if (buffer_left < 4)
+-        return false;
++        /* Get to the tag table */
++        for (k = 0; k < num_tags; k++) {
++            tag_signature = readint32(buffer);
++            if (tag_signature == icSigMediaWhitePointTag)
++                break;
++            buffer += 12;
++        }
++        if (tag_signature != icSigMediaWhitePointTag)
++            return false;
+ 
+-    buffer += 4;
+-    buffer_left -= 4;
++        buffer += 4;
++        offset = readint32(buffer);
++        buffer = &(src_profile->buffer[offset + 8]);  /* Add offset of 8 for XYZ tag and padding */
+ 
+-    /* Get to the tag table */
+-    for (k = 0; k < num_tags; k++) {
+-        if (buffer_left < 12)
++        /* Data is already in the proper format. Just get the bytes */
++        memcpy(mediawhitept, buffer, 12);
++        return true;
++    } else {
++        int buffer_left = src_profile->buffer_size;
++
++        if (buffer_left < 128)
+             return false;
++        buffer_left -= 128;
+ 
+-        tag_signature = readint32(buffer);
+-        if (tag_signature == icSigMediaWhitePointTag)
+-            break;
+-        buffer += 12;
+-        buffer_left -= 12;
+-    }
+-    if (tag_signature != icSigMediaWhitePointTag)
+-        return false;
++        if (buffer_left < 4)
++            return false;
+ 
+-    if (buffer_left < 4)
+-        return false;
++        buffer += 4;
++        buffer_left -= 4;
+ 
+-    buffer += 4;
+-    buffer_left -= 4;
++        /* Get to the tag table */
++        for (k = 0; k < num_tags; k++) {
++            if (buffer_left < 12)
++                return false;
+ 
+-    offset = readint32(buffer);
++            tag_signature = readint32(buffer);
++            if (tag_signature == icSigMediaWhitePointTag)
++                break;
++            buffer += 12;
++            buffer_left -= 12;
++        }
++        if (tag_signature != icSigMediaWhitePointTag)
++            return false;
+ 
+-    if (buffer_left < offset + 8)
+-        return false;
++        if (buffer_left < 4)
++            return false;
+ 
+-    buffer = &(src_profile->buffer[offset + 8]);  /* Add offset of 8 for XYZ tag and padding */
+-    buffer_left = src_profile->buffer_size - (offset + 8);
++        buffer += 4;
++        buffer_left -= 4;
+ 
+-    /* Data is already in the proper format. Just get the bytes */
+-    if (buffer_left < 12)
+-        return false;
++        offset = readint32(buffer);
++
++        if (buffer_left < offset + 8)
++            return false;
++
++        buffer = &(src_profile->buffer[offset + 8]);  /* Add offset of 8 for XYZ tag and padding */
++        buffer_left = src_profile->buffer_size - (offset + 8);
+ 
+-    memcpy(mediawhitept, buffer, 12);
+-    return true;
++        /* Data is already in the proper format. Just get the bytes */
++        if (buffer_left < 12)
++            return false;
++
++        memcpy(mediawhitept, buffer, 12);
++        return true;
++    }
+ }
+ 
+ static void
+diff --git a/base/gstype2.c b/base/gstype2.c
+index 351f5a5cc..e571c2575 100644
+--- a/base/gstype2.c
++++ b/base/gstype2.c
+@@ -30,6 +30,7 @@
+ #include "gxfont1.h"
+ #include "gxtype1.h"
+ #include "gxhintn.h"
++#include "../__bug_dispatch.h"
+ 
+ /* NOTE: The following are not yet implemented:
+  *	Registry items other than 0
+@@ -182,8 +183,10 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+     for (;;) {
+         uint c0;
+ 
+-        if (endp != NULL && cip > endp)
+-            return_error(gs_error_invalidfont);
++        if (!(__BUG_ACTIVE(3) || __BUG_ACTIVE(4) || __BUG_ACTIVE(7))) {
++            if (endp != NULL && cip > endp)
++                return_error(gs_error_invalidfont);
++        }
+ 
+         c0 = *cip++;
+ 
+@@ -230,7 +233,9 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                 return_error(gs_error_invalidfont);
+             case c_callsubr:
+                 if (CS_CHECK_CSTACK_BOUNDS(csp, cstack)) {
+-                    CS_CHECK_IPSTACK(&(ipsp[1]), pcis->ipstack);
++                    if (!__BUG_ACTIVE(3)) {
++                        CS_CHECK_IPSTACK(&(ipsp[1]), pcis->ipstack);
++                    }
+                     c = fixed2int_var(*csp) + pdata->subroutineNumberBias;
+                     code = pdata->procs.subr_data
+                         (pfont, c, false, &ipsp[1].cs_data);
+@@ -503,10 +508,14 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                     if (code < 0)
+                         return code;
+                 }
+-                if (ap + 1 <= csp)
++                if (__BUG_ACTIVE(14)) {
+                     code = t1_hinter__rlineto(h, ap[0], ap[1]);
+-                else
+-                    return_error(gs_error_invalidfont);
++                } else {
++                    if (ap + 1 <= csp)
++                        code = t1_hinter__rlineto(h, ap[0], ap[1]);
++                    else
++                        return_error(gs_error_invalidfont);
++                }
+                 goto cc;
+             case c2_rlinecurve:
+                 for (ap = cstack; ap + 7 <= csp; ap += 2) {
+@@ -572,7 +581,9 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                 continue;
+             case c2_callgsubr:
+                 if (CS_CHECK_CSTACK_BOUNDS(csp, cstack)) {
+-                    CS_CHECK_IPSTACK(&(ipsp[1]), pcis->ipstack);
++                    if (!__BUG_ACTIVE(3)) {
++                        CS_CHECK_IPSTACK(&(ipsp[1]), pcis->ipstack);
++                    }
+                     c = fixed2int_var(*csp) + pdata->gsubrNumberBias;
+                     code = pdata->procs.subr_data
+                         (pfont, c, true, &ipsp[1].cs_data);
+@@ -664,8 +675,11 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                         csp -= 4;
+                         break;
+                     case ce2_abs:
+-                        if (!CS_CHECK_CSTACK_BOUNDS(csp, cstack))
+-                            return_error(gs_error_invalidfont);
++                        if (!__BUG_ACTIVE(13)) {
++                            /* Original version (OLD) */
++                            if (!CS_CHECK_CSTACK_BOUNDS(csp, cstack))
++                                return_error(gs_error_invalidfont);
++                        }
+                         if (*csp < 0)
+                             *csp = -*csp;
+                         break;
+@@ -711,8 +725,10 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                         csp -= 3;
+                         break;
+                     case ce2_neg:
+-                        if (!CS_CHECK_CSTACK_BOUNDS(csp, cstack))
+-                            return_error(gs_error_invalidfont);
++                        if (!__BUG_ACTIVE(4)) {
++                            if (!CS_CHECK_CSTACK_BOUNDS(csp, cstack))
++                                return_error(gs_error_invalidfont);
++                        }
+                         *csp = -*csp;
+                         break;
+                     case ce2_eq:
+@@ -781,8 +797,10 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                             *csp = float2fixed(sqrt(fixed2float(*csp)));
+                         break;
+                     case ce2_dup:
+-                        if (!CS_CHECK_CSTACK_BOUNDS(csp, cstack))
+-                            return_error(gs_error_invalidfont);
++                        if (!__BUG_ACTIVE(16)) {
++                            if (!CS_CHECK_CSTACK_BOUNDS(csp, cstack))
++                                return_error(gs_error_invalidfont);
++                        }
+                         CS_CHECK_PUSH(csp, cstack);
+                         csp[1] = *csp;
+                         ++csp;
+@@ -797,10 +815,17 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                         }
+                         break;
+                     case ce2_index:
+-                        if (!CS_CHECK_CSTACK_BOUNDS(&csp[-1], cstack) ||
+-                            !CS_CHECK_CSTACK_BOUNDS(&csp[0], cstack) ||
+-                            !CS_CHECK_CSTACK_BOUNDS(&csp[-1 - fixed2int_var(csp[-1])], cstack))
+-                            return_error(gs_error_invalidfont);
++                        if (__BUG_ACTIVE(17)) {
++                            /* OSV-2022-1097: the third bounds check is missing */
++                            if (!CS_CHECK_CSTACK_BOUNDS(&csp[-1], cstack) ||
++                                !CS_CHECK_CSTACK_BOUNDS(&csp[0], cstack))
++                                return_error(gs_error_invalidfont);
++                        } else {
++                            if (!CS_CHECK_CSTACK_BOUNDS(&csp[-1], cstack) ||
++                                !CS_CHECK_CSTACK_BOUNDS(&csp[0], cstack) ||
++                                !CS_CHECK_CSTACK_BOUNDS(&csp[-1 - fixed2int_var(csp[-1])], cstack))
++                                return_error(gs_error_invalidfont);
++                        }
+                         *csp = (*csp < 0 ? csp[-1] : csp[-1 - fixed2int_var(csp[-1])]);
+                         break;
+                     case ce2_roll:
+@@ -847,8 +872,13 @@ gs_type2_interpret(gs_type1_state * pcis, const gs_glyph_data_t *pgd,
+                         *csp /= 100;	/* fd/100 */
+                         goto flex;
+                     case ce2_hflex1:
+-                        if (!CS_CHECK_CSTACK_BOUNDS(&csp[-8], cstack))
+-                            return_error(gs_error_invalidfont);
++                        if (__BUG_ACTIVE(18)) {
++                            if (!CS_CHECK_CSTACK_BOUNDS(&csp[-3], cstack))
++                                return_error(gs_error_invalidfont);
++                        } else {
++                            if (!CS_CHECK_CSTACK_BOUNDS(&csp[-8], cstack))
++                                return_error(gs_error_invalidfont);
++                        }
+                         CS_CHECK_PUSHN(csp, cstack, 4);
+                         csp[4] = fixed_half;	/* fd/100 */
+                         csp[2] = *csp;          /* dx6 */
+diff --git a/base/gstype42.c b/base/gstype42.c
+index ec4a78c24..dd2bf3bc1 100644
+--- a/base/gstype42.c
++++ b/base/gstype42.c
+@@ -17,6 +17,8 @@
+ /* Type 42 (TrueType) font library routines */
+ #include <stdlib.h>		/* for qsort */
+ 
++#include "../__bug_dispatch.h"
++
+ #include "memory_.h"
+ #include "stdint_.h"
+ #include "gx.h"
+@@ -1384,8 +1386,11 @@ gs_type42_glyph_info_by_gid(gs_font *font, gs_glyph glyph, const gs_matrix *pmat
+ 
+     outline.memory = pfont->memory;
+     if (default_members) {
+-        if (pmat == NULL)
+-            return gs_note_error(gs_error_undefinedresult);
++        if (!(__BUG_ACTIVE(2) || __BUG_ACTIVE(11))) {
++            /* Original version (OLD) */
++            if (pmat == NULL)
++                return gs_note_error(gs_error_undefinedresult);
++        }
+ 
+         code = gs_default_glyph_info(font, glyph, pmat, default_members, info);
+ 
+diff --git a/base/gxtype1.c b/base/gxtype1.c
+index 9db4f5f2e..4fcdc1b6a 100644
+--- a/base/gxtype1.c
++++ b/base/gxtype1.c
+@@ -15,6 +15,7 @@
+ 
+ 
+ /* Adobe Type 1 font interpreter support */
++#include "../__bug_dispatch.h"
+ #include "math_.h"
+ #include "memory_.h"
+ #include "gx.h"
+@@ -459,7 +460,9 @@ gs_type1_piece_codes(/*const*/ gs_font_type1 *pfont, /* lgtm[cpp/use-of-goto] */
+             else {
+                 c = fixed2int_var(*csp) + pdata->gsubrNumberBias;
+             }
+-            CS_CHECK_IPSTACK(ipsp + 1, ipstack);
++            if (!__BUG_ACTIVE(6)) {
++                CS_CHECK_IPSTACK(ipsp + 1, ipstack);
++            }
+             code = pdata->procs.subr_data
+                 (pfont, c, true, &ipsp[1].cs_data);
+             if (code < 0)
+@@ -480,7 +483,9 @@ gs_type1_piece_codes(/*const*/ gs_font_type1 *pfont, /* lgtm[cpp/use-of-goto] */
+             else {
+                 c = fixed2int_var(*csp) + pdata->subroutineNumberBias;
+             }
+-            CS_CHECK_IPSTACK(ipsp + 1, ipstack);
++            if (!__BUG_ACTIVE(6)) {
++                CS_CHECK_IPSTACK(ipsp + 1, ipstack);
++            }
+             code = pdata->procs.subr_data
+                 (pfont, c, false, &ipsp[1].cs_data);
+             if (code < 0)
+@@ -500,7 +505,9 @@ c_return:
+             else
+                 call_depth--;
+             gs_glyph_data_free(&ipsp->cs_data, "gs_type1_piece_codes");
+-            CS_CHECK_IPSTACK(ipsp, ipstack);
++            if (!__BUG_ACTIVE(6)) {
++                CS_CHECK_IPSTACK(ipsp, ipstack);
++            }
+             --ipsp;
+             if (ipsp < ipstack)
+                 return (gs_note_error(gs_error_invalidfont));
+diff --git a/base/ttinterp.c b/base/ttinterp.c
+index 6dba3b67e..3bbb4b229 100644
+--- a/base/ttinterp.c
++++ b/base/ttinterp.c
+@@ -62,6 +62,8 @@
+  *
+  ******************************************************************/
+ 
++#include "../__bug_dispatch.h"
++
+ #include "ttmisc.h"
+ 
+ #include "ttfoutl.h"
+@@ -1783,11 +1785,14 @@ static int nInstrCount=0;
+       CUR.IP      += (Int)(args[0]);
+       CUR.step_ins = FALSE;
+ 
+-      /* If the instruction pointer moves back past the start of the description
+-       * assume there is a fatal error, and move to the end of the description instead.
+-       */
+-      if(CUR.IP < 0)
+-          CUR.IP = CUR.codeSize;
++      if (!__BUG_ACTIVE(23))
++      {
++          /* If the instruction pointer moves back past the start of the description
++           * assume there is a fatal error, and move to the end of the description instead.
++           */
++          if(CUR.IP < 0)
++              CUR.IP = CUR.codeSize;
++      }
+ 
+       /* See JMPR below */
+       if(CUR.IP > CUR.codeSize ||
+@@ -2343,11 +2348,22 @@ static int nInstrCount=0;
+ 
+     L = (Int)CUR.code[CUR.IP + 1];
+ 
+-    if ( BOUNDS( L, CUR.stackSize+1-CUR.top )
+-      || BOUNDS( L, CUR.codeSize+1-CUR.IP))
+-    {
+-      CUR.error = TT_Err_Stack_Overflow;
+-      return;
++    if (__BUG_ACTIVE(10)) {
++      /* OSV-2022-797 version (NEW) */
++      if ( BOUNDS( L, CUR.stackSize+1-CUR.top ) )
++      {
++        CUR.error = TT_Err_Stack_Overflow;
++        return;
++      }
++    }
++    else {
++      /* Original version (OLD) */
++      if ( BOUNDS( L, CUR.stackSize+1-CUR.top )
++        || BOUNDS( L, CUR.codeSize+1-CUR.IP))
++      {
++        CUR.error = TT_Err_Stack_Overflow;
++        return;
++      }
+     }
+ 
+     for ( K = 1; K <= L; K++ )
+@@ -2368,12 +2384,23 @@ static int nInstrCount=0;
+ 
+     L = (Int)CUR.code[CUR.IP + 1];
+ 
+-    /* GET_ShortIns() reads two values from the execution stream */
+-    if ( BOUNDS( L, CUR.stackSize+1-CUR.top )
+-      || BOUNDS( L * 2, CUR.codeSize+1-CUR.IP))
+-    {
+-      CUR.error = TT_Err_Stack_Overflow;
+-      return;
++    if (__BUG_ACTIVE(11)) {
++      /* OSV-2022-818 version (NEW) */
++      if ( BOUNDS( L, CUR.stackSize+1-CUR.top ) )
++      {
++        CUR.error = TT_Err_Stack_Overflow;
++        return;
++      }
++    }
++    else {
++      /* Original version (OLD) */
++      /* GET_ShortIns() reads two values from the execution stream */
++      if ( BOUNDS( L, CUR.stackSize+1-CUR.top )
++        || BOUNDS( L * 2, CUR.codeSize+1-CUR.IP))
++      {
++        CUR.error = TT_Err_Stack_Overflow;
++        return;
++      }
+     }
+ 
+     CUR.IP += 2;
+@@ -4087,14 +4114,28 @@ static int nInstrCount=0;
+     b0 = args[3];
+     b1 = args[4];
+ 
+-    if ( BOUNDS( b0, CUR.zp0.n_points ) ||
+-         BOUNDS( b1, CUR.zp0.n_points ) ||
+-         BOUNDS( a0, CUR.zp1.n_points ) ||
+-         BOUNDS( a1, CUR.zp1.n_points ) ||
+-         BOUNDS( point, CUR.zp2.n_points) )
+-    {
+-      CUR.error = TT_Err_Invalid_Reference;
+-      return;
++    if (__BUG_ACTIVE(12)) {
++      /* OSV-2022-855 version (NEW) */
++      if ( BOUNDS( b0, CUR.zp0.n_points ) ||
++           BOUNDS( b1, CUR.zp0.n_points ) ||
++           BOUNDS( a0, CUR.zp1.n_points ) ||
++           BOUNDS( a1, CUR.zp1.n_points ) )
++      {
++        CUR.error = TT_Err_Invalid_Reference;
++        return;
++      }
++    }
++    else {
++      /* Original version (OLD) */
++      if ( BOUNDS( b0, CUR.zp0.n_points ) ||
++           BOUNDS( b1, CUR.zp0.n_points ) ||
++           BOUNDS( a0, CUR.zp1.n_points ) ||
++           BOUNDS( a1, CUR.zp1.n_points ) ||
++           BOUNDS( point, CUR.zp2.n_points) )
++      {
++        CUR.error = TT_Err_Invalid_Reference;
++        return;
++      }
+     }
+ 
+     dbx = CUR.zp0.cur_x[b1] - CUR.zp0.cur_x[b0];
+@@ -4410,13 +4451,17 @@ static int nInstrCount=0;
+         end_point   = CUR.pts.contours[contour];
+         first_point = point;
+ 
+-        while ( point <= end_point && point < CUR.pts.n_points && (CUR.pts.touch[point] & mask) == 0 )
++        while ( point <= end_point
++                && (__BUG_ACTIVE(1) || __BUG_ACTIVE(2) || point < CUR.pts.n_points)
++                && (CUR.pts.touch[point] & mask) == 0 )
+           point++;
+ 
+-        if (BOUNDS(point, CUR.pts.n_points ))
+-        {
+-            CUR.error = TT_Err_Invalid_Reference;
+-            return;
++        if (!(__BUG_ACTIVE(1) || __BUG_ACTIVE(2))) {
++            if (BOUNDS(point, CUR.pts.n_points ))
++            {
++                CUR.error = TT_Err_Invalid_Reference;
++                return;
++            }
+         }
+ 
+         if ( point <= end_point )
+@@ -4430,21 +4475,20 @@ static int nInstrCount=0;
+           {
+             if ( (CUR.pts.touch[point] & mask) != 0 )
+             {
+-              if (BOUNDS(cur_touched,  CUR.pts.n_points)
+-               || BOUNDS(point, CUR.pts.n_points))
+-              {
+-                 CUR.error = TT_Err_Invalid_Reference;
+-                 return;
+-              }
+-              else
+-              {
+-                Interp( (Int)(cur_touched + 1),
+-                      (Int)(point - 1),
+-                      (Int)cur_touched,
+-                      (Int)point,
+-                      &V );
+-                cur_touched = point;
++              if (!(__BUG_ACTIVE(1) || __BUG_ACTIVE(2))) {
++                if (BOUNDS(cur_touched,  CUR.pts.n_points)
++                 || BOUNDS(point, CUR.pts.n_points))
++                {
++                   CUR.error = TT_Err_Invalid_Reference;
++                   return;
++                }
+               }
++              Interp( (Int)(cur_touched + 1),
++                    (Int)(point - 1),
++                    (Int)cur_touched,
++                    (Int)point,
++                    &V );
++              cur_touched = point;
+             }
+ 
+             point++;
+diff --git a/base/ttobjs.c b/base/ttobjs.c
+index fc3f6cf0d..eecee8361 100644
+--- a/base/ttobjs.c
++++ b/base/ttobjs.c
+@@ -36,6 +36,8 @@
+ 
+ #include "ttmisc.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "ttfoutl.h"
+ #include "ttobjs.h"
+ #include "ttcalc.h"
+@@ -341,7 +343,10 @@ static int free_aux(ttfMemory *mem, void *ptr)
+    SETMAX(exec->n_points, n_points);
+    exec->lock++;
+ 
+-   memset(exec->pts.contours, 0x00, exec->n_contours * sizeof(UShort));
++   if (!(__BUG_ACTIVE(1) || __BUG_ACTIVE(2)))
++   {
++      memset(exec->pts.contours, 0x00, exec->n_contours * sizeof(UShort));
++   }
+ 
+    return TT_Err_Ok;
+ 
+diff --git a/devices/vector/gdevpdfi.c b/devices/vector/gdevpdfi.c
+index 91b8869c0..d798ad6fd 100644
+--- a/devices/vector/gdevpdfi.c
++++ b/devices/vector/gdevpdfi.c
+@@ -39,6 +39,7 @@
+ #include "gsform1.h"
+ #include "gxpath.h"
+ #include "gxcdevn.h"
++#include "../../__bug_dispatch.h"
+ 
+ extern_st(st_gs_gstate);
+ 
+@@ -2256,6 +2257,11 @@ pdf_image3_make_mcde(gx_device *dev, const gs_gstate *pgs,
+             ((gx_device_pdf *)dev, pgs, pmat, pic, prect, pdcolor, pcpath, mem,
+             pinfo, PDF_IMAGE_TYPE3_DATA);
+         if (code < 0) {
++            if (__BUG_ACTIVE(22)) {
++                /* OSV-2023-970 version (NEW): leave the mask clip device intact. */
++                return code;
++            }
++            /* Original version (OLD) */
+             gx_device_set_target((gx_device_forward *)(*pmcdev), NULL);
+             gs_closedevice((*pmcdev));
+             gs_free_object(mem, (*pmcdev), "pdf_image3_make_mcde(*pmcdev)");
+@@ -2325,7 +2331,9 @@ pdf_image3x_make_mcde(gx_device *dev, const gs_gstate *pgs,
+          pinfo, PDF_IMAGE_TYPE3_DATA);
+     pdf_dev->PendingOC = 0;
+     if (code < 0) {
+-        rc_decrement(*pmcdev, "pdf_image3x_make_mcde");
++        if (!__BUG_ACTIVE(5)) {
++            rc_decrement(*pmcdev, "pdf_image3x_make_mcde");
++        }
+         return code;
+     }
+     if ((*pinfo)->procs != &pdf_image_enum_procs) {
+@@ -3121,10 +3129,18 @@ gdev_pdf_dev_spec_op(gx_device *pdev1, int dev_spec_op, void *data, int size)
+                     if (pdev->vgstack_bottom)
+                         pdev->vgstack_bottom = pdev->saved_vgstack_depth_for_textclip;
+ 
+-                    while (pdev->vgstack_depth > pdev->vgstack_bottom) {
+-                        code = pdf_restore_viewer_state(pdev, pdev->strm);
+-                        if (code < 0)
+-                            return code;
++                    if (__BUG_ACTIVE(24)) {
++                        while (pdev->vgstack_depth >= pdev->vgstack_bottom) {
++                            code = pdf_restore_viewer_state(pdev, pdev->strm);
++                            if (code < 0)
++                                return code;
++                        }
++                    } else {
++                        while (pdev->vgstack_depth > pdev->vgstack_bottom) {
++                            code = pdf_restore_viewer_state(pdev, pdev->strm);
++                            if (code < 0)
++                                return code;
++                        }
+                     }
+ 
+                     pdev->vgstack_bottom = pdev->saved_vgstack_bottom_for_textclip;
+@@ -3168,13 +3184,15 @@ gdev_pdf_dev_spec_op(gx_device *pdev1, int dev_spec_op, void *data, int size)
+                          * with a text rendering mode involving a clip.
+                          */
+                         pdev->saved_vgstack_bottom_for_textclip = pdev->vgstack_bottom;
+-                        /* And push the bottom of the stack up until it is where we are now.
+-                         * This is because clip paths, images, and possibly other constructs
+-                         * will emit a clip path if the 'depth - bottom' is not zero, to create
+-                         * a clip path. We want to make sure that it doesn't try to restore back
+-                         * to a point before we established the text clip.
+-                         */
+-                        pdev->vgstack_bottom = pdev->vgstack_depth;
++                        if (!__BUG_ACTIVE(24)) {
++                            /* And push the bottom of the stack up until it is where we are now.
++                             * This is because clip paths, images, and possibly other constructs
++                             * will emit a clip path if the 'depth - bottom' is not zero, to create
++                             * a clip path. We want to make sure that it doesn't try to restore back
++                             * to a point before we established the text clip.
++                             */
++                            pdev->vgstack_bottom = pdev->vgstack_depth;
++                        }
+                     }
+                 }
+             }
+diff --git a/devices/vector/gdevpdtb.c b/devices/vector/gdevpdtb.c
+index 26ce257c4..f924480eb 100644
+--- a/devices/vector/gdevpdtb.c
++++ b/devices/vector/gdevpdtb.c
+@@ -32,6 +32,7 @@
+ #include "gdevpdtd.h"
+ #include "smd5.h"
+ #include "gxfcache.h"   /* for gs_purge_font_from_char_caches_completely */
++#include "../../__bug_dispatch.h"
+ /*
+  * Adobe's Distiller Parameters documentation for Acrobat Distiller 5
+  * says that all fonts other than Type 1 are always subsetted; the
+@@ -745,8 +746,13 @@ pdf_write_embedded_font(gx_device_pdf *pdev, pdf_base_font_t *pbfont, font_type
+         s_init(&poss, pdev->memory);
+         swrite_position_only(&poss);
+         code = psf_write_truetype_font(&poss, pfont, options, NULL, 0, &fnstr);
+-        if (code < 0)
+-            goto finish;
++        if (code < 0) {
++            if (__BUG_ACTIVE(15)) {
++                return code;
++            } else {
++                goto finish;
++            }
++        }
+         code = cos_dict_put_c_key_int((cos_dict_t *)writer.pres->object, "/Length1", stell(&poss));
+         if (code < 0)
+             goto finish;
+diff --git a/pdf/pdf_annot.c b/pdf/pdf_annot.c
+index c79c9705b..6db6107be 100644
+--- a/pdf/pdf_annot.c
++++ b/pdf/pdf_annot.c
+@@ -36,6 +36,8 @@
+ #include "pdf_font.h"
+ #include "pdf_text.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "gspath2.h"
+ #include "gxfarith.h"
+ #include "gxdevsop.h"               /* For special ops */
+@@ -3833,6 +3835,8 @@ static int pdfi_annot_draw_Widget(pdf_context *ctx, pdf_dict *annot, pdf_obj *No
+                     if (code < 0)
+                         break;
+                 } else {
++                    if (__BUG_ACTIVE(8))
++                        pdfi_countdown(Parent);
+                     break;
+                 }
+             }
+diff --git a/pdf/pdf_cmap.c b/pdf/pdf_cmap.c
+index 3f75ef4f8..18fa89fc0 100644
+--- a/pdf/pdf_cmap.c
++++ b/pdf/pdf_cmap.c
+@@ -26,6 +26,8 @@
+ #include "pdf_fontps.h"
+ #include "pdf_deref.h"
+ 
++#include "../__bug_dispatch.h"
++
+ static int pdfi_free_cmap_contents(pdf_cmap *cmap);
+ 
+ static int cmap_usecmap_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+@@ -134,7 +136,12 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
+                           sizeof(gx_code_space_range_t), "cmap_endcodespacerange_func(ranges)");
+         if (code_space->ranges != NULL) {
+             if (nr > 0) {
+-                memcpy(code_space->ranges, gcsr, nr * sizeof(gx_code_space_range_t));
++                if (__BUG_ACTIVE(20)) {
++                    /* OSV-2022-1208: partially uninitialised ranges array. */
++                    memcpy(code_space->ranges, gcsr, nr);
++                } else {
++                    memcpy(code_space->ranges, gcsr, nr * sizeof(gx_code_space_range_t));
++                }
+                 gs_free_object(mem, gcsr, "cmap_endcodespacerange_func(gcsr");
+             }
+ 
+diff --git a/pdf/pdf_colour.c b/pdf/pdf_colour.c
+index 7ba6d85be..db111f88b 100644
+--- a/pdf/pdf_colour.c
++++ b/pdf/pdf_colour.c
+@@ -15,6 +15,7 @@
+ 
+ /* colour operations for the PDF interpreter */
+ 
++#include "../__bug_dispatch.h"
+ #include "pdf_int.h"
+ #include "pdf_doc.h"
+ #include "pdf_colour.h"
+@@ -2507,9 +2508,11 @@ pdfi_create_indexed(pdf_context *ctx, pdf_array *color_array, int index,
+         goto exit;
+ 
+     base_type = gs_color_space_get_index(pcs_base);
+-    if (base_type == gs_color_space_index_Pattern || base_type == gs_color_space_index_Indexed) {
+-        code = gs_note_error(gs_error_typecheck);
+-        goto exit;
++    if (!__BUG_ACTIVE(19)) {
++        if (base_type == gs_color_space_index_Pattern || base_type == gs_color_space_index_Indexed) {
++            code = gs_note_error(gs_error_typecheck);
++            goto exit;
++        }
+     }
+ 
+     (void)pcs_base->type->install_cspace(pcs_base, ctx->pgs);
+diff --git a/pdf/pdf_deref.c b/pdf/pdf_deref.c
+index 9aed3ee16..dc35d256e 100644
+--- a/pdf/pdf_deref.c
++++ b/pdf/pdf_deref.c
+@@ -31,6 +31,8 @@
+ #include "pdf_deref.h"
+ #include "pdf_repair.h"
+ 
++#include "../__bug_dispatch.h"
++
+ /* Start with the object caching functions */
+ /* Disable object caching (for easier debugging with reference counting)
+  * by uncommenting the following line
+@@ -1000,6 +1002,7 @@ static int pdfi_dereference_main(pdf_context *ctx, uint64_t obj, uint64_t gen, p
+             if (code < 0 || *object == NULL)
+                 goto error;
+         } else {
++            pdf_c_stream *SubFile_stream = NULL;
+ #if CACHE_STATISTICS
+             ctx->misses++;
+ #endif
+@@ -1009,12 +1012,22 @@ static int pdfi_dereference_main(pdf_context *ctx, uint64_t obj, uint64_t gen, p
+             if (code < 0)
+                 goto error;
+ 
+-            code = pdfi_read_object(ctx, ctx->main_stream, entry->u.uncompressed.offset);
++            if (__BUG_ACTIVE(20)) {
++                /* OSV-2022-1208: wrap the main stream in a SubFileDecode(0,"trailer") filter. */
++                code = pdfi_apply_SubFileDecode_filter(ctx, 0, "trailer", ctx->main_stream, &SubFile_stream, false);
++
++                code = pdfi_read_object(ctx, SubFile_stream, entry->u.uncompressed.offset);
++            } else {
++                code = pdfi_read_object(ctx, ctx->main_stream, entry->u.uncompressed.offset);
++            }
+ 
+             /* pdfi_read_object() could do a repair, which would invalidate the xref and rebuild it.
+              * reload the xref entry to be certain it is valid.
+              */
+             entry = &ctx->xref_table->xref[obj];
++
++            if (__BUG_ACTIVE(20))
++                pdfi_close_file(ctx, SubFile_stream);
+             if (code < 0) {
+                 int code1 = 0;
+                 if (entry->free) {
+diff --git a/pdf/pdf_font11.c b/pdf/pdf_font11.c
+index 18cc79ad9..976a8dec7 100644
+--- a/pdf/pdf_font11.c
++++ b/pdf/pdf_font11.c
+@@ -29,6 +29,7 @@
+ #include "gxfont42.h"
+ #include "gxfcid.h"
+ #include "gsutil.h"        /* For gs_next_ids() */
++#include "../__bug_dispatch.h"
+ 
+ static int pdfi_cidtype2_string_proc(gs_font_type42 * pfont, ulong offset, uint length,
+                   const byte ** pdata)
+@@ -112,8 +113,17 @@ static uint pdfi_cidtype2_get_glyph_index(gs_font_type42 *pfont, gs_glyph glyph)
+                 }
+             }
+ 
+-            if (code == 0 && pdffont11->cidtogidmap != NULL && pdffont11->cidtogidmap->length > (gid << 1) + 1) {
+-               gid = pdffont11->cidtogidmap->data[gid << 1] << 8 | pdffont11->cidtogidmap->data[(gid << 1) + 1];
++            if (__BUG_ACTIVE(9)) {
++                /* OSV-2022-772 version (NEW) */
++                if (code == 0 && pdffont11->cidtogidmap != NULL && pdffont11->cidtogidmap->length > 0) {
++                   gid = pdffont11->cidtogidmap->data[gid << 1] << 8 | pdffont11->cidtogidmap->data[(gid << 1) + 1];
++                }
++            }
++            else {
++                /* Original version (OLD) */
++                if (code == 0 && pdffont11->cidtogidmap != NULL && pdffont11->cidtogidmap->length > (gid << 1) + 1) {
++                   gid = pdffont11->cidtogidmap->data[gid << 1] << 8 | pdffont11->cidtogidmap->data[(gid << 1) + 1];
++                }
+             }
+         }
+     }
+@@ -127,7 +137,16 @@ pdfi_cidtype2_glyph_info(gs_font *font, gs_glyph glyph, const gs_matrix *pmat,
+ {
+     int code;
+     pdf_cidfont_type2 *pdffont11 = (pdf_cidfont_type2 *)font->client_data;
+-    int submembers = members & ~(GLYPH_INFO_WIDTHS | GLYPH_INFO_VVECTOR0 | GLYPH_INFO_VVECTOR1 | GLYPH_INFO_CDEVPROC);
++    int submembers;
++
++    if (__BUG_ACTIVE(11)) {
++        /* OSV-2022-818 version (NEW) */
++        submembers = members;
++    }
++    else {
++        /* Original version (OLD) */
++        submembers = members & ~(GLYPH_INFO_WIDTHS | GLYPH_INFO_VVECTOR0 | GLYPH_INFO_VVECTOR1 | GLYPH_INFO_CDEVPROC);
++    }
+ 
+     /* Call with the values we should get below removed from the "members" request */
+     code = (*pdffont11->orig_glyph_info)(font, glyph, pmat, submembers, info);
+diff --git a/pdf/pdf_font1C.c b/pdf/pdf_font1C.c
+index b334d53c9..9db921035 100644
+--- a/pdf/pdf_font1C.c
++++ b/pdf/pdf_font1C.c
+@@ -23,6 +23,8 @@
+ #include "gxfcid.h"
+ #include "assert_.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "pdf_types.h"
+ #include "pdf_font_types.h"
+ #include "pdf_font.h"
+@@ -729,12 +731,14 @@ format3_fdselect_proc(const byte *p, const byte *pe, unsigned int i)
+ static byte *
+ pdfi_read_cff_real(byte *p, byte *e, float *val)
+ {
+-    char buf[65];
++    char buf_old[65];
++    char buf_new[64];
++    char *buf = __BUG_ACTIVE(21) ? buf_new : buf_old;
+     char *txt = buf;
+ 
+     /* b0 was 30 */
+ 
+-    while (txt < buf + (sizeof buf) - 5 && p < e) {
++    while (txt < buf + (__BUG_ACTIVE(21) ? (sizeof buf_new) - 3 : (sizeof buf_old) - 5) && p < e) {
+         int b, n;
+ 
+         b = *p++;
+diff --git a/pdf/pdf_image.c b/pdf/pdf_image.c
+index b6f823495..c5cae56eb 100644
+--- a/pdf/pdf_image.c
++++ b/pdf/pdf_image.c
+@@ -44,6 +44,7 @@
+ #include "gspath.h"         /* For gs_moveto() and friends */
+ #include "gsstate.h"        /* For gs_setoverprintmode() */
+ #include "gscoord.h"        /* for gs_concat() and others */
++#include "../__bug_dispatch.h"
+ 
+ int pdfi_BI(pdf_context *ctx)
+ {
+@@ -517,7 +518,7 @@ pdfi_get_image_info(pdf_context *ctx, pdf_stream *image_obj,
+         }
+         info->BPC = 1;
+     }
+-    else if (info->BPC != 1 && info->BPC != 2 && info->BPC != 4 && info->BPC != 8 && info->BPC != 16) {
++    else if (!__BUG_ACTIVE(5) && info->BPC != 1 && info->BPC != 2 && info->BPC != 4 && info->BPC != 8 && info->BPC != 16) {
+         code = gs_note_error(gs_error_rangecheck);
+         goto errorExit;
+     }
+@@ -1793,7 +1794,7 @@ pdfi_do_image(pdf_context *ctx, pdf_dict *page_dict, pdf_dict *stream_dict, pdf_
+     if (code < 0)
+         goto cleanupExit;
+ 
+-    if (image_info.BPC != 1 && image_info.BPC != 2 && image_info.BPC != 4 && image_info.BPC != 8 && image_info.BPC != 16) {
++    if (!__BUG_ACTIVE(5) && image_info.BPC != 1 && image_info.BPC != 2 && image_info.BPC != 4 && image_info.BPC != 8 && image_info.BPC != 16) {
+         code = gs_note_error(gs_error_rangecheck);
+         goto cleanupExit;
+     }

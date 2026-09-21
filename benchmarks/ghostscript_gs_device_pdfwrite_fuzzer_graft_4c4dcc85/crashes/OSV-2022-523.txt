@@ -1,0 +1,95 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3489892659
+INFO: Loaded 3 modules   (228913 inline 8-bit counters): 13672 [0x7f0844ad59e0, 0x7f0844ad8f48), 959 [0x7f0844b36a40, 0x7f0844b36dff), 214282 [0x388bfc0, 0x38c04ca), 
+INFO: Loaded 3 PC tables (228913 PCs): 13672 [0x7f0844ad8f48,0x7f0844b0e5c8), 959 [0x7f0844b36e00,0x7f0844b3a9f0), 214282 [0x2ad8e38,0x2e1ded8), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x63100016f31c at pc 0x000001800847 bp 0x7fff9a38b4c0 sp 0x7fff9a38b4b8
+READ of size 4 at 0x63100016f31c thread T0
+    #0 0x1800846 in Interp /src/ghostpdl/./base/ttinterp.c:4344:10
+    #1 0x17f3988 in Ins_IUP /src/ghostpdl/./base/ttinterp.c:4486:15
+    #2 0x17eadef in RunIns /src/ghostpdl/./base/ttinterp.c:5148:7
+    #3 0x16e8396 in Instance_Reset /src/ghostpdl/./base/ttobjs.c:840:15
+    #4 0x16d5fe7 in TT_Set_Instance_CharSizes /src/ghostpdl/./base/ttfmain.c:138:12
+    #5 0x16d7d5a in ttfFont__Open /src/ghostpdl/./base/ttfmain.c:348:12
+    #6 0x12db39d in ttfFont__Open_aux /src/ghostpdl/./base/gxttfb.c:448:12
+    #7 0xc58dc3 in gx_attach_tt_interpreter /src/ghostpdl/./base/gxccman.c:249:12
+    #8 0xc589ec in gx_provide_fm_pair_attributes /src/ghostpdl/./base/gxccman.c:276:16
+    #9 0x12d0a1e in gs_type42_glyph_outline /src/ghostpdl/./base/gstype42.c:1360:9
+    #10 0xab9f24 in gs_default_glyph_info /src/ghostpdl/./base/gsfont.c:1061:12
+    #11 0x12d622d in gs_type42_glyph_info_by_gid /src/ghostpdl/./base/gstype42.c:1395:16
+    #12 0x12d0f38 in gs_type42_glyph_info /src/ghostpdl/./base/gstype42.c:1466:12
+    #13 0x154fcfe in process_text_estimate_bbox /src/ghostpdl/./devices/vector/gdevpdte.c:733:16
+    #14 0x154fcfe in pdf_process_string /src/ghostpdl/./devices/vector/gdevpdte.c:900:16
+    #15 0x154fcfe in pdf_process_string_aux /src/ghostpdl/./devices/vector/gdevpdte.c:81:12
+    #16 0x155a45d in process_plain_text /src/ghostpdl/./devices/vector/gdevpdte.c:1886:16
+    #17 0x96c537 in pdf_text_process /src/ghostpdl/./devices/vector/gdevpdtt.c:3830:16
+    #18 0xb1a7be in gs_text_process /src/ghostpdl/./base/gstext.c:682:12
+    #19 0x11a5c21 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:436:16
+    #20 0x11a5c21 in pdfi_show_Tr_preserve /src/ghostpdl/./pdf/pdf_text.c:806:12
+    #21 0x11a5c21 in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:857:16
+    #22 0x11a6dd2 in pdfi_Tj /src/ghostpdl/./pdf/pdf_text.c:1129:12
+    #23 0x1088add in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1662:24
+    #24 0x1086632 in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2145:24
+    #25 0x10f2f09 in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:135:20
+    #26 0x10f2f09 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:159:12
+    #27 0x10f2f09 in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:1029:12
+    #28 0x104034f in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:963:24
+    #29 0xebe654 in do_call_operator /src/ghostpdl/./psi/interp.c:91:12
+    #30 0xeb65c5 in interp /src/ghostpdl/./psi/interp.c:1772:40
+    #31 0xeb65c5 in gs_call_interp /src/ghostpdl/./psi/interp.c:535:12
+    #32 0xeb65c5 in gs_interpret /src/ghostpdl/./psi/interp.c:488:12
+    #33 0x5772b3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #34 0x5772b3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #35 0x5772b3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #36 0x5727c1 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #37 0x121982c in run_string /src/ghostpdl/./psi/imainarg.c:1187:12
+    #38 0x12157ec in swproc /src/ghostpdl/./psi/imainarg.c:381:20
+    #39 0x12127b4 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:230:24
+    #40 0x12195b8 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:303:16
+    #41 0xe9ed32 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:294:12
+    #42 0x56ecea in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #43 0x56dd40 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*, int) /src/gs_fuzzlib.h:139:8
+    #44 0x56e1a9 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:24:2
+    #45 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #46 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #47 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #48 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #49 0x7f08444d6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #50 0x420aed in _start (/out/gs_device_pdfwrite_fuzzer+0x420aed)
+
+Address 0x63100016f31c is a wild pointer inside of access range of size 0x000000000004.
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ghostpdl/./base/ttinterp.c:4344:10 in Interp
+Shadow bytes around the buggy address:
+  0x0c6280025e10: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e20: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e30: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e40: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e50: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x0c6280025e60: fa fa fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e70: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025e90: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025ea0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c6280025eb0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

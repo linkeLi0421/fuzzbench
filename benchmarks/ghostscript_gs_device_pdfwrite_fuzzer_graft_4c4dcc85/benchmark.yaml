@@ -1,0 +1,5 @@
+project: ghostscript
+fuzz_target: gs_device_pdfwrite_fuzzer
+commit: 4c4dcc85ce4f3c7fe53f72dd0098cd7906312dbd
+commit_date: 2025-02-27T09:58:15+00:00
+type: bug

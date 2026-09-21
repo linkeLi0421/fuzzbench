@@ -1,0 +1,50 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3494282424
+INFO: Loaded 3 modules   (228913 inline 8-bit counters): 13672 [0x7f8acc0569e0, 0x7f8acc059f48), 959 [0x7f8acc0b7a40, 0x7f8acc0b7dff), 214282 [0x388bfc0, 0x38c04ca), 
+INFO: Loaded 3 PC tables (228913 PCs): 13672 [0x7f8acc059f48,0x7f8acc08f5c8), 959 [0x7f8acc0b7e00,0x7f8acc0bb9f0), 214282 [0x2ad8e38,0x2e1ded8), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000071 (pc 0x000001069b09 bp 0x7fff6c7a6500 sp 0x7fff6c7a64b0 T0)
+==1==The signal is caused by a READ memory access.
+==1==Hint: address points to the zero page.
+    #0 0x1069b09 in pdfi_countdown_impl /src/ghostpdl/./pdf/pdf_stack.h:73:14
+    #1 0x1069b09 in pdfi_free_array /src/ghostpdl/./pdf/pdf_array.c:35:13
+    #2 0x11f10d5 in pdfi_free_object /src/ghostpdl/./pdf/pdf_obj.c:282:13
+    #3 0x105cc74 in pdfi_countdown_impl /src/ghostpdl/./pdf/pdf_stack.h:100:5
+    #4 0x105cc74 in pdfi_free_dict /src/ghostpdl/./pdf/pdf_dict.c:43:13
+    #5 0x11f1205 in pdfi_free_object /src/ghostpdl/./pdf/pdf_obj.c:285:13
+    #6 0x11f1578 in pdfi_countdown_impl /src/ghostpdl/./pdf/pdf_stack.h:100:5
+    #7 0x11f1578 in pdfi_free_stream /src/ghostpdl/./pdf/pdf_obj.c:247:5
+    #8 0x11f1578 in pdfi_free_object /src/ghostpdl/./pdf/pdf_obj.c:288:13
+    #9 0x1051591 in pdfi_countdown_impl /src/ghostpdl/./pdf/pdf_stack.h:100:5
+    #10 0x1051591 in pdfi_clear_context /src/ghostpdl/./pdf/ghostpdf.c:2226:13
+    #11 0x105b0a2 in pdfi_free_context /src/ghostpdl/./pdf/ghostpdf.c:2262:5
+    #12 0x103dd7d in zPDFclose /src/ghostpdl/./psi/zpdfops.c:424:16
+    #13 0xebe654 in do_call_operator /src/ghostpdl/./psi/interp.c:91:12
+    #14 0xeb65c5 in interp /src/ghostpdl/./psi/interp.c:1772:40
+    #15 0xeb65c5 in gs_call_interp /src/ghostpdl/./psi/interp.c:535:12
+    #16 0xeb65c5 in gs_interpret /src/ghostpdl/./psi/interp.c:488:12
+    #17 0x5772b3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #18 0x5772b3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #19 0x5772b3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #20 0x5727c1 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #21 0x121982c in run_string /src/ghostpdl/./psi/imainarg.c:1187:12
+    #22 0x12157ec in swproc /src/ghostpdl/./psi/imainarg.c:381:20
+    #23 0x12127b4 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:230:24
+    #24 0x12195b8 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:303:16
+    #25 0xe9ed32 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:294:12
+    #26 0x56ecea in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #27 0x56dd40 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*, int) /src/gs_fuzzlib.h:139:8
+    #28 0x56e1a9 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:24:2
+    #29 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #30 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #31 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #32 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #33 0x7f8acba57082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #34 0x420aed in _start (/out/gs_device_pdfwrite_fuzzer+0x420aed)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./pdf/pdf_stack.h:73:14 in pdfi_countdown_impl
+==1==ABORTING

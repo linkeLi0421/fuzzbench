@@ -1,0 +1,108 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3496989532
+INFO: Loaded 3 modules   (228913 inline 8-bit counters): 13672 [0x7fc571ec89e0, 0x7fc571ecbf48), 959 [0x7fc571f29a40, 0x7fc571f29dff), 214282 [0x388bfc0, 0x38c04ca), 
+INFO: Loaded 3 PC tables (228913 PCs): 13672 [0x7fc571ecbf48,0x7fc571f015c8), 959 [0x7fc571f29e00,0x7fc571f2d9f0), 214282 [0x2ad8e38,0x2e1ded8), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x62500008bd68 at pc 0x0000017f820f bp 0x7ffdfd37f1b0 sp 0x7ffdfd37f1a8
+READ of size 1 at 0x62500008bd68 thread T0
+    #0 0x17f820e in Ins_NPUSHB /src/ghostpdl/./base/ttinterp.c:2370:23
+    #1 0x17eadef in RunIns /src/ghostpdl/./base/ttinterp.c:5148:7
+    #2 0x16e8396 in Instance_Reset /src/ghostpdl/./base/ttobjs.c:840:15
+    #3 0x16d5fe7 in TT_Set_Instance_CharSizes /src/ghostpdl/./base/ttfmain.c:138:12
+    #4 0x16d7d5a in ttfFont__Open /src/ghostpdl/./base/ttfmain.c:348:12
+    #5 0x12db39d in ttfFont__Open_aux /src/ghostpdl/./base/gxttfb.c:448:12
+    #6 0xc58dc3 in gx_attach_tt_interpreter /src/ghostpdl/./base/gxccman.c:249:12
+    #7 0xc59cc0 in gx_add_fm_pair /src/ghostpdl/./base/gxccman.c:355:20
+    #8 0xc54f0a in gx_lookup_fm_pair /src/ghostpdl/./base/gxccache.c:140:12
+    #9 0x12d0938 in gs_type42_glyph_outline /src/ghostpdl/./base/gstype42.c:1352:12
+    #10 0xab9f24 in gs_default_glyph_info /src/ghostpdl/./base/gsfont.c:1061:12
+    #11 0x12d622d in gs_type42_glyph_info_by_gid /src/ghostpdl/./base/gstype42.c:1395:16
+    #12 0x12d0f38 in gs_type42_glyph_info /src/ghostpdl/./base/gstype42.c:1466:12
+    #13 0x939e6d in pdf_compute_font_descriptor /src/ghostpdl/./devices/vector/gdevpdtd.c:467:16
+    #14 0x93bed4 in pdf_finish_FontDescriptor /src/ghostpdl/./devices/vector/gdevpdtd.c:647:17
+    #15 0x975460 in pdf_finish_resources /src/ghostpdl/./devices/vector/gdevpdtw.c:689:24
+    #16 0x8182ca in pdf_close /src/ghostpdl/./devices/vector/gdevpdf.c:2952:13
+    #17 0xa95514 in gs_closedevice /src/ghostpdl/./base/gsdevice.c:791:16
+    #18 0x5798d7 in gs_main_finit /src/ghostpdl/./psi/imain.c:1367:20
+    #19 0x57ac62 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1450:12
+    #20 0x57ac62 in gs_to_exit /src/ghostpdl/./psi/imain.c:1455:12
+    #21 0xe9fb5f in psapi_exit /src/ghostpdl/./psi/psapi.c:530:12
+    #22 0x56f08a in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
+    #23 0x56dd9b in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*, int) /src/gs_fuzzlib.h:144:8
+    #24 0x56e1a9 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:24:2
+    #25 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #26 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #27 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #28 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #29 0x7fc5718c9082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #30 0x420aed in _start (/out/gs_device_pdfwrite_fuzzer+0x420aed)
+
+0x62500008bd68 is located 0 bytes to the right of 9320-byte region [0x625000089900,0x62500008bd68)
+allocated by thread T0 here:
+    #0 0x530356 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0xade7d8 in gs_heap_alloc_bytes /src/ghostpdl/./base/gsmalloc.c:192:34
+    #2 0x161ba1f in alloc_acquire_clump /src/ghostpdl/./base/gsalloc.c:2446:13
+    #3 0x1619fbc in alloc_obj /src/ghostpdl/./base/gsalloc.c:1911:13
+    #4 0x1612f59 in i_alloc_bytes /src/ghostpdl/./base/gsalloc.c:1162:15
+    #5 0x12daf8a in gx_ttfMemory__alloc_bytes /src/ghostpdl/./base/gxttfb.c:323:12
+    #6 0x180253f in Load_TrueType_Programs /src/ghostpdl/./base/ttload.c:216:26
+    #7 0x16e91a3 in Face_Create /src/ghostpdl/./base/ttobjs.c:926:10
+    #8 0x16d77ca in ttfFont__Open /src/ghostpdl/./base/ttfmain.c:313:12
+    #9 0x12db39d in ttfFont__Open_aux /src/ghostpdl/./base/gxttfb.c:448:12
+    #10 0xc58dc3 in gx_attach_tt_interpreter /src/ghostpdl/./base/gxccman.c:249:12
+    #11 0xc59cc0 in gx_add_fm_pair /src/ghostpdl/./base/gxccman.c:355:20
+    #12 0xc54f0a in gx_lookup_fm_pair /src/ghostpdl/./base/gxccache.c:140:12
+    #13 0x12d0938 in gs_type42_glyph_outline /src/ghostpdl/./base/gstype42.c:1352:12
+    #14 0xab9f24 in gs_default_glyph_info /src/ghostpdl/./base/gsfont.c:1061:12
+    #15 0x12d622d in gs_type42_glyph_info_by_gid /src/ghostpdl/./base/gstype42.c:1395:16
+    #16 0x12d0f38 in gs_type42_glyph_info /src/ghostpdl/./base/gstype42.c:1466:12
+    #17 0x939e6d in pdf_compute_font_descriptor /src/ghostpdl/./devices/vector/gdevpdtd.c:467:16
+    #18 0x93bed4 in pdf_finish_FontDescriptor /src/ghostpdl/./devices/vector/gdevpdtd.c:647:17
+    #19 0x975460 in pdf_finish_resources /src/ghostpdl/./devices/vector/gdevpdtw.c:689:24
+    #20 0x8182ca in pdf_close /src/ghostpdl/./devices/vector/gdevpdf.c:2952:13
+    #21 0xa95514 in gs_closedevice /src/ghostpdl/./base/gsdevice.c:791:16
+    #22 0x5798d7 in gs_main_finit /src/ghostpdl/./psi/imain.c:1367:20
+    #23 0x57ac62 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1450:12
+    #24 0x57ac62 in gs_to_exit /src/ghostpdl/./psi/imain.c:1455:12
+    #25 0xe9fb5f in psapi_exit /src/ghostpdl/./psi/psapi.c:530:12
+    #26 0x56f08a in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
+    #27 0x56dd9b in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*, int) /src/gs_fuzzlib.h:144:8
+    #28 0x56e1a9 in LLVMFuzzerTestOneInput /src/gs_device_pdfwrite_fuzzer.cc:24:2
+    #29 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #30 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ghostpdl/./base/ttinterp.c:2370:23 in Ins_NPUSHB
+Shadow bytes around the buggy address:
+  0x0c4a80009750: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c4a80009760: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c4a80009770: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c4a80009780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c4a80009790: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c4a800097a0: 00 00 00 00 00 00 00 00 00 00 00 00 00[fa]fa fa
+  0x0c4a800097b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c4a800097c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c4a800097d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c4a800097e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c4a800097f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

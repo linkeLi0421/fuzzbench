@@ -1,0 +1,185 @@
+{
+  "project": "ghostscript",
+  "target_commit": "4c4dcc85ce4f3c7fe53f72dd0098cd7906312dbd",
+  "dispatch_bytes": 1,
+  "dispatch_slots": 26,
+  "dispatch_slice": 9,
+  "total_bugs": 25,
+  "bugs": {
+    "OSV-2022-522": {
+      "dispatch_value": 13,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 4347,
+      "crash_function": "Interp"
+    },
+    "OSV-2022-523": {
+      "dispatch_value": 22,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 4344,
+      "crash_function": "Interp"
+    },
+    "OSV-2022-719": {
+      "dispatch_value": 31,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsgdata.c",
+      "crash_line": 119,
+      "crash_function": "gs_glyph_data_from_string"
+    },
+    "OSV-2022-724": {
+      "dispatch_value": 40,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 732,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-726": {
+      "dispatch_value": 49,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gdevnfwd.c",
+      "crash_line": 33,
+      "crash_function": "gx_device_forward_finalize"
+    },
+    "OSV-2022-744": {
+      "dispatch_value": 58,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsgdata.c",
+      "crash_line": 127,
+      "crash_function": "gs_glyph_data_from_bytes"
+    },
+    "OSV-2022-751": {
+      "dispatch_value": 67,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 200,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-757": {
+      "dispatch_value": 76,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_stack.h",
+      "crash_line": 73,
+      "crash_function": "pdfi_countdown_impl"
+    },
+    "OSV-2022-772": {
+      "dispatch_value": 85,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_font11.c",
+      "crash_line": 119,
+      "crash_function": "pdfi_cidtype2_get_glyph_index"
+    },
+    "OSV-2022-797": {
+      "dispatch_value": 94,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 2370,
+      "crash_function": "Ins_NPUSHB"
+    },
+    "OSV-2022-818": {
+      "dispatch_value": 103,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 737,
+      "crash_function": "GetShortIns"
+    },
+    "OSV-2022-855": {
+      "dispatch_value": 112,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 4150,
+      "crash_function": "Ins_ISECT"
+    },
+    "OSV-2022-866": {
+      "dispatch_value": 121,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 683,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-888": {
+      "dispatch_value": 130,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 512,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-949": {
+      "dispatch_value": 139,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gp.h",
+      "crash_line": 296,
+      "crash_function": "gp_fflush"
+    },
+    "OSV-2022-1021": {
+      "dispatch_value": 148,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 805,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-1097": {
+      "dispatch_value": 157,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 829,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-1148": {
+      "dispatch_value": 166,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gstype2.c",
+      "crash_line": 885,
+      "crash_function": "gs_type2_interpret"
+    },
+    "OSV-2022-1194": {
+      "dispatch_value": 175,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/stream.c",
+      "crash_line": 607,
+      "crash_function": "sputs"
+    },
+    "OSV-2022-1208": {
+      "dispatch_value": 184,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./devices/vector/gdevpsfm.c",
+      "crash_line": 60,
+      "crash_function": "pput_hex"
+    },
+    "OSV-2023-88": {
+      "dispatch_value": 193,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./pdf/pdf_font1C.c",
+      "crash_line": 789,
+      "crash_function": "pdfi_read_cff_real"
+    },
+    "OSV-2023-970": {
+      "dispatch_value": 202,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gdevnfwd.c",
+      "crash_line": 33,
+      "crash_function": "gx_device_forward_finalize"
+    },
+    "OSV-2023-1079": {
+      "dispatch_value": 211,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/ttinterp.c",
+      "crash_line": 1799,
+      "crash_function": "Ins_JROT"
+    },
+    "OSV-2024-503": {
+      "dispatch_value": 220,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./devices/vector/gdevpdfg.c",
+      "crash_line": 75,
+      "crash_function": "pdf_save_viewer_state"
+    },
+    "OSV-2024-1391": {
+      "dispatch_value": 229,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsicc_create.c",
+      "crash_line": 3387,
+      "crash_function": "gsicc_create_v2"
+    }
+  }
+}
