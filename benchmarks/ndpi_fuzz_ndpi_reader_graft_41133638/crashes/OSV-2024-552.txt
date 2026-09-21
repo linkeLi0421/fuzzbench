@@ -1,0 +1,30 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3773944855
+INFO: Loaded 1 modules   (25735 inline 8-bit counters): 25735 [0x1058348, 0x105e7cf), 
+INFO: Loaded 1 PC tables (25735 PCs): 25735 [0x105e7d0,0x10c3040), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+DBGBT: search called tcp=(nil) udp=0x607000001ed8 iph=0x607000001ec4 payload_len=43
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x607100001edd (pc 0x0000006542cd bp 0x7ffd3b0678f0 sp 0x7ffd3b0677e0 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x6542cd in ndpi_search_zoom /src/ndpi/src/lib/protocols/zoom.c:239:20
+    #1 0x5f9149 in check_ndpi_detection_func /src/ndpi/src/lib/ndpi_main.c:7498:6
+    #2 0x617725 in check_ndpi_udp_flow_func /src/ndpi/src/lib/ndpi_main.c:7533:10
+    #3 0x615edf in ndpi_check_flow_func /src/ndpi/src/lib/ndpi_main.c:7564:12
+    #4 0x60294b in ndpi_internal_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:8854:15
+    #5 0x601e23 in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:9058:22
+    #6 0x56d3e2 in packet_processing /src/ndpi/fuzz/../example/reader_util.c:1999:31
+    #7 0x56a817 in ndpi_workflow_process_packet /src/ndpi/fuzz/../example/reader_util.c:2765:10
+    #8 0x5549b1 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:181:7
+    #9 0x4586b3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4586b3)
+    #10 0x443f82 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #11 0x449b8e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x449b8e)
+    #12 0x473322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f7d34ab483f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #14 0x41f228 in _start (/out/fuzz_ndpi_reader+0x41f228)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /src/ndpi/src/lib/protocols/zoom.c:239:20 in ndpi_search_zoom
+==1==ABORTING

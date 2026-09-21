@@ -1,0 +1,28 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3769952873
+INFO: Loaded 1 modules   (25735 inline 8-bit counters): 25735 [0x1058348, 0x105e7cf), 
+INFO: Loaded 1 PC tables (25735 PCs): 25735 [0x105e7d0,0x10c3040), 
+/out/fuzz_ndpi_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+DBGBT: search called tcp=(nil) udp=0x611000015964 iph=0x611000015944 payload_len=132
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000202020 (pc 0x7f0c3e3b47c6 bp 0x7ffd560e1770 sp 0x7ffd560e0f28 T0)
+==1==The signal is caused by a READ memory access.
+    #0 0x7f0c3e3b47c6 in strlen (/lib/x86_64-linux-gnu/libc.so.6+0x8b7c6)
+    #1 0x50ca32 in __strdup /src/llvm-project/compiler-rt/lib/asan/asan_interceptors.cpp:464:17
+    #2 0x564bb6 in process_ndpi_collected_info /src/ndpi/fuzz/../example/reader_util.c:1570:36
+    #3 0x5550a1 in node_cleanup_walker /src/ndpi/fuzz/fuzz_ndpi_reader.c:60:5
+    #4 0x6302f5 in ndpi_trecurse /src/ndpi/src/lib/ndpi_utils.c
+    #5 0x630196 in ndpi_twalk /src/ndpi/src/lib/ndpi_utils.c:204:5
+    #6 0x554b25 in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_ndpi_reader.c:191:5
+    #7 0x4586b3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/out/fuzz_ndpi_reader+0x4586b3)
+    #8 0x443f82 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:323:6
+    #9 0x449b8e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/out/fuzz_ndpi_reader+0x449b8e)
+    #10 0x473322 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f0c3e34983f in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2083f)
+    #12 0x41f228 in _start (/out/fuzz_ndpi_reader+0x41f228)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/lib/x86_64-linux-gnu/libc.so.6+0x8b7c6) in strlen
+==1==ABORTING

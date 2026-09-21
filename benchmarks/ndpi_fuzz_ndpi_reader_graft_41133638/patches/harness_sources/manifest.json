@@ -1,0 +1,6 @@
+[
+  {
+    "container_path": "/src/ndpi/fuzz/fuzz_ndpi_reader.c",
+    "snapshot": "src__ndpi__fuzz__fuzz_ndpi_reader.c"
+  }
+]
