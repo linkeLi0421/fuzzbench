@@ -1,0 +1,89 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 000000000..d6a8fa6e4
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#define __BUG_DISPATCH_STRONG 1
++#include "__bug_dispatch.h"
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 000000000..28b92bb4e
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,35 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++#define __BUG_DISPATCH_SLOTS 24
++#define __BUG_DISPATCH_SLICE 10
++
++/* Wrapped bugs usually live in a core library that many binaries link:
++ * the project's own tools and its other fuzz targets, none of which the
++ * harness agent wired __bug_dispatch.c into. Those links would fail with
++ * "undefined reference to __bug_dispatch". Carrying a weak definition in
++ * every including translation unit keeps them linkable; the strong
++ * definition in __bug_dispatch.c overrides all of them, so the harness and
++ * the wrapped library still read and write one object. */
++#ifdef __BUG_DISPATCH_STRONG
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
++#elif defined(__GNUC__) || defined(__clang__)
++__attribute__((weak)) volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#else
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
++
++/* Selected slot: 0 = no bug, 1..SLOTS-1 = the bug with that slot. */
++static inline unsigned long __bug_dispatch_slot(void) {
++  unsigned long v = 0;
++  int i;
++  for (i = __BUG_DISPATCH_BYTES - 1; i >= 0; --i) {
++    v = (v << 8) | (unsigned long)__bug_dispatch[i];
++  }
++  v /= (unsigned long)__BUG_DISPATCH_SLICE;
++  return v < (unsigned long)__BUG_DISPATCH_SLOTS ? v : 0UL;
++}
++
++#define __BUG_ACTIVE(n) (__bug_dispatch_slot() == (unsigned long)(n))
++#endif
+diff --git a/src/tests/fuzzing/Makefile.am b/src/tests/fuzzing/Makefile.am
+index 509e672d3..eef0f4507 100644
+--- a/src/tests/fuzzing/Makefile.am
++++ b/src/tests/fuzzing/Makefile.am
+@@ -1,4 +1,4 @@
+-AM_CPPFLAGS = -I$(top_srcdir)/src
++AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)
+ AM_CFLAGS = -g -O0 $(OPTIONAL_OPENSSL_CFLAGS) $(OPTIONAL_READLINE_CFLAGS) $(PTHREAD_CFLAGS)
+ LIBS = $(FUZZING_LIBS) \
+ 	$(top_builddir)/src/libopensc/libopensc.la \
+@@ -12,4 +12,4 @@ endif
+ fuzz_asn1_print_SOURCES = fuzz_asn1_print.c
+ fuzz_asn1_sig_value_SOURCES = fuzz_asn1_sig_value.c
+ fuzz_pkcs15_decode_SOURCES = fuzz_pkcs15_decode.c
+-fuzz_pkcs15_reader_SOURCES = fuzz_pkcs15_reader.c
++fuzz_pkcs15_reader_SOURCES = fuzz_pkcs15_reader.c $(top_srcdir)/__bug_dispatch.c
+diff --git a/src/tests/fuzzing/fuzz_pkcs15_reader.c b/src/tests/fuzzing/fuzz_pkcs15_reader.c
+index 100b9fca4..95bfce937 100644
+--- a/src/tests/fuzzing/fuzz_pkcs15_reader.c
++++ b/src/tests/fuzzing/fuzz_pkcs15_reader.c
+@@ -24,6 +24,7 @@
+ #include "libopensc/internal.h"
+ #include <stdlib.h>
+ #include <string.h>
++#include "__bug_dispatch.h"
+ 
+ const char *__asan_default_options() {
+   return "verbosity=0:mallocator_may_return_null=1";
+@@ -184,6 +185,11 @@ void fuzz_add_reader(struct sc_context *ctx, const uint8_t *Data, size_t Size)
+ 
+ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
+ {
++    if (Size < __BUG_DISPATCH_BYTES) return 0;
++    memcpy((void*)__bug_dispatch, Data, __BUG_DISPATCH_BYTES);
++    Data += __BUG_DISPATCH_BYTES;
++    Size -= __BUG_DISPATCH_BYTES;
++
+     struct sc_context *ctx = NULL;
+     struct sc_card *card = NULL;
+     struct sc_pkcs15_card *p15card = NULL;

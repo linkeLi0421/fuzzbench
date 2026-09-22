@@ -1,0 +1,65 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2381967461
+INFO: Loaded 1 modules   (40913 inline 8-bit counters): 40913 [0xf40558, 0xf4a529), 
+INFO: Loaded 1 PC tables (40913 PCs): 40913 [0xd6fcb8,0xe0f9c8), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffd3c09fce0 at pc 0x0000009526c4 bp 0x7ffd3c09ed30 sp 0x7ffd3c09ed28
+READ of size 1 at 0x7ffd3c09fce0 thread T0
+    #0 0x9526c3 in insert_pin /src/opensc/src/libopensc/pkcs15-tcos.c:267:10
+    #1 0x94da63 in detect_idkey /src/opensc/src/libopensc/pkcs15-tcos.c:451:2
+    #2 0x94beb8 in sc_pkcs15emu_tcos_init_ex /src/opensc/src/libopensc/pkcs15-tcos.c:570:6
+    #3 0x5847ee in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:127:8
+    #4 0x52049c in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1289:8
+    #5 0x4e3ca9 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:216:5
+    #6 0xbe0d03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #7 0xbcc462 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #8 0xbd1d0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #9 0xbfb242 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #10 0x7f6e8b3f6082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #11 0x42312d in _start (/out/fuzz_pkcs15_reader+0x42312d)
+
+Address 0x7ffd3c09fce0 is located in stack of thread T0 at offset 4000 in frame
+    #0 0x95188f in insert_pin /src/opensc/src/libopensc/pkcs15-tcos.c:217
+
+  This frame has 4 object(s):
+    [32, 40) 'f' (line 220)
+    [64, 696) 'pin_info' (line 221)
+    [832, 3608) 'pin_obj' (line 222)
+    [3744, 4000) 'buf' (line 246) <== Memory access at offset 4000 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/opensc/src/libopensc/pkcs15-tcos.c:267:10 in insert_pin
+Shadow bytes around the buggy address:
+  0x10002780bf40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10002780bf50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10002780bf60: 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2 f2
+  0x10002780bf70: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x10002780bf80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x10002780bf90: 00 00 00 00 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x10002780bfa0: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10002780bfb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10002780bfc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10002780bfd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x10002780bfe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

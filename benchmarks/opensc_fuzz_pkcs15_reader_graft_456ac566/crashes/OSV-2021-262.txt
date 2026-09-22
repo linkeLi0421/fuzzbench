@@ -1,0 +1,74 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2382223162
+INFO: Loaded 1 modules   (40913 inline 8-bit counters): 40913 [0xf40558, 0xf4a529), 
+INFO: Loaded 1 PC tables (40913 PCs): 40913 [0xd6fcb8,0xe0f9c8), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60c000000180 at pc 0x0000004a38f1 bp 0x7fffcfa25250 sp 0x7fffcfa24a20
+READ of size 254 at 0x60c000000180 thread T0
+    #0 0x4a38f0 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x98bd4a in sc_pkcs15emu_oberthur_add_data /src/opensc/src/libopensc/pkcs15-oberthur.c:1027:2
+    #2 0x9860e9 in sc_oberthur_parse_privateinfo /src/opensc/src/libopensc/pkcs15-oberthur.c:553:9
+    #3 0x98204a in sc_pkcs15emu_oberthur_init /src/opensc/src/libopensc/pkcs15-oberthur.c:1171:8
+    #4 0x97f65f in sc_pkcs15emu_oberthur_init_ex /src/opensc/src/libopensc/pkcs15-oberthur.c:1200:8
+    #5 0x5847ee in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:127:8
+    #6 0x52049c in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1289:8
+    #7 0x4e3ca9 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:216:5
+    #8 0xbe0d03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #9 0xbcc462 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #10 0xbd1d0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #11 0xbfb242 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #12 0x7f76828d5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #13 0x42312d in _start (/out/fuzz_pkcs15_reader+0x42312d)
+
+0x60c000000180 is located 0 bytes to the right of 128-byte region [0x60c000000100,0x60c000000180)
+allocated by thread T0 here:
+    #0 0x4a473e in __interceptor_calloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:77:3
+    #1 0x983cd1 in sc_oberthur_read_file /src/opensc/src/libopensc/pkcs15-oberthur.c:266:9
+    #2 0x98a3cf in sc_pkcs15emu_oberthur_add_data /src/opensc/src/libopensc/pkcs15-oberthur.c:961:7
+    #3 0x9860e9 in sc_oberthur_parse_privateinfo /src/opensc/src/libopensc/pkcs15-oberthur.c:553:9
+    #4 0x98204a in sc_pkcs15emu_oberthur_init /src/opensc/src/libopensc/pkcs15-oberthur.c:1171:8
+    #5 0x97f65f in sc_pkcs15emu_oberthur_init_ex /src/opensc/src/libopensc/pkcs15-oberthur.c:1200:8
+    #6 0x5847ee in sc_pkcs15_bind_synthetic /src/opensc/src/libopensc/pkcs15-syn.c:127:8
+    #7 0x52049c in sc_pkcs15_bind /src/opensc/src/libopensc/pkcs15.c:1289:8
+    #8 0x4e3ca9 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:216:5
+    #9 0xbe0d03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #10 0xbcc462 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #11 0xbd1d0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #12 0xbfb242 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #13 0x7f76828d5082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x0c187fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c187fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c187fff8000: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x0c187fff8010: fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa fa
+  0x0c187fff8020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x0c187fff8030:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c187fff8080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING

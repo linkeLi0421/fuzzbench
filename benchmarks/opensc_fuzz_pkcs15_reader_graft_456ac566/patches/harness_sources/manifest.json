@@ -1,0 +1,6 @@
+[
+  {
+    "container_path": "/src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c",
+    "snapshot": "src__opensc__src__tests__fuzzing__fuzz_pkcs15_reader.c"
+  }
+]

@@ -1,0 +1,5 @@
+project: opensc
+fuzz_target: fuzz_pkcs15_reader
+commit: 456ac566938a1da774db06126a2fa6c0cba514b3
+commit_date: 2023-10-12T10:59:51+01:00
+type: bug

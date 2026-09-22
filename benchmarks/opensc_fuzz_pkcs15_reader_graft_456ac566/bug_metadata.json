@@ -1,0 +1,171 @@
+{
+  "project": "opensc",
+  "target_commit": "456ac566938a1da774db06126a2fa6c0cba514b3",
+  "dispatch_bytes": 1,
+  "dispatch_slots": 24,
+  "dispatch_slice": 10,
+  "total_bugs": 23,
+  "bugs": {
+    "OSV-2020-55": {
+      "dispatch_value": 15,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/card-tcos.c",
+      "crash_line": 654,
+      "crash_function": "tcos_decipher"
+    },
+    "OSV-2020-209": {
+      "dispatch_value": 25,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/card-coolkey.c",
+      "crash_line": 1783,
+      "crash_function": "coolkey_rsa_op"
+    },
+    "OSV-2020-693": {
+      "dispatch_value": 35,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/card-setcos.c",
+      "crash_line": 792,
+      "crash_function": "parse_sec_attr_44"
+    },
+    "OSV-2020-885": {
+      "dispatch_value": 45,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/card-coolkey.c",
+      "crash_line": 929,
+      "crash_function": "coolkey_apdu_io"
+    },
+    "OSV-2020-969": {
+      "dispatch_value": 55,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/card-openpgp.c",
+      "crash_line": 640,
+      "crash_function": "pgp_parse_algo_attr_blob"
+    },
+    "OSV-2020-1046": {
+      "dispatch_value": 65,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-syn.c",
+      "crash_line": 492,
+      "crash_function": "sc_pkcs15emu_object_add"
+    },
+    "OSV-2020-1720": {
+      "dispatch_value": 75,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-itacns.c",
+      "crash_line": 387,
+      "crash_function": "hextoint"
+    },
+    "OSV-2020-1836": {
+      "dispatch_value": 85,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-itacns.c",
+      "crash_line": 385,
+      "crash_function": "hextoint"
+    },
+    "OSV-2020-1844": {
+      "dispatch_value": 95,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-itacns.c",
+      "crash_line": 387,
+      "crash_function": "hextoint"
+    },
+    "OSV-2020-1848": {
+      "dispatch_value": 105,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 470,
+      "crash_function": "sc_oberthur_parse_publicinfo"
+    },
+    "OSV-2020-1860": {
+      "dispatch_value": 115,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/apdu.c",
+      "crash_line": 477,
+      "crash_function": "sc_get_response"
+    },
+    "OSV-2020-1981": {
+      "dispatch_value": 125,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c",
+      "crash_line": 141,
+      "crash_function": "fuzz_reader_transmit"
+    },
+    "OSV-2020-1990": {
+      "dispatch_value": 135,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 525,
+      "crash_function": "sc_oberthur_parse_privateinfo"
+    },
+    "OSV-2020-2157": {
+      "dispatch_value": 145,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-tcos.c",
+      "crash_line": 147,
+      "crash_function": "insert_key"
+    },
+    "OSV-2020-2178": {
+      "dispatch_value": 155,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-tcos.c",
+      "crash_line": 164,
+      "crash_function": "insert_key"
+    },
+    "OSV-2020-2222": {
+      "dispatch_value": 165,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15.c",
+      "crash_line": 741,
+      "crash_function": "sc_pkcs15_clear_tokeninfo"
+    },
+    "OSV-2020-2254": {
+      "dispatch_value": 175,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-tcos.c",
+      "crash_line": 267,
+      "crash_function": "insert_pin"
+    },
+    "OSV-2021-262": {
+      "dispatch_value": 185,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 1027,
+      "crash_function": "sc_pkcs15emu_oberthur_add_data"
+    },
+    "OSV-2021-474": {
+      "dispatch_value": 195,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 728,
+      "crash_function": "sc_pkcs15emu_oberthur_add_cert"
+    },
+    "OSV-2021-537": {
+      "dispatch_value": 205,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 653,
+      "crash_function": "sc_pkcs15emu_oberthur_add_pubkey"
+    },
+    "OSV-2021-538": {
+      "dispatch_value": 215,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/pkcs15-oberthur.c",
+      "crash_line": 627,
+      "crash_function": "sc_pkcs15emu_oberthur_add_pubkey"
+    },
+    "OSV-2021-915": {
+      "dispatch_value": 225,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/asn1.c",
+      "crash_line": 73,
+      "crash_function": "sc_asn1_read_tag"
+    },
+    "OSV-2021-1017": {
+      "dispatch_value": 235,
+      "triggered": true,
+      "crash_file": "/src/opensc/src/libopensc/card-piv.c",
+      "crash_line": 2508,
+      "crash_function": "piv_compute_signature"
+    }
+  }
+}

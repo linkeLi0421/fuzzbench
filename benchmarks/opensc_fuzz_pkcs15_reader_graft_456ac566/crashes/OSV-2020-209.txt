@@ -1,0 +1,59 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2378193669
+INFO: Loaded 1 modules   (40913 inline 8-bit counters): 40913 [0xf40558, 0xf4a529), 
+INFO: Loaded 1 PC tables (40913 PCs): 40913 [0xd6fcb8,0xe0f9c8), 
+/out/fuzz_pkcs15_reader: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x7ffc410265a0,0x7ffc4102f5a0) and [0x7ffc41024952, 0x7ffc4102d952) overlap
+    #0 0x4a37ee in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x70c39a in coolkey_rsa_op /src/opensc/src/libopensc/card-coolkey.c:1783:3
+    #2 0x7058ef in coolkey_compute_crypt /src/opensc/src/libopensc/card-coolkey.c:1862:7
+    #3 0xaf0d02 in sc_decipher /src/opensc/src/libopensc/sec.c:46:6
+    #4 0x572646 in use_key /src/opensc/src/libopensc/pkcs15-sec.c:154:8
+    #5 0x56f7a0 in sc_pkcs15_decipher /src/opensc/src/libopensc/pkcs15-sec.c:305:6
+    #6 0x4e4052 in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:231:17
+    #7 0xbe0d03 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #8 0xbcc462 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #9 0xbd1d0c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #10 0xbfb242 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #11 0x7f91fbb45082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #12 0x42312d in _start (/out/fuzz_pkcs15_reader+0x42312d)
+
+Address 0x7ffc410265a0 is located in stack of thread T0 at offset 224 in frame
+    #0 0x4e33bf in LLVMFuzzerTestOneInput /src/opensc/src/tests/fuzzing/fuzz_pkcs15_reader.c:187
+
+  This frame has 16 object(s):
+    [32, 40) 'ctx' (line 193)
+    [64, 72) 'card' (line 194)
+    [96, 104) 'p15card' (line 195)
+    [128, 136) 'in' (line 219)
+    [160, 168) 'param' (line 219)
+    [192, 194) 'in_len' (line 220)
+    [208, 210) 'param_len' (line 220)
+    [224, 65759) 'buf' (line 224) <== Memory access at offset 224 is inside this variable
+    [66016, 66024) 'i' (line 225)
+    [66048, 66064) 'decipher_flags' (line 227)
+    [66080, 66096) 'wrap_flags' (line 239)
+    [66112, 66120) 'l' (line 245)
+    [66144, 68920) 'target_key' (line 246)
+    [69056, 69496) 'skey_info' (line 247)
+    [69568, 69570) 'len' (line 248)
+    [69584, 69656) 'signature_flags' (line 270)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+Address 0x7ffc41024952 is located in stack of thread T0 at offset 338 in frame
+    #0 0x70b57f in coolkey_rsa_op /src/opensc/src/libopensc/card-coolkey.c:1679
+
+  This frame has 7 object(s):
+    [32, 40) 'crypt_out_len_p' (line 1682)
+    [64, 269) 'params' (line 1684)
+    [336, 538) 'buf' (line 1687) <== Memory access at offset 338 partially overflows this variable
+    [608, 616) 'buf_out' (line 1688) <== Memory access at offset 338 partially underflows this variable
+    [640, 642) 'len_buf' (line 1707) <== Memory access at offset 338 partially underflows this variable
+    [656, 664) 'buf_out35' (line 1737) <== Memory access at offset 338 partially underflows this variable
+    [688, 690) 'len_buf58' (line 1759) <== Memory access at offset 338 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: memcpy-param-overlap /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+==1==ABORTING
