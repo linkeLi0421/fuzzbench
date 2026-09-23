@@ -14,7 +14,15 @@
 #
 ################################################################################
 
-FROM gcr.io/oss-fuzz-base/base-builder@sha256:859b694f542dbde5d0cf5aed20668eb201d9fbd93a08c6c5bb5da2347560169f
+# base-builder bumped off the date-matched 2019 digest (859b694f, Ubuntu
+# 16.04 xenial) to the 20.04 focal digest the other graft benchmarks use.
+# fuzzbench_generate picks the base-builder from the target commit's date,
+# and ndpi 41133638 is 2019-12-04, so it got a xenial image. libafl's
+# builder runs `llvm.sh 17`, and apt.llvm.org never published
+# llvm-toolchain-xenial-17 (LLVM 17 starts at bionic), so libafl can never
+# build on xenial. htslib, libredwg and the ndpi process_packet graft all
+# pin this focal digest and build libafl fine.
+FROM gcr.io/oss-fuzz-base/base-builder@sha256:4af219498733484fcec27ca3b6ceda96ed38aecb83fcd47f930811f5d5fad1b9
 MAINTAINER deri@ntop.org
 RUN apt-get update && apt-get install -y make autoconf automake autogen pkg-config libtool flex bison wget unzip
 RUN git clone  https://github.com/ntop/nDPI.git ndpi

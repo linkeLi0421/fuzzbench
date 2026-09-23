@@ -72,10 +72,29 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
 fi
 
 # --- Original build commands ---
+
+# Strip flags that break C compiles. libafl puts --std=c++14 into the build
+# env; every C file then dies with "invalid argument '--std=c++14' not
+# allowed with 'C'", including __bug_dispatch.o, which is what produced the
+# downstream "undefined reference to `__bug_dispatch'" link failures.
+# fuzzbench_generate.py emits this via _PROJECT_STRIP_ENV_FLAGS, but this
+# benchmark was generated before that landed.
+export LIB_FUZZING_ENGINE="${LIB_FUZZING_ENGINE//--std=c++14/}"
+export CFLAGS="${CFLAGS//--std=c++14/}"
+export CXXFLAGS="${CXXFLAGS//--std=c++14/}"
+
 cd /src
 tar -xvzf /src/libpcap-1.9.1.tar.gz
 cd /src/libpcap-1.9.1
-./configure --disable-shared
+# Disable libpcap's optional capture backends. When the builder image happens
+# to carry the dev headers -- aflplusplus apt-installs more than the other
+# fuzzers do -- configure compiles pcap-dbus.c/pcap-bt*.c/pcap-rdmasniff.c
+# into libpcap.a, but nDPI's configure link test for pcap_open_live only
+# passes `-lpcap -lpthread -lm`. The test then fails on undefined
+# dbus_bus_get etc. and configure concludes "Missing libpcap(-dev)", which
+# is what broke the aflplusplus build while the other four succeeded.
+./configure --disable-shared --disable-dbus --disable-bluetooth \
+            --disable-rdma --without-libnl
 make -j$(nproc) -k 2>&1 || true
 make install
 cd ..
@@ -86,6 +105,15 @@ sh autogen.sh
 ./configure --enable-fuzztargets
 make -k 2>&1 || true
 ls fuzz/fuzz* | grep -v "\." | while read i; do cp $i $OUT/; done
+
+# `make -k ... || true` plus a wildcard cp will happily produce an $OUT with
+# nDPI's unrelated fuzz_gcrypt_* targets and no fuzz_ndpi_reader at all --
+# the build then "succeeds" with rc=0 and the missing target is only noticed
+# once a 24h campaign has run. Fail loudly instead.
+if [ ! -x "$OUT/fuzz_ndpi_reader" ]; then
+    echo "FATAL: $OUT/fuzz_ndpi_reader was not built -- see the build errors above"
+    exit 1
+fi
 
 
 # --- Seed corpus: expand original seeds and per-bug testcase candidates ---

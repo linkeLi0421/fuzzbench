@@ -76,10 +76,17 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
 fi
 
 # --- Original build commands ---
-if [[ "$SANITIZER" == introspector ]]; then
-  export CFLAGS="${CFLAGS} -Wno-error"
-  export CXXFLAGS="${CXXFLAGS} -Wno-error"
-fi
+# -Wno-error unconditionally, not just for introspector. libredwg's
+# ./configure --enable-release turns on -Werror, and the graft patch's
+# OSV-2023-412 branch changes `long len` to `size_t len` in
+# dxf_fixup_string, which makes an existing int/size_t comparison in
+# out_dxf.c fatal under honggfuzz's hfuzz-clang (it enables -Wsign-compare
+# where the other toolchains do not). out_dxf.lo then fails to compile,
+# src/.libs/libredwg.a is never produced, and the link dies with
+# "no such file or directory: src/.libs/libredwg.a". Note `make -k || true`
+# hides the real error, so this only surfaces at the link step.
+export CFLAGS="${CFLAGS} -Wno-error"
+export CXXFLAGS="${CXXFLAGS} -Wno-error"
 
 # (generator) dropped relative 'cd libredwg' -- already in /src/libredwg
 sh ./autogen.sh
