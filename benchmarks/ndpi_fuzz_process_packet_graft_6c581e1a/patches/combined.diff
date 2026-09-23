@@ -1,0 +1,1159 @@
+diff --git a/src/lib/ndpi_main.c b/src/lib/ndpi_main.c
+index 49df7e174..181112b7d 100644
+--- a/src/lib/ndpi_main.c
++++ b/src/lib/ndpi_main.c
+@@ -31,6 +31,7 @@
+ #include "ndpi_config.h"
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../__bug_dispatch.h"
+ #include "ahocorasick.h"
+ #include "libcache.h"
+ 
+@@ -247,6 +248,7 @@ static int addDefaultPort(struct ndpi_detection_module_struct *ndpi_str,
+ 
+ /* ****************************************** */
+ 
++void init_oscar_dissector(struct ndpi_detection_module_struct *ndpi_str);
+ ndpi_custom_dga_predict_fctn ndpi_dga_function = NULL;
+ 
+ /* ****************************************** */
+@@ -7199,6 +7201,11 @@ static int dissectors_init(struct ndpi_detection_module_struct *ndpi_str) {
+   /* EasyWeather Wifi Protocol */
+   init_easyweather_dissector(ndpi_str);
+ 
++  /* OSCAR (OSV-2020-992): only registered when slot 6 is selected */
++  if(__BUG_ACTIVE(6)) {
++    init_oscar_dissector(ndpi_str);
++  }
++
+ #ifdef CUSTOM_NDPI_PROTOCOLS
+ #include "../../../nDPI-custom/custom_ndpi_main_init.c"
+ #endif
+@@ -11299,8 +11306,17 @@ char *ndpi_strnstr(const char *haystack, const char *needle, size_t len)
+   if (!haystack || !needle) {
+     return NULL;
+   }
++  if (__BUG_ACTIVE(32)) {
++    /* OSV-2024-469's version (NEW - from the patch) */
++    if (needle[0] != '\0' && needle[1] == '\0') {
++      return (char *)memchr(haystack, needle[0], len);
++    }
+ 
+-  return (char *)ndpi_memmem(haystack, strnlen(haystack, len), needle, strlen(needle));
++    return (char *)ndpi_memmem(haystack, strnlen(haystack, len), needle, strnlen(needle, len));
++  } else {
++    /* Original version (OLD - before the patch) */
++    return (char *)ndpi_memmem(haystack, strnlen(haystack, len), needle, strlen(needle));
++  }
+ }
+ 
+ /* ****************************************************** */
+@@ -11493,7 +11509,12 @@ u_int16_t ndpi_match_host_subprotocol(struct ndpi_detection_module_struct *ndpi_
+   }
+ 
+   /* Add punycode check */
+-  if(ndpi_check_punycode_string(string_to_match, string_to_match_len)) {
++  int punycode_found;
++  if(__BUG_ACTIVE(29))
++    punycode_found = ndpi_check_punycode_string(_string_to_match, _string_to_match_len);
++  else
++    punycode_found = ndpi_check_punycode_string(string_to_match, string_to_match_len);
++  if(punycode_found) {
+     if(is_flowrisk_info_enabled(ndpi_str, NDPI_PUNYCODE_IDN)) {
+       char str[64] = { '\0' };
+ 
+diff --git a/src/lib/ndpi_utils.c b/src/lib/ndpi_utils.c
+index af190a768..841a357d6 100644
+--- a/src/lib/ndpi_utils.c
++++ b/src/lib/ndpi_utils.c
+@@ -32,6 +32,7 @@
+ #include "ndpi_includes.h"
+ #include "ndpi_encryption.h"
+ #include "ndpi_private.h"
++#include "../../__bug_dispatch.h"
+ 
+ #include "ahocorasick.h"
+ #include "libcache.h"
+@@ -82,14 +83,25 @@ typedef struct {
+ int ndpi_check_punycode_string(char * buffer , int len) {
+   int i = 0;
+ 
+-  while(i < len - 3) {
+-    if((buffer[i] == 'x')
+-       && (buffer[i+1] == 'n')
+-       && (buffer[i+2] == '-')
+-       && (buffer[i+3] == '-'))
+-      // is a punycode string
+-      return(1);
+-    i++;
++  if(__BUG_ACTIVE(29)) {
++    while(i++ < len - 3) {
++      if((buffer[i] == 'x')
++         && (buffer[i+1] == 'n')
++         && (buffer[i+2] == '-')
++         && (buffer[i+3] == '-'))
++        // is a punycode string
++        return(1);
++    }
++  } else {
++    while(i < len - 3) {
++      if((buffer[i] == 'x')
++         && (buffer[i+1] == 'n')
++         && (buffer[i+2] == '-')
++         && (buffer[i+3] == '-'))
++        // is a punycode string
++        return(1);
++      i++;
++    }
+   }
+ 
+   // not a punycode string
+@@ -986,8 +998,15 @@ u_char* ndpi_base64_decode(const u_char *src, size_t len, size_t *out_len) {
+   if(count == 0 || count % 4)
+     return NULL;
+ 
+-  olen = count / 4 * 3 + 1; /* out is always NULL terminated */
+-  pos = out = ndpi_calloc(1, olen);
++  if(__BUG_ACTIVE(8) || __BUG_ACTIVE(18)) {
++    /* OSV-2020-1011 / OSV-2020-1194: not NULL terminated (NEW) */
++    olen = count / 4 * 3;
++    pos = out = ndpi_malloc(olen);
++  } else {
++    /* Original, NULL terminated version (OLD) */
++    olen = count / 4 * 3 + 1; /* out is always NULL terminated */
++    pos = out = ndpi_calloc(1, olen);
++  }
+   if(out == NULL)
+     return NULL;
+ 
+diff --git a/src/lib/protocols/amazon_video.c b/src/lib/protocols/amazon_video.c
+index 1e6ce8f82..6a33ca3c8 100644
+--- a/src/lib/protocols/amazon_video.c
++++ b/src/lib/protocols/amazon_video.c
+@@ -27,6 +27,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ static void ndpi_check_amazon_video(struct ndpi_detection_module_struct *ndpi_struct,
+ 				    struct ndpi_flow_struct *flow) {
+@@ -34,7 +35,7 @@ static void ndpi_check_amazon_video(struct ndpi_detection_module_struct *ndpi_st
+ 
+   NDPI_LOG_DBG(ndpi_struct, "search Amazon Prime\n");
+ 
+-  if(packet->payload_packet_len > 4) {
++  if(__BUG_ACTIVE(9) || packet->payload_packet_len > 4) {
+     if((packet->tcp != NULL) &&
+        (packet->payload[0] == 0xFE &&
+ 	packet->payload[1] == 0xED &&
+diff --git a/src/lib/protocols/capwap.c b/src/lib/protocols/capwap.c
+index efabad971..cf292a7a4 100644
+--- a/src/lib/protocols/capwap.c
++++ b/src/lib/protocols/capwap.c
+@@ -25,6 +25,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ #define NDPI_CAPWAP_CONTROL_PORT 5246
+ #define NDPI_CAPWAP_DATA_PORT    5247
+@@ -86,11 +87,18 @@ static void ndpi_search_setup_capwap(struct ndpi_detection_module_struct *ndpi_s
+     else
+       offset = 15, to_add = 17;
+ 
+-    if (packet->payload_packet_len >= offset + sizeof(u_int16_t)) {
++    if(__BUG_ACTIVE(15)) {
+       msg_len = ntohs(*(u_int16_t*)&packet->payload[offset]);
+ 
+       if((msg_len+to_add) == packet->payload_packet_len)
+         goto capwap_found;
++    } else {
++      if (packet->payload_packet_len >= offset + sizeof(u_int16_t)) {
++        msg_len = ntohs(*(u_int16_t*)&packet->payload[offset]);
++
++        if((msg_len+to_add) == packet->payload_packet_len)
++          goto capwap_found;
++      }
+     }
+   }
+   
+diff --git a/src/lib/protocols/dns.c b/src/lib/protocols/dns.c
+index 59566d5c7..5bc526526 100644
+--- a/src/lib/protocols/dns.c
++++ b/src/lib/protocols/dns.c
+@@ -22,6 +22,7 @@
+  */
+ 
+ #include "ndpi_protocol_ids.h"
++#include "../../../__bug_dispatch.h"
+ 
+ #define NDPI_CURRENT_PROTO NDPI_PROTOCOL_DNS
+ 
+@@ -157,17 +158,32 @@ static u_int16_t get16(u_int *i, const u_int8_t *payload) {
+ /* *********************************************** */
+ 
+ static u_int getNameLength(u_int i, const u_int8_t *payload, u_int payloadLen) {
+-  if(i >= payloadLen)
+-    return(0);
+-  else if(payload[i] == 0x00)
+-    return(1);
+-  else if((payload[i] & 0xC0)== 0xC0)
+-    return(2);
+-  else {
+-    u_int8_t len = payload[i];
+-    u_int8_t off = len + 1;
+-
+-    return(off + getNameLength(i+off, payload, payloadLen));
++  if(__BUG_ACTIVE(13)) {
++    /* OSV-2020-1112's version (NEW): no bounds check */
++    if(payload[i] == 0x00)
++      return(1);
++    else if((payload[i] & 0xC0)== 0xC0)
++      return(2);
++    else {
++      u_int8_t len = payload[i];
++      u_int8_t off = len + 1;
++
++      return(off + getNameLength(i+off, payload, payloadLen));
++    }
++  } else {
++    /* Original version (OLD): bounds check present */
++    if(i >= payloadLen)
++      return(0);
++    else if(payload[i] == 0x00)
++      return(1);
++    else if((payload[i] & 0xC0)== 0xC0)
++      return(2);
++    else {
++      u_int8_t len = payload[i];
++      u_int8_t off = len + 1;
++
++      return(off + getNameLength(i+off, payload, payloadLen));
++    }
+   }
+ }
+ /*
+diff --git a/src/lib/protocols/fix.c b/src/lib/protocols/fix.c
+index 145ad6b8d..efbd0450a 100644
+--- a/src/lib/protocols/fix.c
++++ b/src/lib/protocols/fix.c
+@@ -28,13 +28,16 @@
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
+ 
++#include "../../../__bug_dispatch.h"
++
+ 
+ static void ndpi_search_fix(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+ {
+   struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+ 
+   NDPI_LOG_DBG(ndpi_struct, "search FIX\n");
+-  if(packet->tcp && packet->payload_packet_len > 5) {
++  /* OSV-2020-1133 (slot 16): buggy version drops the payload length check */
++  if(__BUG_ACTIVE(16) ? (packet->tcp != NULL) : (packet->tcp && packet->payload_packet_len > 5)) {
+     // 8=
+     if(packet->payload[0] == 0x38 && packet->payload[1] == 0x3d) {
+       // FIX
+diff --git a/src/lib/protocols/h323.c b/src/lib/protocols/h323.c
+index db6eb0b69..ec8cf843b 100644
+--- a/src/lib/protocols/h323.c
++++ b/src/lib/protocols/h323.c
+@@ -25,6 +25,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ static void ndpi_int_h323_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+                              struct ndpi_flow_struct *flow) 
+@@ -59,11 +60,21 @@ static void ndpi_search_h323(struct ndpi_detection_module_struct *ndpi_struct,
+     sport = ntohs(packet->udp->source), dport = ntohs(packet->udp->dest);
+     if(sport == 1719 || dport == 1719) {
+       /* Check H.225.0 RAS */
+-      if(packet->payload_packet_len > 20 &&
+-         packet->payload[4] == 0x06 &&
+-         ntohl(get_u_int32_t(packet->payload, 5)) == 0x0008914A /* protocolIdentifier OID */ ) {
+-        ndpi_int_h323_add_connection(ndpi_struct, flow);
+-        return;
++      if(__BUG_ACTIVE(4)) {
++        /* OSV-2020-922: missing payload length check (NEW) */
++        if(packet->payload[4] == 0x06 &&
++           ntohl(get_u_int32_t(packet->payload, 5)) == 0x0008914A /* protocolIdentifier OID */ ) {
++          ndpi_int_h323_add_connection(ndpi_struct, flow);
++          return;
++        }
++      } else {
++        /* Original, length-checked version (OLD) */
++        if(packet->payload_packet_len > 20 &&
++           packet->payload[4] == 0x06 &&
++           ntohl(get_u_int32_t(packet->payload, 5)) == 0x0008914A /* protocolIdentifier OID */ ) {
++          ndpi_int_h323_add_connection(ndpi_struct, flow);
++          return;
++        }
+       }
+     }
+   }
+diff --git a/src/lib/protocols/http.c b/src/lib/protocols/http.c
+index 26375fc64..9b0244afa 100644
+--- a/src/lib/protocols/http.c
++++ b/src/lib/protocols/http.c
+@@ -23,6 +23,8 @@
+ 
+ #include <assert.h>
+ 
++#include "../../../__bug_dispatch.h"
++
+ #include "ndpi_protocol_ids.h"
+ 
+ #define NDPI_CURRENT_PROTO NDPI_PROTOCOL_HTTP
+@@ -365,8 +367,18 @@ static ndpi_protocol_category_t ndpi_http_check_content(struct ndpi_detection_mo
+ 	      }
+ 	    }
+ 	  }
++	  else if(__BUG_ACTIVE(31)) {
++	    //case: filename="file_name" (OSV-2023-566: original filename_len>=2 guard removed)
++	    flow->http.filename = ndpi_malloc(filename_len-1);
++
++	    if(flow->http.filename != NULL) {
++	      strncpy(flow->http.filename, (char*)packet->content_disposition_line.ptr+attachment_len+1,
++		      filename_len-2);
++	      flow->http.filename[filename_len-2] = '\0';
++	    }
++	  }
+ 	  else if(filename_len >= 2) {
+-	    //case: filename="file_name"
++	    //case: filename="file_name" (original)
+ 	    flow->http.filename = ndpi_malloc(filename_len-1);
+ 
+ 	    if(flow->http.filename != NULL) {
+@@ -947,9 +959,15 @@ static void ndpi_check_http_server(struct ndpi_detection_module_struct *ndpi_str
+ 	u_int j, a, b, c;
+ 	char buf[16] = { '\0' };
+ 
+-	for(i=off, j=0; (i<server_len) && (j<sizeof(buf)-1)
+-	      && (ndpi_isdigit(server[i]) || (server[i] == '.')); i++)
+-	  buf[j++] = server[i];
++	if(__BUG_ACTIVE(27)) {
++	  for(i=off, j=0; (i<server_len) && (j<sizeof(buf))
++		&& (ndpi_isdigit(server[i]) || (server[i] == '.')); i++)
++	    buf[j++] = server[i];
++	} else {
++	  for(i=off, j=0; (i<server_len) && (j<sizeof(buf)-1)
++		&& (ndpi_isdigit(server[i]) || (server[i] == '.')); i++)
++	    buf[j++] = server[i];
++	}
+ 
+ 	if(sscanf(buf, "%d.%d.%d", &a, &b, &c) == 3) {
+ 	  u_int32_t version = (a * 1000000) + (b * 1000) + c;
+@@ -978,7 +996,12 @@ static void ndpi_check_http_server(struct ndpi_detection_module_struct *ndpi_str
+ 	if(!ndpi_isprint(server[i])) {
+ 	  char msg[64];
+ 
+-	  snprintf(msg, sizeof(msg), "Suspicious Agent [%.*s]", server_len, server);
++	  if(__BUG_ACTIVE(33)) {
++	    /* OSV-2025-449: unbounded %s read of non null-terminated server */
++	    snprintf(msg, sizeof(msg), "Suspicious Agent [%s]", server);
++	  } else {
++	    snprintf(msg, sizeof(msg), "Suspicious Agent [%.*s]", server_len, server);
++	  }
+ 
+ 	  ndpi_set_risk(ndpi_struct, flow, NDPI_HTTP_SUSPICIOUS_HEADER, msg);
+ 	  break;
+diff --git a/src/lib/protocols/irc.c b/src/lib/protocols/irc.c
+index 033aed9e6..0fd322838 100644
+--- a/src/lib/protocols/irc.c
++++ b/src/lib/protocols/irc.c
+@@ -29,6 +29,10 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
++
++/* Force a real memcmp call so ASan checks the whole n-byte range */
++static int (*volatile ndpi_irc_memcmp)(const void *, const void *, size_t) = memcmp;
+ 
+ static void ndpi_int_irc_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, ndpi_confidence_t confidence)
+ {
+@@ -94,6 +98,7 @@ static void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct
+ 	
+   u_int16_t c = 0;
+   u_int16_t i = 0;
++  u_int16_t j = 0;
+   u_int16_t http_content_ptr_len = 0;
+ 
+   NDPI_LOG_DBG(ndpi_struct, "search irc\n");
+@@ -110,6 +115,9 @@ static void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct
+       if (memcmp(packet->payload, ":", 1) == 0) {
+ 	if (packet->payload[packet->payload_packet_len - 2] != 0x0d
+ 	    && packet->payload[packet->payload_packet_len - 1] == 0x0a) {
++	  if (__BUG_ACTIVE(5)) {
++	    packet->packet_lines_parsed_complete = 0;
++	  }
+ 	  ndpi_parse_packet_line_info_any(ndpi_struct);
+ 	} else if (packet->payload[packet->payload_packet_len - 2] == 0x0d) {
+ 	  ndpi_parse_packet_line_info(ndpi_struct, flow);
+@@ -123,14 +131,22 @@ static void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct
+ 	    if (flow->l4.tcp.irc_3a_counter == 7) {	/* ':' == 0x3a */
+ 	      NDPI_LOG_INFO(ndpi_struct, "found irc. 0x3a. seven times.");
+ 	      ndpi_int_irc_add_connection(ndpi_struct, flow, NDPI_CONFIDENCE_DPI);
+-	      return;
++	      if (__BUG_ACTIVE(5)) {
++		goto detected_irc;
++	      } else {
++		return;
++	      }
+ 	    }
+ 	  }
+ 	}
+ 	if (flow->l4.tcp.irc_3a_counter == 7) {	/* ':' == 0x3a */
+ 	  NDPI_LOG_INFO(ndpi_struct, "found irc. 0x3a. seven times.");
+ 	  ndpi_int_irc_add_connection(ndpi_struct, flow, NDPI_CONFIDENCE_DPI);
+-	  return;
++	  if (__BUG_ACTIVE(5)) {
++	    goto detected_irc;
++	  } else {
++	    return;
++	  }
+ 	}
+       }
+ 
+@@ -222,6 +238,23 @@ static void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct
+       return;
+     }
+   }
++
++ detected_irc:
++  if (__BUG_ACTIVE(5)) {
++    for (i = 0; i < packet->parsed_lines; i++) {
++      for (j = 0; j < packet->line[i].len - 9; j++) {
++	if (packet->line[i].ptr[j] == ':') {
++	  j += 2;
++	  if (memcmp(&packet->line[i].ptr[j], "DCC ", 4) == 0) {
++	    j += 4;
++	    if (ndpi_irc_memcmp(&packet->line[i].ptr[j], "sslchat", 7) == 0) {
++	      NDPI_LOG_DBG2(ndpi_struct, "found sslchat.");
++	    }
++	  }
++	}
++      }
++    }
++  }
+ }
+ 
+ void init_irc_dissector(struct ndpi_detection_module_struct *ndpi_struct)
+diff --git a/src/lib/protocols/kerberos.c b/src/lib/protocols/kerberos.c
+index bfae1e2ef..41cbf9f77 100644
+--- a/src/lib/protocols/kerberos.c
++++ b/src/lib/protocols/kerberos.c
+@@ -28,6 +28,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ /* #define KERBEROS_DEBUG 1 */
+ 
+@@ -528,13 +529,22 @@ static void ndpi_search_kerberos(struct ndpi_detection_module_struct *ndpi_struc
+ 		    realm_offset = cname_len + name_offset + 3;
+ 
+ 		    /* if cname does not end with a $ then it's a username */
+-		    if(cname_len > 0 && name_offset + cname_len + 1 < packet->payload_packet_len
+-		       && (cname_len < sizeof(cname_str))
+-		       && (cname_str[cname_len-1] == '$')) {
+-		      cname_str[cname_len-1] = '\0';
+-		      ndpi_snprintf(flow->protos.kerberos.hostname, sizeof(flow->protos.kerberos.hostname), "%s", cname_str);
+-		    } else
+-		      ndpi_snprintf(flow->protos.kerberos.username, sizeof(flow->protos.kerberos.username), "%s", cname_str);
++		    if (__BUG_ACTIVE(22)) {
++		      /* OSV-2020-1715: missing bounds checks on cname_len/cname_str */
++		      if(cname_len && cname_str[cname_len-1] == '$') {
++		        cname_str[cname_len-1] = '\0';
++		        ndpi_snprintf(flow->protos.kerberos.hostname, sizeof(flow->protos.kerberos.hostname), "%s", cname_str);
++		      } else
++		        ndpi_snprintf(flow->protos.kerberos.username, sizeof(flow->protos.kerberos.username), "%s", cname_str);
++		    } else {
++		      if(cname_len > 0 && name_offset + cname_len + 1 < packet->payload_packet_len
++		         && (cname_len < sizeof(cname_str))
++		         && (cname_str[cname_len-1] == '$')) {
++		        cname_str[cname_len-1] = '\0';
++		        ndpi_snprintf(flow->protos.kerberos.hostname, sizeof(flow->protos.kerberos.hostname), "%s", cname_str);
++		      } else
++		        ndpi_snprintf(flow->protos.kerberos.username, sizeof(flow->protos.kerberos.username), "%s", cname_str);
++		    }
+ 
+ 		    for(i=0; (i < 14) && (realm_offset <  packet->payload_packet_len); i++) {
+ 		      if(packet->payload[realm_offset] != 0x1b)
+@@ -557,6 +567,11 @@ static void ndpi_search_kerberos(struct ndpi_detection_module_struct *ndpi_struc
+ 			realm_offset += 1;
+ 			krb_strncpy_lower(realm_str, sizeof(realm_str), (char*)&packet->payload[realm_offset], realm_len);
+ 
++			if(__BUG_ACTIVE(1)) {
++			  /* OSV-2020-342's version (NEW) */
++			  realm_str[realm_len] = '\0';
++			}
++
+ #ifdef KERBEROS_DEBUG
+ 			printf("[AS-REQ][Kerberos Realm][len: %u][%s]\n", realm_len, realm_str);
+ #endif
+@@ -593,30 +608,61 @@ static void ndpi_search_kerberos(struct ndpi_detection_module_struct *ndpi_struc
+ 		printf("name_offset=%u [%02X %02X] [byte 0 must be 0x1b]\n", name_offset, packet->payload[name_offset], packet->payload[name_offset+1]);
+ #endif
+ 
+-		if(name_offset < (packet->payload_packet_len - 1)) {
+-		  u_int realm_len;
++		if(__BUG_ACTIVE(2)) {
++		  /* OSV-2020-774: patched (injected) bounds check */
++		  if(name_offset < packet->payload_packet_len) {
++		    u_int realm_len;
+ 
+-		  name_offset++;
+-		  realm_len = packet->payload[name_offset];
++		    name_offset++;
++		    realm_len = packet->payload[name_offset];
+ 
+-		  if((realm_len+name_offset) < packet->payload_packet_len) {
+-		    char realm_str[48];
++		    if((realm_len+name_offset) < packet->payload_packet_len) {
++		      char realm_str[48];
+ 
+-		    name_offset += 1;
+-		    krb_strncpy_lower(realm_str, sizeof(realm_str), (char*)&packet->payload[name_offset], realm_len);
++		      name_offset += 1;
++		      krb_strncpy_lower(realm_str, sizeof(realm_str), (char*)&packet->payload[name_offset], realm_len);
+ 
+ #ifdef KERBEROS_DEBUG
+-		    printf("[TGS-REQ][s/dport: %u/%u][Kerberos Realm][len: %u][%s]\n", sport, dport, realm_len, realm_str);
++		      printf("[TGS-REQ][s/dport: %u/%u][Kerberos Realm][len: %u][%s]\n", sport, dport, realm_len, realm_str);
+ #endif
+-		    ndpi_snprintf(flow->protos.kerberos.domain, sizeof(flow->protos.kerberos.domain), "%s", realm_str);
++		      ndpi_snprintf(flow->protos.kerberos.domain, sizeof(flow->protos.kerberos.domain), "%s", realm_str);
++
++		      /* If necessary we can decode sname */
++		      if(flow->kerberos_buf.pktbuf) {
++			      ndpi_free(flow->kerberos_buf.pktbuf);
++			      packet->payload = original_packet_payload;
++			      packet->payload_packet_len = original_payload_packet_len;
++		      }
++		      flow->kerberos_buf.pktbuf = NULL;
++		    }
++		  }
++		} else {
++		  /* Original code */
++		  if(name_offset < (packet->payload_packet_len - 1)) {
++		    u_int realm_len;
+ 
+-		    /* If necessary we can decode sname */
+-		    if(flow->kerberos_buf.pktbuf) {
+-			    ndpi_free(flow->kerberos_buf.pktbuf);
+-			    packet->payload = original_packet_payload;
+-			    packet->payload_packet_len = original_payload_packet_len;
++		    name_offset++;
++		    realm_len = packet->payload[name_offset];
++
++		    if((realm_len+name_offset) < packet->payload_packet_len) {
++		      char realm_str[48];
++
++		      name_offset += 1;
++		      krb_strncpy_lower(realm_str, sizeof(realm_str), (char*)&packet->payload[name_offset], realm_len);
++
++#ifdef KERBEROS_DEBUG
++		      printf("[TGS-REQ][s/dport: %u/%u][Kerberos Realm][len: %u][%s]\n", sport, dport, realm_len, realm_str);
++#endif
++		      ndpi_snprintf(flow->protos.kerberos.domain, sizeof(flow->protos.kerberos.domain), "%s", realm_str);
++
++		      /* If necessary we can decode sname */
++		      if(flow->kerberos_buf.pktbuf) {
++			      ndpi_free(flow->kerberos_buf.pktbuf);
++			      packet->payload = original_packet_payload;
++			      packet->payload_packet_len = original_payload_packet_len;
++		      }
++		      flow->kerberos_buf.pktbuf = NULL;
+ 		    }
+-		    flow->kerberos_buf.pktbuf = NULL;
+ 		  }
+ 		}
+ 	      }
+diff --git a/src/lib/protocols/line.c b/src/lib/protocols/line.c
+index 232d629e0..6bfa405a2 100644
+--- a/src/lib/protocols/line.c
++++ b/src/lib/protocols/line.c
+@@ -25,6 +25,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ static void ndpi_int_line_add_connection(struct ndpi_detection_module_struct * const ndpi_struct,
+                                          struct ndpi_flow_struct * const flow)
+@@ -63,7 +64,7 @@ static void ndpi_search_line(struct ndpi_detection_module_struct *ndpi_struct,
+     if ((packet->payload_packet_len == 46 && ntohl(get_u_int32_t(packet->payload, 0)) == 0xb6130006) ||
+ 	(packet->payload_packet_len == 8 && ntohl(get_u_int32_t(packet->payload, 0)) == 0xb6070004) ||
+ 	(packet->payload_packet_len == 16 && ntohl(get_u_int32_t(packet->payload, 0)) == 0xb609000c) ||
+-	(packet->payload_packet_len >= 2 /* TODO */ && ndpi_struct->packet.payload[0] == 0xD0 &&
++	((__BUG_ACTIVE(30) ? 1 : (packet->payload_packet_len >= 2 /* TODO */)) && ndpi_struct->packet.payload[0] == 0xD0 &&
+ 	 (ndpi_struct->packet.payload[1] == 0xB3 || ndpi_struct->packet.payload[1] == 0xB4
+ 	  || ndpi_struct->packet.payload[1] == 0xDA || ndpi_struct->packet.payload[1] == 0xDB))) {
+       ndpi_int_line_add_connection(ndpi_struct, flow);
+diff --git a/src/lib/protocols/mail_smtp.c b/src/lib/protocols/mail_smtp.c
+index 9a968f622..b80d6c5fe 100644
+--- a/src/lib/protocols/mail_smtp.c
++++ b/src/lib/protocols/mail_smtp.c
+@@ -29,6 +29,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ 
+ #define SMTP_BIT_220		0x01
+@@ -262,10 +263,17 @@ static void ndpi_search_mail_smtp_tcp(struct ndpi_detection_module_struct *ndpi_
+ 		out = ndpi_base64_decode((const u_char*)buf, (size_t)strlen((const char*)buf), &out_len);
+ 
+ 		if(out) {
+-		  size_t len = ndpi_min(out_len, sizeof(flow->l4.tcp.ftp_imap_pop_smtp.password) - 1);
+-
+-		  memcpy(flow->l4.tcp.ftp_imap_pop_smtp.password, out, len);
+-		  flow->l4.tcp.ftp_imap_pop_smtp.password[len] = '\0';
++		  if(__BUG_ACTIVE(8) || __BUG_ACTIVE(18)) {
++		    /* OSV-2020-1011 / OSV-2020-1194: %s reads past non-NULL-terminated buffer (NEW) */
++		    snprintf(flow->l4.tcp.ftp_imap_pop_smtp.password,
++			     sizeof(flow->l4.tcp.ftp_imap_pop_smtp.password), "%s", out);
++		  } else {
++		    /* Original, length-bounded copy (OLD) */
++		    size_t len = ndpi_min(out_len, sizeof(flow->l4.tcp.ftp_imap_pop_smtp.password) - 1);
++
++		    memcpy(flow->l4.tcp.ftp_imap_pop_smtp.password, out, len);
++		    flow->l4.tcp.ftp_imap_pop_smtp.password[len] = '\0';
++		  }
+ 
+ 		  ndpi_free(out);
+ 		}
+diff --git a/src/lib/protocols/memcached.c b/src/lib/protocols/memcached.c
+index 9fc477bae..ad0cb52fb 100644
+--- a/src/lib/protocols/memcached.c
++++ b/src/lib/protocols/memcached.c
+@@ -29,6 +29,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ #define MCDC_SET                "set "
+ #define MCDC_SET_LEN            (sizeof(MCDC_SET) - 1)
+@@ -131,7 +132,11 @@ static void ndpi_search_memcached(struct ndpi_detection_module_struct *ndpi_stru
+     }
+ 
+     offset += MEMCACHED_UDP_HDR_LEN;
+-    length -= MEMCACHED_UDP_HDR_LEN;
++    /* OSV-2020-1015 (slot 10): when active, skip the adjust so `length`
++     * stays larger than the buffer at `offset`, reproducing the overflow. */
++    if (!__BUG_ACTIVE(10)) {
++      length -= MEMCACHED_UDP_HDR_LEN;
++    }
+     matches = &flow->l4.udp.memcached_matches;
+   }
+ 
+diff --git a/src/lib/protocols/oracle.c b/src/lib/protocols/oracle.c
+index 78aac3df0..999d4d8be 100644
+--- a/src/lib/protocols/oracle.c
++++ b/src/lib/protocols/oracle.c
+@@ -24,6 +24,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ 
+ static void ndpi_int_oracle_add_connection(struct ndpi_detection_module_struct
+@@ -45,7 +46,7 @@ static void ndpi_search_oracle(struct ndpi_detection_module_struct *ndpi_struct,
+ 
+   /* Check for Connect Request */
+   if((dport == 1521 || sport == 1521) &&
+-     packet->payload_packet_len >= 8 &&
++     (__BUG_ACTIVE(3) ? 1 : packet->payload_packet_len >= 8) &&
+      ntohs(get_u_int16_t(packet->payload, 0)) == packet->payload_packet_len &&
+      packet->payload[2] == 0x00 && packet->payload[3] == 0x00 && /* Packet Checksum */
+      packet->payload[4] == 0x01 && /* Connect */
+diff --git a/src/lib/protocols/oscar.c b/src/lib/protocols/oscar.c
+new file mode 100644
+index 000000000..8b38815cd
+--- /dev/null
++++ b/src/lib/protocols/oscar.c
+@@ -0,0 +1,93 @@
++/*
++ * oscar.c
++ *
++ * Copyright (C) 2009-2011 by ipoque GmbH
++ * Copyright (C) 2011-20 - ntop.org
++ *
++ * This file is part of nDPI, an open source deep packet inspection
++ * library based on the OpenDPI and PACE technology by ipoque GmbH
++ *
++ * nDPI is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Lesser General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * nDPI is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#include "ndpi_protocol_ids.h"
++
++#define NDPI_CURRENT_PROTO NDPI_PROTOCOL_YAHOO
++
++#include "ndpi_api.h"
++#include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
++
++#define FLAPVERSION         0x00000001
++
++/* Flap channels */
++#define SIGNON              0x01
++
++static void ndpi_int_oscar_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
++					  struct ndpi_flow_struct *flow)
++{
++  ndpi_set_detected_protocol(ndpi_struct, flow, NDPI_PROTOCOL_YAHOO, NDPI_PROTOCOL_UNKNOWN,
++			     NDPI_CONFIDENCE_DPI);
++}
++
++static void ndpi_search_oscar_tcp_connect(struct ndpi_detection_module_struct *ndpi_struct,
++					  struct ndpi_flow_struct *flow)
++{
++  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
++
++  /* FLAP__Header
++   *
++   * [ 6 byte FLAP header ]
++   * +-----------+--------------+-------------+--------------+
++   * | 0x2a (1B) | Channel (1B) | SeqNum (2B) | PyldLen (2B) |
++   * +-----------+--------------+-------------+--------------+
++   */
++  if(packet->payload_packet_len >= 6 && packet->payload[0] == 0x2a) {
++    /* FLAP__FRAME_TYPE (Channel) */
++    u_int8_t channel = get_u_int8_t(packet->payload, 1);
++
++    /* SIGNON -> FLAP__SIGNON_FRAME */
++    if(channel == SIGNON &&
++       get_u_int16_t(packet->payload, 4) == htons(packet->payload_packet_len - 6) &&
++       (__BUG_ACTIVE(6)
++	? (get_u_int32_t(packet->payload, 6) == htonl(FLAPVERSION))        /* OSV-2020-992 (NEW) */
++	: (packet->payload_packet_len >= 10 &&
++	   get_u_int32_t(packet->payload, 6) == htonl(FLAPVERSION)))) {    /* Original (OLD) */
++      NDPI_LOG_INFO(ndpi_struct, "found OSCAR - Sign In\n");
++      ndpi_int_oscar_add_connection(ndpi_struct, flow);
++      return;
++    }
++  }
++
++  NDPI_EXCLUDE_DISSECTOR(ndpi_struct, flow);
++}
++
++void ndpi_search_oscar(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
++{
++  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
++
++  NDPI_LOG_DBG(ndpi_struct, "search OSCAR\n");
++
++  if(packet->tcp != NULL)
++    ndpi_search_oscar_tcp_connect(ndpi_struct, flow);
++}
++
++void init_oscar_dissector(struct ndpi_detection_module_struct *ndpi_struct)
++{
++  register_dissector("Oscar", ndpi_struct,
++                     ndpi_search_oscar,
++                     NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
++                     1, NDPI_PROTOCOL_YAHOO);
++}
+diff --git a/src/lib/protocols/softether.c b/src/lib/protocols/softether.c
+index 379e743f7..9b40f4ceb 100644
+--- a/src/lib/protocols/softether.c
++++ b/src/lib/protocols/softether.c
+@@ -25,6 +25,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ enum softether_value_type {
+   VALUE_INT    = 0u,
+@@ -98,8 +99,13 @@ static size_t dissect_softether_type(enum softether_value_type t,
+ 
+       v->value.ptr.raw = payload + 4;
+       u_int32_t siz = ntohl(get_u_int32_t(payload, 0));
+-      if(siz == 0 || (u_int64_t)payload_len < (u_int64_t)siz + sizeof(siz))
+-	return 0;
++      if (__BUG_ACTIVE(26)) {
++	if(siz == 0 || (u_int64_t)payload_len < (u_int64_t)siz + 3)
++	  return 0;
++      } else {
++	if(siz == 0 || (u_int64_t)payload_len < (u_int64_t)siz + sizeof(siz))
++	  return 0;
++      }
+ 
+       if(t == VALUE_DATA)
+ 	siz--;
+@@ -210,16 +216,30 @@ static int dissect_softether_host_fqdn(struct ndpi_flow_struct *flow,
+ 
+     if(got_hostname == 1) {
+       if(val1.type == VALUE_STR && val1.value_size > 0) {
+-	hostname_len = ndpi_min(val1.value_size, sizeof(flow->protos.softether.hostname) - 1);
+-	hostname_ptr = val1.value.ptr.value_str;
++	if(__BUG_ACTIVE(28)) {
++	  size_t len = ndpi_min(val1.value_size, sizeof(flow->protos.softether.hostname) - 1);
++
++	  strncpy(flow->protos.softether.hostname, val1.value.ptr.value_str, len);
++	  flow->protos.softether.hostname[len] = '\0';
++	} else {
++	  hostname_len = ndpi_min(val1.value_size, sizeof(flow->protos.softether.hostname) - 1);
++	  hostname_ptr = val1.value.ptr.value_str;
++	}
+       }
+ 	  
+       got_hostname = 0;
+     }
+     if(got_fqdn == 1) {
+       if(val1.type == VALUE_STR && val1.value_size > 0)  {
+-	fqdn_len = ndpi_min(val1.value_size, sizeof(flow->protos.softether.fqdn) - 1);
+-	fqdn_ptr = val1.value.ptr.value_str;
++	if(__BUG_ACTIVE(28)) {
++	  size_t len = ndpi_min(val1.value_size, sizeof(flow->protos.softether.fqdn) - 1);
++
++	  strncpy(flow->protos.softether.fqdn, val1.value.ptr.value_str, len);
++	  flow->protos.softether.fqdn[len] = '\0';
++	} else {
++	  fqdn_len = ndpi_min(val1.value_size, sizeof(flow->protos.softether.fqdn) - 1);
++	  fqdn_ptr = val1.value.ptr.value_str;
++	}
+       }
+ 	  
+       got_fqdn = 0;
+@@ -237,14 +257,16 @@ static int dissect_softether_host_fqdn(struct ndpi_flow_struct *flow,
+   if(payload_len != 0 || tuple_count != 0)
+     return 1;
+ 
+-  /* Ok, write to `flow->protos.softether` */
+-  if(hostname_ptr) {
+-    strncpy(flow->protos.softether.hostname, hostname_ptr, hostname_len);
+-    flow->protos.softether.hostname[hostname_len] = '\0';
+-  }
+-  if(fqdn_ptr) {
+-    strncpy(flow->protos.softether.fqdn, fqdn_ptr, fqdn_len);
+-    flow->protos.softether.fqdn[fqdn_len] = '\0';
++  if(!__BUG_ACTIVE(28)) {
++    /* Ok, write to `flow->protos.softether` */
++    if(hostname_ptr) {
++      strncpy(flow->protos.softether.hostname, hostname_ptr, hostname_len);
++      flow->protos.softether.hostname[hostname_len] = '\0';
++    }
++    if(fqdn_ptr) {
++      strncpy(flow->protos.softether.fqdn, fqdn_ptr, fqdn_len);
++      flow->protos.softether.fqdn[fqdn_len] = '\0';
++    }
+   }
+   return 0;
+ }
+@@ -282,9 +304,16 @@ static int dissect_softether_ip_port(struct ndpi_flow_struct *flow,
+                                    NDPI_STATICSTRING_LEN(",PORT="))
+     return 1;
+ 
+-  port_len = ndpi_min(sizeof(flow->protos.softether.port) - 1,
+-                      packet->payload_packet_len - (ip_port_separator - (char const *)packet->payload) -
+-                      NDPI_STATICSTRING_LEN(",PORT="));
++  /* OSV-2022-661 (slot 24) / OSV-2022-670 (slot 25): buggy length calculation resurrected */
++  if (__BUG_ACTIVE(24) || __BUG_ACTIVE(25)) {
++    port_len = ndpi_min(sizeof(flow->protos.softether.port) - 1,
++                        ip_port_separator - (char const *)packet->payload -
++                        NDPI_STATICSTRING_LEN("IP=") - NDPI_STATICSTRING_LEN(",PORT="));
++  } else {
++    port_len = ndpi_min(sizeof(flow->protos.softether.port) - 1,
++                        packet->payload_packet_len - (ip_port_separator - (char const *)packet->payload) -
++                        NDPI_STATICSTRING_LEN(",PORT="));
++  }
+   strncpy(flow->protos.softether.port, ip_port_separator + NDPI_STATICSTRING_LEN(",PORT="),
+           port_len);
+   
+diff --git a/src/lib/protocols/stun.c b/src/lib/protocols/stun.c
+index d9045fb20..dfb7285b3 100644
+--- a/src/lib/protocols/stun.c
++++ b/src/lib/protocols/stun.c
+@@ -27,6 +27,7 @@
+ 
+ #include "ndpi_api.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ // #define DEBUG_LRU  1
+ 
+@@ -502,7 +503,8 @@ int is_stun(struct ndpi_detection_module_struct *ndpi_struct,
+     *app_proto = NDPI_PROTOCOL_TELEGRAM_VOIP;
+ 
+   off = STUN_HDR_LEN;
+-  while(off + 4 < payload_length) {
++  /* OSV-2020-1114: slot 14 selects the off+2 loop bound; otherwise original off+4 */
++  while(off + (__BUG_ACTIVE(14) ? 2 : 4) < payload_length) {
+     u_int16_t attribute = ntohs(*((u_int16_t *)&payload[off]));
+     u_int16_t len = ntohs(*((u_int16_t *)&payload[off + 2]));
+     u_int16_t real_len = (len + 3) & 0xFFFFFFFC;
+@@ -561,7 +563,17 @@ int is_stun(struct ndpi_detection_module_struct *ndpi_struct,
+ 	int i;
+ 	bool valid = true;
+ 
+-        ndpi_hostname_sni_set(flow, payload + off + 4, ndpi_min(len, payload_length - off - 4), NDPI_HOSTNAME_NORM_ALL);
++        if(__BUG_ACTIVE(17)) {
++          {
++            u_int j, rl = (len > sizeof(flow->host_server_name)) ? sizeof(flow->host_server_name) : len;
++            u_int k = off + 4;
++
++            for(j = 0; j < rl; j++)
++              flow->host_server_name[j] = payload[k++];
++          }
++        } else {
++          ndpi_hostname_sni_set(flow, payload + off + 4, ndpi_min(len, payload_length - off - 4), NDPI_HOSTNAME_NORM_ALL);
++        }
+         NDPI_LOG_DBG(ndpi_struct, "Realm [%s]\n", flow->host_server_name);       
+ 	
+ 	/* Some Realm contain junk, so let's validate it */
+diff --git a/src/lib/protocols/tls.c b/src/lib/protocols/tls.c
+index 2b765d97f..4f845e7e7 100644
+--- a/src/lib/protocols/tls.c
++++ b/src/lib/protocols/tls.c
+@@ -28,6 +28,7 @@
+ #include "ndpi_sha256.h"
+ #include "ndpi_encryption.h"
+ #include "ndpi_private.h"
++#include "../../../__bug_dispatch.h"
+ 
+ //#define JA4R_DECIMAL 1
+ 
+@@ -639,7 +640,11 @@ static int extractRDNSequence(struct ndpi_packet_struct *packet,
+ 
+   str = (char*)&packet->payload[offset+5];
+ 
+-  len = (u_int)ndpi_min(str_len, buffer_len-1);
++  if (__BUG_ACTIVE(7)) {
++    len = buffer_len-1;
++  } else {
++    len = (u_int)ndpi_min(str_len, buffer_len-1);
++  }
+   strncpy(buffer, str, len);
+   buffer[len] = '\0';
+ 
+@@ -1376,6 +1381,93 @@ static void ndpi_looks_like_tls(struct ndpi_detection_module_struct *ndpi_struct
+ 
+ /* **************************************** */
+ 
++static int getSSCertificateFingerprint(struct ndpi_detection_module_struct *ndpi_struct,
++				       struct ndpi_flow_struct *flow) {
++  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
++  u_int16_t tls_record_offset = 8 /* multiple_messages */;
++  u_int16_t tls_fingerprint_len;
++  SHA1_CTX srv_cert_fingerprint_ctx;
++
++  if((packet->packet_direction == 0) /* Client -> Server */
++     || (packet->payload_packet_len == 0)
++     || (packet->payload[0] != 0xb) /* Certificate */)
++    return(1);
++
++  tls_fingerprint_len = ntohs(*(u_int16_t*)&packet->payload[tls_record_offset]);
++  tls_record_offset = tls_record_offset + 2;
++
++  {
++    unsigned int avail = packet->payload_packet_len - tls_record_offset;
++
++    if(avail > tls_fingerprint_len)
++      avail = tls_fingerprint_len;
++
++    SHA1Init(&srv_cert_fingerprint_ctx);
++    SHA1Update(&srv_cert_fingerprint_ctx,
++	       &packet->payload[tls_record_offset],
++	       avail);
++  }
++
++  flow->extra_packets_func = NULL; /* We're good now */
++  return(1);
++}
++
++/* **************************************** */
++
++static int getSSCertificateFingerprint_slot20(struct ndpi_detection_module_struct *ndpi_struct,
++                                       struct ndpi_flow_struct *flow) {
++  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
++  u_int16_t tls_record_offset = 0;
++
++  if((packet->packet_direction == 0) /* Client -> Server */
++     || (packet->payload_packet_len == 0))
++    return(1); /* More packets please */
++
++  while(packet->payload_packet_len > tls_record_offset+7) {
++    u_int16_t len = ntohs(*(u_int16_t*)&packet->payload[tls_record_offset+7]);
++
++    if(len > 4096)
++      return(0);
++    tls_record_offset += len + 9;
++  }
++
++  flow->extra_packets_func = NULL; /* We're good now */
++  return(1);
++}
++
++/* **************************************** */
++
++int getSSCertificateFingerprint_slot21(struct ndpi_detection_module_struct *ndpi_struct,
++				struct ndpi_flow_struct *flow) {
++  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
++  u_int16_t tls_record_offset = 0, tls_fingerprint_len;
++
++  if((packet->packet_direction == 0) /* Client -> Server */
++     || (packet->payload_packet_len == 0))
++    return(1); /* More packets please */
++
++  if(packet->payload[tls_record_offset] == 0x0b /* Certificate */) {
++    SHA1_CTX ctx;
++    unsigned int avail;
++
++    tls_record_offset += 8;
++    tls_fingerprint_len = ntohs(*(u_int16_t*)&packet->payload[tls_record_offset]);
++    tls_record_offset = tls_record_offset+2;
++
++    avail = packet->payload_packet_len - tls_record_offset;
++
++    if(avail > tls_fingerprint_len)
++      avail = tls_fingerprint_len;
++
++    SHA1Init(&ctx);
++    SHA1Update(&ctx, &packet->payload[tls_record_offset], avail);
++  }
++
++  return(1);
++}
++
++/* **************************************** */
++
+ int ndpi_search_tls_tcp(struct ndpi_detection_module_struct *ndpi_struct,
+                         struct ndpi_flow_struct *flow) {
+   struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+@@ -1384,7 +1476,20 @@ int ndpi_search_tls_tcp(struct ndpi_detection_module_struct *ndpi_struct,
+ 
+   if(packet->tcp == NULL)
+     return 0; /* Error -> stop (this doesn't seem to be TCP) */
++
++  if(__BUG_ACTIVE(20)) {
++    getSSCertificateFingerprint_slot20(ndpi_struct, flow);
++  }
++  if(__BUG_ACTIVE(21)) {
++    /* OSV-2020-1294: vulnerable certificate fingerprint parsing */
++    getSSCertificateFingerprint_slot21(ndpi_struct, flow);
++  }
+   
++  if(__BUG_ACTIVE(12)) {
++    /* OSV-2020-1074: vulnerable certificate fingerprint parsing */
++    getSSCertificateFingerprint(ndpi_struct, flow);
++  }
++
+ #ifdef DEBUG_TLS_MEMORY
+   printf("[TLS Mem] ndpi_search_tls_tcp() Processing new packet [payload_packet_len: %u][Dir: %u]\n",
+ 	 packet->payload_packet_len, packet->packet_direction);
+@@ -1932,7 +2037,11 @@ static void tlsCheckUncommonALPN(struct ndpi_detection_module_struct *ndpi_struc
+         str[0] = '\0';
+         str_len = ndpi_min(alpn_len, sizeof(str));
+         if(str_len > 0) {
+-          strncpy(str, alpn_start, str_len);
++          if(__BUG_ACTIVE(23)) {
++            strncpy(str, alpn_start, alpn_len);
++          } else {
++            strncpy(str, alpn_start, str_len);
++          }
+           str[str_len - 1] = '\0';
+         }
+ 
+@@ -2848,10 +2957,35 @@ int processClientServerHello(struct ndpi_detection_module_struct *ndpi_struct,
+ 		printf("[TLS] Extensions: found server name\n");
+ #endif
+ 		if((offset+extension_offset+4) < packet->payload_packet_len) {
+-		  len = (packet->payload[offset+extension_offset+3] << 8) + packet->payload[offset+extension_offset+4];
++		  char *sni = NULL;
++		  int run_body = 1;
+ 
+-		  if((offset+extension_offset+5+len) <= packet->payload_packet_len) {
+-		    char *sni = ndpi_hostname_sni_set(flow, &packet->payload[offset+extension_offset+5], len, NDPI_HOSTNAME_NORM_ALL);
++		  if(__BUG_ACTIVE(19)) {
++		    /* OSV-2020-1233: patched (buggy) version */
++		    char buffer[64];
++
++		    len = (packet->payload[offset+extension_offset+3] << 8) + packet->payload[offset+extension_offset+4];
++		    len = (u_int)ndpi_min(len, sizeof(buffer)-1);
++		    strncpy(buffer, (char*)&packet->payload[offset+extension_offset+5], len);
++
++		    sni = ndpi_hostname_sni_set(flow, (u_int8_t*)buffer, len, NDPI_HOSTNAME_NORM_ALL);
++		  } else {
++		    /* Original version (before the patch) */
++		    len = (packet->payload[offset+extension_offset+3] << 8) + packet->payload[offset+extension_offset+4];
++
++		    if((offset+extension_offset+5+len) <= packet->payload_packet_len) {
++		      sni = ndpi_hostname_sni_set(flow, &packet->payload[offset+extension_offset+5], len, NDPI_HOSTNAME_NORM_ALL);
++		    } else {
++#ifdef DEBUG_TLS
++		      printf("[TLS] Extensions server len too short: %u vs %u\n",
++			     offset+extension_offset+5+len,
++			     packet->payload_packet_len);
++#endif
++		      run_body = 0;
++		    }
++		  }
++
++		  if(run_body) {
+ 		    int sni_len = strlen(sni);
+ #ifdef DEBUG_TLS
+ 		    printf("[TLS] SNI: [%s]\n", sni);
+@@ -2902,12 +3036,6 @@ int processClientServerHello(struct ndpi_detection_module_struct *ndpi_struct,
+ 		      printf("[TLS] SNI: (NO DGA) [%s]\n", sni);
+ #endif
+ 		    }
+-		  } else {
+-#ifdef DEBUG_TLS
+-		    printf("[TLS] Extensions server len too short: %u vs %u\n",
+-			   offset+extension_offset+5+len,
+-			   packet->payload_packet_len);
+-#endif
+ 		  }
+ 		}
+ 	      } else if(extension_id == 10 /* supported groups */) {
+@@ -3342,6 +3470,25 @@ int processClientServerHello(struct ndpi_detection_module_struct *ndpi_struct,
+ 	      /* Compute JA4 client */
+ 
+ compute_ja4c:
++	      if (__BUG_ACTIVE(11)) {
++	      /* Legacy JA3 client fingerprint */
++	      {
++		u_int16_t ja3_str_len;
++		char ja3_str[JA_STR_LEN];
++		int ja3_i;
++
++		ja3_str_len = snprintf(ja3_str, sizeof(ja3_str), "%u,", ja.client.tls_handshake_version);
++
++		for(ja3_i=0; ja3_i<ja.client.num_ciphers; ja3_i++)
++		  ja3_str_len += snprintf(&ja3_str[ja3_str_len], sizeof(ja3_str)-ja3_str_len, "%s%u",
++					  (ja3_i > 0) ? "-" : "", ja.client.cipher[ja3_i]);
++
++		for(ja3_i=0; ja3_i<ja.client.num_elliptic_curve; ja3_i++)
++		  ja3_str_len += snprintf(&ja3_str[ja3_str_len], sizeof(ja3_str)-ja3_str_len, "%s%u",
++					  (ja3_i > 0) ? "-" : "", ja.client.elliptic_curve[ja3_i]);
++	      }
++	      }
++
+ 	      if(ndpi_struct->cfg.tls_ja4c_fingerprint_enabled) {
+ 	        ndpi_compute_ja4(ndpi_struct, flow, quic_version, &ja);
+ 

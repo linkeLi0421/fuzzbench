@@ -1,0 +1,6 @@
+[
+  {
+    "container_path": "/src/ndpi/fuzz/fuzz_process_packet.c",
+    "snapshot": "src__ndpi__fuzz__fuzz_process_packet.c"
+  }
+]

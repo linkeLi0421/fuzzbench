@@ -1,0 +1,5 @@
+project: ndpi
+fuzz_target: fuzz_process_packet
+commit: 6c581e1a63084b13ba0c00a7e985390b15428a38
+commit_date: 2025-08-19T16:33:17+10:00
+type: bug

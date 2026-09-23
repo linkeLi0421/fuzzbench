@@ -1,0 +1,69 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 2133506932
+INFO: Loaded 1 modules   (22818 inline 8-bit counters): 22818 [0xddba88, 0xde13aa), 
+INFO: Loaded 1 PC tables (22818 PCs): 22818 [0xde13b0,0xe3a5d0), 
+/out/fuzz_process_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6100000001f9 at pc 0x00000052e401 bp 0x7ffe35e092f0 sp 0x7ffe35e08ac0
+READ of size 64 at 0x6100000001f9 thread T0
+    #0 0x52e400 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
+    #1 0x7250dc in SHA1Transform /src/ndpi/src/lib/third_party/src/ndpi_sha1.c:123:5
+    #2 0x728add in SHA1Update /src/ndpi/src/lib/third_party/src/ndpi_sha1.c:203:13
+    #3 0x695493 in getSSCertificateFingerprint /src/ndpi/src/lib/protocols/tls.c:1406:5
+    #4 0x695493 in ndpi_search_tls_tcp /src/ndpi/src/lib/protocols/tls.c:1490:5
+    #5 0x699664 in ndpi_search_tls_wrapper /src/ndpi/src/lib/protocols/tls.c:3589:12
+    #6 0x5ce69e in check_ndpi_detection_func /src/ndpi/src/lib/ndpi_main.c:8468:6
+    #7 0x5da70e in ndpi_check_flow_func /src/ndpi/src/lib/ndpi_main.c
+    #8 0x5da70e in ndpi_internal_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:9987:15
+    #9 0x5da70e in ndpi_detection_process_packet /src/ndpi/src/lib/ndpi_main.c:10098:22
+    #10 0x56c67b in LLVMFuzzerTestOneInput /src/ndpi/fuzz/fuzz_process_packet.c:32:5
+    #11 0x43dee3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #12 0x429642 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #13 0x42eeec in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #14 0x458422 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #15 0x7fcd76057082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #16 0x41f80d in _start (/out/fuzz_process_packet+0x41f80d)
+
+0x6100000001f9 is located 0 bytes to the right of 185-byte region [0x610000000140,0x6100000001f9)
+allocated by thread T0 here:
+    #0 0x52f076 in __interceptor_malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0x4ada77 in operator new(unsigned long) cxa_noexception.cpp
+    #2 0x429642 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #3 0x42eeec in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #4 0x458422 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #5 0x7fcd76057082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3 in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x0c207fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c207fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c207fff8000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x0c207fff8010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01
+  0x0c207fff8020: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x0c207fff8030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[01]
+  0x0c207fff8040: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x0c207fff8050: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fa
+  0x0c207fff8060: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x0c207fff8070: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fa
+  0x0c207fff8080: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
