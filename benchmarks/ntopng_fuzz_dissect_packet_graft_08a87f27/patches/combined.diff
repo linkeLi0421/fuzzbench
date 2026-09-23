@@ -1,0 +1,437 @@
+diff --git a/fuzz/fuzz_dissect_packet.cpp b/fuzz/fuzz_dissect_packet.cpp
+index 6a33e68dac..20481431ca 100644
+--- a/fuzz/fuzz_dissect_packet.cpp
++++ b/fuzz/fuzz_dissect_packet.cpp
+@@ -208,9 +208,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
+   pcap_setnonblock(pcap_handle, 1, pcap_error_buffer);
+ 
+   while (pcap_next_ex(pcap_handle, &hdr, &pkt) > 0) {
+-    iface->dissectPacket(UNKNOWN_PKT_IFACE_IDX,
+-			 DUMMY_BRIDGE_INTERFACE_ID, DLT_NULL, true, NULL, hdr, pkt,
+-			 &p, &srcHost, &dstHost, &flow);
++    if (__BUG_ACTIVE(3) || __BUG_ACTIVE(4) || __BUG_ACTIVE(5) || __BUG_ACTIVE(6) ||
++        __BUG_ACTIVE(7) || __BUG_ACTIVE(9) || __BUG_ACTIVE(10) || __BUG_ACTIVE(11) ||
++        __BUG_ACTIVE(14)) {
++      /* use the pcap's real datalink so the dissector reaches the vulnerable path */
++      iface->dissectPacket(UNKNOWN_PKT_IFACE_IDX,
++			   DUMMY_BRIDGE_INTERFACE_ID, iface->get_datalink(), true, NULL, hdr, pkt,
++			   &p, &srcHost, &dstHost, &flow);
++    } else {
++      iface->dissectPacket(UNKNOWN_PKT_IFACE_IDX,
++			   DUMMY_BRIDGE_INTERFACE_ID, DLT_NULL, true, NULL, hdr, pkt,
++			   &p, &srcHost, &dstHost, &flow);
++    }
+   }
+   pcap_close(pcap_handle);
+ 
+diff --git a/src/Flow.cpp b/src/Flow.cpp
+index 47b15256b7..6c0f9f148d 100644
+--- a/src/Flow.cpp
++++ b/src/Flow.cpp
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "ntop_includes.h"
++#include "__bug_dispatch.h"
+ 
+ /* static so default is zero-initialization, let's just define it */
+ 
+@@ -5902,10 +5903,14 @@ void Flow::dissectBittorrent(char *payload, u_int16_t payload_len) {
+                                   "BitTorrent protocol", payload_len - 20);
+ 
+     if(bt_proto) {
+-      u_int l = strnlen(bt_proto, 27);
+-
+-      if(l >= 27)
++      if (__BUG_ACTIVE(10)) {
+ 	setBittorrentHash(&bt_proto[27]);
++      } else {
++	u_int l = strnlen(bt_proto, 27);
++
++	if(l >= 27)
++	  setBittorrentHash(&bt_proto[27]);
++      }
+     }
+   }
+ }
+@@ -5926,7 +5931,12 @@ bool Flow::setDNSQuery(char *query_value, char *rsp_addresses, bool copy_memory)
+ 	    last_pkt_rcvd /* Latest swap occurred at least one second ago */)) {
+       if(protos.dns.last_query_shadow) free(protos.dns.last_query_shadow);
+       protos.dns.last_query_shadow = protos.dns.last_query;
+-      protos.dns.last_query = copy_memory ? strdup(query_value) : query_value;
++      if (__BUG_ACTIVE(6)) {
++	/* OSV-2023-688: no strdup, leads to an invalid free in ~Flow */
++	protos.dns.last_query = query_value;
++      } else {
++	protos.dns.last_query = copy_memory ? strdup(query_value) : query_value;
++      }
+ 
+       if(protos.dns.last_rsp_shadow) free(protos.dns.last_rsp_shadow);
+       protos.dns.last_rsp_shadow = protos.dns.last_rsp;
+@@ -6379,8 +6389,10 @@ void Flow::dissectMDNS(u_int8_t *payload, u_int16_t payload_len) {
+       first_char = false;
+     }
+ 
+-    if((i+sizeof(rsp)) >= payload_len)
+-      return; /* packet too short */
++    if (!__BUG_ACTIVE(12)) {
++      if((i+sizeof(rsp)) >= payload_len)
++        return; /* packet too short */
++    }
+ 
+     memcpy(&rsp, &payload[i], sizeof(rsp));
+     data_len = ntohs(rsp.data_len), rsp_type = ntohs(rsp.rsp_type);
+@@ -6439,7 +6451,20 @@ void Flow::dissectMDNS(u_int8_t *payload, u_int16_t payload_len) {
+ 	char *txt = (char *)&payload[base_off], txt_buf[256];
+ 	u_int16_t off = 0;
+ 
+-	while((off < data_len) && ((off+base_off) < payload_len)) {
++	while(1) {
++	  bool __bug_loop_cond;
++
++	  if (__BUG_ACTIVE(8)) {
++	    /* OSV-2023-710 (NEW): unbounded loop condition */
++	    __bug_loop_cond = (off < data_len);
++	  } else {
++	    /* Original version (OLD) */
++	    __bug_loop_cond = (off < data_len) && ((off+base_off) < payload_len);
++	  }
++
++	  if(!__bug_loop_cond)
++	    break;
++
+ 	  u_int8_t txt_len = (u_int8_t)txt[off];
+ 
+ 	  if(txt_len < data_len) {
+@@ -6545,9 +6570,23 @@ void Flow::dissectNetBIOS(u_int8_t *payload, u_int16_t payload_len) {
+   /* Already dissected ? */
+   if(protos.netbios.name) return;
+ 
+-  if((payload_len >= 12) &&
+-      ((payload[2] & 0x80) /* NetBIOS Response */ ||
+-       ((payload[2] & 0x78) == 0x28 /* NetBIOS Registration */)) &&
++  bool netbios_hdr_match;
++
++  if (__BUG_ACTIVE(9)) {
++    /* OSV-2023-726: the payload length is checked only after payload[2]
++       is dereferenced, so a short payload causes an out-of-bounds read. */
++    netbios_hdr_match =
++      (((payload[2] & 0x80) /* NetBIOS Response */ ||
++        ((payload[2] & 0x78) == 0x28 /* NetBIOS Registration */)) &&
++       (payload_len >= 12));
++  } else {
++    netbios_hdr_match =
++      ((payload_len >= 12) &&
++       ((payload[2] & 0x80) /* NetBIOS Response */ ||
++        ((payload[2] & 0x78) == 0x28 /* NetBIOS Registration */)));
++  }
++
++  if(netbios_hdr_match &&
+       (ndpi_netbios_name_interpret((u_char *)&payload[12], payload_len - 12,
+                                    (u_char *)name, sizeof(name)) > 0) &&
+       (!strstr(name, "__MSBROWSE__"))) {
+diff --git a/src/ICMPinfo.cpp b/src/ICMPinfo.cpp
+index f82292e7b3..8759141a14 100644
+--- a/src/ICMPinfo.cpp
++++ b/src/ICMPinfo.cpp
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "ntop_includes.h"
++#include "__bug_dispatch.h"
+ 
+ /* *************************************** */
+ 
+@@ -102,8 +103,17 @@ void ICMPinfo::dissectICMP(u_int16_t const payload_len,
+   if (payload_len > 2) {
+     icmp_type = payload_data[0], icmp_code = payload_data[1];
+ 
++    u_short icmp_unreach_min_len;
++
++    if (__BUG_ACTIVE(11)) {
++      /* OSV-2023-761: the original +8 bound is removed */
++      icmp_unreach_min_len = (u_short)sizeof(struct ndpi_iphdr);
++    } else {
++      icmp_unreach_min_len = (u_short)(sizeof(struct ndpi_iphdr) + 8);
++    }
++
+     if (icmp_type == ICMP_DEST_UNREACH && icmp_code == ICMP_PORT_UNREACH &&
+-        payload_len >= (sizeof(struct ndpi_iphdr) + 8)) {
++        payload_len >= icmp_unreach_min_len) {
+       struct ndpi_iphdr *icmp_port_unreach_ip = (struct ndpi_iphdr *)&payload_data[8];
+       u_short icmp_port_unreach_iph_len = (u_short)(icmp_port_unreach_ip->ihl * 4);
+ 
+diff --git a/src/IEC104Stats.cpp b/src/IEC104Stats.cpp
+index dcd2c413d4..ee1bafc116 100644
+--- a/src/IEC104Stats.cpp
++++ b/src/IEC104Stats.cpp
+@@ -21,6 +21,7 @@
+ 
+ #include "ntop_includes.h"
+ #include "flow_alerts_includes.h"
++#include "__bug_dispatch.h"
+ 
+ /*
+   #define DEBUG_IEC60870
+@@ -140,7 +141,11 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
+ 	break;
+ 
+         case 0x01: /* S */
+-	  if((offset+4) < payload_len) {
++	  /* OSV-2023-1160 (slot 13) and OSV-2023-1375 (slot 17) both remove the
++	   * (offset+4) < payload_len bounds check when their slot is active, so
++	   * the active arm bypasses it and the inactive arm keeps the OLD guard. */
++	  if (__BUG_ACTIVE(13) || __BUG_ACTIVE(17)) {
++	    /* OSV-2023-1160 / OSV-2023-1375: bounds check removed (NEW) */
+ 	    if (len >= 4) {
+ 	      u_int16_t rx = ((((u_int16_t)payload[offset + 4]) << 8) + payload[offset + 3]) >> 1;
+ 
+@@ -167,6 +172,36 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
+ 	    }
+ 
+ 	    stats.type_s++;
++	  } else {
++	    /* Original bounds-checked version (OLD) */
++	    if((offset+4) < payload_len) {
++	      if (len >= 4) {
++		u_int16_t rx = ((((u_int16_t)payload[offset + 4]) << 8) + payload[offset + 3]) >> 1;
++
++		if (last_i_apdu.tv_sec != 0) {
++		  float ms = Utils::msTimevalDiff(&h->ts, &last_i_apdu);
++
++#ifdef IEC60870_TRACE
++		  ntop->getTrace()->traceEvent(
++                    TRACE_NORMAL,
++                    "A-PDU S [last I-TX: %u][S RX ack: %u][tdiff: %.2f msec]",
++                    tx_seq_num, rx, ms);
++#endif
++		  /*
++		    In theory if all is in good shape
++		    (rx + 1) == tx_seq_num
++		  */
++
++		  ndpi_data_add_value(i_s_apdu, ms);
++		}
++
++		/* No rx and tx to be updated */
++		snprintf(infobuf, sizeof(infobuf) - 1, "%s S, RX %u",
++			 tx_direction ? "->" : "<-", rx);
++	      }
++
++	      stats.type_s++;
++	    }
+ 	  }
+           break;
+       }
+@@ -181,7 +216,16 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
+       memcpy(&last_i_apdu, &h->ts, sizeof(struct timeval));
+       stats.type_i++;
+ 
+-      if(((offset + 6) < payload_len) && (len >= 6 /* Ignore 4 bytes APDUs */)) {
++      bool bug_type_i_ok;
++      if (__BUG_ACTIVE(7)) {
++        /* OSV-2023-697: overly permissive bound check */
++        bug_type_i_ok = (len >= 6 /* Ignore 4 bytes APDUs */);
++      } else {
++        bug_type_i_ok = (((offset + 6) < payload_len) &&
++                         (len >= 6 /* Ignore 4 bytes APDUs */));
++      }
++
++      if(bug_type_i_ok) {
+         u_int16_t rx_value, tx_value;
+         bool initial_run = ((rx_seq_num == 0) && (tx_seq_num == 0)) ? true : false;
+ 
+@@ -244,10 +288,17 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
+ 
+           offset += len + 2 /* magic and len */;
+ 
+-          if((len >= 6) && ((offset + 6) <= payload_len))
+-            asdu = /* ntohs */ (*((u_int16_t *)&payload[4 + offset]));
+-          else
+-            asdu = 0;
++          if (__BUG_ACTIVE(5)) {
++            if(len >= 6)
++              asdu = /* ntohs */ (*((u_int16_t *)&payload[4 + offset]));
++            else
++              asdu = 0;
++          } else {
++            if((len >= 6) && ((offset + 6) <= payload_len))
++              asdu = /* ntohs */ (*((u_int16_t *)&payload[4 + offset]));
++            else
++              asdu = 0;
++          }
+ 
+ #ifdef DEBUG_IEC60870
+           ntop->getTrace()->traceEvent(
+@@ -389,15 +440,29 @@ void IEC104Stats::processPacket(Flow *f, bool tx_direction,
+         break;
+       }
+       
+-      if((offset < payload_len) && (payload[offset] == 0x68 /* IEC magic byte */))
+-        offset += 1; /* We skip the initial magic byte */
+-      else {
++      if (__BUG_ACTIVE(3)) {
++        /* OSV-2023-462: missing (offset < payload_len) bound check */
++        if(payload[offset] == 0x68 /* IEC magic byte */)
++          offset += 1; /* We skip the initial magic byte */
++        else {
+ #ifdef DEBUG_IEC60870
+-        ntop->getTrace()->traceEvent(
+-            TRACE_WARNING, "Skipping IEC entry: no magic byte @ offset %u",
+-            offset);
++          ntop->getTrace()->traceEvent(
++              TRACE_WARNING, "Skipping IEC entry: no magic byte @ offset %u",
++              offset);
+ #endif
+-        break;
++          break;
++        }
++      } else {
++        if((offset < payload_len) && (payload[offset] == 0x68 /* IEC magic byte */))
++          offset += 1; /* We skip the initial magic byte */
++        else {
++#ifdef DEBUG_IEC60870
++          ntop->getTrace()->traceEvent(
++              TRACE_WARNING, "Skipping IEC entry: no magic byte @ offset %u",
++              offset);
++#endif
++          break;
++        }
+       }
+     } /* while */
+ 
+diff --git a/src/NetworkInterface.cpp b/src/NetworkInterface.cpp
+index 1d223721fb..98abe0e088 100644
+--- a/src/NetworkInterface.cpp
++++ b/src/NetworkInterface.cpp
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "ntop_includes.h"
++#include "__bug_dispatch.h"
+ 
+ #ifdef __APPLE__
+ #include <uuid/uuid.h>
+@@ -1816,14 +1817,19 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
+     tos = ((ntohl(*tos_ptr) & 0xFF00000) >> 20) & 0xFF;
+   }
+ 
+-  if((packet + h->caplen) > l4)
++  if (__BUG_ACTIVE(2)) {
++    /* OSV-2023-425: length check removed */
+     trusted_l4_packet_len = packet + h->caplen - l4;
+-  else {
+-    /* Invalid lenght */
+-    incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IPV6,
+-	     NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
+-	     len_on_wire, 1);
+-    return (pass_verdict);
++  } else {
++    if((packet + h->caplen) > l4)
++      trusted_l4_packet_len = packet + h->caplen - l4;
++    else {
++      /* Invalid lenght */
++      incStats(*ingressPacket, when->tv_sec, ETHERTYPE_IPV6,
++	       NDPI_PROTOCOL_UNKNOWN, NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0,
++	       len_on_wire, 1);
++      return (pass_verdict);
++    }
+   }
+ 
+   if (trusted_l4_packet_len > frame_padding)
+@@ -2142,7 +2148,7 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
+ 	    ntop->getTrace()->traceEvent(TRACE_WARNING, "[DHCP] [id=%u][len=%u]", id, len);
+ #endif
+ 
+-	    if((i + 2 + len) < trusted_payload_len) {
++	    if (__BUG_ACTIVE(18) || ((i + 2 + len) < trusted_payload_len)) {
+ 	      if (id == 12 /* Host Name */) {
+ 		char name[64], buf[24], *client_mac, key[64];
+ 		int j;
+@@ -2256,6 +2262,9 @@ bool NetworkInterface::processPacket(int32_t if_index, u_int32_t bridge_iface_id
+ 	  DNS-over-TCP has a 2-bytes field with DNS payload length
+ 	  at the beginning. See RFC1035 section 4.2.2. TCP usage.
+ 	*/
++	if (__BUG_ACTIVE(15)) {
++	  flow->dissectMDNS(payload, trusted_payload_len);
++	}
+       }
+ 
+       break;
+@@ -2544,18 +2553,23 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
+ 
+  datalink_check:
+   if (datalink_type == DLT_NULL) {
+-    if (h->caplen < sizeof(u_int32_t)) {
+-      incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
+-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+-      goto dissect_packet_end;
+-    }
+-
+-    if((eth_offset + sizeof(u_int32_t)) <= h->caplen)
++    if (__BUG_ACTIVE(1)) {
++      /* OSV-2023-423: unconditional read, bounds checks removed */
+       memcpy(&null_type, &packet[eth_offset], sizeof(u_int32_t));
+-    else {
+-      incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
+-	       NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
+-      goto dissect_packet_end;
++    } else {
++      if (h->caplen < sizeof(u_int32_t)) {
++        incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
++                 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
++        goto dissect_packet_end;
++      }
++
++      if((eth_offset + sizeof(u_int32_t)) <= h->caplen)
++        memcpy(&null_type, &packet[eth_offset], sizeof(u_int32_t));
++      else {
++        incStats(ingressPacket, h->ts.tv_sec, 0, NDPI_PROTOCOL_UNKNOWN,
++                 NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, h->len, 1);
++        goto dissect_packet_end;
++      }
+     }
+ 
+     switch (null_type) {
+@@ -2796,13 +2810,15 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
+ 		 (iph->protocol == IPPROTO_UDP) &&
+ 		 ((frag_off & 0x3FFF /* IP_MF | IP_OFFSET */) == 0)) {
+ 
+-	if(ip_offset + ip_len + sizeof(struct ndpi_udphdr) > h->caplen) {
+-	  incStats(ingressPacket, h->ts.tv_sec, 0,
+-		   NDPI_PROTOCOL_UNKNOWN,
+-		   NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
+-		   1);
+-	  goto dissect_packet_end;
+-        }
++	if (!__BUG_ACTIVE(4)) {
++	  if(ip_offset + ip_len + sizeof(struct ndpi_udphdr) > h->caplen) {
++	    incStats(ingressPacket, h->ts.tv_sec, 0,
++		     NDPI_PROTOCOL_UNKNOWN,
++		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire,
++		     1);
++	    goto dissect_packet_end;
++          }
++	}
+ 
+ 	struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[ip_offset + ip_len];
+ 	u_int16_t sport = ntohs(udp->source), dport = ntohs(udp->dest);
+@@ -3086,8 +3102,17 @@ bool NetworkInterface::dissectPacket(int32_t if_index,
+ 		   (l4_proto == IPPROTO_UDP)) {
+ 	  struct ndpi_udphdr *udp;
+ 	  u_int16_t sport, dport;
++	  bool udp_hdr_out_of_bounds;
++
++	  if (__BUG_ACTIVE(16)) {
++	    /* OSV-2023-1360: check against the on-the-wire length */
++	    udp_hdr_out_of_bounds = (ip_offset + ipv6_shift) >= h->len;
++	  } else {
++	    udp_hdr_out_of_bounds =
++	      (ip_offset + ipv6_shift + sizeof(struct ndpi_udphdr)) > h->caplen;
++	  }
+ 
+-	  if ((ip_offset + ipv6_shift + sizeof(struct ndpi_udphdr)) > h->caplen) {
++	  if (udp_hdr_out_of_bounds) {
+ 	    incStats(ingressPacket, h->ts.tv_sec, ETHERTYPE_IPV6,
+ 		     NDPI_PROTOCOL_UNKNOWN,
+ 		     NDPI_PROTOCOL_CATEGORY_UNSPECIFIED, 0, len_on_wire, 1);

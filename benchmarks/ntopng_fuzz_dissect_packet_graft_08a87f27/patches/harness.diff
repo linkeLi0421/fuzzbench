@@ -1,0 +1,83 @@
+diff --git a/__bug_dispatch.c b/__bug_dispatch.c
+new file mode 100644
+index 0000000000..d6a8fa6e41
+--- /dev/null
++++ b/__bug_dispatch.c
+@@ -0,0 +1,2 @@
++#define __BUG_DISPATCH_STRONG 1
++#include "__bug_dispatch.h"
+diff --git a/__bug_dispatch.h b/__bug_dispatch.h
+new file mode 100644
+index 0000000000..763525cd17
+--- /dev/null
++++ b/__bug_dispatch.h
+@@ -0,0 +1,35 @@
++#ifndef __BUG_DISPATCH_H
++#define __BUG_DISPATCH_H
++#include <stdint.h>
++#define __BUG_DISPATCH_BYTES 1
++#define __BUG_DISPATCH_SLOTS 19
++#define __BUG_DISPATCH_SLICE 13
++
++/* Wrapped bugs usually live in a core library that many binaries link:
++ * the project's own tools and its other fuzz targets, none of which the
++ * harness agent wired __bug_dispatch.c into. Those links would fail with
++ * "undefined reference to __bug_dispatch". Carrying a weak definition in
++ * every including translation unit keeps them linkable; the strong
++ * definition in __bug_dispatch.c overrides all of them, so the harness and
++ * the wrapped library still read and write one object. */
++#ifdef __BUG_DISPATCH_STRONG
++volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES] = {0};
++#elif defined(__GNUC__) || defined(__clang__)
++__attribute__((weak)) volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#else
++extern volatile uint8_t __bug_dispatch[__BUG_DISPATCH_BYTES];
++#endif
++
++/* Selected slot: 0 = no bug, 1..SLOTS-1 = the bug with that slot. */
++static inline unsigned long __bug_dispatch_slot(void) {
++  unsigned long v = 0;
++  int i;
++  for (i = __BUG_DISPATCH_BYTES - 1; i >= 0; --i) {
++    v = (v << 8) | (unsigned long)__bug_dispatch[i];
++  }
++  v /= (unsigned long)__BUG_DISPATCH_SLICE;
++  return v < (unsigned long)__BUG_DISPATCH_SLOTS ? v : 0UL;
++}
++
++#define __BUG_ACTIVE(n) (__bug_dispatch_slot() == (unsigned long)(n))
++#endif
+diff --git a/fuzz/fuzz_dissect_packet.cpp b/fuzz/fuzz_dissect_packet.cpp
+index f487645bde..6a33e68dac 100644
+--- a/fuzz/fuzz_dissect_packet.cpp
++++ b/fuzz/fuzz_dissect_packet.cpp
+@@ -19,6 +19,9 @@
+  *
+  */
+ 
++#include "__bug_dispatch.h"
++#include <string.h>
++
+ #ifdef FUZZ_WITH_PROTOBUF
+ #include <bits/types/struct_timeval.h>
+ #include <src/libfuzzer/libfuzzer_macro.h>
+@@ -174,9 +177,17 @@ DEFINE_PROTO_FUZZER(const ntopng_fuzz::Pcap &message) {
+ #else
+ 
+ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
+-  if (len == 0) return -1;
++  const uint8_t *data = buf;
++  size_t size = len;
++
++  if (size < __BUG_DISPATCH_BYTES) return 0;
++  memcpy((void*)__bug_dispatch, data, __BUG_DISPATCH_BYTES);
++  data += __BUG_DISPATCH_BYTES;
++  size -= __BUG_DISPATCH_BYTES;
++
++  if (size == 0) return -1;
+ 
+-  FILE *fd = fmemopen((void *)buf, len, "r");
++  FILE *fd = fmemopen((void *)data, size, "r");
+   if (fd == NULL) {
+     std::cerr << "Cannot create the file descriptor with fmemopen"
+ 	      << std::endl;

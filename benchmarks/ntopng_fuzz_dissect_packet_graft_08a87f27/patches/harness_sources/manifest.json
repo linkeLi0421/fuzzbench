@@ -1,0 +1,6 @@
+[
+  {
+    "container_path": "/src/ntopng/fuzz/fuzz_dissect_packet.cpp",
+    "snapshot": "src__ntopng__fuzz__fuzz_dissect_packet.cpp"
+  }
+]

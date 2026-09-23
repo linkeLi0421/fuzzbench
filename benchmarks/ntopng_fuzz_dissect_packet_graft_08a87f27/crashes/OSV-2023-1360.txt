@@ -1,0 +1,58 @@
+23/Sep/2026 22:08:45 [NetworkInterface.cpp:2532] WARNING: If TSO/GRO is enabled, please disable it for best accuracy
+23/Sep/2026 22:08:45 [NetworkInterface.cpp:2536] WARNING: using: sudo ethtool -K custom gro off gso off tso off
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3122254530
+INFO: Loaded 1 modules   (47390 inline 8-bit counters): 47390 [0x102bd60, 0x103767e), 
+INFO: Loaded 1 PC tables (47390 PCs): 47390 [0xd48518,0xe016f8), 
+/out/fuzz_dissect_packet: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x608000002b1c at pc 0x000000751619 bp 0x7ffdb22e68d0 sp 0x7ffdb22e68c8
+READ of size 2 at 0x608000002b1c thread T0
+    #0 0x751618 in NetworkInterface::dissectPacket(int, unsigned int, int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**) /src/ntopng/src/NetworkInterface.cpp:3123:17
+    #1 0x578695 in LLVMFuzzerTestOneInput /src/ntopng/fuzz/fuzz_dissect_packet.cpp
+    #2 0x448f83 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #3 0x4346e2 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #4 0x439f8c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #5 0x4634c2 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #6 0x7f6feefcb082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #7 0x42a8ad in _start (/out/fuzz_dissect_packet+0x42a8ad)
+
+0x608000002b1c is located 285 bytes to the right of 95-byte region [0x6080000029a0,0x6080000029ff)
+allocated by thread T0 here:
+    #0 0x53a116 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:69:3
+    #1 0xa00ec3 in pcap_check_header /src/libpcap-1.9.1/./sf-pcap.c:405:14
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /src/ntopng/src/NetworkInterface.cpp:3123:17 in NetworkInterface::dissectPacket(int, unsigned int, int, bool, unsigned char*, pcap_pkthdr const*, unsigned char const*, unsigned short*, Host**, Host**, Flow**)
+Shadow bytes around the buggy address:
+  0x0c107fff8510: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c107fff8520: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0c107fff8530: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 07
+  0x0c107fff8540: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c107fff8550: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x0c107fff8560: fa fa fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c107fff8570: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c107fff8580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c107fff8590: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c107fff85a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c107fff85b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
