@@ -51,11 +51,15 @@ else
     git apply $HARNESS_EXCLUDES /src/patches/harness.diff
 fi
 
-if ! git apply --check /src/patches/combined.diff 2>/dev/null; then
+# $HARNESS_EXCLUDES applies here too: the harness file is restored whole
+# from harness_sources/, so combined.diff's hunks for it would collide
+# ("does not match index"). Since the snapshot is taken after the merge it
+# already carries every per-bug harness gate.
+if ! git apply --check $HARNESS_EXCLUDES /src/patches/combined.diff 2>/dev/null; then
     echo "Trying git apply --3way for combined.diff..."
-    git apply --3way /src/patches/combined.diff
+    git apply --3way $HARNESS_EXCLUDES /src/patches/combined.diff
 else
-    git apply /src/patches/combined.diff
+    git apply $HARNESS_EXCLUDES /src/patches/combined.diff
 fi
 
 # --- Fix library CMakeLists.txt for new source files from combined.diff ---
@@ -71,7 +75,23 @@ if [ -d blosc ] && [ -f blosc/CMakeLists.txt ]; then
     done
 fi
 
+# --- Sanitizers: ASan only ---
+# These benchmarks are built with SANITIZER=address and their oracle counts
+# ASan reports and aborts. Any UBSan instrumentation that leaks in through the
+# environment produces recoverable "runtime error:" noise in every crash log,
+# and under aflplusplus (ASAN_OPTIONS=abort_on_error=1) turns it into a
+# SIGABRT that kills seeds during calibration. Drop it from the inherited
+# flags; -fsanitize=address and libFuzzer's own flags are kept.
+for _var in CFLAGS CXXFLAGS; do
+    eval "_val=\${$_var:-}"
+    _val=$(printf '%s' "$_val" | sed -E         -e 's/-fsanitize=undefined[^ ]*//g'         -e 's/-fsanitize=(array-bounds|bool|builtin|enum|float-divide-by-zero|function|integer|integer-divide-by-zero|null|object-size|return|returns-nonnull-attribute|shift|signed-integer-overflow|unreachable|vla-bound|vptr)[^ ]*//g'         -e 's/-f(no-)?sanitize-(recover|trap)=[^ ]*//g'         -e 's/  +/ /g')
+    eval "export $_var=\"\$_val\""
+done
+
 # --- Original build commands ---
+export CFLAGS="${CFLAGS:-} -Wno-error=implicit-function-declaration"
+export CXXFLAGS="${CXXFLAGS:-} -Wno-error=implicit-function-declaration"
+
 pushd $SRC/cups
 # Fix bad line
 sed -i '2110s/\(\s\)f->value/\1(int)f->value/' cups/ppd-cache.c
@@ -94,11 +114,47 @@ CUPS_LDFLAGS=$($CUPSCONFIG --ldflags)
 CUPS_LIBS=$($CUPSCONFIG --image --libs)
 export CXXFLAGS="$CXXFLAGS $CUPS_CFLAGS"
 
+# --disable-fontconfig below: fontconfig only enumerates SYSTEM fonts, which
+# a fuzzed PDF never uses -- the grafted bugs are in embedded-font parsing
+# (gstype2.c, ttinterp.c). When the headers happen to be present configure
+# enables it and compiles gp_unix.c against it, but nothing puts -lfontconfig
+# on the link line (pkg-config has no fontconfig in these images), so the link
+# dies on undefined FcPatternGetString / FcConfigDestroy. Whether the headers
+# were present varied per fuzzer image, so the six fuzzers were not even
+# building the same ghostscript. Disabling it makes them identical.
 CPPFLAGS="${CPPFLAGS:-} $CUPS_CFLAGS -DPACIFY_VALGRIND" ./autogen.sh \
   CUPSCONFIG=$CUPSCONFIG \
-  --enable-freetype --enable-fontconfig \
+  --enable-freetype --disable-fontconfig \
   --enable-cups --with-ijs --with-jbig2dec \
-  --with-drivers=pdfwrite,cups,ljet4,laserjet,pxlmono,pxlcolor,pcl3,uniprint,pgmraw,ps2write,png16m,tiffsep1,faxg3,psdcmyk,eps2write,bmpmono,xpswrite
+  --with-drivers=pdfwrite,cups,ljet4,laserjet,pxlmono,pxlcolor,pcl3,uniprint,pgmraw,ps2write,png16m,tiffsep1,faxg3,psdcmyk,eps2write,bmpmono,xpswrite --without-x
+# (generator) ASan-only: drop every UBSan flag autogen.sh injected.
+# Matching one literal check list is too fragile -- autogen writes the
+# checks out in whatever order it detected them -- so rewrite each
+# -fsanitize= list and keep only address/fuzzer components.
+python3 - <<'STRIP_UBSAN'
+import os, re
+KEEP = ("address", "fuzzer", "fuzzer-no-link")
+def fix_list(match):
+    kept = [c for c in match.group(1).split(",") if c in KEEP]
+    return "-fsanitize=" + ",".join(kept) if kept else ""
+changed = 0
+for root, _, files in os.walk("."):
+    for name in files:
+        if name != "Makefile" and not name.endswith(".mak"):
+            continue
+        path = os.path.join(root, name)
+        try:
+            text = open(path, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        new = re.sub(r"-fsanitize=([\w,-]+)", fix_list, text)
+        new = re.sub(r"-f(no-)?sanitize-(recover|trap)=[^\s]*", "", new)
+        new = new.replace("-fsanitize-undefined-trap-on-error", "")
+        if new != text:
+            open(path, "w", encoding="utf-8").write(new)
+            changed += 1
+print("stripped UBSan flags from %d makefile(s)" % changed)
+STRIP_UBSAN
 make -j$(nproc) libgs
 
 # Compile __bug_dispatch.c for the fuzzers
@@ -189,7 +245,6 @@ for fuzzer in $fuzzers_with_dict; do
   cp $SRC/dicts/pdf.dict $OUT/${fuzzer}.dict
 done
 cp $SRC/dicts/ps.dict $OUT/gstoraster_ps_fuzzer.dict
-
 
 # --- Seed corpus: expand original seeds and per-bug testcase candidates ---
 # FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.
