@@ -66,6 +66,13 @@ def fuzz(input_corpus, output_corpus, target_binary):
     if dictionary_path:
         command += (['-x', dictionary_path])
     command += (['-o', output_corpus, '-i', input_corpus])
+    # Per-execution timeout, in ms. The LibAFL fuzzbench binary defaults to
+    # 1200, far below afl/aflplusplus/fairfuzz (-t 5000+) and honggfuzz (25s).
+    # On a slow, contended node ghostscript routinely exceeds 1.2s, so libafl
+    # recorded 11,415 "timeouts" on the pdfwrite graft campaign -- inputs that
+    # replay cleanly in ~0.3s on faster hardware. Treating them as hangs
+    # discards them instead of keeping them in the corpus. Match the AFL family.
+    command += (['-t', '5000'])
     fuzzer_env = os.environ.copy()
     fuzzer_env['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libjemalloc.so.2'
     print(command)
