@@ -4,7 +4,11 @@
   "dispatch_bytes": 1,
   "dispatch_slots": 87,
   "dispatch_slice": 2,
-  "total_bugs": 86,
+  "total_bugs": 84,
+  "empty_slots": {
+    "57": "OSV-2022-79 (failed transplant, no gate)",
+    "74": "OSV-2022-339 (failed transplant, no gate)"
+  },
   "bugs": {
     "OSV-2020-1875": {
       "dispatch_value": 3,
@@ -398,10 +402,6 @@
       "crash_line": 416,
       "crash_function": "s_hex_process"
     },
-    "OSV-2022-79": {
-      "dispatch_value": 115,
-      "triggered": false
-    },
     "OSV-2022-81": {
       "dispatch_value": 117,
       "triggered": true,
@@ -513,10 +513,6 @@
       "crash_file": "/src/ghostpdl/./base/gxblend.c",
       "crash_line": 2984,
       "crash_function": "template_compose_group"
-    },
-    "OSV-2022-339": {
-      "dispatch_value": 149,
-      "triggered": false
     },
     "OSV-2022-351": {
       "dispatch_value": 151,
