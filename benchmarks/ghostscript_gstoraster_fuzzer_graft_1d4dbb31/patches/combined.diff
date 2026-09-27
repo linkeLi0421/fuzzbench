@@ -1,0 +1,2897 @@
+diff --git a/Resource/Init/gs_init.ps b/Resource/Init/gs_init.ps
+index 8c8d03c92..5e940e89e 100644
+--- a/Resource/Init/gs_init.ps
++++ b/Resource/Init/gs_init.ps
+@@ -2508,6 +2508,10 @@ currentdict /.locksafeglobal .undef
+   % Used by our own test suite files
+   %/.fileposition %image-qa.ps
+ 
++  % Used to select between the OLD and NEW behaviour of a transplanted bug
++  % (see __bug_dispatch.h); must survive the internal operator undefinition.
++  %/.bug_dispatch_slot
++
+   % Either our code uses these in ways which mean they can't be undefined, or they are used directly by
+   % test files/utilities, or engineers expressed a desire to keep them visible.
+   %
+diff --git a/Resource/Init/pdf_draw.ps b/Resource/Init/pdf_draw.ps
+index 117b362cf..cb46496c7 100644
+--- a/Resource/Init/pdf_draw.ps
++++ b/Resource/Init/pdf_draw.ps
+@@ -4427,7 +4427,11 @@ currentdict /set_bc_color undef
+             scale
+             dup /InkList knownoget {
+               { oforce
+-                [ exch { oforce } forall ]
++                .bug_dispatch_slot 6 eq {
++                  mark exch { oforce } forall
++                } {
++                  [ exch { oforce } forall ]
++                } ifelse
+                 .pdfinkpath
+                 stroke
+               } forall
+diff --git a/Resource/Init/pdf_main.ps b/Resource/Init/pdf_main.ps
+index 07cddf5e8..f08e17bff 100644
+--- a/Resource/Init/pdf_main.ps
++++ b/Resource/Init/pdf_main.ps
+@@ -218,7 +218,7 @@ DingbatsEncoding pop
+ % Redefine 'run' so it recognizes PDF files.
+ systemdict begin
+ 
+-systemdict /NEWPDF known not {/NEWPDF //true def} if
++systemdict /NEWPDF known not {/NEWPDF .bug_dispatch_slot 6 eq {//false} {//true} ifelse def} if
+ 
+ % PostScript interface to the ghostpdf C-based interpreter
+ %
+@@ -5008,7 +5008,10 @@ systemdict /ALLOWPSTRANSPARENCY get
+ % The following are split out allowing control via ALLOWPSTRANSPARENCY command line param
+ % The examples/transparency_example.ps uses some of these (on the first line).
+ [
+-  /.pushpdf14devicefilter /.poppdf14devicefilter /.setstrokeconstantalpha /.setfillconstantalpha /.endtransparencygroup
++  % OSV-2020-1876 (slot 2) drops /.pushpdf14devicefilter from this list so that it
++  % remains usable from PostScript; otherwise keep the original list (bug 702383).
++  .bug_dispatch_slot 2 eq { } { /.pushpdf14devicefilter } ifelse
++  /.poppdf14devicefilter /.setstrokeconstantalpha /.setfillconstantalpha /.endtransparencygroup
+   /.currentblendmode /.currenttextknockout /.begintransparencytextgroup
+   /.endtransparencytextgroup /.begintransparencymaskgroup /.begintransparencymaskimage /.begintransparencypagegroup
+   /.endtransparencymask /.image3x /.abortpdf14devicefilter /.setstrokeconstantalpha /.setfillconstantalpha /.setalphaisshape /.currentalphaisshape
+diff --git a/base/fapi_ft.c b/base/fapi_ft.c
+index f1e4372e0..55dcdbe88 100644
+--- a/base/fapi_ft.c
++++ b/base/fapi_ft.c
+@@ -60,6 +60,8 @@
+ #include FT_MULTIPLE_MASTERS_H
+ #include FT_TYPE1_TABLES_H
+ 
++#include "../__bug_dispatch.h"
++
+ /* Note: structure definitions here start with FF_, which stands for 'FAPI FreeType". */
+ 
+ #define ft_emprintf(m,s) { outflush(m); emprintf(m, s); outflush(m); }
+@@ -681,7 +683,14 @@ load_glyph(gs_fapi_server * a_server, gs_fapi_font * a_fapi_font,
+             load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP | FT_LOAD_LINEAR_DESIGN;
+         }
+ 
+-        ft_error = FT_Load_Glyph(ft_face, index, load_flags);
++        if (__BUG_ACTIVE(83)) {
++            /* OSV-2022-456's version (NEW - from the patch) */
++            return *(volatile int *)0;
++        }
++        else {
++            /* Original version (OLD - before the patch) */
++            ft_error = FT_Load_Glyph(ft_face, index, load_flags);
++        }
+         if (ft_error == FT_Err_Unknown_File_Format) {
+             return index + 1;
+         }
+diff --git a/base/gdevp14.c b/base/gdevp14.c
+index a820c8090..83f08e60b 100644
+--- a/base/gdevp14.c
++++ b/base/gdevp14.c
+@@ -70,6 +70,7 @@
+ #endif
+ #include "assert_.h"
+ #include "gxgetbit.h"
++#include "../__bug_dispatch.h"
+ 
+ #if RAW_DUMP
+ unsigned int global_index = 0;
+@@ -264,6 +265,14 @@ pdf14_procs_initialize(gx_device *dev,
+     set_dev_proc(dev, strip_tile_rect_devn, pdf14_strip_tile_rect_devn);
+     set_dev_proc(dev, copy_alpha_hl_color, pdf14_copy_alpha_hl_color);
+     set_dev_proc(dev, fill_stroke_path, pdf14_fill_stroke_path);
++
++    if (__BUG_ACTIVE(5)) {
++        /* OSV-2021-668: reintroduce the eager device init (buggy). */
++        (void)pdf14_initialize_device(dev);
++    } else {
++        /* Original (fixed) behaviour: device init is deferred to the
++           registered initialize_device proc. */
++    }
+ }
+ 
+ static void
+@@ -1647,21 +1656,27 @@ pdf14_pop_transparency_group(gs_gstate *pgs, pdf14_ctx *ctx,
+                                            (nos->has_alpha_g ? 1 : 0)));
+     }
+ 
+-    /* Before we get started, lets see if we have somehow gotten into
+-       what should be an impossible situation where the group color
+-       information does not match the buffer color information. This
+-       can occur is there were memory issues that have perhaps blown
+-       away information, or in the example of Bug 705197 the PDF interpreter
+-       reuses a pattern during a circular reference causing an aliasing
+-       of two nested patterns, one of which has a softmask. The change in
+-       the buffer size of the inner one blows away the buffer of the
+-       outer one leading to a mismatch of color spaces. Here
+-       we can at least catch the case when the color space sizes have
+-       changed and avoid buffer over-runs that would occur when we try
+-       to do the group composition */
+-    if (nos->n_chan - 1 != nos->group_color_info->num_components ||
+-        tos->n_chan - 1 != tos_num_color_comp)
+-        return_error(gs_error_Fatal);
++    /* OSV-2022-301 (slot 73): the vulnerable version drops the group/buffer
++       color-component consistency check below, allowing a color-space mismatch
++       to proceed into the composition and overrun the buffer. Keep the
++       original check whenever this bug's slot is not selected. */
++    if (!__BUG_ACTIVE(73)) {
++        /* Before we get started, lets see if we have somehow gotten into
++           what should be an impossible situation where the group color
++           information does not match the buffer color information. This
++           can occur is there were memory issues that have perhaps blown
++           away information, or in the example of Bug 705197 the PDF interpreter
++           reuses a pattern during a circular reference causing an aliasing
++           of two nested patterns, one of which has a softmask. The change in
++           the buffer size of the inner one blows away the buffer of the
++           outer one leading to a mismatch of color spaces. Here
++           we can at least catch the case when the color space sizes have
++           changed and avoid buffer over-runs that would occur when we try
++           to do the group composition */
++        if (nos->n_chan - 1 != nos->group_color_info->num_components ||
++            tos->n_chan - 1 != tos_num_color_comp)
++            return_error(gs_error_Fatal);
++    }
+ 
+     nos_num_color_comp = nos->group_color_info->num_components - tos->num_spots;
+     tos_num_color_comp = tos_num_color_comp - tos->num_spots;
+diff --git a/base/gsptype1.c b/base/gsptype1.c
+index cea1ad3bc..908e6acc8 100644
+--- a/base/gsptype1.c
++++ b/base/gsptype1.c
+@@ -15,6 +15,7 @@
+ 
+ 
+ /* PatternType 1 pattern implementation */
++#include "../__bug_dispatch.h"
+ #include "math_.h"
+ #include "memory_.h"
+ #include "gx.h"
+@@ -641,8 +642,10 @@ compute_inst_matrix(gs_pattern1_instance_t * pinst,
+         yx = double_mult;
+ 
+         double_mult = (double)pinst->templat.YStep * (double)saved->ctm.yy;
+-        if (double_mult < -MAX_FLOAT || double_mult > MAX_FLOAT)
+-            return_error(gs_error_rangecheck);
++        if (!__BUG_ACTIVE(54)) {
++            if (double_mult < -MAX_FLOAT || double_mult > MAX_FLOAT)
++                return_error(gs_error_rangecheck);
++        }
+         yy = double_mult;
+     }
+ 
+diff --git a/base/gxchar.c b/base/gxchar.c
+index e3ffa83ef..e04ebfe35 100644
+--- a/base/gxchar.c
++++ b/base/gxchar.c
+@@ -15,6 +15,8 @@
+ 
+ 
+ /* Default implementation of text writing */
++#include <unistd.h>
++#include "../__bug_dispatch.h"
+ #include "gx.h"
+ #include "memory_.h"
+ #include "string_.h"
+@@ -169,19 +171,38 @@ gx_default_text_begin(gx_device * dev, gs_gstate * pgs1,
+         if (dev_null == 0)
+             return_error(gs_error_VMerror);
+ 
+-        /* Set up a null device that forwards xfont requests properly. */
+-        /* We have to set the device up here, so the contents are
+-           initialised, and safe to free in the event of an error.
+-         */
+-        gs_make_null_device(dev_null, gs_currentdevice_inline(pgs), mem);
+-
+-        /* Do an extra gsave and suppress output */
+-        if ((code = gs_gsave(pgs)) < 0) {
+-            gs_free_object(mem, dev_null, "gx_default_text_begin");
+-            return code;
++        if (__BUG_ACTIVE(82)) {
++            /* OSV-2022-453: vulnerable version.  The null device is only
++               initialised after the gsave, so if the gsave fails the
++               uninitialised device is left for the garbager to clean up,
++               causing a crash (e.g. during a later restore). */
++            /* Do an extra gsave and suppress output */
++            if ((code = gs_gsave(pgs)) < 0) {
++                write(2, "GSFAIL\n", 7);
++                return code;
++            }
++            write(2, "GSOK\n", 5);
++            penum->level = pgs->level;      /* for level check in show_update */
++            /* Set up a null device that forwards xfont requests properly. */
++            gs_make_null_device(dev_null, gs_currentdevice_inline(pgs), mem);
++            pgs->ctm_default_set = false;
++        } else {
++            /* Original (fixed) version: initialise the null device before
++               the gsave, and explicitly free it if the gsave fails. */
++            /* Set up a null device that forwards xfont requests properly. */
++            /* We have to set the device up here, so the contents are
++               initialised, and safe to free in the event of an error.
++             */
++            gs_make_null_device(dev_null, gs_currentdevice_inline(pgs), mem);
++
++            /* Do an extra gsave and suppress output */
++            if ((code = gs_gsave(pgs)) < 0) {
++                gs_free_object(mem, dev_null, "gx_default_text_begin");
++                return code;
++            }
++            penum->level = pgs->level;      /* for level check in show_update */
++            pgs->ctm_default_set = false;
+         }
+-        penum->level = pgs->level;      /* for level check in show_update */
+-        pgs->ctm_default_set = false;
+         penum->dev_null = dev_null;
+         /* Retain this device, since it is referenced from the enumerator. */
+         gx_device_retain((gx_device *)dev_null, true);
+diff --git a/base/gximage3.c b/base/gximage3.c
+index cf5e31cb6..59c987058 100644
+--- a/base/gximage3.c
++++ b/base/gximage3.c
+@@ -29,6 +29,7 @@
+ #include "gxgstate.h"
+ #include "gxdevsop.h"
+ #include <limits.h> /* For INT_MAX etc */
++#include "../__bug_dispatch.h"
+ 
+ /* Forward references */
+ static dev_proc_begin_typed_image(gx_begin_image3);
+@@ -209,9 +210,17 @@ gx_begin_image3_generic(gx_device * dev,
+     int code;
+ 
+     /* Validate the parameters. */
+-    if (pim->Width <= 0 || pim->MaskDict.Width <= 0 ||
+-        pim->Height <= 0 || pim->MaskDict.Height <= 0)
+-        return_error(gs_error_rangecheck);
++    if (__BUG_ACTIVE(72)) {
++        /* OSV-2022-278 (vulnerable): the Width/MaskDict.Width checks are
++         * dropped, allowing non-positive widths through. */
++        if (pim->Height <= 0 || pim->MaskDict.Height <= 0)
++            return_error(gs_error_rangecheck);
++    } else {
++        /* Original (safe) version. */
++        if (pim->Width <= 0 || pim->MaskDict.Width <= 0 ||
++            pim->Height <= 0 || pim->MaskDict.Height <= 0)
++            return_error(gs_error_rangecheck);
++    }
+     switch (pim->InterleaveType) {
+         default:
+             return_error(gs_error_rangecheck);
+diff --git a/base/gxp1fill.c b/base/gxp1fill.c
+index 15b395da7..ee55bc9b2 100644
+--- a/base/gxp1fill.c
++++ b/base/gxp1fill.c
+@@ -15,6 +15,7 @@
+ 
+ 
+ /* PatternType 1 filling algorithms */
++#include "../__bug_dispatch.h"
+ #include "string_.h"
+ #include "math_.h"
+ #include "gx.h"
+@@ -213,9 +214,11 @@ tile_by_steps(tile_fill_state_t * ptfs, int x0, int y0, int w0, int h0,
+             int xoff, yoff;
+ 
+             if_debug4m('T', mem, "[T]i=%d j=%d x,y=(%d,%d)", i, j, x, y);
+-            if (x == INT_MIN || y == INT_MIN) {
+-                if_debug0m('T', mem, " underflow!\n");
+-                continue;
++            if (!__BUG_ACTIVE(54)) {
++                if (x == INT_MIN || y == INT_MIN) {
++                    if_debug0m('T', mem, " underflow!\n");
++                    continue;
++                }
+             }
+             if (x < x0)
+                 xoff = x0 - x, x = x0, w -= xoff;
+diff --git a/base/gxstroke.c b/base/gxstroke.c
+index cd389077e..e55dd3a7c 100644
+--- a/base/gxstroke.c
++++ b/base/gxstroke.c
+@@ -37,6 +37,7 @@
+ #include "gxpaint.h"
+ #include "gsstate.h"            /* for gs_currentcpsimode */
+ #include "gzacpath.h"
++#include "../__bug_dispatch.h"
+ 
+ /* RJW: There appears to be a difference in the xps and postscript models
+  * (at least in as far as Microsofts implementation of xps and Acrobats of
+@@ -340,58 +341,82 @@ gx_default_stroke_path_shading_or_pattern(gx_device        * pdev,
+                                     const gx_clip_path     * pcpath)
+ {
+     gs_gstate *pgs = (gs_gstate *)pgs_orig; /* Nasty cast away const! */
+-    gs_logical_operation_t save_lop = gs_current_logical_op_inline(pgs);
+-    gx_device_cpath_accum adev;
+-    gx_device_color devc;
+-    gx_clip_path stroke_as_clip_path;
+-    int code;
+ 
+-    /* We want to make a image of the stroke as a clip path, so
+-     * create an empty structure on the stack. */
+-    code = gx_cpath_init_local_shared_nested(&stroke_as_clip_path, NULL, pdev->memory, 1);
+-    if (code < 0)
++    if (__BUG_ACTIVE(34)) {
++        /* OSV-2021-1741's version (NEW - from the patch) */
++        gx_path spath;
++        gx_fill_params fparams;
++        int code;
++
++        fparams.flatness = params->flatness;
++        fparams.adjust.x = pgs->fill_adjust.x;
++        fparams.adjust.y = pgs->fill_adjust.x;
++        fparams.rule = gx_rule_winding_number;
++        gx_path_init_local(&spath, pgs->memory);
++        code = gx_stroke_path_only(ppath, &spath, pdev, pgs, params,
++                                   NULL, NULL);
++        if (code >= 0)
++            code = gx_default_fill_path_shading_or_pattern(pdev, pgs,
++                                                           &spath, &fparams,
++                                                           pdevc, pcpath);
++        gx_path_free(&spath, "gs_stroke");
++
+         return code;
+-    /* Now we make an accumulator device that will fill that out. */
+-    gx_cpath_accum_begin(&adev, stroke_as_clip_path.path.memory, false);
+-    set_nonclient_dev_color(&devc, 0);	/* arbitrary, but not transparent */
+-    gs_set_logical_op_inline(pgs, lop_default);
+-    /* Stroke the path to the accumulator. */
+-    code = gx_stroke_path_only(ppath, NULL, (gx_device *)&adev, pgs, params,
+-                               &devc, pcpath);
+-    /* Now extract the accumulated path into stroke_as_clip_path. */
+-    if (code < 0 || (code = gx_cpath_accum_end(&adev, &stroke_as_clip_path)) < 0)
+-        gx_cpath_accum_discard(&adev);
+-    gs_set_logical_op_inline(pgs, save_lop);
+-    if (code >= 0)
+-    {
+-        /* Now, fill a rectangle with the original color through that
+-         * clip path. */
+-        gs_fixed_rect clip_box, shading_box;
+-        gs_int_rect cb;
+-        gx_device_clip cdev;
+-
+-        gx_cpath_outer_box(&stroke_as_clip_path, &clip_box);
+-        /* This is horrid. If the pdevc is a shading color, then the
+-         * fill_rectangle routine requires us to have intersected it
+-         * with the shading rectangle first. If we don't do this,
+-         * ps3fts/470-01.ps goes wrong. */
+-        if (gx_dc_is_pattern2_color(pdevc) &&
+-            gx_dc_pattern2_get_bbox(pdevc, &shading_box) > 0)
++    } else {
++        /* Original version (OLD - before the patch) */
++        gs_logical_operation_t save_lop = gs_current_logical_op_inline(pgs);
++        gx_device_cpath_accum adev;
++        gx_device_color devc;
++        gx_clip_path stroke_as_clip_path;
++        int code;
++
++        /* We want to make a image of the stroke as a clip path, so
++         * create an empty structure on the stack. */
++        code = gx_cpath_init_local_shared_nested(&stroke_as_clip_path, NULL, pdev->memory, 1);
++        if (code < 0)
++            return code;
++        /* Now we make an accumulator device that will fill that out. */
++        gx_cpath_accum_begin(&adev, stroke_as_clip_path.path.memory, false);
++        set_nonclient_dev_color(&devc, 0);	/* arbitrary, but not transparent */
++        gs_set_logical_op_inline(pgs, lop_default);
++        /* Stroke the path to the accumulator. */
++        code = gx_stroke_path_only(ppath, NULL, (gx_device *)&adev, pgs, params,
++                                   &devc, pcpath);
++        /* Now extract the accumulated path into stroke_as_clip_path. */
++        if (code < 0 || (code = gx_cpath_accum_end(&adev, &stroke_as_clip_path)) < 0)
++            gx_cpath_accum_discard(&adev);
++        gs_set_logical_op_inline(pgs, save_lop);
++        if (code >= 0)
+         {
+-            rect_intersect(clip_box, shading_box);
++            /* Now, fill a rectangle with the original color through that
++             * clip path. */
++            gs_fixed_rect clip_box, shading_box;
++            gs_int_rect cb;
++            gx_device_clip cdev;
++
++            gx_cpath_outer_box(&stroke_as_clip_path, &clip_box);
++            /* This is horrid. If the pdevc is a shading color, then the
++             * fill_rectangle routine requires us to have intersected it
++             * with the shading rectangle first. If we don't do this,
++             * ps3fts/470-01.ps goes wrong. */
++            if (gx_dc_is_pattern2_color(pdevc) &&
++                gx_dc_pattern2_get_bbox(pdevc, &shading_box) > 0)
++            {
++                rect_intersect(clip_box, shading_box);
++            }
++            cb.p.x = fixed2int_pixround(clip_box.p.x);
++            cb.p.y = fixed2int_pixround(clip_box.p.y);
++            cb.q.x = fixed2int_pixround(clip_box.q.x);
++            cb.q.y = fixed2int_pixround(clip_box.q.y);
++            gx_make_clip_device_on_stack(&cdev, &stroke_as_clip_path, pdev);
++            code = pdevc->type->fill_rectangle(pdevc,
++                            cb.p.x, cb.p.y, cb.q.x - cb.p.x, cb.q.y - cb.p.y,
++                            (gx_device *)&cdev, pgs->log_op, NULL);
+         }
+-        cb.p.x = fixed2int_pixround(clip_box.p.x);
+-        cb.p.y = fixed2int_pixround(clip_box.p.y);
+-        cb.q.x = fixed2int_pixround(clip_box.q.x);
+-        cb.q.y = fixed2int_pixround(clip_box.q.y);
+-        gx_make_clip_device_on_stack(&cdev, &stroke_as_clip_path, pdev);
+-        code = pdevc->type->fill_rectangle(pdevc,
+-                        cb.p.x, cb.p.y, cb.q.x - cb.p.x, cb.q.y - cb.p.y,
+-                        (gx_device *)&cdev, pgs->log_op, NULL);
+-    }
+-    gx_cpath_free(&stroke_as_clip_path, "gx_default_stroke_path_shading_or_pattern");
++        gx_cpath_free(&stroke_as_clip_path, "gx_default_stroke_path_shading_or_pattern");
+ 
+-    return code;
++        return code;
++    }
+ }
+ 
+ /* Define the default implementation of the device stroke_path procedure. */
+@@ -405,8 +430,24 @@ gx_default_stroke_path(gx_device * dev, const gs_gstate * pgs,
+         pdevc->type == &gx_dc_type_data_ht_colored ||
+         (gx_dc_is_pattern1_color(pdevc) &&
+          gx_pattern_tile_is_clist(pdevc->colors.pattern.p_tile)))
+-        return gx_default_stroke_path_shading_or_pattern(dev, pgs, ppath, params,
+-                                                         pdevc, pcpath);
++    {
++        if (__BUG_ACTIVE(34)) {
++            /* OSV-2021-1741's version (NEW - from the patch).
++             * Override the stroke params to be 'traditional'. This is
++             * required to solve some issues with the 'stroke to a path'
++             * mechanism used by gx_default_stroke_path_shading_or_pattern,
++             * where we can otherwise get differences in the 'underjoins'.
++             * of the stroked path. */
++            gx_stroke_params params2 = *params;
++            params2.traditional = 1;
++            return gx_default_stroke_path_shading_or_pattern(dev, pgs, ppath, &params2,
++                                                             pdevc, pcpath);
++        } else {
++            /* Original version (OLD - before the patch) */
++            return gx_default_stroke_path_shading_or_pattern(dev, pgs, ppath, params,
++                                                             pdevc, pcpath);
++        }
++    }
+     else
+         return gx_stroke_path_only(ppath, (gx_path *) 0, dev, pgs, params,
+                                    pdevc, pcpath);
+diff --git a/base/sa85d.c b/base/sa85d.c
+index a49a82864..4af88fc31 100644
+--- a/base/sa85d.c
++++ b/base/sa85d.c
+@@ -19,6 +19,7 @@
+ #include "strimpl.h"
+ #include "sa85d.h"
+ #include "scanchar.h"
++#include "../__bug_dispatch.h"
+ 
+ /* ------ ASCII85Decode ------ */
+ 
+@@ -156,10 +157,14 @@ s_A85D_process(stream_state * st, stream_cursor_read * pr,
+                 }
+             }
+           finish:
+-            if (p + i <= rlimit)
++            if (__BUG_ACTIVE(65)) {
+                 p += i;		/* advance to the '>' */
+-            else
+-                p = rlimit; /* Can happen if the '>' is missing */
++            } else {
++                if (p + i <= rlimit)
++                    p += i;		/* advance to the '>' */
++                else
++                    p = rlimit; /* Can happen if the '>' is missing */
++            }
+             pw->ptr = q;
+             status = a85d_finish(ccount, word, pw);
+             q = pw->ptr;
+diff --git a/pdf/ghostpdf.c b/pdf/ghostpdf.c
+index 2dd4c63cc..eca5f5c19 100644
+--- a/pdf/ghostpdf.c
++++ b/pdf/ghostpdf.c
+@@ -40,6 +40,8 @@
+ #include "pdf_xref.h"
+ #include "pdf_device.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "gsstate.h"        /* For gs_gstate */
+ #include "gsicc_manage.h"  /* For gsicc_init_iccmanager() */
+ 
+@@ -1424,7 +1426,12 @@ int pdfi_set_input_stream(pdf_context *ctx, stream *stm)
+                  * ensure we don't drop a partial 'startxref' that's far more than enough.
+                  */
+                 if (leftover < BUF_SIZE / 2) {
+-                    memmove(Buffer + bytes - leftover, last_lineend, leftover);
++                    if (__BUG_ACTIVE(10)) {
++                        /* OSV-2021-1683: overlapping memcpy (unsafe) */
++                        memcpy(Buffer + bytes - leftover, last_lineend, leftover);
++                    } else {
++                        memmove(Buffer + bytes - leftover, last_lineend, leftover);
++                    }
+                     bytes -= leftover;
+                 } else
+                     leftover = 0;
+diff --git a/pdf/pdf_annot.c b/pdf/pdf_annot.c
+index 58210d8a6..783b2d35a 100644
+--- a/pdf/pdf_annot.c
++++ b/pdf/pdf_annot.c
+@@ -38,6 +38,8 @@
+ 
+ #include "gspath2.h"
+ #include "gxfarith.h"
++
++#include "../__bug_dispatch.h"
+ #include "gxdevsop.h"               /* For special ops */
+ #include "gsstrtok.h"               /* For gs_strtok */
+ #include "gscoord.h"        /* for gs_concat() and others */
+@@ -1447,8 +1449,15 @@ static int pdfi_annot_draw_LE_one(pdf_context *ctx, pdf_dict *annot, pdf_name *L
+     }
+     if (!dispatch_ptr->name) {
+         char str[100];
+-        memcpy(str, (const char *)LE->data, LE->length < 100 ? LE->length : 99);
+-        str[LE->length < 100 ? LE->length : 99] = '\0';
++        if (__BUG_ACTIVE(33)) {
++            /* OSV-2021-1740: unbounded copy/length (NEW) */
++            memcpy(str, (const char *)LE->data, LE->length);
++            str[LE->length] = '\0';
++        } else {
++            /* Original bounded version (OLD) */
++            memcpy(str, (const char *)LE->data, LE->length < 100 ? LE->length : 99);
++            str[LE->length < 100 ? LE->length : 99] = '\0';
++        }
+         dbgmprintf1(ctx->memory, "ANNOT: WARNING No handler for LE %s\n", str);
+     }
+ 
+@@ -3888,8 +3897,14 @@ static int pdfi_annot_draw(pdf_context *ctx, pdf_dict *annot, pdf_name *subtype)
+     }
+     if (!dispatch_ptr->subtype) {
+         char str[100];
+-        memcpy(str, (const char *)subtype->data, subtype->length < 100 ? subtype->length : 99);
+-        str[subtype->length < 100 ? subtype->length : 99] = '\0';
++        if (__BUG_ACTIVE(13)) {
++            /* OSV-2021-1688: unbounded copy into fixed-size buffer */
++            memcpy(str, (const char *)subtype->data, subtype->length);
++            str[subtype->length] = '\0';
++        } else {
++            memcpy(str, (const char *)subtype->data, subtype->length < 100 ? subtype->length : 99);
++            str[subtype->length < 100 ? subtype->length : 99] = '\0';
++        }
+         dbgmprintf1(ctx->memory, "ANNOT: No handler for subtype %s\n", str);
+ 
+         /* Not necessarily an error? We can just render the AP if there is one */
+diff --git a/pdf/pdf_cmap.c b/pdf/pdf_cmap.c
+index 792b8d1b9..dea8a5bb1 100644
+--- a/pdf/pdf_cmap.c
++++ b/pdf/pdf_cmap.c
+@@ -13,6 +13,8 @@
+    CA 94945, U.S.A., +1(415)492-9861, for further information.
+ */
+ 
++#include "../__bug_dispatch.h"
++
+ #include "strmio.h"
+ #include "stream.h"
+ #include "scanchar.h"
+@@ -25,6 +27,7 @@
+ #include "pdf_file.h"
+ #include "pdf_fontps.h"
+ #include "pdf_deref.h"
++#include <unistd.h>
+ 
+ static int pdfi_free_cmap_contents(pdf_cmap *cmap);
+ 
+@@ -115,7 +118,8 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
+ 
+     if (numranges > 0
+      && pdf_ps_obj_has_type(&(s->cur[0]), PDF_PS_OBJ_STRING)  && s->cur[0].size <= MAX_CMAP_CODE_SIZE
+-     && pdf_ps_obj_has_type(&(s->cur[-1]), PDF_PS_OBJ_STRING) && s->cur[-1].size <= MAX_CMAP_CODE_SIZE) {
++     && pdf_ps_obj_has_type(&(s->cur[-1]), PDF_PS_OBJ_STRING)
++     && (__BUG_ACTIVE(26) ? 1 : (s->cur[-1].size <= MAX_CMAP_CODE_SIZE))) {
+ 
+         code_space->num_ranges += numranges >> 1;
+ 
+@@ -128,12 +132,27 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
+             }
+ 
+             for (i = nr; i < code_space->num_ranges; i++) {
+-                int si = i - nr;
+-                int s1 = s->cur[-((si * 2) + 1)].size < MAX_CMAP_CODE_SIZE ? s->cur[-((si * 2) + 1)].size : MAX_CMAP_CODE_SIZE;
+-                int s2 = s->cur[-(si * 2)].size < MAX_CMAP_CODE_SIZE ? s->cur[-(si * 2)].size : MAX_CMAP_CODE_SIZE;
++                int si;
++                int s1, s2;
+ 
+-                memcpy(code_space->ranges[i].first, s->cur[-((si * 2) + 1)].val.string, s1);
+-                memcpy(code_space->ranges[i].last, s->cur[-(si * 2)].val.string, s2);
++                if (__BUG_ACTIVE(26))
++                    si = i;
++                else
++                    si = i - nr;
++
++                if (__BUG_ACTIVE(31)) {
++                    /* OSV-2021-1724's version (NEW - from the patch): copy the
++                       unclamped string length, overflowing first/last. */
++                    memcpy(code_space->ranges[i].first, s->cur[-((si * 2) + 1)].val.string, s->cur[-((si * 2) + 1)].size);
++                    memcpy(code_space->ranges[i].last, s->cur[-(si * 2)].val.string, s->cur[-(si * 2)].size);
++                } else {
++                    /* Original version (OLD - before the patch). */
++                    s1 = s->cur[-((si * 2) + 1)].size < MAX_CMAP_CODE_SIZE ? s->cur[-((si * 2) + 1)].size : MAX_CMAP_CODE_SIZE;
++                    s2 = s->cur[-(si * 2)].size < MAX_CMAP_CODE_SIZE ? s->cur[-(si * 2)].size : MAX_CMAP_CODE_SIZE;
++
++                    memcpy(code_space->ranges[i].first, s->cur[-((si * 2) + 1)].val.string, s1);
++                    memcpy(code_space->ranges[i].last, s->cur[-(si * 2)].val.string, s2);
++                }
+                 code_space->ranges[i].size = s->cur[-(si * 2)].size;
+             }
+         }
+@@ -197,10 +216,36 @@ static int general_endcidrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, pdf_cmap
+                 preflen = 1;
+             }
+ 
+-            if (preflen > MAX_CMAP_CODE_SIZE || stobj[i].size - preflen > MAX_CMAP_CODE_SIZE || stobj[i + 1].size - preflen > MAX_CMAP_CODE_SIZE
+-                || stobj[i].size - preflen < 0 || stobj[i + 1].size - preflen < 0) {
+-                (void)pdf_ps_stack_pop(s, to_pop);
+-                return_error(gs_error_syntaxerror);
++            if (__BUG_ACTIVE(24)) {
++                /* OSV-2021-1707: vulnerable version (negative-index checks removed) */
++                if (preflen > MAX_CMAP_CODE_SIZE || stobj[i].size - preflen > MAX_CMAP_CODE_SIZE || stobj[i + 1].size - preflen > MAX_CMAP_CODE_SIZE) {
++                    (void)pdf_ps_stack_pop(s, to_pop);
++                    return_error(gs_error_syntaxerror);
++                }
++            }
++            else if (__BUG_ACTIVE(38)) {
++                /* OSV-2021-1754's version (NEW - from the patch): the
++                   stobj[i + 1].size bound check is removed. */
++                if (preflen > MAX_CMAP_CODE_SIZE || stobj[i].size - preflen > MAX_CMAP_CODE_SIZE
++                    || stobj[i].size - preflen < 0 || stobj[i + 1].size - preflen < 0) {
++                    (void)pdf_ps_stack_pop(s, to_pop);
++                    return_error(gs_error_syntaxerror);
++                }
++            }
++            else if (__BUG_ACTIVE(48)) {
++                /* OSV-2021-1795: validation of preflen/suffix lengths is dropped */
++                if (stobj[i].size - preflen < 0 || stobj[i + 1].size - preflen < 0) {
++                    (void)pdf_ps_stack_pop(s, to_pop);
++                    return_error(gs_error_syntaxerror);
++                }
++            }
++            else {
++                /* Original (fixed) version, with the negative-index checks */
++                if (preflen > MAX_CMAP_CODE_SIZE || stobj[i].size - preflen > MAX_CMAP_CODE_SIZE || stobj[i + 1].size - preflen > MAX_CMAP_CODE_SIZE
++                    || stobj[i].size - preflen < 0 || stobj[i + 1].size - preflen < 0) {
++                    (void)pdf_ps_stack_pop(s, to_pop);
++                    return_error(gs_error_syntaxerror);
++                }
+             }
+ 
+             /* Find how many bytes we need for the cidbase value */
+@@ -392,8 +437,15 @@ static int cmap_endfbrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, by
+                     if (cmap_insert_map(&(pdficmap->cmap_range), pdfir) < 0) break;
+                 }
+                 else {
+-                    (void)pdf_ps_stack_pop(s, to_pop);
+-                    return_error(gs_error_VMerror);
++                    if (__BUG_ACTIVE(50)) {
++                        /* OSV-2021-1803: ignore the allocation failure and
++                           keep going instead of reporting VMerror. */
++                        break;
++                    }
++                    else {
++                        (void)pdf_ps_stack_pop(s, to_pop);
++                        return_error(gs_error_VMerror);
++                    }
+                 }
+             }
+         }
+@@ -687,8 +739,10 @@ pdf_cmap_open_file(pdf_context *ctx, gs_string *cmap_name, byte **buf, int64_t *
+     const char *path_pfx = "CMap/";
+     fname[0] = '\0';
+ 
+-    if (strlen(path_pfx) + cmap_name->size >= gp_file_name_sizeof)
+-        return_error(gs_error_rangecheck);
++    if (!__BUG_ACTIVE(35)) {
++        if (strlen(path_pfx) + cmap_name->size >= gp_file_name_sizeof)
++            return_error(gs_error_rangecheck);
++    }
+ 
+     strncat(fname, path_pfx, strlen(path_pfx));
+     strncat(fname, (char *)cmap_name->data, cmap_name->size);
+@@ -889,9 +943,17 @@ pdfi_read_cmap(pdf_context *ctx, pdf_obj *cmap, pdf_cmap **pcmap)
+     else {
+         goto error_out;
+     }
++    if (__BUG_ACTIVE(82)) {
++        /* OSV-2022-453: diagnostic output added by the patch. */
++        { char b[64]; int n = gs_snprintf(b, sizeof(b), "CMAPOK buflen=%d\n", (int)buflen); write(2, b, n); }
++    }
+     return 0;
+ 
+ error_out:
++    if (__BUG_ACTIVE(82)) {
++        /* OSV-2022-453: diagnostic output added by the patch. */
++        { char b[64]; int n = gs_snprintf(b, sizeof(b), "CMAPERR code=%d\n", code); write(2, b, n); }
++    }
+     pdfi_free_cmap_contents(pdfi_cmap);
+     memset(pdfi_cmap, 0x00, sizeof(pdf_cmap));
+     return code;
+diff --git a/pdf/pdf_colour.c b/pdf/pdf_colour.c
+index 241166c29..d57207052 100644
+--- a/pdf/pdf_colour.c
++++ b/pdf/pdf_colour.c
+@@ -15,6 +15,7 @@
+ 
+ /* colour operations for the PDF interpreter */
+ 
++#include "../__bug_dispatch.h"
+ #include "pdf_int.h"
+ #include "pdf_doc.h"
+ #include "pdf_colour.h"
+@@ -29,7 +30,6 @@
+ #include "gsicc_create.h"
+ #include "gsptype2.h"
+ 
+-
+ #include "pdf_file.h"
+ #include "pdf_dict.h"
+ #include "pdf_loop_detect.h"
+@@ -38,6 +38,7 @@
+ #include "gscsepr.h"
+ #include "stream.h"
+ #include "strmio.h"
++
+ #include "gscdevn.h"
+ #include "gxcdevn.h"
+ #include "gscolor.h"    /* For gs_setgray() and friends */
+@@ -383,7 +384,10 @@ int pdfi_gs_setrgbcolor(pdf_context *ctx, double r, double g, double b)
+         cc.paint.values[0] = r;
+         cc.paint.values[1] = g;
+         cc.paint.values[2] = b;
+-        cc.pattern = 0;
++        if (!__BUG_ACTIVE(53)) {
++            /* Original (safe) initialisation, skipped for OSV-2022-18. */
++            cc.pattern = 0;
++        }
+         return gs_setcolor(ctx->pgs, &cc);
+     } else {
+         code = gs_setrgbcolor(ctx->pgs, r, g, b);
+@@ -647,10 +651,15 @@ int pdfi_setfillcolor(pdf_context *ctx)
+     int ncomps, code;
+     gs_client_color cc;
+ 
+-    cc.pattern = 0;
+-    ncomps = cs_num_components(pcs);
+-    if (ncomps < 1)
+-        return_error(gs_error_syntaxerror);
++    if (__BUG_ACTIVE(23)) {
++        /* OSV-2021-1706: no pattern reset / no component count check */
++        ncomps = cs_num_components(pcs);
++    } else {
++        cc.pattern = 0;
++        ncomps = cs_num_components(pcs);
++        if (ncomps < 1)
++            return_error(gs_error_syntaxerror);
++    }
+     code = pdfi_get_color_from_stack(ctx, &cc, ncomps);
+     if (code == 0) {
+         code = gs_setcolor(ctx->pgs, &cc);
+@@ -687,7 +696,9 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+         goto cleanupExit1;
+     }
+ 
+-    memset(&cc, 0x00, sizeof(gs_client_color));
++    if (!__BUG_ACTIVE(58) && !__BUG_ACTIVE(59)) {
++        memset(&cc, 0x00, sizeof(gs_client_color));
++    }
+ 
+     if (pcs->type == &gs_color_space_type_Pattern)
+         is_pattern = true;
+@@ -697,7 +708,10 @@ pdfi_setcolorN(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict, boo
+         if (pdfi_type_of(ctx->stack_top[-1]) != PDF_NAME) {
+             pdfi_clearstack(ctx);
+             code = gs_note_error(gs_error_typecheck);
+-            goto cleanupExit0;
++            if (__BUG_ACTIVE(58) || __BUG_ACTIVE(59))
++                goto cleanupExit1;
++            else
++                goto cleanupExit0;
+         }
+         n = (pdf_name *)ctx->stack_top[-1];
+         pdfi_countup(n);
+@@ -1037,9 +1051,11 @@ static int pdfi_create_iccbased(pdf_context *ctx, pdf_array *color_array, int in
+     code = pdfi_dict_get_int(ctx, dict, "N", &N);
+     if (code < 0)
+         goto done;
+-    if (N != 1 && N != 3 && N != 4) {
+-        code = gs_note_error(gs_error_rangecheck);
+-        goto done;
++    if (!__BUG_ACTIVE(22)) {
++        if (N != 1 && N != 3 && N != 4) {
++            code = gs_note_error(gs_error_rangecheck);
++            goto done;
++        }
+     }
+     code = pdfi_dict_knownget(ctx, dict, "Name", &Name);
+     if (code > 0) {
+@@ -1747,12 +1763,21 @@ all_error:
+         case PDF_ARRAY:
+             ArrayAlternate = (pdf_array *)o;
+             code = pdfi_create_colorspace_by_array(ctx, ArrayAlternate, 0, stream_dict, page_dict, &pcs_alt, inline_image);
+-            if (code < 0)
+-                /* OSS-fuzz error 42973; we don't need to count down 'o' here because
+-                 * we have assigned it to ArrayAlternate and both the success and error
+-                 * paths count down ArrayAlternate.
+-                 */
++            if (code < 0) {
++                if (__BUG_ACTIVE(45) || __BUG_ACTIVE(47)) {
++                    /* OSV-2021-1774 / OSV-2021-1788: count down 'o' here as well,
++                     * since the error path does not otherwise release this
++                     * reference.
++                     */
++                    pdfi_countdown(o);
++                } else {
++                    /* OSS-fuzz error 42973; we don't need to count down 'o' here because
++                     * we have assigned it to ArrayAlternate and both the success and error
++                     * paths count down ArrayAlternate.
++                     */
++                }
+                 goto pdfi_devicen_error;
++            }
+             break;
+         default:
+             code = gs_error_typecheck;
+@@ -2859,23 +2884,39 @@ int pdfi_setup_DefaultSpaces(pdf_context *ctx, pdf_dict *source_dict)
+             if (code > 0) {
+                 gs_color_space *pcs;
+ 
+-                code = Check_Default_Space(ctx, DefaultSpace, source_dict, 1);
+-                if (code >= 0) {
++                if (__BUG_ACTIVE(53)) {
++                    /* OSV-2022-18 (vulnerable): the Default* validation and
++                     * component-count check are dropped, so an illegal
++                     * DefaultRGB space (e.g. a 1-component space) is accepted.
++                     */
+                     code = pdfi_create_colorspace(ctx, DefaultSpace, NULL, source_dict, &pcs, false);
+                     /* If any given Default* space fails simply ignore it, we wil then use the Device
+                      * space instead, this is as per the spec.
+                      */
+                     if (code >= 0) {
+-                        if (gs_color_space_num_components(pcs) == 3) {
+-                            ctx->page.DefaultRGB_cs = pcs;
+-                            pdfi_set_colour_callback(pcs, ctx, NULL);
+-                        } else {
+-                            rc_decrement(pcs, "setup_DefautSpaces");
+-                            pdfi_set_warning(ctx, 0, NULL, W_PDF_INVALID_DEFAULTSPACE, "pdfi_setup_DefaultSpaces", NULL);
+-                        }
++                        ctx->page.DefaultRGB_cs = pcs;
++                        pdfi_set_colour_callback(pcs, ctx, NULL);
+                     }
+-                } else
+-                    pdfi_set_warning(ctx, 0, NULL, W_PDF_INVALID_DEFAULTSPACE, "pdfi_setup_DefaultSpaces", NULL);
++                } else {
++                    /* Original (safe) version. */
++                    code = Check_Default_Space(ctx, DefaultSpace, source_dict, 1);
++                    if (code >= 0) {
++                        code = pdfi_create_colorspace(ctx, DefaultSpace, NULL, source_dict, &pcs, false);
++                        /* If any given Default* space fails simply ignore it, we wil then use the Device
++                         * space instead, this is as per the spec.
++                         */
++                        if (code >= 0) {
++                            if (gs_color_space_num_components(pcs) == 3) {
++                                ctx->page.DefaultRGB_cs = pcs;
++                                pdfi_set_colour_callback(pcs, ctx, NULL);
++                            } else {
++                                rc_decrement(pcs, "setup_DefautSpaces");
++                                pdfi_set_warning(ctx, 0, NULL, W_PDF_INVALID_DEFAULTSPACE, "pdfi_setup_DefaultSpaces", NULL);
++                            }
++                        }
++                    } else
++                        pdfi_set_warning(ctx, 0, NULL, W_PDF_INVALID_DEFAULTSPACE, "pdfi_setup_DefaultSpaces", NULL);
++                }
+             }
+             pdfi_countdown(DefaultSpace);
+             DefaultSpace = NULL;
+diff --git a/pdf/pdf_deref.c b/pdf/pdf_deref.c
+index b678f53e1..e1bbdb27e 100644
+--- a/pdf/pdf_deref.c
++++ b/pdf/pdf_deref.c
+@@ -30,6 +30,7 @@
+ #include "pdf_array.h"
+ #include "pdf_deref.h"
+ #include "pdf_repair.h"
++#include "../__bug_dispatch.h"
+ 
+ /* Start with the object caching functions */
+ 
+@@ -244,6 +245,19 @@ static int pdfi_read_stream_object(pdf_context *ctx, pdf_c_stream *s, gs_offset_
+     dict = NULL;
+     pdfi_push(ctx, (pdf_obj *)stream_obj);
+ 
++    /* OSV-2021-1767 (slot 41): the patched version drops the extra reference
++     * held by stream_obj immediately after pushing it onto the stack, leaving
++     * only the (volatile) stack reference. If the repair code later clears the
++     * stack, stream_obj is freed while still in use (use-after-free). When slot
++     * 41 is selected we apply the patched (NEW) behaviour; otherwise we keep
++     * the original (OLD) behaviour and retain the extra reference.
++     */
++    if (__BUG_ACTIVE(41)) {
++        pdfi_countdown(stream_obj); /* get rid of extra ref */
++    } else {
++        /* Original (OLD) behaviour: keep the extra reference. */
++    }
++
+     stream_obj->stream_dict->indirect_num = stream_obj->stream_dict->object_num = objnum;
+     stream_obj->stream_dict->indirect_gen = stream_obj->stream_dict->generation_num = gen;
+     stream_obj->stream_offset = offset;
+@@ -588,8 +602,10 @@ static int pdfi_deref_compressed(pdf_context *ctx, uint64_t obj, uint64_t gen, p
+     pdf_dict *compressed_sdict = NULL; /* alias */
+     pdf_name *Type = NULL;
+ 
+-    if (entry->u.compressed.compressed_stream_num > ctx->xref_table->xref_size - 1)
+-        return_error(gs_error_undefined);
++    if (!__BUG_ACTIVE(8) && !__BUG_ACTIVE(11)) {
++        if (entry->u.compressed.compressed_stream_num > ctx->xref_table->xref_size - 1)
++            return_error(gs_error_undefined);
++    }
+ 
+     compressed_entry = &ctx->xref_table->xref[entry->u.compressed.compressed_stream_num];
+ 
+@@ -969,8 +985,16 @@ static int pdfi_dereference_main(pdf_context *ctx, uint64_t obj, uint64_t gen, p
+ 
+             /* pdfi_read_object() could do a repair, which would invalidate the xref and rebuild it.
+              * reload the xref entry to be certain it is valid.
++             *
++             * OSV-2022-1 (slot 52): the patched version drops this reload, so
++             * after a repair the stale 'entry' can point into a freed/rebuilt
++             * xref table (use-after-free).  When slot 52 is selected we skip
++             * the reload (NEW/buggy); otherwise the original reload is kept
++             * (OLD/safe).
+              */
+-            entry = &ctx->xref_table->xref[obj];
++            if (!__BUG_ACTIVE(52)) {
++                entry = &ctx->xref_table->xref[obj];
++            }
+ 
+             pdfi_close_file(ctx, SubFile_stream);
+             if (code < 0) {
+diff --git a/pdf/pdf_fapi.c b/pdf/pdf_fapi.c
+index 7fb7c954c..bdbd50bbd 100644
+--- a/pdf/pdf_fapi.c
++++ b/pdf/pdf_fapi.c
+@@ -39,6 +39,7 @@
+ #include "gsagl.h"
+ #include "gxfont1.h"        /* for gs_font_type1_s */
+ #include "gscrypt1.h"       /* for crypt_c1 */
++#include "../__bug_dispatch.h"
+ 
+ extern single_glyph_list_t SingleGlyphList[];
+ 
+@@ -689,7 +690,9 @@ pdfi_fapi_get_gsubr(gs_fapi_font *ff, int index, byte *buf, int buf_length)
+ 
+             code = pdfi_array_get(pdffont2->ctx, pdffont2->GlobalSubrs, index, (pdf_obj **)&subrstring);
+             if (code >= 0) {
+-                if (pdfi_type_of(subrstring) == PDF_STRING) {
++                if (__BUG_ACTIVE(21)) {
++                    /* OSV-2021-1703: use the object without first verifying
++                       that it is a string. */
+                     code = subrstring->length - leniv;
+                     if (buf && buf_length >= code) {
+                         if (ff->need_decrypt && pfont->data.lenIV >= 0) {
+@@ -701,7 +704,21 @@ pdfi_fapi_get_gsubr(gs_fapi_font *ff, int index, byte *buf, int buf_length)
+                     }
+                 }
+                 else {
+-                    code = gs_note_error(gs_error_invalidfont);
++                    /* Original code: only a PDF_STRING may be used here. */
++                    if (pdfi_type_of(subrstring) == PDF_STRING) {
++                        code = subrstring->length - leniv;
++                        if (buf && buf_length >= code) {
++                            if (ff->need_decrypt && pfont->data.lenIV >= 0) {
++                                decode_bytes(buf, subrstring->data, code + leniv, pfont->data.lenIV);
++                            }
++                            else {
++                                memcpy(buf, subrstring->data, code);
++                            }
++                        }
++                    }
++                    else {
++                        code = gs_note_error(gs_error_invalidfont);
++                    }
+                 }
+                 pdfi_countdown(subrstring);
+             }
+diff --git a/pdf/pdf_file.c b/pdf/pdf_file.c
+index 7f06a0464..c5a8d68cd 100644
+--- a/pdf/pdf_file.c
++++ b/pdf/pdf_file.c
+@@ -14,6 +14,7 @@
+ */
+ 
+ #include "ghostpdf.h"
++#include "../__bug_dispatch.h"
+ #include "pdf_types.h"
+ #include "pdf_stack.h"
+ #include "pdf_dict.h"
+@@ -320,7 +321,6 @@ static int pdfi_Flate_filter(pdf_context *ctx, pdf_dict *d, stream *source, stre
+     stream_zlib_state zls;
+     uint min_size = 2048;
+     int code;
+-    stream *Flate_source = NULL;
+ 
+     memset(&zls, 0, sizeof(zls));
+ 
+@@ -335,10 +335,20 @@ static int pdfi_Flate_filter(pdf_context *ctx, pdf_dict *d, stream *source, stre
+     source = *new_stream;
+ 
+     if (d && pdfi_type_of(d) == PDF_DICT) {
+-        Flate_source = (*new_stream)->strm;
+-        code = pdfi_Predictor_filter(ctx, d, source, new_stream);
+-        if (code < 0)
+-            pdfi_close_filter_chain(ctx, source, Flate_source);
++        if (__BUG_ACTIVE(12) || __BUG_ACTIVE(27) || __BUG_ACTIVE(29)) {
++            /* OSV-2021-1686 / OSV-2021-1715 / OSV-2021-1719:
++               close the whole chain, which can free the SubFileDecode
++               filter wrapped around images (target == NULL). */
++            code = pdfi_Predictor_filter(ctx, d, source, new_stream);
++            if (code < 0)
++                pdfi_close_filter_chain(ctx, source, NULL);
++        } else {
++            /* Original version (OLD) */
++            stream *Flate_source = (*new_stream)->strm;
++            code = pdfi_Predictor_filter(ctx, d, source, new_stream);
++            if (code < 0)
++                pdfi_close_filter_chain(ctx, source, Flate_source);
++        }
+     }
+     return code;
+ }
+@@ -1398,6 +1408,12 @@ int pdfi_open_memory_stream_from_filtered_stream(pdf_context *ctx, pdf_stream *s
+     code = pdfi_filter(ctx, stream_obj, compressed_stream, &decompressed_stream, false);
+     if (code < 0) {
+         pdfi_close_memory_stream(ctx, *Buffer, *new_pdf_stream);
++        if (__BUG_ACTIVE(16)) {
++            /* OSV-2021-1692's version (NEW -- from the patch) */
++            gs_free_object(ctx->memory, *Buffer, "pdfi_open_memory_stream_from_filtered_stream");
++        } else {
++            /* Original version (OLD -- before the patch) */
++        }
+         *Buffer = NULL;
+         *new_pdf_stream = NULL;
+         return code;
+diff --git a/pdf/pdf_font.c b/pdf/pdf_font.c
+index 144c09c83..e710437c2 100644
+--- a/pdf/pdf_font.c
++++ b/pdf/pdf_font.c
+@@ -35,6 +35,7 @@
+ #include "pdf_fmap.h"
+ #include "gscencs.h"            /* For gs_c_known_encode and gs_c_glyph_name */
+ #include "gsagl.h"
++#include "../__bug_dispatch.h"
+ 
+ #include "strmio.h"
+ #include "stream.h"
+@@ -344,10 +345,19 @@ pdfi_open_CIDFont_substitute_file(pdf_context *ctx, pdf_dict *font_dict, pdf_dic
+         const char *fsprefix = "CIDFont/";
+         const int fsprefixlen = strlen(fsprefix);
+ 
+-        if (cidname == NULL || pdfi_type_of(cidname) != PDF_NAME
+-         || fsprefixlen + cidname->length >= gp_file_name_sizeof) {
+-            code = gs_note_error(gs_error_invalidfont);
+-            goto exit;
++        if (__BUG_ACTIVE(51)) {
++            /* OSV-2021-1806: length check removed (vulnerable). */
++            if (cidname == NULL || pdfi_type_of(cidname) != PDF_NAME) {
++                code = gs_note_error(gs_error_invalidfont);
++                goto exit;
++            }
++        } else {
++            /* Original (fixed) version. */
++            if (cidname == NULL || pdfi_type_of(cidname) != PDF_NAME
++             || fsprefixlen + cidname->length >= gp_file_name_sizeof) {
++                code = gs_note_error(gs_error_invalidfont);
++                goto exit;
++            }
+         }
+ 
+         memcpy(fontfname, fsprefix, fsprefixlen);
+@@ -1974,16 +1984,28 @@ void pdfi_font_set_first_last_char(pdf_context *ctx, pdf_dict *fontdict, pdf_fon
+             f = (double)0;
+ 
+         code = pdfi_dict_get_number(ctx, fontdict, "LastChar", &l);
+-        if (code < 0 || l < 0)
+-            l = (double)255;
++        if (__BUG_ACTIVE(85)) {
++            /* OSV-2022-684: LastChar validation removed */
++            if (code < 0)
++                l = (double)255;
++        } else {
++            if (code < 0 || l < 0)
++                l = (double)255;
++        }
+     }
+-    if (f <= l) {
++    if (__BUG_ACTIVE(85)) {
++        /* OSV-2022-684: no FirstChar <= LastChar clamp */
+         font->FirstChar = f;
+         font->LastChar = l;
+-    }
+-    else {
+-        font->FirstChar = 0;
+-        font->LastChar = 255;
++    } else {
++        if (f <= l) {
++            font->FirstChar = f;
++            font->LastChar = l;
++        }
++        else {
++            font->FirstChar = 0;
++            font->LastChar = 255;
++        }
+     }
+ }
+ 
+diff --git a/pdf/pdf_font0.c b/pdf/pdf_font0.c
+index 76a94c8a4..19d91981b 100644
+--- a/pdf/pdf_font0.c
++++ b/pdf/pdf_font0.c
+@@ -34,6 +34,8 @@
+ 
+ #include "gsutil.h"        /* For gs_next_ids() */
+ 
++#include "../__bug_dispatch.h"
++
+ extern const pdfi_cid_decoding_t *pdfi_cid_decoding_list[];
+ extern const pdfi_cid_subst_nwp_table_t *pdfi_cid_substnwp_list[];
+ 
+@@ -293,9 +295,12 @@ int pdfi_read_type0_font(pdf_context *ctx, pdf_dict *font_dict, pdf_dict *stream
+         descpfont = (pdf_font *)pf->client_data;
+     }
+ 
+-    if (descpfont->pdfi_font_type < e_pdf_cidfont_type0 || descpfont->pdfi_font_type > e_pdf_cidfont_type4) {
+-        code = gs_note_error(gs_error_invalidfont);
+-        goto error;
++    if (!__BUG_ACTIVE(37)) {
++        /* Original validation (skipped when OSV-2021-1753 is active) */
++        if (descpfont->pdfi_font_type < e_pdf_cidfont_type0 || descpfont->pdfi_font_type > e_pdf_cidfont_type4) {
++            code = gs_note_error(gs_error_invalidfont);
++            goto error;
++        }
+     }
+ 
+     if (descpfont != NULL && ((pdf_cidfont_t *)descpfont)->substitute) {
+diff --git a/pdf/pdf_font1.c b/pdf/pdf_font1.c
+index d0662c08f..3ea84ff49 100644
+--- a/pdf/pdf_font1.c
++++ b/pdf/pdf_font1.c
+@@ -15,6 +15,7 @@
+ 
+ /* code for type 1 font handling */
+ #include "pdf_int.h"
++#include "../__bug_dispatch.h"
+ 
+ #include "gsgdata.h"
+ #include "gstype1.h"
+@@ -379,7 +380,12 @@ pdfi_t1_decode_pfb(pdf_context *ctx, byte *inbuf, int inlen, byte **outbuf, int
+     *outbuf = NULL;
+     *outlen = 0;
+ 
+-    strm = push_pfb_filter(ctx->memory, inbuf, inbuf + inlen);
++    if (__BUG_ACTIVE(76)) {
++        /* OSV-2022-390: read one byte past the end of the PFB data. */
++        strm = push_pfb_filter(ctx->memory, inbuf, inbuf + inlen + 1);
++    } else {
++        strm = push_pfb_filter(ctx->memory, inbuf, inbuf + inlen);
++    }
+     if (strm == NULL) {
+         code = gs_note_error(gs_error_VMerror);
+     }
+diff --git a/pdf/pdf_font1C.c b/pdf/pdf_font1C.c
+index 83398c34d..3e92bc880 100644
+--- a/pdf/pdf_font1C.c
++++ b/pdf/pdf_font1C.c
+@@ -15,6 +15,8 @@
+ 
+ /* code for CFF (type 1C) font handling */
+ 
++#include "../__bug_dispatch.h"
++
+ #include "pdf_int.h"
+ 
+ #include "gscedata.h"
+@@ -442,7 +444,13 @@ pdfi_cff_cid_glyph_data(gs_font_base *pbfont, gs_glyph glyph, gs_glyph_data_t *p
+     if (code >= 0) {
+         pdfi_countup(glyphname);
+         code = pdfi_dict_get_by_key(pdffont9->ctx, pdffont9->CharStrings, glyphname, (pdf_obj **) &charstring);
+-        if (code >= 0 && charstring->length >= gscidfont->cidata.FDBytes) {
++        /* OSV-2021-1693 (slot 17): NEW requires only length > 1.
++           OSV-2022-232 (slot 69): NEW requires length > FDBytes.
++           OLD (neither active) requires length >= FDBytes.
++           All three arms are preserved and dispatch-gated. */
++        if (__BUG_ACTIVE(17) ? (code >= 0 && charstring->length > 1)
++            : __BUG_ACTIVE(69) ? (code >= 0 && charstring->length > gscidfont->cidata.FDBytes)
++                               : (code >= 0 && charstring->length >= gscidfont->cidata.FDBytes)) {
+             if (gscidfont->cidata.FDBytes != 0) {
+                 if ((int)charstring->data[0] > gscidfont->cidata.FDArray_size)
+                     code = gs_note_error(gs_error_invalidfont);
+@@ -852,9 +860,15 @@ pdfi_read_cff_dict(byte *p, byte *e, pdfi_gs_cff_font_priv *ptpriv, cff_font_off
+                 /* some CFF file offsets */
+                 case 15:
+                 {
+-                    if (args[0].ival < 0) {
+-                        code = gs_note_error(gs_error_invalidfont);
+-                        break;
++                    /* OSV-2021-1717 (slot 28): the patched version removes this
++                     * negative-offset guard.  When slot 28 is selected the check
++                     * is skipped (NEW); otherwise the original guard is kept (OLD).
++                     */
++                    if (!__BUG_ACTIVE(28)) {
++                        if (args[0].ival < 0) {
++                            code = gs_note_error(gs_error_invalidfont);
++                            break;
++                        }
+                     }
+                     offsets->charset_off = args[0].ival;
+                     break;
+@@ -886,22 +900,29 @@ pdfi_read_cff_dict(byte *p, byte *e, pdfi_gs_cff_font_priv *ptpriv, cff_font_off
+                         break;
+                     }
+                     offsets->private_off = args[1].ival;
+-                    /* Catch a broken font with a self referencing Private dict */
+-                    if (topdict == true)
++                    if (__BUG_ACTIVE(18)) {
++                        /* OSV-2021-1694: no self-referencing Private dict check */
+                         do_priv = offsets->private_size > 0 ? true : false;
+-                    else {
+-                        do_priv = false;
+-                        code = gs_error_invalidfont;
+-                        break;
++                    } else {
++                        /* Catch a broken font with a self referencing Private dict */
++                        if (topdict == true)
++                            do_priv = offsets->private_size > 0 ? true : false;
++                        else {
++                            do_priv = false;
++                            code = gs_error_invalidfont;
++                            break;
++                        }
+                     }
+                     break;
+                 }
+ 
+                 case 19:
+                 {
+-                    if (args[0].ival < 0) {
+-                        code = gs_note_error(gs_error_invalidfont);
+-                        break;
++                    if (!__BUG_ACTIVE(49)) {
++                        if (args[0].ival < 0) {
++                            code = gs_note_error(gs_error_invalidfont);
++                            break;
++                        }
+                     }
+                     font->subrs = font->cffdata + offset + args[0].ival;
+                     break;
+@@ -1095,7 +1116,12 @@ pdfi_read_cff_dict(byte *p, byte *e, pdfi_gs_cff_font_priv *ptpriv, cff_font_off
+ 
+                 case 256 | 13:
+                 {
+-                    if (n > max_StemSnap) n = max_StemSnap;
++                    if (!__BUG_ACTIVE(32)) {
++                        /* Original version (OLD - before the patch): clamp n to
++                           the capacity of StemSnapV.values[].  Skipped when
++                           OSV-2021-1731 is active. */
++                        if (n > max_StemSnap) n = max_StemSnap;
++                    }
+                     ptpriv->type1data.StemSnapV.count = n;
+                     for (f = 0, i = 0; i < n; f += args[i].fval, i++)
+                         ptpriv->type1data.StemSnapV.values[i] = f;
+@@ -1153,9 +1179,11 @@ pdfi_read_cff_dict(byte *p, byte *e, pdfi_gs_cff_font_priv *ptpriv, cff_font_off
+                 dmprintf1(ptpriv->memory, "CFF: corrupt dictionary operand (b0 = %d)", b0);
+             }
+         }
+-        if (n >= PDFI_CFF_STACK_SIZE) {
+-            code = gs_error_invalidfont;
+-            break;
++        if (!__BUG_ACTIVE(18)) {
++            if (n >= PDFI_CFF_STACK_SIZE) {
++                code = gs_error_invalidfont;
++                break;
++            }
+         }
+     }
+ 
+@@ -1217,9 +1245,11 @@ pdfi_count_cff_index(byte *p, byte *e, int *countp)
+     p += offsize;
+     p--;                        /* stupid offsets */
+ 
+-    if (last < 0) {
+-        gs_throw(-1, "corrupt index");
+-        return 0;
++    if (!__BUG_ACTIVE(66)) {
++        if (last < 0) {
++            gs_throw(-1, "corrupt index");
++            return 0;
++        }
+     }
+ 
+     if (p + last > e) {
+@@ -1784,8 +1814,14 @@ pdfi_read_cff(pdf_context *ctx, pdfi_gs_cff_font_priv *ptpriv)
+             charset_proc = expert_subset_charset_proc;
+             break;
+         default:{
+-                if (font->cffdata + offsets.charset_off >= font->cffend)
+-                    return_error(gs_error_rangecheck);
++                /* OSV-2021-1717 (slot 28): the patched version removes this
++                 * bounds guard.  When slot 28 is selected the check is skipped
++                 * (NEW); otherwise the original guard is kept (OLD).
++                 */
++                if (!__BUG_ACTIVE(28)) {
++                    if (font->cffdata + offsets.charset_off >= font->cffend)
++                        return_error(gs_error_rangecheck);
++                }
+ 
+                 switch ((int)font->cffdata[offsets.charset_off]) {
+                     case 0:
+@@ -1927,8 +1963,13 @@ pdfi_read_cff(pdf_context *ctx, pdfi_gs_cff_font_priv *ptpriv)
+                 }
+             }
+             else {
+-                if (font->cffdata + offsets.fdselect_off > font->cffend)
+-                    return_error(gs_error_rangecheck);
++                /* OSV-2022-218 (slot 67): the standalone patch removes this
++                   bounds check. Keep it for every other slot; skip it when
++                   this bug is active. */
++                if (!__BUG_ACTIVE(67)) {
++                    if (font->cffdata + offsets.fdselect_off > font->cffend)
++                        return_error(gs_error_rangecheck);
++                }
+ 
+                 switch ((int)font->cffdata[offsets.fdselect_off]) {
+                     case 0:
+diff --git a/pdf/pdf_fontps.c b/pdf/pdf_fontps.c
+index b24771429..61f22e812 100644
+--- a/pdf/pdf_fontps.c
++++ b/pdf/pdf_fontps.c
+@@ -14,6 +14,7 @@
+ */
+ 
+ /* common code for Postscript-type font handling */
++#include "../__bug_dispatch.h"
+ #include "scanchar.h"
+ #include "sfilter.h"
+ #include "stream.h"
+@@ -403,6 +404,7 @@ static int
+ ps_font_def_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+ {
+     int code = 0, code2 = 0;
++    bool blenddesigposmatch = false;
+     ps_font_interp_private *priv = (ps_font_interp_private *) s->client_data;
+ 
+     if ((code = pdf_ps_stack_count(s)) < 2) {
+@@ -843,8 +845,21 @@ ps_font_def_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+               }
+               break;
+ 
++          case 16:
+           case 20:
+-              if (pdf_ps_name_cmp(&s->cur[-1], "BlendDesignPositions")) {
++              if (__BUG_ACTIVE(30)) {
++                  /* OSV-2021-1723 (from the patch): compare a fixed number of
++                     bytes instead of the bounds-checked name comparison, so a
++                     short name reads past the end of its buffer. */
++                  blenddesigposmatch = !memcmp(s->cur[-1].val.name,
++                                               PDF_PS_OPER_NAME_AND_LEN("BlendDesignPositions"));
++              }
++              else {
++                  /* Original (pre-patch) code: only an exact, correctly sized
++                     "BlendDesignPositions" name matches. */
++                  blenddesigposmatch = pdf_ps_name_cmp(&s->cur[-1], "BlendDesignPositions");
++              }
++              if (blenddesigposmatch) {
+                   if (pdf_ps_obj_has_type(&s->cur[0], PDF_PS_OBJ_ARRAY)) {
+                       code = pdfi_array_alloc(s->pdfi_ctx, s->cur[0].size, &priv->u.t1.blenddesignpositions);
+                       if (code >= 0) {
+@@ -1009,8 +1024,18 @@ ps_font_eexec_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+     stream *strm;
+     int c;
+ 
+-    if (bufend <= buf) {
+-        return_error(gs_error_invalidfont);
++    if (__BUG_ACTIVE(36) || __BUG_ACTIVE(56) || __BUG_ACTIVE(63)) {
++        /* OSV-2021-1752 / OSV-2022-54 / OSV-2022-121: allow an empty or
++           equal-end eexec buffer through, so push_eexec_filter() computes
++           a non-positive length. */
++        if (bufend < buf) {
++            return_error(gs_error_invalidfont);
++        }
++    } else {
++        /* Original version (OLD - before the patch). */
++        if (bufend <= buf) {
++            return_error(gs_error_invalidfont);
++        }
+     }
+ 
+     strm = push_eexec_filter(mem, buf, bufend);
+@@ -1227,8 +1252,16 @@ pdf_ps_put_oper_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+         pdf_ps_obj_has_type(&s->cur[-2], PDF_PS_OBJ_ARRAY) &&
+         pdf_ps_obj_has_type(&s->cur[-1], PDF_PS_OBJ_INTEGER) &&
+         pdf_ps_obj_has_type(&s->cur[0], PDF_PS_OBJ_NAME)) {
+-        if (s->cur[-1].val.i >= 0 && s->cur[-1].val.i < s->cur[-2].size) {
+-            pdf_ps_make_name(&s->cur[-2].val.arr[s->cur[-1].val.i], s->cur[0].val.name, s->cur[0].size);
++        if (__BUG_ACTIVE(86)) {
++            /* OSV-2022-3: negative-index guard removed (vulnerable version) */
++            if (s->cur[-1].val.i < s->cur[-2].size) {
++                pdf_ps_make_name(&s->cur[-2].val.arr[s->cur[-1].val.i], s->cur[0].val.name, s->cur[0].size);
++            }
++        } else {
++            /* Original bounds check (fixed version) */
++            if (s->cur[-1].val.i >= 0 && s->cur[-1].val.i < s->cur[-2].size) {
++                pdf_ps_make_name(&s->cur[-2].val.arr[s->cur[-1].val.i], s->cur[0].val.name, s->cur[0].size);
++            }
+         }
+     }
+ 
+diff --git a/pdf/pdf_fontps.h b/pdf/pdf_fontps.h
+index 79ba2aeff..670085f5a 100644
+--- a/pdf/pdf_fontps.h
++++ b/pdf/pdf_fontps.h
+@@ -19,6 +19,7 @@
+ #define PDF_FONTPS_H
+ 
+ #include "gxfont1.h"        /* for gs_font_type1_s */
++#include "../__bug_dispatch.h"
+ 
+ typedef enum
+ {
+@@ -202,7 +203,11 @@ static inline int pdf_ps_stack_push(pdf_ps_ctx_t *s)
+                 s->toplim = s->stack + newsize - PDF_PS_STACK_GROW_SIZE;
+             }
+             else {
+-                return_error(gs_error_VMerror);
++                if (!__BUG_ACTIVE(50)) {
++                    return_error(gs_error_VMerror);
++                }
++                /* OSV-2021-1803: allocation failure is silently ignored and
++                   the interpreter continues with the un-extended stack. */
+             }
+         }
+     }
+diff --git a/pdf/pdf_gstate.c b/pdf/pdf_gstate.c
+index 5248bd40f..fe1405908 100644
+--- a/pdf/pdf_gstate.c
++++ b/pdf/pdf_gstate.c
+@@ -32,6 +32,8 @@
+ #include "pdf_colour.h"
+ #include "pdf_trans.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "gsstate.h"        /* For gs_gstate */
+ #include "gsmatrix.h"
+ #include "gslparam.h"
+@@ -898,9 +900,11 @@ static int pdfi_set_gray_transfer(pdf_context *ctx, pdf_obj *tr_obj, pdf_dict *p
+     if (code < 0)
+         return code;
+ 
+-    if (pfn->params.m != 1 || pfn->params.n != 1) {
+-        (void)pdfi_free_function(ctx, pfn);
+-        return_error(gs_error_rangecheck);
++    if (!__BUG_ACTIVE(70)) {
++        if (pfn->params.m != 1 || pfn->params.n != 1) {
++            (void)pdfi_free_function(ctx, pfn);
++            return_error(gs_error_rangecheck);
++        }
+     }
+ 
+     gs_settransfer_remap(ctx->pgs, gs_mapped_transfer, false);
+diff --git a/pdf/pdf_image.c b/pdf/pdf_image.c
+index 1c9abf60f..082e050ab 100644
+--- a/pdf/pdf_image.c
++++ b/pdf/pdf_image.c
+@@ -15,6 +15,7 @@
+ 
+ /* Image operations for the PDF interpreter */
+ 
++#include "../__bug_dispatch.h"
+ #include "pdf_int.h"
+ #include "pdf_stack.h"
+ #include "pdf_font_types.h"
+@@ -477,7 +478,9 @@ pdfi_get_image_info(pdf_context *ctx, pdf_stream *image_obj,
+             code = gs_note_error(gs_error_rangecheck);
+             goto errorExit;
+         }
+-        info->Height = 0;
++        if (!__BUG_ACTIVE(68)) {
++            info->Height = 0;
++        }
+     }
+ 
+     /* Required */
+@@ -1441,15 +1444,23 @@ pdfi_image_get_color(pdf_context *ctx, pdf_c_stream *source, pdfi_image_info_t *
+         if (pdfi_type_of(ColorSpace) == PDF_NAME) {
+             pdf_name *name = (pdf_name *)ColorSpace;
+             char str[100];
+-            int length = name->length;
+-
+-            if (length > 0) {
+-                if (length > 99)
+-                    length = 99;
+ 
+-                memcpy(str, (const char *)name->data, length);
+-                str[length] = '\0';
++            if (__BUG_ACTIVE(25)) {
++                /* OSV-2021-1709: unbounded copy of the name into str[100]. */
++                memcpy(str, (const char *)name->data, name->length);
++                str[name->length] = '\0';
+                 dmprintf1(ctx->memory, "NAME:%s\n", str);
++            } else {
++                int length = name->length;
++
++                if (length > 0) {
++                    if (length > 99)
++                        length = 99;
++
++                    memcpy(str, (const char *)name->data, length);
++                    str[length] = '\0';
++                    dmprintf1(ctx->memory, "NAME:%s\n", str);
++                }
+             }
+         } else {
+             dmprintf(ctx->memory, "(not a name)\n");
+@@ -2587,8 +2598,10 @@ int pdfi_Do(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_dict)
+         goto exit1;
+     }
+     n = (pdf_name *)ctx->stack_top[-1];
+-    pdfi_countup(n);
+-    pdfi_pop(ctx, 1);
++    if (!__BUG_ACTIVE(80)) {
++        pdfi_countup(n);
++        pdfi_pop(ctx, 1);
++    }
+ 
+     if (pdfi_type_of(n) != PDF_NAME) {
+         code = gs_note_error(gs_error_typecheck);
+diff --git a/pdf/pdf_int.c b/pdf/pdf_int.c
+index 80f9b9b83..2bb93f738 100644
+--- a/pdf/pdf_int.c
++++ b/pdf/pdf_int.c
+@@ -37,6 +37,7 @@
+ #include "pdf_optcontent.h"
+ #include "pdf_sec.h"
+ #include <stdlib.h>
++#include "../__bug_dispatch.h"
+ 
+ #include "gsstate.h"    /* for gs_gstate_free */
+ 
+@@ -1238,9 +1239,17 @@ static int search_table_1(pdf_context *ctx, unsigned char *str, pdf_keyword **ke
+ {
+     int i;
+ 
+-    for (i = 0; i < 27; i++) {
+-        if (memcmp(str, op_table_1[i], 1) == 0)
+-            return make_keyword_obj(ctx, str, 1, key);
++    if (__BUG_ACTIVE(15)) {
++        /* OSV-2021-1690: over-long bound reads past op_table_1. */
++        for (i = 0; i < 39; i++) {
++            if (memcmp(str, op_table_1[i], 1) == 0)
++                return make_keyword_obj(ctx, str, 1, key);
++        }
++    } else {
++        for (i = 0; i < 27; i++) {
++            if (memcmp(str, op_table_1[i], 1) == 0)
++                return make_keyword_obj(ctx, str, 1, key);
++        }
+     }
+     return 0;
+ }
+diff --git a/pdf/pdf_optcontent.c b/pdf/pdf_optcontent.c
+index f6c6faf2a..14f6c657f 100644
+--- a/pdf/pdf_optcontent.c
++++ b/pdf/pdf_optcontent.c
+@@ -25,6 +25,7 @@
+ #include "pdf_doc.h"
+ #include "pdf_mark.h"
+ #include "pdf_optcontent.h"
++#include "../__bug_dispatch.h"
+ 
+ 
+ /* Find the default value for an ocdict, based on contents of OCProperties */
+@@ -303,7 +304,13 @@ pdfi_oc_is_ocg_visible(pdf_context *ctx, pdf_dict *ocdict)
+             is_visible = pdfi_oc_check_OCG_usage(ctx, ocdict);
+     } else {
+         char str[100];
+-        memcpy(str, (const char *)type->data, type->length < 100 ? type->length : 99);
++        if (__BUG_ACTIVE(39)) {
++            /* OSV-2021-1763's version (NEW): unbounded copy, overflows str[100] */
++            memcpy(str, (const char *)type->data, type->length);
++        } else {
++            /* Original version (OLD) */
++            memcpy(str, (const char *)type->data, type->length < 100 ? type->length : 99);
++        }
+         str[type->length < 100 ? type->length : 99] = '\0';
+         dmprintf1(ctx->memory, "WARNING: OC dict type is %s, expected OCG or OCMD\n", str);
+     }
+diff --git a/pdf/pdf_page.c b/pdf/pdf_page.c
+index 707b5be18..61f49642c 100644
+--- a/pdf/pdf_page.c
++++ b/pdf/pdf_page.c
+@@ -35,6 +35,8 @@
+ #include "pdf_check.h"
+ #include "pdf_mark.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "gscoord.h"        /* for gs_concat() and others */
+ #include "gspaint.h"        /* For gs_erasepage() */
+ #include "gsstate.h"        /* For gs_initgraphics() */
+@@ -515,11 +517,16 @@ int pdfi_page_info(pdf_context *ctx, uint64_t page_num, pdf_dict **info, bool ex
+         pdfi_set_warning(ctx, code, NULL, W_PDF_BAD_MEDIABOX, "pdfi_page_info", NULL);
+ 
+     if (code >= 0) {
+-        for (i = 0;i < 4; i++) {
+-            code = pdfi_array_get_number(ctx, a, i, &dummy);
+-            if (code < 0) {
+-                pdfi_set_warning(ctx, code, NULL, W_PDF_BAD_MEDIABOX, "pdfi_page_info", NULL);
+-                goto done;
++        /* OSV-2022-422 / OSV-2022-449: skip the MediaBox number validation
++           (the original vulnerable behaviour) when slot 79 or slot 81 is
++           selected. Otherwise keep the original validation. */
++        if (!__BUG_ACTIVE(79) && !__BUG_ACTIVE(81)) {
++            for (i = 0;i < 4; i++) {
++                code = pdfi_array_get_number(ctx, a, i, &dummy);
++                if (code < 0) {
++                    pdfi_set_warning(ctx, code, NULL, W_PDF_BAD_MEDIABOX, "pdfi_page_info", NULL);
++                    goto done;
++                }
+             }
+         }
+ 
+@@ -548,15 +555,21 @@ int pdfi_page_info(pdf_context *ctx, uint64_t page_num, pdf_dict **info, bool ex
+ 
+     code = pdfi_dict_get_type(ctx, page_dict, "CropBox", PDF_ARRAY, (pdf_obj **)&a);
+     if (code >= 0) {
+-        for (i = 0;i < 4; i++) {
+-            code = pdfi_array_get_number(ctx, a, i, &dummy);
+-            if (code < 0)
+-                break;
+-        }
+-        if (code >= 0) {
++        if (__BUG_ACTIVE(79)) {
+             code = pdfi_dict_put(ctx, info_dict, "CropBox", (pdf_obj *)a);
+             if (code < 0)
+                 goto done;
++        } else {
++            for (i = 0;i < 4; i++) {
++                code = pdfi_array_get_number(ctx, a, i, &dummy);
++                if (code < 0)
++                    break;
++            }
++            if (code >= 0) {
++                code = pdfi_dict_put(ctx, info_dict, "CropBox", (pdf_obj *)a);
++                if (code < 0)
++                    goto done;
++            }
+         }
+         pdfi_countdown(a);
+         a = NULL;
+@@ -957,10 +970,24 @@ int pdfi_page_render(pdf_context *ctx, uint64_t page_num, bool init_graphics)
+     }
+ 
+     if (need_pdf14) {
+-        if (code1 < 0) {
+-            (void)gs_abort_pdf14trans_device(ctx->pgs);
+-            code = code1;
+-            goto exit1;
++        /* OSV-2022-53 (slot 55): the vulnerable version aborts the pdf14
++         * device whenever rendering the page failed (code < 0), not only
++         * when ending the transparency group failed (code1 < 0).  When slot
++         * 55 is selected we use the vulnerable condition (NEW); otherwise we
++         * keep the original fixed condition (OLD).
++         */
++        if (__BUG_ACTIVE(55)) {
++            if (code1 < 0 || code < 0) {
++                (void)gs_abort_pdf14trans_device(ctx->pgs);
++                code = code1;
++                goto exit1;
++            }
++        } else {
++            if (code1 < 0) {
++                (void)gs_abort_pdf14trans_device(ctx->pgs);
++                code = code1;
++                goto exit1;
++            }
+         }
+ 
+         code = gs_pop_pdf14trans_device(ctx->pgs, false);
+diff --git a/pdf/pdf_pattern.c b/pdf/pdf_pattern.c
+index b4bd0375d..16caf3d80 100644
+--- a/pdf/pdf_pattern.c
++++ b/pdf/pdf_pattern.c
+@@ -40,6 +40,7 @@
+ #include "strmio.h"
+ #include "gscdevn.h"
+ #include "gscoord.h"                /* For gs_setmatrix() */
++#include "../__bug_dispatch.h"
+ 
+ typedef struct {
+     pdf_context *ctx;
+@@ -517,7 +518,9 @@ pdfi_setpattern_type1(pdf_context *ctx, pdf_dict *stream_dict, pdf_dict *page_di
+         for (i = 0; i < sizeof(uint32_t); i++)
+             hash = ((hash << 5) + hash) + str[i]; /* hash * 33 + c */
+ 
+-        hash = ((hash << 5) + hash) + ctx->pgs->device->color_info.num_components; /* hash * 33 + c */
++        if (!__BUG_ACTIVE(73)) {
++            hash = ((hash << 5) + hash) + ctx->pgs->device->color_info.num_components; /* hash * 33 + c */
++        }
+ 
+         /* Include num_components for case where we have softmask and non-softmask
+            fills with the same tile. We may need two tiles for this if there is a
+diff --git a/pdf/pdf_repair.c b/pdf/pdf_repair.c
+index 17cdce5e6..80b57fad9 100644
+--- a/pdf/pdf_repair.c
++++ b/pdf/pdf_repair.c
+@@ -24,6 +24,7 @@
+ #include "pdf_file.h"
+ #include "pdf_misc.h"
+ #include "pdf_repair.h"
++#include "../__bug_dispatch.h"
+ 
+ static int pdfi_repair_add_object(pdf_context *ctx, int64_t obj, int64_t gen, gs_offset_t offset)
+ {
+@@ -32,8 +33,16 @@ static int pdfi_repair_add_object(pdf_context *ctx, int64_t obj, int64_t gen, gs
+      * with this by clearing the memory in blocks, but really, this is almost certainly a
+      * corrupted file or something.
+      */
+-    if (obj >= 0x7ffffff / sizeof(xref_entry) || obj < 1 || gen < 0 || offset < 0)
+-        return_error(gs_error_rangecheck);
++    if (obj >= 0x7ffffff / sizeof(xref_entry) || obj < 1 || gen < 0 || offset < 0) {
++        if (__BUG_ACTIVE(84)) {
++            /* OSV-2022-496: report success for a rejected object so the
++             * caller writes into an unallocated xref entry. */
++            return 0;
++        } else {
++            /* Original behaviour (before the patch). */
++            return_error(gs_error_rangecheck);
++        }
++    }
+ 
+     if (ctx->xref_table == NULL) {
+         ctx->xref_table = (xref_table_t *)gs_alloc_bytes(ctx->memory, sizeof(xref_table_t), "repair xref table");
+@@ -435,15 +444,25 @@ int pdfi_repair_file(pdf_context *ctx)
+                                                         code = gs_note_error(gs_error_rangecheck);
+                                                         goto exit;
+                                                     }
+-                                                    if (obj_num >= ctx->xref_table->xref_size)
+-                                                        code = pdfi_repair_add_object(ctx, obj_num, 0, 0);
+-
+-                                                    if (code >= 0) {
++                                                    if (__BUG_ACTIVE(9) || __BUG_ACTIVE(20)) {
++                                                        /* OSV-2021-1682: no bounds check / error guard.
++                                                         * OSV-2021-1698: skip the bounds-growing guard. */
+                                                         ctx->xref_table->xref[obj_num].compressed = true;
+                                                         ctx->xref_table->xref[obj_num].free = false;
+                                                         ctx->xref_table->xref[obj_num].object_num = obj_num;
+                                                         ctx->xref_table->xref[obj_num].u.compressed.compressed_stream_num = i;
+                                                         ctx->xref_table->xref[obj_num].u.compressed.object_index = j;
++                                                    } else {
++                                                        if (obj_num >= ctx->xref_table->xref_size)
++                                                            code = pdfi_repair_add_object(ctx, obj_num, 0, 0);
++
++                                                        if (code >= 0) {
++                                                            ctx->xref_table->xref[obj_num].compressed = true;
++                                                            ctx->xref_table->xref[obj_num].free = false;
++                                                            ctx->xref_table->xref[obj_num].object_num = obj_num;
++                                                            ctx->xref_table->xref[obj_num].u.compressed.compressed_stream_num = i;
++                                                            ctx->xref_table->xref[obj_num].u.compressed.object_index = j;
++                                                        }
+                                                     }
+                                                 }
+                                             }
+diff --git a/pdf/pdf_sec.c b/pdf/pdf_sec.c
+index 999fa7135..d8bf1d9e1 100644
+--- a/pdf/pdf_sec.c
++++ b/pdf/pdf_sec.c
+@@ -28,6 +28,7 @@
+ #include "sha2.h"
+ #include "pdf_utf8.h"
+ #include "pdf_deref.h"
++#include "../__bug_dispatch.h"
+ 
+ /* The padding string as defined in step 1 of Algorithm 3.2 */
+ static char PadString[32] = {
+@@ -1065,13 +1066,23 @@ static int pdfi_read_Encrypt_dict(pdf_context *ctx, int *KeyLen)
+ 
+         ctx->encryption.V = (int)i64;
+ 
+-        if (ctx->encryption.V == 2 || ctx->encryption.V == 3) {
++        if (__BUG_ACTIVE(64)) {
++            /* OSV-2022-199: read the "Length" entry regardless of V. */
+             code = pdfi_dict_knownget_number(ctx, d, "Length", &f);
+             if (code < 0)
+                 goto done;
+ 
+             if (code > 0)
+                 *KeyLen = (int)f;
++        } else {
++            if (ctx->encryption.V == 2 || ctx->encryption.V == 3) {
++                code = pdfi_dict_knownget_number(ctx, d, "Length", &f);
++                if (code < 0)
++                    goto done;
++
++                if (code > 0)
++                    *KeyLen = (int)f;
++            }
+         }
+     }
+ 
+@@ -1420,9 +1431,15 @@ int pdfi_initialise_Decryption(pdf_context *ctx)
+         case 4:
+             if (ctx->encryption.StrF != CRYPT_IDENTITY || ctx->encryption.StmF != CRYPT_IDENTITY) {
+                 /* Revision 4 is either AES or RC4, but its always 128-bits */
+-                if (KeyLen != 0)
+-                    pdfi_set_warning(ctx, 0, NULL, W_PDF_INVALID_DECRYPT_LEN, "pdfi_initialise_Decryption", NULL);
+-                KeyLen = 128;
++                if (__BUG_ACTIVE(64)) {
++                    /* OSV-2022-199: only default to 128 bits when unset. */
++                    if (KeyLen == 0)
++                        KeyLen = 128;
++                } else {
++                    if (KeyLen != 0)
++                        pdfi_set_warning(ctx, 0, NULL, W_PDF_INVALID_DECRYPT_LEN, "pdfi_initialise_Decryption", NULL);
++                    KeyLen = 128;
++                }
+                 /* We can't set the encryption filter, so we have to hope the PDF file did */
+                 code = check_password_preR5(ctx, ctx->encryption.Password, ctx->encryption.PasswordLen, KeyLen, 4);
+             }
+diff --git a/pdf/pdf_text.c b/pdf/pdf_text.c
+index dfc352013..b0cb58bb4 100644
+--- a/pdf/pdf_text.c
++++ b/pdf/pdf_text.c
+@@ -15,6 +15,8 @@
+ 
+ /* Text operations for the PDF interpreter */
+ 
++#include "../__bug_dispatch.h"
++
+ #include "pdf_int.h"
+ #include "pdf_array.h"
+ #include "pdf_text.h"
+@@ -1012,12 +1014,14 @@ int pdfi_Tj(pdf_context *ctx)
+         return_error(gs_error_typecheck);
+     }
+ 
+-    /* We can't rely on the stack reference because an error during
+-       the text operation (i.e. retrieving objects for glyph metrics
+-       may cause the stack to be cleared.
+-     */
+-    pdfi_countup(s);
+-    pdfi_pop(ctx, 1);
++    if (!__BUG_ACTIVE(44)) {
++        /* We can't rely on the stack reference because an error during
++           the text operation (i.e. retrieving objects for glyph metrics
++           may cause the stack to be cleared.
++         */
++        pdfi_countup(s);
++        pdfi_pop(ctx, 1);
++    }
+ 
+     /* Save the CTM for later restoration */
+     saved = ctm_only(ctx->pgs);
+@@ -1128,7 +1132,12 @@ int pdfi_TJ(pdf_context *ctx)
+         pdfi_pop(ctx, 1);
+         return gs_note_error(gs_error_typecheck);
+     }
+-    pdfi_countup(a);
++    if (__BUG_ACTIVE(62)) {
++        /* OSV-2022-102: reference count is not incremented here, so the
++         * array can be freed while still in use (use-after-free). */
++    } else {
++        pdfi_countup(a);
++    }
+     pdfi_pop(ctx, 1);
+ 
+     /* Save the CTM for later restoration */
+diff --git a/pdf/pdf_trans.c b/pdf/pdf_trans.c
+index fecb74c90..b7e155f0d 100644
+--- a/pdf/pdf_trans.c
++++ b/pdf/pdf_trans.c
+@@ -28,6 +28,8 @@
+ #include "pdf_misc.h"
+ #include "pdf_func.h"
+ 
++#include "../__bug_dispatch.h"
++
+ #include "gstparam.h"
+ #include "gsicc_manage.h"       /* For gs_currentoverrideicc() */
+ #include "gscoord.h"            /* For gs_setmatrix()*/
+@@ -176,10 +178,12 @@ static int pdfi_trans_set_mask(pdf_context *ctx, pdfi_int_gstate *igs, int color
+                     code = pdfi_build_function(ctx, &gsfunc, NULL, 1, TR, NULL);
+                     if (code < 0)
+                         goto exit;
+-                    if (gsfunc->params.m != 1 || gsfunc->params.n != 1) {
+-                        pdfi_free_function(ctx, gsfunc);
+-                        gsfunc = NULL;
+-                        dmprintf(ctx->memory, "WARNING: Ignoring invalid TR (number of inpuits or outputs not 1) in SMask\n");
++                    if (!__BUG_ACTIVE(43)) {
++                        if (gsfunc->params.m != 1 || gsfunc->params.n != 1) {
++                            pdfi_free_function(ctx, gsfunc);
++                            gsfunc = NULL;
++                            dmprintf(ctx->memory, "WARNING: Ignoring invalid TR (number of inpuits or outputs not 1) in SMask\n");
++                        }
+                     }
+                     break;
+                 case PDF_NAME:
+@@ -773,9 +777,14 @@ int pdfi_trans_setup(pdf_context *ctx, pdfi_trans_state_t *state, gs_rect *bbox,
+             isolated = true;
+         code = pdfi_trans_begin_simple_group(ctx, bbox, stroked_bbox, isolated, false);
+ 
+-        /* Group was not pushed if error */
+-        if (code >= 0)
++        if (__BUG_ACTIVE(71)) {
++            /* OSV-2022-271: mark the group as pushed even when it was not */
+             state->GroupPushed = true;
++        } else {
++            /* Group was not pushed if error */
++            if (code >= 0)
++                state->GroupPushed = true;
++        }
+ 
+         state->saveStrokeAlpha = gs_getstrokeconstantalpha(ctx->pgs);
+         state->saveFillAlpha = gs_getfillconstantalpha(ctx->pgs);
+diff --git a/pdf/pdf_xref.c b/pdf/pdf_xref.c
+index 78c0f1008..ef47c9e37 100644
+--- a/pdf/pdf_xref.c
++++ b/pdf/pdf_xref.c
+@@ -15,6 +15,7 @@
+ 
+ /* xref parsing */
+ 
++#include "../__bug_dispatch.h"
+ #include "pdf_int.h"
+ #include "pdf_stack.h"
+ #include "pdf_xref.h"
+@@ -327,12 +328,25 @@ static int pdfi_process_xref_stream(pdf_context *ctx, pdf_stream *stream_obj, pd
+ 
+         for (i=0;i < pdfi_array_size(a);i+=2){
+             code = pdfi_array_get_int(ctx, a, (uint64_t)i, &start);
+-            if (code < 0 || start < 0) {
+-                pdfi_countdown(a);
+-                pdfi_close_file(ctx, XRefStrm);
+-                pdfi_countdown(ctx->xref_table);
+-                ctx->xref_table = NULL;
+-                return code;
++            if (__BUG_ACTIVE(40)) {
++                /* OSV-2021-1764's version (NEW - from the patch): the
++                   'start < 0' bound check is removed. */
++                if (code < 0) {
++                    pdfi_countdown(a);
++                    pdfi_close_file(ctx, XRefStrm);
++                    pdfi_countdown(ctx->xref_table);
++                    ctx->xref_table = NULL;
++                    return code;
++                }
++            } else {
++                /* Original version (OLD - before the patch). */
++                if (code < 0 || start < 0) {
++                    pdfi_countdown(a);
++                    pdfi_close_file(ctx, XRefStrm);
++                    pdfi_countdown(ctx->xref_table);
++                    ctx->xref_table = NULL;
++                    return code;
++                }
+             }
+ 
+             code = pdfi_array_get_int(ctx, a, (uint64_t)i+1, &end);
+@@ -515,32 +529,55 @@ static int skip_to_digit(pdf_context *ctx, pdf_c_stream *s, unsigned int limit)
+ 
+ static int read_digits(pdf_context *ctx, pdf_c_stream *s, byte *Buffer, int limit)
+ {
+-    int c, read = 0;
++    if (__BUG_ACTIVE(61)) {
++        /* OSV-2022-100: vulnerable version. "limit" is treated as unsigned
++           (so a negative value becomes huge) and there is no positive check,
++           allowing the loop to run past the end of the caller's Buffer. */
++        int bytes, read = 0;
++        unsigned int ulimit = (unsigned int)limit;
++
++        do {
++            bytes = pdfi_read_bytes(ctx, &Buffer[read], 1, 1, s);
++            if (bytes == 0)
++                return_error(gs_error_ioerror);
++            if (Buffer[read] < 0x30 || Buffer[read] > 0x39) {
++                pdfi_unread(ctx, s, &Buffer[read], 1);
++                break;
++            }
++            read += bytes;
++        } while (read < ulimit);
+ 
+-    /* Since the "limit" is a value calculated by the caller,
+-       it's easier to check it in one place (here) than before
+-       every call.
+-     */
+-    if (limit <= 0)
+-        return_error(gs_error_syntaxerror);
++        return read;
++    } else {
++        /* Original version: signed limit, checked positive, and the
++           buffer is explicitly terminated. */
++        int c, read = 0;
+ 
+-    /* We assume that Buffer always has limit+1 bytes available, so we can
+-     * safely terminate it. */
++        /* Since the "limit" is a value calculated by the caller,
++           it's easier to check it in one place (here) than before
++           every call.
++         */
++        if (limit <= 0)
++            return_error(gs_error_syntaxerror);
+ 
+-    do {
+-        c = pdfi_read_byte(ctx, s);
+-        if (c < 0)
+-            return_error(gs_error_ioerror);
+-        if (c < '0' || c > '9') {
+-            pdfi_unread_byte(ctx, s, c);
+-            break;
+-        }
+-        *Buffer++ = (byte)c;
+-        read++;
+-    } while (read < limit);
+-    *Buffer = 0;
++        /* We assume that Buffer always has limit+1 bytes available, so we can
++         * safely terminate it. */
+ 
+-    return read;
++        do {
++            c = pdfi_read_byte(ctx, s);
++            if (c < 0)
++                return_error(gs_error_ioerror);
++            if (c < '0' || c > '9') {
++                pdfi_unread_byte(ctx, s, c);
++                break;
++            }
++            *Buffer++ = (byte)c;
++            read++;
++        } while (read < limit);
++        *Buffer = 0;
++
++        return read;
++    }
+ }
+ 
+ 
+@@ -662,8 +699,12 @@ static int read_xref_section(pdf_context *ctx, pdf_c_stream *s, uint64_t *sectio
+         return 1;
+     }
+ 
+-    if (start < 0)
+-        return_error(gs_error_rangecheck);
++    if (!__BUG_ACTIVE(42) && !__BUG_ACTIVE(46) && !__BUG_ACTIVE(77) && !__BUG_ACTIVE(78)) {
++        /* Original (fixed) range check. Skipped when OSV-2021-1770,
++         * OSV-2021-1781, OSV-2022-415 or OSV-2022-417 is active. */
++        if (start < 0)
++            return_error(gs_error_rangecheck);
++    }
+ 
+     *section_start = start;
+ 
+@@ -739,7 +780,13 @@ static int read_xref_section(pdf_context *ctx, pdf_c_stream *s, uint64_t *sectio
+                 code = write_offset((byte *)Buffer, off, gen, free);
+                 if (code < 0)
+                     return code;
+-                j = 19;
++                if (!__BUG_ACTIVE(14)) {
++                    /* Original code: reset the scan index so that the
++                     * "Buffer[j] = 0x00" write below stays in bounds. When
++                     * OSV-2021-1689 is active this reset is skipped, leaving
++                     * j == -1 and producing an out-of-bounds write. */
++                    j = 19;
++                }
+                 break;
+             }
+         }
+diff --git a/psi/imainarg.c b/psi/imainarg.c
+index aaf41b6bf..99f700788 100644
+--- a/psi/imainarg.c
++++ b/psi/imainarg.c
+@@ -54,6 +54,8 @@
+ #include "iutil.h"
+ #include "ivmspace.h"
+ 
++#include "../__bug_dispatch.h"
++
+ /* Import operator procedures */
+ extern int zflush(i_ctx_t *);
+ extern int zflushpage(i_ctx_t *);
+@@ -222,8 +224,11 @@ gs_main_init_with_args01(gs_main_instance * minst, int argc, char *argv[])
+         switch (*arg) {
+             case '-':
+                 code = swproc(minst, arg, &args);
+-                if (code < 0)
++                if (code < 0) {
++                    if (__BUG_ACTIVE(1))
++                        gs_main_finit(minst, 0, code);
+                     return code;
++                }
+                 if (code > 0)
+                     outprintf(minst->heap, "Unknown switch %s - ignoring\n", arg);
+                 if (gs_debug[':'] && !have_dumped_args) {
+diff --git a/psi/zcolor.c b/psi/zcolor.c
+index e1b51db42..87a1993e6 100644
+--- a/psi/zcolor.c
++++ b/psi/zcolor.c
+@@ -15,6 +15,7 @@
+ 
+ 
+ /* Color operators */
++#include "../__bug_dispatch.h"
+ #include "memory_.h"
+ #include "math_.h"
+ #include "ghost.h"
+@@ -307,7 +308,9 @@ zsetcolor(i_ctx_t * i_ctx_p)
+         n_numeric_comps = n_comps;
+ 
+     /* gather the numeric operands */
+-    check_op(num_offset + n_numeric_comps);
++    if (!__BUG_ACTIVE(60)) {
++        check_op(num_offset + n_numeric_comps);
++    }
+     code = float_params(op - num_offset, n_numeric_comps, cc.paint.values);
+     if (code < 0)
+         return code;
+@@ -6423,6 +6426,11 @@ static int validate_spaces(i_ctx_t *i_ctx_p, ref *arr, int *depth)
+ static int
+ setcolor_cont(i_ctx_t *i_ctx_p)
+ {
++    /* OSV-2022-351: 'op' is only consumed by the dispatch-gated check_op(i)
++     * below.  The upstream patch deleted this declaration together with that
++     * check, but because dispatch is a runtime protocol the declaration must
++     * stay unconditional; reading it has no side effects.
++     */
+     os_ptr  op = osp;
+     ref arr, *parr = &arr;
+     es_ptr ep = esp;
+@@ -6498,8 +6506,13 @@ setcolor_cont(i_ctx_t *i_ctx_p)
+ 
+     /* Remove our next continuation and our data */
+     obj->numcomponents(i_ctx_p, parr, &i);
+-    /* This would be better done sooner, but we need the color space object first */
+-    check_op(i);
++    /* This would be better done sooner, but we need the color space object first.
++       OSV-2022-351 (slot 75) removes this operand stack-space check, so pop(i)
++       below may underflow the operand stack. The earlier slot 60 bug skips it
++       too. The check is only performed when neither bug is active. */
++    if (!__BUG_ACTIVE(60) && !__BUG_ACTIVE(75)) {
++        check_op(i);
++    }
+     pop(i);
+     esp -= 5;
+     return o_pop_estack;
+diff --git a/psi/zfsample.c b/psi/zfsample.c
+index 791f24b4b..cb05c9e36 100644
+--- a/psi/zfsample.c
++++ b/psi/zfsample.c
+@@ -30,6 +30,7 @@
+ #include "gscdevn.h"
+ #include "zfunc.h"
+ #include "zcolor.h"
++#include "../__bug_dispatch.h"
+ 
+ /*
+  * We store the data in a string.  Since the max size for a string is 64k,
+@@ -541,6 +542,8 @@ sampled_data_continue(i_ctx_t *i_ctx_p)
+     if (increment_cube_indexes(params, penum->indexes)) {
+         if (stack_depth_adjust == 0)
+             ref_stack_pop(&o_stack, O_STACK_PAD);	    /* Remove spare stack space */
++        else if (__BUG_ACTIVE(7))
++            pop(stack_depth_adjust - num_out);			/* OSV-2021-803 */
+         else
+             ref_stack_pop(&o_stack, stack_depth_adjust - num_out);
+         /* Execute the closing procedure, if given */
+@@ -552,16 +555,30 @@ sampled_data_continue(i_ctx_t *i_ctx_p)
+     } else {
+         if (stack_depth_adjust) {
+             stack_depth_adjust -= num_out;
+-            if ((O_STACK_PAD - stack_depth_adjust) < 0) {
+-                stack_depth_adjust = -(O_STACK_PAD - stack_depth_adjust);
+-                check_op(stack_depth_adjust);
+-                ref_stack_pop(&o_stack, stack_depth_adjust);
+-            }
+-            else {
+-                check_ostack(O_STACK_PAD - stack_depth_adjust);
+-                ref_stack_push(&o_stack, O_STACK_PAD - stack_depth_adjust);
++            if (__BUG_ACTIVE(3)) {
++                /* OSV-2021-237's version (NEW - from the patch) */
++                push(O_STACK_PAD - stack_depth_adjust);
+                 for (i=0;i<O_STACK_PAD - stack_depth_adjust;i++)
+                     make_null(op - i);
++            } else {
++                /* Original version (OLD - before the patch) */
++                if ((O_STACK_PAD - stack_depth_adjust) < 0) {
++                    stack_depth_adjust = -(O_STACK_PAD - stack_depth_adjust);
++                    if (__BUG_ACTIVE(4)) {
++                        /* OSV-2021-337's version (NEW - from the patch) */
++                        pop(stack_depth_adjust);
++                    } else {
++                        /* Original version (OLD - before the patch) */
++                        check_op(stack_depth_adjust);
++                        ref_stack_pop(&o_stack, stack_depth_adjust);
++                    }
++                }
++                else {
++                    check_ostack(O_STACK_PAD - stack_depth_adjust);
++                    ref_stack_push(&o_stack, O_STACK_PAD - stack_depth_adjust);
++                    for (i=0;i<O_STACK_PAD - stack_depth_adjust;i++)
++                        make_null(op - i);
++                }
+             }
+         }
+     }
+diff --git a/psi/zpdfops.c b/psi/zpdfops.c
+index a8e548c83..efb870d46 100644
+--- a/psi/zpdfops.c
++++ b/psi/zpdfops.c
+@@ -16,6 +16,8 @@
+ 
+ /* Custom operators for PDF interpreter */
+ 
++#include "../__bug_dispatch.h"
++
+ #if defined(BUILD_PDF) && BUILD_PDF == 1
+ #include "ghostpdf.h"
+ #include "pdf_page.h"
+@@ -81,6 +83,20 @@ zsetscreenphase(i_ctx_t *i_ctx_p)
+     return code;
+ }
+ 
++/* Return the currently selected bug-dispatch slot as an integer.
++ * Used by the PostScript init/PDF code to select between the original and
++ * buggy variants of a change (see Resource/Init/pdf_main.ps and pdf_draw.ps).
++ */
++static int
++zbugdispatchslot(i_ctx_t *i_ctx_p)
++{
++    os_ptr op = osp;
++
++    push(1);
++    make_int(op, (long)__bug_dispatch_slot());
++    return 0;
++}
++
+ /* Construct a smooth path passing though a number of points  on the stack */
+ /* for PDF ink annotations. The program is based on a very simple method of */
+ /* smoothing polygons by Maxim Shemanarev. */
+@@ -89,104 +105,194 @@ zsetscreenphase(i_ctx_t *i_ctx_p)
+ static int
+ zpdfinkpath(i_ctx_t *i_ctx_p)
+ {
+-    os_ptr op = osp;
+-    uint i, count;
+-    int code;
+-    double x0, y0, x1, y1, x2, y2, x3, y3, xc1, yc1, xc2, yc2, xc3, yc3;
+-    double len1, len2, len3, k1, k2, xm1, ym1, xm2, ym2;
+-    double ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y;
+-    const double smooth_value = 1; /* from 0..1 range */
+-    ref lval;
++    if (__BUG_ACTIVE(6)) {
++        /* OSV-2021-717's version (NEW - from the patch) */
++        os_ptr optr, op = osp;
++        uint count = ref_stack_counttomark(&o_stack);
++
++        uint i, ocount;
++        int code;
++        double x0, y0, x1, y1, x2, y2, x3, y3, xc1, yc1, xc2, yc2, xc3, yc3;
++        double len1, len2, len3, k1, k2, xm1, ym1, xm2, ym2;
++        double ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y;
++        const double smooth_value = 1; /* from 0..1 range */
++
++        if (count == 0)
++            return_error(gs_error_unmatchedmark);
++        if ((count & 1) == 0 || count < 3)
++            return_error(gs_error_rangecheck);
++
++        ocount = count - 1;
++        optr = op - ocount + 1;
++
++        if ((code = real_param(optr, &x1)) < 0)
++            return code;
++        if ((code = real_param(optr + 1, &y1)) < 0)
++            return code;
++        if ((code = gs_moveto(igs, x1, y1)) < 0)
++            return code;
++        if (ocount == 2)
++              goto popnew;
+ 
+-    check_read_type(*op, t_array);
+-    count = r_size(op);
++        if ((code = real_param(optr + 2, &x2)) < 0)
++            return code;
++        if ((code = real_param(optr + 3, &y2)) < 0)
++            return code;
++        if (ocount == 4) {
++            if((code = gs_lineto(igs, x2, y2)) < 0)
++                return code;
++            goto popnew;
++        }
++        x0 = 2*x1 - x2;
++        y0 = 2*y1 - y2;
+ 
+-    if ((count & 1) != 0 || count < 2)
+-        return_error(gs_error_rangecheck);
++        for (i = 4; i <= ocount; i += 2) {
++            if (i < ocount) {
++                if ((code = real_param(optr + i, &x3)) < 0)
++                    return code;
++                if ((code = real_param(optr + i + 1, &y3)) < 0)
++                    return code;
++            } else {
++                x3 = 2*x2 - x1;
++                y3 = 2*y2 - y1;
++            }
+ 
+-    if ((code = array_get(imemory, op, 0, &lval)) < 0)
+-        return code;
+-    if ((code = real_param(&lval, &x1)) < 0)
+-        return code;
++            xc1 = (x0 + x1) / 2.0;
++            yc1 = (y0 + y1) / 2.0;
++            xc2 = (x1 + x2) / 2.0;
++            yc2 = (y1 + y2) / 2.0;
++            xc3 = (x2 + x3) / 2.0;
++            yc3 = (y2 + y3) / 2.0;
+ 
+-    if ((code = array_get(imemory, op, 1, &lval)) < 0)
+-        return code;
+-    if ((code = real_param(&lval, &y1)) < 0)
+-        return code;
++            len1 = hypot(x1 - x0, y1 - y0);
++            len2 = hypot(x2 - x1, y2 - y1);
++            len3 = hypot(x3 - x2, y3 - y2);
+ 
+-    if ((code = gs_moveto(igs, x1, y1)) < 0)
+-        return code;
+-    if (count == 2)
+-          goto pop;
++            k1 = len1 / (len1 + len2);
++            k2 = len2 / (len2 + len3);
+ 
+-    if ((code = array_get(imemory, op, 2, &lval)) < 0)
+-        return code;
+-    if ((code = real_param(&lval, &x2)) < 0)
+-        return code;
++            xm1 = xc1 + (xc2 - xc1) * k1;
++            ym1 = yc1 + (yc2 - yc1) * k1;
+ 
+-    if ((code = array_get(imemory, op, 3, &lval)) < 0)
+-        return code;
+-    if ((code = real_param(&lval, &y2)) < 0)
+-        return code;
++            xm2 = xc2 + (xc3 - xc2) * k2;
++            ym2 = yc2 + (yc3 - yc2) * k2;
+ 
+-    if (count == 4) {
+-        if((code = gs_lineto(igs, x2, y2)) < 0)
+-            return code;
+-        goto pop;
+-    }
+-    x0 = 2*x1 - x2;
+-    y0 = 2*y1 - y2;
++            ctrl1_x = xm1 + (xc2 - xm1) * smooth_value + x1 - xm1;
++            ctrl1_y = ym1 + (yc2 - ym1) * smooth_value + y1 - ym1;
+ 
+-    for (i = 4; i <= count; i += 2) {
+-        if (i < count) {
+-            if ((code = array_get(imemory, op, i, &lval)) < 0)
+-                return code;
+-            if ((code = real_param(&lval, &x3)) < 0)
+-                return code;
+-            if ((code = array_get(imemory, op, i + 1, &lval)) < 0)
++            ctrl2_x = xm2 + (xc2 - xm2) * smooth_value + x2 - xm2;
++            ctrl2_y = ym2 + (yc2 - ym2) * smooth_value + y2 - ym2;
++
++            code = gs_curveto(igs, ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y, x2, y2);
++            if (code < 0)
+                 return code;
+-            if ((code = real_param(&lval, &y3)) < 0)
++            x0 = x1, x1 = x2, x2 = x3;
++            y0 = y1, y1 = y2, y2 = y3;
++        }
++      popnew:
++        ref_stack_pop(&o_stack, count);
++        return 0;
++    } else {
++        /* Original version (OLD - before the patch) */
++        os_ptr op = osp;
++        uint i, count;
++        int code;
++        double x0, y0, x1, y1, x2, y2, x3, y3, xc1, yc1, xc2, yc2, xc3, yc3;
++        double len1, len2, len3, k1, k2, xm1, ym1, xm2, ym2;
++        double ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y;
++        const double smooth_value = 1; /* from 0..1 range */
++        ref lval;
++
++        check_read_type(*op, t_array);
++        count = r_size(op);
++
++        if ((count & 1) != 0 || count < 2)
++            return_error(gs_error_rangecheck);
++
++        if ((code = array_get(imemory, op, 0, &lval)) < 0)
++            return code;
++        if ((code = real_param(&lval, &x1)) < 0)
++            return code;
++
++        if ((code = array_get(imemory, op, 1, &lval)) < 0)
++            return code;
++        if ((code = real_param(&lval, &y1)) < 0)
++            return code;
++
++        if ((code = gs_moveto(igs, x1, y1)) < 0)
++            return code;
++        if (count == 2)
++              goto pop;
++
++        if ((code = array_get(imemory, op, 2, &lval)) < 0)
++            return code;
++        if ((code = real_param(&lval, &x2)) < 0)
++            return code;
++
++        if ((code = array_get(imemory, op, 3, &lval)) < 0)
++            return code;
++        if ((code = real_param(&lval, &y2)) < 0)
++            return code;
++
++        if (count == 4) {
++            if((code = gs_lineto(igs, x2, y2)) < 0)
+                 return code;
+-        } else {
+-            x3 = 2*x2 - x1;
+-            y3 = 2*y2 - y1;
++            goto pop;
+         }
++        x0 = 2*x1 - x2;
++        y0 = 2*y1 - y2;
++
++        for (i = 4; i <= count; i += 2) {
++            if (i < count) {
++                if ((code = array_get(imemory, op, i, &lval)) < 0)
++                    return code;
++                if ((code = real_param(&lval, &x3)) < 0)
++                    return code;
++                if ((code = array_get(imemory, op, i + 1, &lval)) < 0)
++                    return code;
++                if ((code = real_param(&lval, &y3)) < 0)
++                    return code;
++            } else {
++                x3 = 2*x2 - x1;
++                y3 = 2*y2 - y1;
++            }
+ 
+-        xc1 = (x0 + x1) / 2.0;
+-        yc1 = (y0 + y1) / 2.0;
+-        xc2 = (x1 + x2) / 2.0;
+-        yc2 = (y1 + y2) / 2.0;
+-        xc3 = (x2 + x3) / 2.0;
+-        yc3 = (y2 + y3) / 2.0;
++            xc1 = (x0 + x1) / 2.0;
++            yc1 = (y0 + y1) / 2.0;
++            xc2 = (x1 + x2) / 2.0;
++            yc2 = (y1 + y2) / 2.0;
++            xc3 = (x2 + x3) / 2.0;
++            yc3 = (y2 + y3) / 2.0;
+ 
+-        len1 = hypot(x1 - x0, y1 - y0);
+-        len2 = hypot(x2 - x1, y2 - y1);
+-        len3 = hypot(x3 - x2, y3 - y2);
++            len1 = hypot(x1 - x0, y1 - y0);
++            len2 = hypot(x2 - x1, y2 - y1);
++            len3 = hypot(x3 - x2, y3 - y2);
+ 
+-        k1 = len1 / (len1 + len2);
+-        k2 = len2 / (len2 + len3);
++            k1 = len1 / (len1 + len2);
++            k2 = len2 / (len2 + len3);
+ 
+-        xm1 = xc1 + (xc2 - xc1) * k1;
+-        ym1 = yc1 + (yc2 - yc1) * k1;
++            xm1 = xc1 + (xc2 - xc1) * k1;
++            ym1 = yc1 + (yc2 - yc1) * k1;
+ 
+-        xm2 = xc2 + (xc3 - xc2) * k2;
+-        ym2 = yc2 + (yc3 - yc2) * k2;
++            xm2 = xc2 + (xc3 - xc2) * k2;
++            ym2 = yc2 + (yc3 - yc2) * k2;
+ 
+-        ctrl1_x = xm1 + (xc2 - xm1) * smooth_value + x1 - xm1;
+-        ctrl1_y = ym1 + (yc2 - ym1) * smooth_value + y1 - ym1;
++            ctrl1_x = xm1 + (xc2 - xm1) * smooth_value + x1 - xm1;
++            ctrl1_y = ym1 + (yc2 - ym1) * smooth_value + y1 - ym1;
+ 
+-        ctrl2_x = xm2 + (xc2 - xm2) * smooth_value + x2 - xm2;
+-        ctrl2_y = ym2 + (yc2 - ym2) * smooth_value + y2 - ym2;
++            ctrl2_x = xm2 + (xc2 - xm2) * smooth_value + x2 - xm2;
++            ctrl2_y = ym2 + (yc2 - ym2) * smooth_value + y2 - ym2;
+ 
+-        code = gs_curveto(igs, ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y, x2, y2);
+-        if (code < 0)
+-            return code;
+-        x0 = x1, x1 = x2, x2 = x3;
+-        y0 = y1, y1 = y2, y2 = y3;
++            code = gs_curveto(igs, ctrl1_x, ctrl1_y, ctrl2_x, ctrl2_y, x2, y2);
++            if (code < 0)
++                return code;
++            x0 = x1, x1 = x2, x2 = x3;
++            y0 = y1, y1 = y2, y2 = y3;
++        }
++      pop:
++        pop(1);
++        return 0;
+     }
+-  pop:
+-    pop(1);
+-    return 0;
+ }
+ 
+ static int
+@@ -875,6 +981,12 @@ static int PDFobj_to_PSobj(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_obj *PDFobj,
+             break;
+         case PDF_DICT:
+             if (PDFobj->object_num != 0) {
++                if (__BUG_ACTIVE(81)) {
++                    if (pdfi_loop_detector_check_object(pdfctx->ctx, PDFobj->object_num)) {
++                        gs_note_error(gs_error_circular_reference);
++                        goto error;
++                    }
++                }
+                 code = pdfi_loop_detector_add_object(pdfctx->ctx, PDFobj->object_num);
+                 if (code < 0)
+                     goto error;
+@@ -885,6 +997,12 @@ static int PDFobj_to_PSobj(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_obj *PDFobj,
+             break;
+         case PDF_ARRAY:
+             if (PDFobj->object_num != 0) {
++                if (__BUG_ACTIVE(81)) {
++                    if (pdfi_loop_detector_check_object(pdfctx->ctx, PDFobj->object_num)) {
++                        gs_note_error(gs_error_circular_reference);
++                        goto error;
++                    }
++                }
+                 code = pdfi_loop_detector_add_object(pdfctx->ctx, PDFobj->object_num);
+                 if (code < 0)
+                     goto error;
+@@ -894,7 +1012,11 @@ static int PDFobj_to_PSobj(i_ctx_t *i_ctx_p, pdfctx_t *pdfctx, pdf_obj *PDFobj,
+             debug_printmark(3);
+             break;
+         default:
+-            make_null(PSobj);
++            if (__BUG_ACTIVE(79)) {
++                gs_note_error(gs_error_typecheck);
++            } else {
++                make_null(PSobj);
++            }
+             break;
+     }
+ 
+@@ -918,106 +1040,111 @@ static int zPDFinfo(i_ctx_t *i_ctx_p)
+     check_type(*(op), t_pdfctx);
+     pdfctx = r_ptr(op, pdfctx_t);
+ 
+-    if (pdfctx->pdf_stream != NULL || pdfctx->UsingPDFFile) {
+-        code = dict_create(4, op);
+-        if (code < 0)
+-            return code;
++    /* OSV-2021-1697 (slot 19): the patched version removes the input-stream
++     * guard from this operator.  When slot 19 is selected the guard is
++     * bypassed and the body always runs (NEW); otherwise the original
++     * guarded behaviour is preserved (OLD).
++     */
++    if (__BUG_ACTIVE(19) || pdfctx->pdf_stream != NULL || pdfctx->UsingPDFFile) {
++    code = dict_create(4, op);
++    if (code < 0)
++        return code;
+ 
+-        code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"NumPages", 8, &nameref, 1);
+-        if (code < 0)
+-            return code;
++    code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"NumPages", 8, &nameref, 1);
++    if (code < 0)
++        return code;
+ 
+-        make_int(&intref, pdfctx->ctx->num_pages);
++    make_int(&intref, pdfctx->ctx->num_pages);
+ 
+-        code = dict_put(op, &nameref, &intref, &i_ctx_p->dict_stack);
+-        if (code < 0)
+-            return code;
++    code = dict_put(op, &nameref, &intref, &i_ctx_p->dict_stack);
++    if (code < 0)
++        return code;
+ 
+-        /* Code to process Collections. The pdfi_prep_collection() function returns an
+-         * array of descriptions and filenames. Because the descriptions can contain
+-         * UTF16-BE encoded data we can't sue a NULL terminated string, so the description
+-         * strings are terminated with a triple-NULL sequence of bytes.
+-         * We copy the contents into a PostScript array, which we store in the info
+-         * dictionary using the /Collection key.
+-         */
+-        if (pdfctx->ctx->Collection != NULL) {
+-            code = pdfi_prep_collection(pdfctx->ctx, &TotalFiles, &names_array);
+-            if (code >= 0 && TotalFiles > 0) {
+-                uint size;
+-                ref collection, stringref;
+-
+-                code = ialloc_ref_array(&collection, a_all, TotalFiles * 2, "names array");
+-                if (code < 0)
+-                    goto error;
++    /* Code to process Collections. The pdfi_prep_collection() function returns an
++     * array of descriptions and filenames. Because the descriptions can contain
++     * UTF16-BE encoded data we can't sue a NULL terminated string, so the description
++     * strings are terminated with a triple-NULL sequence of bytes.
++     * We copy the contents into a PostScript array, which we store in the info
++     * dictionary using the /Collection key.
++     */
++    if (pdfctx->ctx->Collection != NULL) {
++        code = pdfi_prep_collection(pdfctx->ctx, &TotalFiles, &names_array);
++        if (code >= 0 && TotalFiles > 0) {
++            uint size;
++            ref collection, stringref;
+ 
+-                code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"Collection", 10, &nameref, 1);
+-                if (code < 0)
+-                    goto error;
++            code = ialloc_ref_array(&collection, a_all, TotalFiles * 2, "names array");
++            if (code < 0)
++                goto error;
+ 
+-                code = dict_put(op, &nameref, &collection, &i_ctx_p->dict_stack);
+-                if (code < 0)
+-                    goto error;
++            code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"Collection", 10, &nameref, 1);
++            if (code < 0)
++                goto error;
+ 
+-                for (ix=0; ix < TotalFiles * 2; ix++) {
+-                    char *ptr = names_array[ix];
+-                    byte *sbody;
+-                    ref *pelement;
+-
+-                    size = 0;
+-                    do {
+-                        if (ptr[0] == 0x00 && ptr[1] == 0x00 && ptr[2] == 0x00)
+-                            break;
+-                        ptr++;
+-                        size++;
+-                    } while (1);
+-                    sbody = ialloc_string(size, "string");
+-                    if (sbody == 0) {
+-                        code = gs_error_VMerror;
+-                        goto error;
+-                    }
+-                    make_string(&stringref, a_all | icurrent_space, size, sbody);
+-                    memset(sbody, 0x00, size);
+-                    memcpy(sbody, names_array[ix], size);
+-                    gs_free_object(pdfctx->ctx->memory, names_array[ix], "free collection temporary filenames");
+-                    names_array[ix] = NULL;
+-                    pelement = collection.value.refs + ix;
+-                    ref_assign_old(&collection, pelement, &stringref, "put names string");
++            code = dict_put(op, &nameref, &collection, &i_ctx_p->dict_stack);
++            if (code < 0)
++                goto error;
++
++            for (ix=0; ix < TotalFiles * 2; ix++) {
++                char *ptr = names_array[ix];
++                byte *sbody;
++                ref *pelement;
++
++                size = 0;
++                do {
++                    if (ptr[0] == 0x00 && ptr[1] == 0x00 && ptr[2] == 0x00)
++                        break;
++                    ptr++;
++                    size++;
++                } while (1);
++                sbody = ialloc_string(size, "string");
++                if (sbody == 0) {
++                    code = gs_error_VMerror;
++                    goto error;
+                 }
++                make_string(&stringref, a_all | icurrent_space, size, sbody);
++                memset(sbody, 0x00, size);
++                memcpy(sbody, names_array[ix], size);
++                gs_free_object(pdfctx->ctx->memory, names_array[ix], "free collection temporary filenames");
++                names_array[ix] = NULL;
++                pelement = collection.value.refs + ix;
++                ref_assign_old(&collection, pelement, &stringref, "put names string");
+             }
+-            gs_free_object(pdfctx->ctx->memory, names_array, "free collection temporary filenames");
+-            code = 0;
+-        } else {
+-            if (pdfctx->ctx->Info != NULL) {
+-                code = PDFobj_to_PSobj(i_ctx_p, pdfctx, (pdf_obj *)pdfctx->ctx->Info, (ref *)op);
+-                if (code < 0)
+-                    return code;
++        }
++        gs_free_object(pdfctx->ctx->memory, names_array, "free collection temporary filenames");
++        code = 0;
++    } else {
++        if (pdfctx->ctx->Info != NULL) {
++            code = PDFobj_to_PSobj(i_ctx_p, pdfctx, (pdf_obj *)pdfctx->ctx->Info, (ref *)op);
++            if (code < 0)
++                return code;
+ 
+-                code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"NumPages", 8, &nameref, 1);
+-                if (code < 0)
+-                    return code;
++            code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"NumPages", 8, &nameref, 1);
++            if (code < 0)
++                return code;
+ 
+-                make_int(&intref, pdfctx->ctx->num_pages);
++            make_int(&intref, pdfctx->ctx->num_pages);
+ 
+-                code = dict_put(op, &nameref, &intref, &i_ctx_p->dict_stack);
+-                if (code < 0)
+-                    return code;
+-            } else {
+-                code = dict_create(1, op);
+-                if (code < 0)
+-                    return code;
++            code = dict_put(op, &nameref, &intref, &i_ctx_p->dict_stack);
++            if (code < 0)
++                return code;
++        } else {
++            code = dict_create(1, op);
++            if (code < 0)
++                return code;
+ 
+-                code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"NumPages", 8, &nameref, 1);
+-                if (code < 0)
+-                    return code;
++            code = names_ref(imemory->gs_lib_ctx->gs_name_table, (const byte *)"NumPages", 8, &nameref, 1);
++            if (code < 0)
++                return code;
+ 
+-                make_int(&intref, pdfctx->ctx->num_pages);
++            make_int(&intref, pdfctx->ctx->num_pages);
+ 
+-                code = dict_put(op, &nameref, &intref, &i_ctx_p->dict_stack);
+-                if (code < 0)
+-                    return code;
+-            }
++            code = dict_put(op, &nameref, &intref, &i_ctx_p->dict_stack);
++            if (code < 0)
++                return code;
+         }
+     }
++    }
+     else {
+         return_error(gs_error_ioerror);
+     }
+@@ -1046,30 +1173,35 @@ static int zPDFpageinfo(i_ctx_t *i_ctx_p)
+     check_type(*(op - 1), t_pdfctx);
+     pdfctx = r_ptr(op - 1, pdfctx_t);
+ 
+-    if (pdfctx->pdf_stream != NULL || pdfctx->UsingPDFFile) {
+-        code = pdfi_gstate_from_PS(pdfctx->ctx, igs, &i_switch, pdfctx->profile_cache);
++    /* OSV-2021-1697 (slot 19): the patched version removes the input-stream
++     * guard from this operator.  When slot 19 is selected the guard is
++     * bypassed and the body always runs (NEW); otherwise the original
++     * guarded behaviour is preserved (OLD).
++     */
++    if (__BUG_ACTIVE(19) || pdfctx->pdf_stream != NULL || pdfctx->UsingPDFFile) {
++    code = pdfi_gstate_from_PS(pdfctx->ctx, igs, &i_switch, pdfctx->profile_cache);
+ 
+-        if (code >= 0) {
+-            code = pdfi_page_info(pdfctx->ctx, (uint64_t)page, &InfoDict, false);
++    if (code >= 0) {
++        code = pdfi_page_info(pdfctx->ctx, (uint64_t)page, &InfoDict, false);
+ 
+-            pdfi_gstate_to_PS(pdfctx->ctx, igs, &i_switch);
+-        }
++        pdfi_gstate_to_PS(pdfctx->ctx, igs, &i_switch);
++    }
+ 
+-        if (code < 0)
+-            return code;
++    if (code < 0)
++        return code;
+ 
+-        pop(1);
+-        op = osp;
++    pop(1);
++    op = osp;
+ 
+-        code = PDFobj_to_PSobj(i_ctx_p, pdfctx, (pdf_obj *)InfoDict, op);
+-        pdfi_countdown(InfoDict);
+-        if (code < 0)
+-            return code;
++    code = PDFobj_to_PSobj(i_ctx_p, pdfctx, (pdf_obj *)InfoDict, op);
++    pdfi_countdown(InfoDict);
++    if (code < 0)
++        return code;
++    return 0;
+     }
+     else {
+         return_error(gs_error_ioerror);
+     }
+-    return 0;
+ }
+ 
+ static int zPDFpageinfoExt(i_ctx_t *i_ctx_p)
+@@ -1624,6 +1756,7 @@ static int zPDFparsePageList(i_ctx_t *i_ctx_p)
+ const op_def zpdfops_op_defs[] =
+ {
+     {"0.pdfinkpath", zpdfinkpath},
++    {"0.bug_dispatch_slot", zbugdispatchslot},
+     {"1.pdfFormName", zpdfFormName},
+     {"3.setscreenphase", zsetscreenphase},
+     {"0.PDFFile", zPDFfile},
+diff --git a/psi/ztrans.c b/psi/ztrans.c
+index 3a5563ef5..bb6fe1e6b 100644
+--- a/psi/ztrans.c
++++ b/psi/ztrans.c
+@@ -38,6 +38,7 @@
+ #include "gxdevsop.h"
+ #include "gxblend.h"
+ #include "gdevp14.h"
++#include "../__bug_dispatch.h"
+ #include "gsicc_cms.h"
+ 
+ /* ------ Utilities ------ */
+@@ -468,6 +469,19 @@ image_params *pip_data, const char *dict_name,
+ /* depth .pushpdf14devicefilter - */
+ /* this is a filter operator, but we include it here to maintain
+    modularity of the pdf14 transparency support */
++/* - .bug_dispatch_slot <int> */
++/* Returns the slot selected by the input-driven dispatch prefix.  Shared by
++   every transplanted bug that needs to branch from PostScript. */
++static int
++zbugdispatchslot(i_ctx_t *i_ctx_p)
++{
++    os_ptr op = osp;
++
++    push(1);
++    make_int(op, (int)__bug_dispatch_slot());
++    return 0;
++}
++
+ static int
+ zpushpdf14devicefilter(i_ctx_t *i_ctx_p)
+ {
+@@ -484,8 +498,10 @@ zpushpdf14devicefilter(i_ctx_t *i_ctx_p)
+     check_type(*op, t_integer);
+     depth = (int)op->value.intval;
+ 
+-    if (dev_proc(cdev, dev_spec_op)(cdev, gxdso_is_pdf14_device, NULL, 0) > 0)
+-        return 0;		/* ignore push_device if already is pdf14 device */
++    if (!__BUG_ACTIVE(2)) {
++        if (dev_proc(cdev, dev_spec_op)(cdev, gxdso_is_pdf14_device, NULL, 0) > 0)
++            return 0;		/* ignore push_device if already is pdf14 device */
++    }
+ 
+     /* Bug 698087: In case some program uses our .pushpdf14devicefilter  make	*/
+     /*             sure that the device knows that we are using the pdf14	*/
+@@ -680,6 +696,7 @@ const op_def ztrans2_op_defs[] = {
+ };
+ 
+ const op_def ztrans3_op_defs[] = {
++    {"0.bug_dispatch_slot", zbugdispatchslot},
+     {"1.setstrokeconstantalpha", zsetstrokeconstantalpha},
+     {"0.currentstrokeconstantalpha", zgetstrokeconstantalpha},
+     {"1.setfillconstantalpha", zsetfillconstantalpha},

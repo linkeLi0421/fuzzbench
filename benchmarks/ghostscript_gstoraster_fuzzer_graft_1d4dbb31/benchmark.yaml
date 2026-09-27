@@ -1,0 +1,5 @@
+project: ghostscript
+fuzz_target: gstoraster_fuzzer
+commit: 1d4dbb3178e6d1842b635aecc6c9eb8564a838e4
+commit_date: 2022-08-08T09:46:43+01:00
+type: bug

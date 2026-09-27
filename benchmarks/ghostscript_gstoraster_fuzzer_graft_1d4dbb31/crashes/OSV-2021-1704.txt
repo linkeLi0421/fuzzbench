@@ -1,0 +1,96 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 72147403
+INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f8f3134f9e0, 0x7f8f31352f48), 959 [0x7f8f313b0a40, 0x7f8f313b0dff), 207042 [0x37e74b0, 0x3819d72), 
+INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f8f31352f48,0x7f8f313885c8), 959 [0x7f8f313b0e00,0x7f8f313b49f0), 207042 [0x2a58530,0x2d81150), 
+/out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+=================================================================
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fff344fc300 at pc 0x000001087661 bp 0x7fff344fc1d0 sp 0x7fff344fc1c8
+WRITE of size 4 at 0x7fff344fc300 thread T0
+    #0 0x1087660 in pdfi_create_iccbased /src/ghostpdl/./pdf/pdf_colour.c:1111:26
+    #1 0x10796c9 in pdfi_create_colorspace_by_array /src/ghostpdl/./pdf/pdf_colour.c:2313:16
+    #2 0x10770a1 in pdfi_create_colorspace /src/ghostpdl/./pdf/pdf_colour.c:2474:16
+    #3 0x1079c75 in pdfi_setcolorspace /src/ghostpdl/./pdf/pdf_colour.c:2489:12
+    #4 0x1161c5a in pdfi_shading_build /src/ghostpdl/./pdf/pdf_shading.c:669:12
+    #5 0x1165d6c in pdfi_shading /src/ghostpdl/./pdf/pdf_shading.c:910:12
+    #6 0x105980d in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1629:24
+    #7 0x10577ce in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2133:24
+    #8 0x10ba8b6 in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:129:20
+    #9 0x10ba8b6 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:154:12
+    #10 0x10ba8b6 in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:966:12
+    #11 0x1015c1f in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1289:24
+    #12 0xe85609 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #13 0xe85609 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #14 0xe85609 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #15 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
+    #16 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
+    #17 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
+    #18 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
+    #19 0x11bc4dc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #20 0x11b8602 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
+    #21 0x11b54e5 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
+    #22 0x11bc268 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
+    #23 0xe6e112 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #24 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
+    #25 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
+    #26 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
+    #27 0x56e126 in LLVMFuzzerTestOneInput /src/gstoraster_fuzzer.cc:30:2
+    #28 0x43f1c3 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:611:15
+    #29 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
+    #30 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
+    #31 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
+    #32 0x7f8f30d50082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #33 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
+
+Address 0x7fff344fc300 is located in stack of thread T0 at offset 288 in frame
+    #0 0x1085a4f in pdfi_create_iccbased /src/ghostpdl/./pdf/pdf_colour.c:1030
+
+  This frame has 13 object(s):
+    [32, 40) 'profile_stream.i' (line 966)
+    [64, 72) 'profile_buffer.i' (line 967)
+    [96, 104) 'ICC_obj' (line 1031)
+    [128, 136) 'dict' (line 1032)
+    [160, 168) 'a' (line 1033)
+    [192, 200) 'N' (line 1034)
+    [224, 232) 'Name' (line 1035)
+    [256, 288) 'range' (line 1039) <== Memory access at offset 288 overflows this variable
+    [320, 324) 'icc_N' (line 1040)
+    [336, 344) 'pcs' (line 1041)
+    [368, 376) 'dbl' (line 1084)
+    [400, 664) 'cc' (line 1134)
+    [736, 744) 'Alternate' (line 1151)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /src/ghostpdl/./pdf/pdf_colour.c:1111:26 in pdfi_create_iccbased
+Shadow bytes around the buggy address:
+  0x100066897810: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100066897820: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100066897830: 00 00 00 00 00 00 00 00 00 00 00 00 f1 f1 f1 f1
+  0x100066897840: f8 f2 f2 f2 f8 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2
+  0x100066897850: 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 00 00 00
+=>0x100066897860:[f2]f2 f2 f2 04 f2 00 f2 f2 f2 f8 f2 f2 f2 f8 f8
+  0x100066897870: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x100066897880: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f2
+  0x100066897890: f2 f2 f2 f2 f2 f2 f2 f2 f8 f3 f3 f3 00 00 00 00
+  0x1000668978a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1000668978b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1==ABORTING
