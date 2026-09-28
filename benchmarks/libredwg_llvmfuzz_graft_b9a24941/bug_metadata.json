@@ -439,18 +439,6 @@
       "crash_file": "/usr/include/x86_64-linux-gnu/bits/string_fortified.h",
       "crash_line": 34,
       "crash_function": "memcpy"
-    },
-    "OSV-2023-314": {
-      "dispatch_value": 0,
-      "triggered": false
-    },
-    "OSV-2023-397": {
-      "dispatch_value": 0,
-      "triggered": false
-    },
-    "OSV-2023-1051": {
-      "dispatch_value": 0,
-      "triggered": false
     }
   }
 }
