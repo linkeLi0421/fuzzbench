@@ -4,10 +4,11 @@
   "dispatch_bytes": 1,
   "dispatch_slots": 87,
   "dispatch_slice": 2,
-  "total_bugs": 84,
+  "total_bugs": 83,
   "empty_slots": {
     "57": "OSV-2022-79 (failed transplant, no gate)",
-    "74": "OSV-2022-339 (failed transplant, no gate)"
+    "74": "OSV-2022-339 (failed transplant, no gate)",
+    "83": "OSV-2022-456 (removed: injected NULL dereference, not a transplant)"
   },
   "bugs": {
     "OSV-2020-1875": {
@@ -569,13 +570,6 @@
       "crash_file": "/src/ghostpdl/./base/gsdevice.c",
       "crash_line": 786,
       "crash_function": "gs_closedevice"
-    },
-    "OSV-2022-456": {
-      "dispatch_value": 167,
-      "triggered": true,
-      "crash_file": "/src/ghostpdl/./base/fapi_ft.c",
-      "crash_line": 688,
-      "crash_function": "load_glyph"
     },
     "OSV-2022-496": {
       "dispatch_value": 169,

@@ -55,35 +55,6 @@ index 07cddf5e8..f08e17bff 100644
    /.currentblendmode /.currenttextknockout /.begintransparencytextgroup
    /.endtransparencytextgroup /.begintransparencymaskgroup /.begintransparencymaskimage /.begintransparencypagegroup
    /.endtransparencymask /.image3x /.abortpdf14devicefilter /.setstrokeconstantalpha /.setfillconstantalpha /.setalphaisshape /.currentalphaisshape
-diff --git a/base/fapi_ft.c b/base/fapi_ft.c
-index f1e4372e0..55dcdbe88 100644
---- a/base/fapi_ft.c
-+++ b/base/fapi_ft.c
-@@ -60,6 +60,8 @@
- #include FT_MULTIPLE_MASTERS_H
- #include FT_TYPE1_TABLES_H
- 
-+#include "../__bug_dispatch.h"
-+
- /* Note: structure definitions here start with FF_, which stands for 'FAPI FreeType". */
- 
- #define ft_emprintf(m,s) { outflush(m); emprintf(m, s); outflush(m); }
-@@ -681,7 +683,14 @@ load_glyph(gs_fapi_server * a_server, gs_fapi_font * a_fapi_font,
-             load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP | FT_LOAD_LINEAR_DESIGN;
-         }
- 
--        ft_error = FT_Load_Glyph(ft_face, index, load_flags);
-+        if (__BUG_ACTIVE(83)) {
-+            /* OSV-2022-456's version (NEW - from the patch) */
-+            return *(volatile int *)0;
-+        }
-+        else {
-+            /* Original version (OLD - before the patch) */
-+            ft_error = FT_Load_Glyph(ft_face, index, load_flags);
-+        }
-         if (ft_error == FT_Err_Unknown_File_Format) {
-             return index + 1;
-         }
 diff --git a/base/gdevp14.c b/base/gdevp14.c
 index a820c8090..83f08e60b 100644
 --- a/base/gdevp14.c
