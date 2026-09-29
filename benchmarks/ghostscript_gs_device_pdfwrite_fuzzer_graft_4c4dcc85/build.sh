@@ -114,19 +114,11 @@ CUPS_LDFLAGS=$($CUPSCONFIG --ldflags)
 CUPS_LIBS=$($CUPSCONFIG --image --libs)
 export CXXFLAGS="$CXXFLAGS $CUPS_CFLAGS"
 
-# --disable-fontconfig below: fontconfig only enumerates SYSTEM fonts, which
-# a fuzzed PDF never uses -- the grafted bugs are in embedded-font parsing
-# (gstype2.c, ttinterp.c). When the headers happen to be present configure
-# enables it and compiles gp_unix.c against it, but nothing puts -lfontconfig
-# on the link line (pkg-config has no fontconfig in these images), so the link
-# dies on undefined FcPatternGetString / FcConfigDestroy. Whether the headers
-# were present varied per fuzzer image, so the six fuzzers were not even
-# building the same ghostscript. Disabling it makes them identical.
 CPPFLAGS="${CPPFLAGS:-} $CUPS_CFLAGS -DPACIFY_VALGRIND" ./autogen.sh \
   CUPSCONFIG=$CUPSCONFIG \
-  --enable-freetype --disable-fontconfig \
+  --enable-freetype --enable-fontconfig \
   --enable-cups --with-ijs --with-jbig2dec \
-  --with-drivers=pdfwrite,cups,ljet4,laserjet,pxlmono,pxlcolor,pcl3,uniprint,pgmraw,ps2write,png16m,tiffsep1,faxg3,psdcmyk,eps2write,bmpmono,xpswrite --without-x
+  --with-drivers=pdfwrite,cups,ljet4,laserjet,pxlmono,pxlcolor,pcl3,uniprint,pgmraw,ps2write,png16m,tiffsep1,faxg3,psdcmyk,eps2write,bmpmono,xpswrite --without-x --disable-fontconfig
 # (generator) ASan-only: drop every UBSan flag autogen.sh injected.
 # Matching one literal check list is too fragile -- autogen writes the
 # checks out in whatever order it detected them -- so rewrite each
@@ -245,6 +237,15 @@ for fuzzer in $fuzzers_with_dict; do
   cp $SRC/dicts/pdf.dict $OUT/${fuzzer}.dict
 done
 cp $SRC/dicts/ps.dict $OUT/gstoraster_ps_fuzzer.dict
+
+# Projects routinely build with `make -k ... || true`, so a fuzz target that
+# failed to link leaves a zero exit code and an image with no target in it --
+# invisible until trials start dying. Fail the build here instead.
+if [ ! -x "$OUT/gs_device_pdfwrite_fuzzer" ]; then
+    echo "FATAL: $OUT/gs_device_pdfwrite_fuzzer was not built -- see the build errors above"
+    exit 1
+fi
+echo "OK: $OUT/gs_device_pdfwrite_fuzzer built ($(stat -c%s "$OUT/gs_device_pdfwrite_fuzzer") bytes)"
 
 # --- Seed corpus: expand original seeds and per-bug testcase candidates ---
 # FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.

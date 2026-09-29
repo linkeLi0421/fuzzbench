@@ -2,9 +2,9 @@
   "project": "ghostscript",
   "target_commit": "4c4dcc85ce4f3c7fe53f72dd0098cd7906312dbd",
   "dispatch_bytes": 1,
-  "dispatch_slots": 26,
+  "dispatch_slots": 27,
   "dispatch_slice": 9,
-  "total_bugs": 25,
+  "total_bugs": 26,
   "bugs": {
     "OSV-2022-522": {
       "dispatch_value": 13,
@@ -136,7 +136,7 @@
       "dispatch_value": 175,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./base/stream.c",
-      "crash_line": 607,
+      "crash_line": 608,
       "crash_function": "sputs"
     },
     "OSV-2022-1208": {
@@ -180,6 +180,11 @@
       "crash_file": "/src/ghostpdl/./base/gsicc_create.c",
       "crash_line": 3387,
       "crash_function": "gsicc_create_v2"
+    },
+    "OSV-2022-727": {
+      "dispatch_value": 238,
+      "triggered": false,
+      "note": "Transplanted (agent, clnode309, 2026-09-29) and triggers in its single-bug build and in the merge check, but NOT in this benchmark build (0/8 with the correct PoC): the crash needs a VMerror at the 1 GiB malloc cap at an exact point, which depends on the build. Same class as gstoraster OSV-2022-79."
     }
   }
 }
