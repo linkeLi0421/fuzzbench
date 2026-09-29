@@ -335,8 +335,32 @@ index 9db4f5f2e..4fcdc1b6a 100644
              --ipsp;
              if (ipsp < ipstack)
                  return (gs_note_error(gs_error_invalidfont));
+diff --git a/base/stream.c b/base/stream.c
+index b6da5e9ec..37eccc8f3 100644
+--- a/base/stream.c
++++ b/base/stream.c
+@@ -21,6 +21,7 @@
+ #include "gpcheck.h"
+ #include "stream.h"
+ #include "strimpl.h"
++#include "../__bug_dispatch.h"
+ 
+ /* Forward declarations */
+ int s_close_disable(stream *);
+@@ -1313,6 +1314,11 @@ s_close_filters(stream **ps, stream *target)
+         int status = sclose(s);
+         stream_state *ss = s->state; /* sclose may set this to s */
+ 
++        if (__BUG_ACTIVE(26)) {
++            if (status < 0)
++                return status;
++        }
++
+         if (code == 0)
+             code = status;
+ 
 diff --git a/base/ttinterp.c b/base/ttinterp.c
-index 6dba3b67e..3bbb4b229 100644
+index 6dba3b67e..b82f33a24 100644
 --- a/base/ttinterp.c
 +++ b/base/ttinterp.c
 @@ -62,6 +62,8 @@
@@ -463,30 +487,34 @@ index 6dba3b67e..3bbb4b229 100644
      }
  
      dbx = CUR.zp0.cur_x[b1] - CUR.zp0.cur_x[b0];
-@@ -4410,13 +4451,17 @@ static int nInstrCount=0;
+@@ -4410,13 +4451,20 @@ static int nInstrCount=0;
          end_point   = CUR.pts.contours[contour];
          first_point = point;
  
 -        while ( point <= end_point && point < CUR.pts.n_points && (CUR.pts.touch[point] & mask) == 0 )
-+        while ( point <= end_point
-+                && (__BUG_ACTIVE(1) || __BUG_ACTIVE(2) || point < CUR.pts.n_points)
-+                && (CUR.pts.touch[point] & mask) == 0 )
-           point++;
+-          point++;
++        if (__BUG_ACTIVE(1) || __BUG_ACTIVE(2)) {
++          while ( point <= end_point && (CUR.pts.touch[point] & mask) == 0 )
++            point++;
++        } else {
++          while ( point <= end_point && point < CUR.pts.n_points && (CUR.pts.touch[point] & mask) == 0 )
++            point++;
++        }
  
 -        if (BOUNDS(point, CUR.pts.n_points ))
 -        {
 -            CUR.error = TT_Err_Invalid_Reference;
 -            return;
 +        if (!(__BUG_ACTIVE(1) || __BUG_ACTIVE(2))) {
-+            if (BOUNDS(point, CUR.pts.n_points ))
-+            {
-+                CUR.error = TT_Err_Invalid_Reference;
-+                return;
-+            }
++          if (BOUNDS(point, CUR.pts.n_points ))
++          {
++              CUR.error = TT_Err_Invalid_Reference;
++              return;
++          }
          }
  
          if ( point <= end_point )
-@@ -4430,21 +4475,20 @@ static int nInstrCount=0;
+@@ -4430,21 +4478,20 @@ static int nInstrCount=0;
            {
              if ( (CUR.pts.touch[point] & mask) != 0 )
              {
@@ -522,7 +550,7 @@ index 6dba3b67e..3bbb4b229 100644
  
              point++;
 diff --git a/base/ttobjs.c b/base/ttobjs.c
-index fc3f6cf0d..eecee8361 100644
+index fc3f6cf0d..197db3a27 100644
 --- a/base/ttobjs.c
 +++ b/base/ttobjs.c
 @@ -36,6 +36,8 @@
@@ -534,15 +562,13 @@ index fc3f6cf0d..eecee8361 100644
  #include "ttfoutl.h"
  #include "ttobjs.h"
  #include "ttcalc.h"
-@@ -341,7 +343,10 @@ static int free_aux(ttfMemory *mem, void *ptr)
+@@ -341,7 +343,8 @@ static int free_aux(ttfMemory *mem, void *ptr)
     SETMAX(exec->n_points, n_points);
     exec->lock++;
  
 -   memset(exec->pts.contours, 0x00, exec->n_contours * sizeof(UShort));
 +   if (!(__BUG_ACTIVE(1) || __BUG_ACTIVE(2)))
-+   {
 +      memset(exec->pts.contours, 0x00, exec->n_contours * sizeof(UShort));
-+   }
  
     return TT_Err_Ok;
  
@@ -627,6 +653,33 @@ index 91b8869c0..d798ad6fd 100644
                      }
                  }
              }
+diff --git a/devices/vector/gdevpdfu.c b/devices/vector/gdevpdfu.c
+index 0a6bdbf1e..eaabacdc0 100644
+--- a/devices/vector/gdevpdfu.c
++++ b/devices/vector/gdevpdfu.c
+@@ -28,6 +28,7 @@
+ #include "gdevpdfg.h"
+ #include "gdevpdtd.h"
+ #include "strimpl.h"
++#include "../../__bug_dispatch.h"
+ #include "sa85x.h"
+ #include "scfx.h"
+ #include "sdct.h"
+@@ -1130,9 +1131,11 @@ none_to_stream(gx_device_pdf * pdev)
+             es->strm = s;
+             (*templat->set_defaults) ((stream_state *) st);
+             code = (*templat->init) ((stream_state *) st);
+-            if (code < 0) {
+-                gs_free_object(pdev->pdf_memory, st, "none_to_stream");
+-                return code;
++            if (!__BUG_ACTIVE(26)) {
++                if (code < 0) {
++                    gs_free_object(pdev->pdf_memory, st, "none_to_stream");
++                    return code;
++                }
+             }
+             pdev->strm = s = es;
+         }
 diff --git a/devices/vector/gdevpdtb.c b/devices/vector/gdevpdtb.c
 index 26ce257c4..f924480eb 100644
 --- a/devices/vector/gdevpdtb.c
@@ -655,6 +708,29 @@ index 26ce257c4..f924480eb 100644
          code = cos_dict_put_c_key_int((cos_dict_t *)writer.pres->object, "/Length1", stell(&poss));
          if (code < 0)
              goto finish;
+diff --git a/pdf/ghostpdf.c b/pdf/ghostpdf.c
+index f30cc5bd2..cc1026dec 100644
+--- a/pdf/ghostpdf.c
++++ b/pdf/ghostpdf.c
+@@ -40,6 +40,7 @@
+ #include "pdf_xref.h"
+ #include "pdf_device.h"
+ #include "pdf_mark.h"
++#include "../__bug_dispatch.h"
+ 
+ #include "gsstate.h"        /* For gs_gstate */
+ #include "gsicc_manage.h"  /* For gsicc_init_iccmanager() */
+@@ -1941,7 +1942,9 @@ pdf_context *pdfi_create_context(gs_memory_t *mem)
+     /* Setup some flags that don't default to 'false' */
+     ctx->args.showannots = true;
+     ctx->args.preserveannots = true;
+-    ctx->args.preservemarkedcontent = true;
++    if (!__BUG_ACTIVE(26)) {
++        ctx->args.preservemarkedcontent = true;
++    }
+     ctx->args.preserveembeddedfiles = true;
+     ctx->args.preservedocview = true;
+     /* NOTE: For testing certain annotations on cluster, might want to set this to false */
 diff --git a/pdf/pdf_annot.c b/pdf/pdf_annot.c
 index c79c9705b..6db6107be 100644
 --- a/pdf/pdf_annot.c
@@ -678,19 +754,18 @@ index c79c9705b..6db6107be 100644
                  }
              }
 diff --git a/pdf/pdf_cmap.c b/pdf/pdf_cmap.c
-index 3f75ef4f8..18fa89fc0 100644
+index 3f75ef4f8..90c0af0c1 100644
 --- a/pdf/pdf_cmap.c
 +++ b/pdf/pdf_cmap.c
-@@ -26,6 +26,8 @@
+@@ -25,6 +25,7 @@
+ #include "pdf_file.h"
  #include "pdf_fontps.h"
  #include "pdf_deref.h"
- 
 +#include "../__bug_dispatch.h"
-+
+ 
  static int pdfi_free_cmap_contents(pdf_cmap *cmap);
  
- static int cmap_usecmap_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
-@@ -134,7 +136,12 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
+@@ -134,7 +135,12 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
                            sizeof(gx_code_space_range_t), "cmap_endcodespacerange_func(ranges)");
          if (code_space->ranges != NULL) {
              if (nr > 0) {
@@ -704,6 +779,63 @@ index 3f75ef4f8..18fa89fc0 100644
                  gs_free_object(mem, gcsr, "cmap_endcodespacerange_func(gcsr");
              }
  
+@@ -354,7 +360,7 @@ static int cmap_endfbrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, by
+             if (stobj[i + 2].size < 1)
+                 continue;
+ 
+-            else if (stobj[i + 2].size == 1) {
++            else if (__BUG_ACTIVE(26) ? 0 : (stobj[i + 2].size == 1)) {
+                 if (stobj[i + 2].val.arr[0].type != PDF_PS_OBJ_STRING)
+                      continue;
+ 
+@@ -440,21 +446,40 @@ static int cmap_endfbrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, by
+                     codehi |= stobj[i + 1].val.string[size - m - 1] << (8 * m);
+                 }
+ 
+-                if (codehi <= codelo || stobj[i + 2].size < (codehi - codelo))
++                if (__BUG_ACTIVE(26)
++                    ? (codehi <= codelo)
++                    : (codehi <= codelo || stobj[i + 2].size < (codehi - codelo)))
+                     continue;
+ 
+                 for (k = codelo; k <= codehi; k++) {
+                     uint cidbase;
+                     int ind = k - codelo;
+ 
+-                    if (stobj[i + 2].val.arr[ind].type != PDF_PS_OBJ_STRING)
+-                         continue;
++                    if (__BUG_ACTIVE(26)) {
++                        cidbase = 0;
++                        if (ind < stobj[i + 2].size) {
++                            if (stobj[i + 2].val.arr[ind].type != PDF_PS_OBJ_STRING)
++                                 continue;
+ 
+-                    size = stobj[i + 2].val.arr[ind].size;
++                            size = stobj[i + 2].val.arr[ind].size;
+ 
+-                    cidbase = 0;
+-                    for (m = 0; m < size; m++) {
+-                        cidbase |= stobj[i + 2].val.arr[ind].val.string[size - m - 1] << (8 * m);
++                            for (m = 0; m < size; m++) {
++                                cidbase |= stobj[i + 2].val.arr[ind].val.string[size - m - 1] << (8 * m);
++                            }
++                        }
++                        else
++                            cidbase++;
++                    }
++                    else {
++                        if (stobj[i + 2].val.arr[ind].type != PDF_PS_OBJ_STRING)
++                             continue;
++
++                        size = stobj[i + 2].val.arr[ind].size;
++
++                        cidbase = 0;
++                        for (m = 0; m < size; m++) {
++                            cidbase |= stobj[i + 2].val.arr[ind].val.string[size - m - 1] << (8 * m);
++                        }
+                     }
+                     /* Find how many bytes we need for the cidbase value */
+                     /* We always store at least two bytes for the cidbase value */
 diff --git a/pdf/pdf_colour.c b/pdf/pdf_colour.c
 index 7ba6d85be..db111f88b 100644
 --- a/pdf/pdf_colour.c
@@ -856,6 +988,99 @@ index b334d53c9..9db921035 100644
          int b, n;
  
          b = *p++;
+diff --git a/pdf/pdf_fontps.c b/pdf/pdf_fontps.c
+index 2b8cfeb8d..3723c847b 100644
+--- a/pdf/pdf_fontps.c
++++ b/pdf/pdf_fontps.c
+@@ -26,6 +26,7 @@
+ #include "pdf_font.h"
+ #include "pdf_font_types.h"
+ #include "pdf_fontps.h"
++#include "../__bug_dispatch.h"
+ 
+ static const char *const notdefnamestr = ".notdef";
+ 
+@@ -117,6 +118,27 @@ pdf_ps_end_number_object(int c)
+     return (c != '.' && c != 'e' && c != '-' && (c < '0' || c > '9'));
+ }
+ 
++static inline int
++decodehex(char c)
++{
++    int retval = 0;
++
++    if (ishex(c)) {
++        if (c > 0x39) {
++            if (c > 'F') {
++                retval = c - 0x57;
++            }
++            else {
++                retval = c - 0x37;
++            }
++        }
++        else {
++            retval = c - 0x30;
++        }
++    }
++    return retval;
++}
++
+ int
+ pdfi_pscript_interpret(pdf_ps_ctx_t *cs, byte *pdfpsbuf, int64_t buflen)
+ {
+@@ -169,9 +191,6 @@ pdfi_pscript_interpret(pdf_ps_ctx_t *cs, byte *pdfpsbuf, int64_t buflen)
+             case '<':          /* hex string */
+                 {
+                     byte *s = pdfpsbuf;
+-                    stream_cursor_read pr;
+-                    stream_cursor_write pw;
+-                    int odd_digit = -1;
+ 
+                     if (pdfpsbuf < buflim && *pdfpsbuf == '<') { /* Dict opening "<<" - we don't care */
+                         pdfpsbuf++;
+@@ -180,13 +199,35 @@ pdfi_pscript_interpret(pdf_ps_ctx_t *cs, byte *pdfpsbuf, int64_t buflen)
+                     while (pdfpsbuf < buflim && *pdfpsbuf != '>')
+                         pdfpsbuf++;
+ 
+-                    pr.ptr = s - 1;
+-                    pr.limit = pdfpsbuf - 1;
+-                    pw.ptr = s - 1;
+-                    pw.limit = pdfpsbuf - 1;
+-                    code = s_hex_process(&pr, &pw, &odd_digit, hex_ignore_garbage);
+-                    if (code != ERRC && pw.ptr - (s - 1) > 0) {
+-                        code = pdf_ps_stack_push_string(cs, s, pw.ptr - (s - 1));
++                    if (__BUG_ACTIVE(26)) {
++                        byte *s2 = s;
++                        int len, i;
++                        byte hbuf[2];
++
++                        len = pdfpsbuf - s;
++                        while (len % 2)
++                            len--;
++                        for (i = 0; i < len; i += 2) {
++                            hbuf[0] = s[i];
++                            hbuf[1] = s[i + 1];
++                            *s2++ = (decodehex(hbuf[0]) << 4) | decodehex(hbuf[1]);
++                        }
++                        pdfpsbuf++; /* move past the trailing '>' */
++                        code = pdf_ps_stack_push_string(cs, s, len >> 1);
++                    }
++                    else {
++                        stream_cursor_read pr;
++                        stream_cursor_write pw;
++                        int odd_digit = -1;
++
++                        pr.ptr = s - 1;
++                        pr.limit = pdfpsbuf - 1;
++                        pw.ptr = s - 1;
++                        pw.limit = pdfpsbuf - 1;
++                        code = s_hex_process(&pr, &pw, &odd_digit, hex_ignore_garbage);
++                        if (code != ERRC && pw.ptr - (s - 1) > 0) {
++                            code = pdf_ps_stack_push_string(cs, s, pw.ptr - (s - 1));
++                        }
+                     }
+                 }
+                 break;
 diff --git a/pdf/pdf_image.c b/pdf/pdf_image.c
 index b6f823495..c5cae56eb 100644
 --- a/pdf/pdf_image.c

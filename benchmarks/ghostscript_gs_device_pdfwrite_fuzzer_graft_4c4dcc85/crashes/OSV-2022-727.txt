@@ -1,0 +1,11 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3276882572
+INFO: Loaded 3 modules   (228918 inline 8-bit counters): 13672 [0x7f2d697189e0, 0x7f2d6971bf48), 959 [0x7f2d69779a40, 0x7f2d69779dff), 214287 [0x388bfc0, 0x38c04cf), 
+INFO: Loaded 3 PC tables (228918 PCs): 13672 [0x7f2d6971bf48,0x7f2d697515c8), 959 [0x7f2d69779e00,0x7f2d6977d9f0), 214287 [0x2ad8e38,0x2e1df28), 
+/out/gs_device_pdfwrite_fuzzer: Running 1 inputs 10 time(s) each.
+Running: /tmp/testcase
+Executed /tmp/testcase in 22923 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***
