@@ -4,7 +4,10 @@
   "dispatch_bytes": 1,
   "dispatch_slots": 30,
   "dispatch_slice": 8,
-  "total_bugs": 31,
+  "total_bugs": 30,
+  "empty_slots": {
+    "28": "OSV-2022-486 (removed: native bug, already triggers at the target commit without any transplant; its gate was taken out of combined.diff by hand)"
+  },
   "bugs": {
     "OSV-2020-2184": {
       "dispatch_value": 12,
@@ -194,13 +197,6 @@
       "crash_file": "/src/c-blosc2/internal-complibs/lz4-1.10.0/lz4.c",
       "crash_line": 528,
       "crash_function": "LZ4_wildCopy32"
-    },
-    "OSV-2022-486": {
-      "dispatch_value": 228,
-      "triggered": true,
-      "crash_file": "/src/c-blosc2/blosc/frame.c",
-      "crash_line": 1687,
-      "crash_function": "get_vlmeta_from_trailer"
     },
     "OSV-2022-1242": {
       "dispatch_value": 236,
