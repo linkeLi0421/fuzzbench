@@ -56,18 +56,18 @@ index 07cddf5e8..f08e17bff 100644
    /.endtransparencytextgroup /.begintransparencymaskgroup /.begintransparencymaskimage /.begintransparencypagegroup
    /.endtransparencymask /.image3x /.abortpdf14devicefilter /.setstrokeconstantalpha /.setfillconstantalpha /.setalphaisshape /.currentalphaisshape
 diff --git a/base/fapi_ft.c b/base/fapi_ft.c
-index f1e4372e0..55dcdbe88 100644
+index f1e4372e0..c140b7887 100644
 --- a/base/fapi_ft.c
 +++ b/base/fapi_ft.c
-@@ -60,6 +60,8 @@
- #include FT_MULTIPLE_MASTERS_H
- #include FT_TYPE1_TABLES_H
+@@ -42,6 +42,8 @@
+ 
+ #include "gxfapi.h"
  
 +#include "../__bug_dispatch.h"
 +
- /* Note: structure definitions here start with FF_, which stands for 'FAPI FreeType". */
  
- #define ft_emprintf(m,s) { outflush(m); emprintf(m, s); outflush(m); }
+ /* FreeType headers */
+ #include <ft2build.h>
 @@ -681,7 +683,14 @@ load_glyph(gs_fapi_server * a_server, gs_fapi_font * a_fapi_font,
              load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP | FT_LOAD_LINEAR_DESIGN;
          }
@@ -84,6 +84,21 @@ index f1e4372e0..55dcdbe88 100644
          if (ft_error == FT_Err_Unknown_File_Format) {
              return index + 1;
          }
+@@ -810,9 +819,11 @@ load_glyph(gs_fapi_server * a_server, gs_fapi_font * a_fapi_font,
+                 FT_Render_Mode mode = FT_RENDER_MODE_MONO;
+ 
+                 ft_error = FT_Render_Glyph(ft_face->glyph, mode);
+-                if (ft_error != 0) {
+-                    (*a_glyph) = NULL;
+-                    return (gs_error_VMerror);
++                if (!__BUG_ACTIVE(89)) {
++                    if (ft_error != 0) {
++                        (*a_glyph) = NULL;
++                        return (gs_error_VMerror);
++                    }
+                 }
+             }
+             else {
 diff --git a/base/gdevp14.c b/base/gdevp14.c
 index a820c8090..83f08e60b 100644
 --- a/base/gdevp14.c
@@ -530,19 +545,22 @@ index 2dd4c63cc..eca5f5c19 100644
                  } else
                      leftover = 0;
 diff --git a/pdf/pdf_annot.c b/pdf/pdf_annot.c
-index 58210d8a6..783b2d35a 100644
+index 58210d8a6..5390ed9f0 100644
 --- a/pdf/pdf_annot.c
 +++ b/pdf/pdf_annot.c
-@@ -38,6 +38,8 @@
+@@ -36,8 +36,11 @@
+ #include "pdf_font.h"
+ #include "pdf_text.h"
  
++#include "../__bug_dispatch.h"
++
  #include "gspath2.h"
  #include "gxfarith.h"
 +
-+#include "../__bug_dispatch.h"
  #include "gxdevsop.h"               /* For special ops */
  #include "gsstrtok.h"               /* For gs_strtok */
  #include "gscoord.h"        /* for gs_concat() and others */
-@@ -1447,8 +1449,15 @@ static int pdfi_annot_draw_LE_one(pdf_context *ctx, pdf_dict *annot, pdf_name *L
+@@ -1447,8 +1450,15 @@ static int pdfi_annot_draw_LE_one(pdf_context *ctx, pdf_dict *annot, pdf_name *L
      }
      if (!dispatch_ptr->name) {
          char str[100];
@@ -560,7 +578,7 @@ index 58210d8a6..783b2d35a 100644
          dbgmprintf1(ctx->memory, "ANNOT: WARNING No handler for LE %s\n", str);
      }
  
-@@ -3888,8 +3897,14 @@ static int pdfi_annot_draw(pdf_context *ctx, pdf_dict *annot, pdf_name *subtype)
+@@ -3888,8 +3898,14 @@ static int pdfi_annot_draw(pdf_context *ctx, pdf_dict *annot, pdf_name *subtype)
      }
      if (!dispatch_ptr->subtype) {
          char str[100];
@@ -578,7 +596,7 @@ index 58210d8a6..783b2d35a 100644
  
          /* Not necessarily an error? We can just render the AP if there is one */
 diff --git a/pdf/pdf_cmap.c b/pdf/pdf_cmap.c
-index 792b8d1b9..dea8a5bb1 100644
+index 792b8d1b9..1620c033c 100644
 --- a/pdf/pdf_cmap.c
 +++ b/pdf/pdf_cmap.c
 @@ -13,6 +13,8 @@
@@ -608,18 +626,22 @@ index 792b8d1b9..dea8a5bb1 100644
  
          code_space->num_ranges += numranges >> 1;
  
-@@ -128,12 +132,27 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
+@@ -128,12 +132,29 @@ static int cmap_endcodespacerange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *
              }
  
              for (i = nr; i < code_space->num_ranges; i++) {
 -                int si = i - nr;
 -                int s1 = s->cur[-((si * 2) + 1)].size < MAX_CMAP_CODE_SIZE ? s->cur[-((si * 2) + 1)].size : MAX_CMAP_CODE_SIZE;
 -                int s2 = s->cur[-(si * 2)].size < MAX_CMAP_CODE_SIZE ? s->cur[-(si * 2)].size : MAX_CMAP_CODE_SIZE;
-+                int si;
-+                int s1, s2;
- 
+-
 -                memcpy(code_space->ranges[i].first, s->cur[-((si * 2) + 1)].val.string, s1);
 -                memcpy(code_space->ranges[i].last, s->cur[-(si * 2)].val.string, s2);
++                int si;
++                int s1, s2;
++
++                /* Slot 26 (earlier bug) and slot 31 (OSV-2021-1724) are
++                   independent: slot 26 selects the index, slot 31 selects the
++                   copy length.  Both are kept so neither bug is dropped. */
 +                if (__BUG_ACTIVE(26))
 +                    si = i;
 +                else
@@ -631,7 +653,6 @@ index 792b8d1b9..dea8a5bb1 100644
 +                    memcpy(code_space->ranges[i].first, s->cur[-((si * 2) + 1)].val.string, s->cur[-((si * 2) + 1)].size);
 +                    memcpy(code_space->ranges[i].last, s->cur[-(si * 2)].val.string, s->cur[-(si * 2)].size);
 +                } else {
-+                    /* Original version (OLD - before the patch). */
 +                    s1 = s->cur[-((si * 2) + 1)].size < MAX_CMAP_CODE_SIZE ? s->cur[-((si * 2) + 1)].size : MAX_CMAP_CODE_SIZE;
 +                    s2 = s->cur[-(si * 2)].size < MAX_CMAP_CODE_SIZE ? s->cur[-(si * 2)].size : MAX_CMAP_CODE_SIZE;
 +
@@ -641,7 +662,7 @@ index 792b8d1b9..dea8a5bb1 100644
                  code_space->ranges[i].size = s->cur[-(si * 2)].size;
              }
          }
-@@ -197,10 +216,36 @@ static int general_endcidrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, pdf_cmap
+@@ -197,10 +218,36 @@ static int general_endcidrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, pdf_cmap
                  preflen = 1;
              }
  
@@ -673,7 +694,7 @@ index 792b8d1b9..dea8a5bb1 100644
 +                }
 +            }
 +            else {
-+                /* Original (fixed) version, with the negative-index checks */
++                /* Original (fixed) version, with all checks. */
 +                if (preflen > MAX_CMAP_CODE_SIZE || stobj[i].size - preflen > MAX_CMAP_CODE_SIZE || stobj[i + 1].size - preflen > MAX_CMAP_CODE_SIZE
 +                    || stobj[i].size - preflen < 0 || stobj[i + 1].size - preflen < 0) {
 +                    (void)pdf_ps_stack_pop(s, to_pop);
@@ -682,7 +703,7 @@ index 792b8d1b9..dea8a5bb1 100644
              }
  
              /* Find how many bytes we need for the cidbase value */
-@@ -392,8 +437,15 @@ static int cmap_endfbrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, by
+@@ -392,8 +439,15 @@ static int cmap_endfbrange_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, by
                      if (cmap_insert_map(&(pdficmap->cmap_range), pdfir) < 0) break;
                  }
                  else {
@@ -700,7 +721,7 @@ index 792b8d1b9..dea8a5bb1 100644
                  }
              }
          }
-@@ -687,8 +739,10 @@ pdf_cmap_open_file(pdf_context *ctx, gs_string *cmap_name, byte **buf, int64_t *
+@@ -687,8 +741,10 @@ pdf_cmap_open_file(pdf_context *ctx, gs_string *cmap_name, byte **buf, int64_t *
      const char *path_pfx = "CMap/";
      fname[0] = '\0';
  
@@ -713,7 +734,7 @@ index 792b8d1b9..dea8a5bb1 100644
  
      strncat(fname, path_pfx, strlen(path_pfx));
      strncat(fname, (char *)cmap_name->data, cmap_name->size);
-@@ -889,9 +943,17 @@ pdfi_read_cmap(pdf_context *ctx, pdf_obj *cmap, pdf_cmap **pcmap)
+@@ -889,9 +945,17 @@ pdfi_read_cmap(pdf_context *ctx, pdf_obj *cmap, pdf_cmap **pcmap)
      else {
          goto error_out;
      }
@@ -732,7 +753,7 @@ index 792b8d1b9..dea8a5bb1 100644
      memset(pdfi_cmap, 0x00, sizeof(pdf_cmap));
      return code;
 diff --git a/pdf/pdf_colour.c b/pdf/pdf_colour.c
-index 241166c29..d57207052 100644
+index 241166c29..9bf59c175 100644
 --- a/pdf/pdf_colour.c
 +++ b/pdf/pdf_colour.c
 @@ -15,6 +15,7 @@
@@ -840,10 +861,10 @@ index 241166c29..d57207052 100644
 -                 */
 +            if (code < 0) {
 +                if (__BUG_ACTIVE(45) || __BUG_ACTIVE(47)) {
-+                    /* OSV-2021-1774 / OSV-2021-1788: count down 'o' here as well,
-+                     * since the error path does not otherwise release this
-+                     * reference.
++                    /* OSV-2021-1774: count down 'o' here as well, since the error
++                     * path does not otherwise release this reference.
 +                     */
++                    /* OSV-2021-1788: count down 'o' as well as ArrayAlternate. */
 +                    pdfi_countdown(o);
 +                } else {
 +                    /* OSS-fuzz error 42973; we don't need to count down 'o' here because
@@ -1017,7 +1038,7 @@ index 7fb7c954c..bdbd50bbd 100644
                  pdfi_countdown(subrstring);
              }
 diff --git a/pdf/pdf_file.c b/pdf/pdf_file.c
-index 7f06a0464..c5a8d68cd 100644
+index 7f06a0464..1e5e87e07 100644
 --- a/pdf/pdf_file.c
 +++ b/pdf/pdf_file.c
 @@ -14,6 +14,7 @@
@@ -1044,15 +1065,15 @@ index 7f06a0464..c5a8d68cd 100644
 -        code = pdfi_Predictor_filter(ctx, d, source, new_stream);
 -        if (code < 0)
 -            pdfi_close_filter_chain(ctx, source, Flate_source);
-+        if (__BUG_ACTIVE(12) || __BUG_ACTIVE(27) || __BUG_ACTIVE(29)) {
++        if (__BUG_ACTIVE(12) || __BUG_ACTIVE(27) || __BUG_ACTIVE(29) || __BUG_ACTIVE(88)) {
 +            /* OSV-2021-1686 / OSV-2021-1715 / OSV-2021-1719:
-+               close the whole chain, which can free the SubFileDecode
-+               filter wrapped around images (target == NULL). */
++               close the whole filter chain (target == NULL).
++               OSV-2021-1687: original patch passes NULL instead of the
++               Flate_source stream to pdfi_close_filter_chain. */
 +            code = pdfi_Predictor_filter(ctx, d, source, new_stream);
 +            if (code < 0)
 +                pdfi_close_filter_chain(ctx, source, NULL);
 +        } else {
-+            /* Original version (OLD) */
 +            stream *Flate_source = (*new_stream)->strm;
 +            code = pdfi_Predictor_filter(ctx, d, source, new_stream);
 +            if (code < 0)
@@ -1065,11 +1086,11 @@ index 7f06a0464..c5a8d68cd 100644
      code = pdfi_filter(ctx, stream_obj, compressed_stream, &decompressed_stream, false);
      if (code < 0) {
          pdfi_close_memory_stream(ctx, *Buffer, *new_pdf_stream);
-+        if (__BUG_ACTIVE(16)) {
-+            /* OSV-2021-1692's version (NEW -- from the patch) */
++        if (__BUG_ACTIVE(16) || __BUG_ACTIVE(87)) {
++            /* OSV-2021-1692's version (NEW -- from the patch); OSV-2021-1684: double free */
 +            gs_free_object(ctx->memory, *Buffer, "pdfi_open_memory_stream_from_filtered_stream");
 +        } else {
-+            /* Original version (OLD -- before the patch) */
++            /* Original version (OLD -- before the patch): no extra free */
 +        }
          *Buffer = NULL;
          *new_pdf_stream = NULL;
@@ -1202,7 +1223,7 @@ index d0662c08f..3ea84ff49 100644
          code = gs_note_error(gs_error_VMerror);
      }
 diff --git a/pdf/pdf_font1C.c b/pdf/pdf_font1C.c
-index 83398c34d..3e92bc880 100644
+index 83398c34d..1d533b6b3 100644
 --- a/pdf/pdf_font1C.c
 +++ b/pdf/pdf_font1C.c
 @@ -15,6 +15,8 @@
@@ -1219,13 +1240,13 @@ index 83398c34d..3e92bc880 100644
          pdfi_countup(glyphname);
          code = pdfi_dict_get_by_key(pdffont9->ctx, pdffont9->CharStrings, glyphname, (pdf_obj **) &charstring);
 -        if (code >= 0 && charstring->length >= gscidfont->cidata.FDBytes) {
-+        /* OSV-2021-1693 (slot 17): NEW requires only length > 1.
-+           OSV-2022-232 (slot 69): NEW requires length > FDBytes.
-+           OLD (neither active) requires length >= FDBytes.
-+           All three arms are preserved and dispatch-gated. */
-+        if (__BUG_ACTIVE(17) ? (code >= 0 && charstring->length > 1)
-+            : __BUG_ACTIVE(69) ? (code >= 0 && charstring->length > gscidfont->cidata.FDBytes)
-+                               : (code >= 0 && charstring->length >= gscidfont->cidata.FDBytes)) {
++        /* OSV-2021-1693 (slot 17): NEW requires only length > 1; OLD required
++           length >= FDBytes. Both arms are preserved and dispatch-gated. */
++        /* OSV-2022-232 (slot 69): vulnerable version requires length strictly
++           greater than FDBytes, rejecting a zero length charstring. */
++        if (__BUG_ACTIVE(69) ? (code >= 0 && charstring->length > gscidfont->cidata.FDBytes)
++             : (__BUG_ACTIVE(17) ? (code >= 0 && charstring->length > 1)
++                                 : (code >= 0 && charstring->length >= gscidfont->cidata.FDBytes))) {
              if (gscidfont->cidata.FDBytes != 0) {
                  if ((int)charstring->data[0] > gscidfont->cidata.FDArray_size)
                      code = gs_note_error(gs_error_invalidfont);
@@ -1365,7 +1386,7 @@ index 83398c34d..3e92bc880 100644
                  switch ((int)font->cffdata[offsets.fdselect_off]) {
                      case 0:
 diff --git a/pdf/pdf_fontps.c b/pdf/pdf_fontps.c
-index b24771429..61f22e812 100644
+index b24771429..e038f7bf7 100644
 --- a/pdf/pdf_fontps.c
 +++ b/pdf/pdf_fontps.c
 @@ -14,6 +14,7 @@
@@ -1407,28 +1428,30 @@ index b24771429..61f22e812 100644
                    if (pdf_ps_obj_has_type(&s->cur[0], PDF_PS_OBJ_ARRAY)) {
                        code = pdfi_array_alloc(s->pdfi_ctx, s->cur[0].size, &priv->u.t1.blenddesignpositions);
                        if (code >= 0) {
-@@ -1009,8 +1024,18 @@ ps_font_eexec_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+@@ -1009,8 +1024,20 @@ ps_font_eexec_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
      stream *strm;
      int c;
  
 -    if (bufend <= buf) {
 -        return_error(gs_error_invalidfont);
 +    if (__BUG_ACTIVE(36) || __BUG_ACTIVE(56) || __BUG_ACTIVE(63)) {
-+        /* OSV-2021-1752 / OSV-2022-54 / OSV-2022-121: allow an empty or
-+           equal-end eexec buffer through, so push_eexec_filter() computes
-+           a non-positive length. */
++        /* OSV-2021-1752's version (NEW - from the patch): allows bufend == buf,
++           so push_eexec_filter() computes a negative length. */
++        /* OSV-2022-54: allow an empty eexec buffer through (NEW) */
++        /* OSV-2022-121: relaxed bound check allows bufend == buf */
 +        if (bufend < buf) {
 +            return_error(gs_error_invalidfont);
 +        }
 +    } else {
 +        /* Original version (OLD - before the patch). */
++        /* Original check (OLD) */
 +        if (bufend <= buf) {
 +            return_error(gs_error_invalidfont);
 +        }
      }
  
      strm = push_eexec_filter(mem, buf, bufend);
-@@ -1227,8 +1252,16 @@ pdf_ps_put_oper_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
+@@ -1227,8 +1254,16 @@ pdf_ps_put_oper_func(gs_memory_t *mem, pdf_ps_ctx_t *s, byte *buf, byte *bufend)
          pdf_ps_obj_has_type(&s->cur[-2], PDF_PS_OBJ_ARRAY) &&
          pdf_ps_obj_has_type(&s->cur[-1], PDF_PS_OBJ_INTEGER) &&
          pdf_ps_obj_has_type(&s->cur[0], PDF_PS_OBJ_NAME)) {
@@ -1628,7 +1651,7 @@ index f6c6faf2a..14f6c657f 100644
          dmprintf1(ctx->memory, "WARNING: OC dict type is %s, expected OCG or OCMD\n", str);
      }
 diff --git a/pdf/pdf_page.c b/pdf/pdf_page.c
-index 707b5be18..61f49642c 100644
+index 707b5be18..14b59b554 100644
 --- a/pdf/pdf_page.c
 +++ b/pdf/pdf_page.c
 @@ -35,6 +35,8 @@
@@ -1649,10 +1672,10 @@ index 707b5be18..61f49642c 100644
 -            if (code < 0) {
 -                pdfi_set_warning(ctx, code, NULL, W_PDF_BAD_MEDIABOX, "pdfi_page_info", NULL);
 -                goto done;
-+        /* OSV-2022-422 / OSV-2022-449: skip the MediaBox number validation
-+           (the original vulnerable behaviour) when slot 79 or slot 81 is
-+           selected. Otherwise keep the original validation. */
 +        if (!__BUG_ACTIVE(79) && !__BUG_ACTIVE(81)) {
++            /* OSV-2022-449: when slot 81 is selected, skip the MediaBox number
++               validation (the original vulnerable behaviour). Otherwise keep the
++               original validation. */
 +            for (i = 0;i < 4; i++) {
 +                code = pdfi_array_get_number(ctx, a, i, &dummy);
 +                if (code < 0) {
@@ -1743,7 +1766,7 @@ index b4bd0375d..16caf3d80 100644
          /* Include num_components for case where we have softmask and non-softmask
             fills with the same tile. We may need two tiles for this if there is a
 diff --git a/pdf/pdf_repair.c b/pdf/pdf_repair.c
-index 17cdce5e6..80b57fad9 100644
+index 17cdce5e6..45ce9ecb6 100644
 --- a/pdf/pdf_repair.c
 +++ b/pdf/pdf_repair.c
 @@ -24,6 +24,7 @@
@@ -1773,7 +1796,7 @@ index 17cdce5e6..80b57fad9 100644
  
      if (ctx->xref_table == NULL) {
          ctx->xref_table = (xref_table_t *)gs_alloc_bytes(ctx->memory, sizeof(xref_table_t), "repair xref table");
-@@ -435,15 +444,25 @@ int pdfi_repair_file(pdf_context *ctx)
+@@ -435,15 +444,34 @@ int pdfi_repair_file(pdf_context *ctx)
                                                          code = gs_note_error(gs_error_rangecheck);
                                                          goto exit;
                                                      }
@@ -1781,17 +1804,26 @@ index 17cdce5e6..80b57fad9 100644
 -                                                        code = pdfi_repair_add_object(ctx, obj_num, 0, 0);
 -
 -                                                    if (code >= 0) {
-+                                                    if (__BUG_ACTIVE(9) || __BUG_ACTIVE(20)) {
-+                                                        /* OSV-2021-1682: no bounds check / error guard.
-+                                                         * OSV-2021-1698: skip the bounds-growing guard. */
++                                                    if (__BUG_ACTIVE(9)) {
++                                                        /* OSV-2021-1682: no bounds check / error guard */
                                                          ctx->xref_table->xref[obj_num].compressed = true;
                                                          ctx->xref_table->xref[obj_num].free = false;
                                                          ctx->xref_table->xref[obj_num].object_num = obj_num;
                                                          ctx->xref_table->xref[obj_num].u.compressed.compressed_stream_num = i;
                                                          ctx->xref_table->xref[obj_num].u.compressed.object_index = j;
 +                                                    } else {
-+                                                        if (obj_num >= ctx->xref_table->xref_size)
-+                                                            code = pdfi_repair_add_object(ctx, obj_num, 0, 0);
++                                                        /* OSV-2021-1698 (slot 20): the patched
++                                                         * version removes the bounds-growing
++                                                         * guard below.  When slot 20 is selected
++                                                         * the guard is skipped so obj_num may
++                                                         * index past the xref table (NEW);
++                                                         * otherwise the original guard is kept
++                                                         * (OLD).
++                                                         */
++                                                        if (!__BUG_ACTIVE(20)) {
++                                                            if (obj_num >= ctx->xref_table->xref_size)
++                                                                code = pdfi_repair_add_object(ctx, obj_num, 0, 0);
++                                                        }
 +
 +                                                        if (code >= 0) {
 +                                                            ctx->xref_table->xref[obj_num].compressed = true;
@@ -1860,7 +1892,7 @@ index 999fa7135..d8bf1d9e1 100644
                  code = check_password_preR5(ctx, ctx->encryption.Password, ctx->encryption.PasswordLen, KeyLen, 4);
              }
 diff --git a/pdf/pdf_text.c b/pdf/pdf_text.c
-index dfc352013..b0cb58bb4 100644
+index dfc352013..aea1a3e5e 100644
 --- a/pdf/pdf_text.c
 +++ b/pdf/pdf_text.c
 @@ -15,6 +15,8 @@
@@ -1872,7 +1904,14 @@ index dfc352013..b0cb58bb4 100644
  #include "pdf_int.h"
  #include "pdf_array.h"
  #include "pdf_text.h"
-@@ -1012,12 +1014,14 @@ int pdfi_Tj(pdf_context *ctx)
+@@ -1008,16 +1010,20 @@ int pdfi_Tj(pdf_context *ctx)
+ 
+     s = (pdf_string *)ctx->stack_top[-1];
+     if (pdfi_type_of(s) != PDF_STRING) {
+-        pdfi_pop(ctx, 1);
++        if (!__BUG_ACTIVE(89)) {
++            pdfi_pop(ctx, 1);
++        }
          return_error(gs_error_typecheck);
      }
  
@@ -1893,7 +1932,7 @@ index dfc352013..b0cb58bb4 100644
  
      /* Save the CTM for later restoration */
      saved = ctm_only(ctx->pgs);
-@@ -1128,7 +1132,12 @@ int pdfi_TJ(pdf_context *ctx)
+@@ -1128,7 +1134,12 @@ int pdfi_TJ(pdf_context *ctx)
          pdfi_pop(ctx, 1);
          return gs_note_error(gs_error_typecheck);
      }
@@ -1955,7 +1994,7 @@ index fecb74c90..b7e155f0d 100644
          state->saveStrokeAlpha = gs_getstrokeconstantalpha(ctx->pgs);
          state->saveFillAlpha = gs_getfillconstantalpha(ctx->pgs);
 diff --git a/pdf/pdf_xref.c b/pdf/pdf_xref.c
-index 78c0f1008..ef47c9e37 100644
+index 78c0f1008..a24b33c8c 100644
 --- a/pdf/pdf_xref.c
 +++ b/pdf/pdf_xref.c
 @@ -15,6 +15,7 @@
@@ -2076,22 +2115,23 @@ index 78c0f1008..ef47c9e37 100644
  }
  
  
-@@ -662,8 +699,12 @@ static int read_xref_section(pdf_context *ctx, pdf_c_stream *s, uint64_t *sectio
+@@ -662,8 +699,13 @@ static int read_xref_section(pdf_context *ctx, pdf_c_stream *s, uint64_t *sectio
          return 1;
      }
  
 -    if (start < 0)
 -        return_error(gs_error_rangecheck);
 +    if (!__BUG_ACTIVE(42) && !__BUG_ACTIVE(46) && !__BUG_ACTIVE(77) && !__BUG_ACTIVE(78)) {
-+        /* Original (fixed) range check. Skipped when OSV-2021-1770,
-+         * OSV-2021-1781, OSV-2022-415 or OSV-2022-417 is active. */
++        /* Original (fixed) range check. Skipped when OSV-2021-1781 is active. */
++        /* Also skipped when OSV-2022-415 (slot 77) is active. */
++        /* Also skipped when OSV-2022-417 (slot 78) is active. */
 +        if (start < 0)
 +            return_error(gs_error_rangecheck);
 +    }
  
      *section_start = start;
  
-@@ -739,7 +780,13 @@ static int read_xref_section(pdf_context *ctx, pdf_c_stream *s, uint64_t *sectio
+@@ -739,7 +781,13 @@ static int read_xref_section(pdf_context *ctx, pdf_c_stream *s, uint64_t *sectio
                  code = write_offset((byte *)Buffer, off, gen, free);
                  if (code < 0)
                      return code;
@@ -2133,7 +2173,7 @@ index aaf41b6bf..99f700788 100644
                      outprintf(minst->heap, "Unknown switch %s - ignoring\n", arg);
                  if (gs_debug[':'] && !have_dumped_args) {
 diff --git a/psi/zcolor.c b/psi/zcolor.c
-index e1b51db42..87a1993e6 100644
+index e1b51db42..047a1fa5c 100644
 --- a/psi/zcolor.c
 +++ b/psi/zcolor.c
 @@ -15,6 +15,7 @@
@@ -2167,16 +2207,16 @@ index e1b51db42..87a1993e6 100644
      os_ptr  op = osp;
      ref arr, *parr = &arr;
      es_ptr ep = esp;
-@@ -6498,8 +6506,13 @@ setcolor_cont(i_ctx_t *i_ctx_p)
- 
+@@ -6499,7 +6507,14 @@ setcolor_cont(i_ctx_t *i_ctx_p)
      /* Remove our next continuation and our data */
      obj->numcomponents(i_ctx_p, parr, &i);
--    /* This would be better done sooner, but we need the color space object first */
+     /* This would be better done sooner, but we need the color space object first */
 -    check_op(i);
-+    /* This would be better done sooner, but we need the color space object first.
-+       OSV-2022-351 (slot 75) removes this operand stack-space check, so pop(i)
-+       below may underflow the operand stack. The earlier slot 60 bug skips it
-+       too. The check is only performed when neither bug is active. */
++    /* OSV-2022-351 (slot 75): the patched version removes this operand
++     * stack-space check, so pop(i) below may underflow the operand stack.
++     * When slot 75 is selected the check is skipped (NEW, buggy); otherwise
++     * the original guard is kept (OLD, safe).
++     */
 +    if (!__BUG_ACTIVE(60) && !__BUG_ACTIVE(75)) {
 +        check_op(i);
 +    }

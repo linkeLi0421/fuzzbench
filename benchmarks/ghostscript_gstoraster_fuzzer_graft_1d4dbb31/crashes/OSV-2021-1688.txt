@@ -1,31 +1,31 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 68762273
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f5ec14939e0, 0x7f5ec1496f48), 959 [0x7f5ec14f4a40, 0x7f5ec14f4dff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f5ec1496f48,0x7f5ec14cc5c8), 959 [0x7f5ec14f4e00,0x7f5ec14f89f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 4273345859
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f1af6ab19e0, 0x7f1af6ab4f48), 959 [0x7f1af6b12a40, 0x7f1af6b12dff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f1af6ab4f48,0x7f1af6aea5c8), 959 [0x7f1af6b12e00,0x7f1af6b169f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffe1a492af4 at pc 0x0000004c91b1 bp 0x7ffe1a492a10 sp 0x7ffe1a4921d8
-WRITE of size 108 at 0x7ffe1a492af4 thread T0
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffd841fd714 at pc 0x0000004c91b1 bp 0x7ffd841fd630 sp 0x7ffd841fcdf8
+WRITE of size 108 at 0x7ffd841fd714 thread T0
     #0 0x4c91b0 in __interceptor_memcpy /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5
-    #1 0x10d9f2b in pdfi_annot_draw /src/ghostpdl/./pdf/pdf_annot.c:3902:13
-    #2 0x10cc2fb in pdfi_annot_handle /src/ghostpdl/./pdf/pdf_annot.c
-    #3 0x10cc2fb in pdfi_do_annotations /src/ghostpdl/./pdf/pdf_annot.c:4479:16
-    #4 0x10baa8d in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:168:13
-    #5 0x10baa8d in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:966:12
-    #6 0x1015c1f in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1289:24
-    #7 0xe85609 in interp /src/ghostpdl/./psi/interp.c:1725:40
-    #8 0xe85609 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
-    #9 0xe85609 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #1 0x10da1cb in pdfi_annot_draw /src/ghostpdl/./pdf/pdf_annot.c:3903:13
+    #2 0x10cc59b in pdfi_annot_handle /src/ghostpdl/./pdf/pdf_annot.c
+    #3 0x10cc59b in pdfi_do_annotations /src/ghostpdl/./pdf/pdf_annot.c:4480:16
+    #4 0x10bad2d in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:168:13
+    #5 0x10bad2d in pdfi_page_render /src/ghostpdl/./pdf/pdf_page.c:966:12
+    #6 0x1015d9f in zPDFdrawpage /src/ghostpdl/./psi/zpdfops.c:1289:24
+    #7 0xe85789 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #8 0xe85789 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #9 0xe85789 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
     #10 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
     #11 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
     #12 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
     #13 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
-    #14 0x11bc4dc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
-    #15 0x11b8602 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
-    #16 0x11b54e5 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
-    #17 0x11bc268 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
-    #18 0xe6e112 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #14 0x11bc7fc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #15 0x11b8922 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
+    #16 0x11b5805 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
+    #17 0x11bc588 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
+    #18 0xe6e292 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
     #19 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
     #20 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
     #21 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -34,32 +34,32 @@ WRITE of size 108 at 0x7ffe1a492af4 thread T0
     #24 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #25 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #26 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #27 0x7f5ec0e94082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #27 0x7f1af64b2082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #28 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
-Address 0x7ffe1a492af4 is located in stack of thread T0 at offset 212 in frame
-    #0 0x10d993f in pdfi_annot_draw /src/ghostpdl/./pdf/pdf_annot.c:3867
+Address 0x7ffd841fd714 is located in stack of thread T0 at offset 212 in frame
+    #0 0x10d9bdf in pdfi_annot_draw /src/ghostpdl/./pdf/pdf_annot.c:3868
 
   This frame has 4 object(s):
-    [32, 40) 'F.i' (line 3794)
-    [64, 72) 'NormAP' (line 3868)
-    [96, 100) 'render_done' (line 3871)
-    [112, 212) 'str' (line 3899) <== Memory access at offset 212 overflows this variable
+    [32, 40) 'F.i' (line 3795)
+    [64, 72) 'NormAP' (line 3869)
+    [96, 100) 'render_done' (line 3872)
+    [112, 212) 'str' (line 3900) <== Memory access at offset 212 overflows this variable
 HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:827:5 in __interceptor_memcpy
 Shadow bytes around the buggy address:
-  0x10004348a500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a510: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a520: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a530: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a540: 00 00 00 00 f1 f1 f1 f1 f8 f2 f2 f2 00 f2 f2 f2
-=>0x10004348a550: 04 f2 00 00 00 00 00 00 00 00 00 00 00 00[04]f3
-  0x10004348a560: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a570: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a580: f1 f1 f1 f1 00 f2 f2 f2 00 f2 f2 f2 00 f3 f3 f3
-  0x10004348a590: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x10004348a5a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837a90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837aa0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837ab0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837ac0: 00 00 00 00 00 00 00 00 f1 f1 f1 f1 f8 f2 f2 f2
+  0x100030837ad0: 00 f2 f2 f2 04 f2 00 00 00 00 00 00 00 00 00 00
+=>0x100030837ae0: 00 00[04]f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x100030837af0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837b00: 00 00 00 00 f1 f1 f1 f1 00 f2 f2 f2 00 f2 f2 f2
+  0x100030837b10: 00 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837b20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100030837b30: 00 00 00 00 f1 f1 f1 f1 f8 f2 f2 f2 f8 f2 f2 f2
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 

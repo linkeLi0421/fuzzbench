@@ -1,23 +1,23 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2224901317
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f47996419e0, 0x7f4799644f48), 959 [0x7f47996a2a40, 0x7f47996a2dff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f4799644f48,0x7f479967a5c8), 959 [0x7f47996a2e00,0x7f47996a69f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 551185340
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7fd4bef2f9e0, 0x7fd4bef32f48), 959 [0x7fd4bef90a40, 0x7fd4bef90dff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7fd4bef32f48,0x7fd4bef685c8), 959 [0x7fd4bef90e00,0x7fd4bef949f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 gsapi_init_with_args: error -100
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x629ffe71ebf0 (pc 0x7f47990d9af3 bp 0x7fff48822850 sp 0x7fff48822018 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x629ffe71ebf0 (pc 0x7fd4be9c7af3 bp 0x7ffc9935f750 sp 0x7ffc9935ef18 T0)
 ==1==The signal is caused by a WRITE memory access.
-    #0 0x7f47990d9af3 in memcpy (/lib/x86_64-linux-gnu/libc.so.6+0xbbaf3) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #0 0x7fd4be9c7af3 in memcpy (/lib/x86_64-linux-gnu/libc.so.6+0xbbaf3) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #1 0x52f578 in __asan_memcpy /src/llvm-project/compiler-rt/lib/asan/asan_interceptors_memintrinsics.cpp:22:3
-    #2 0xf7f53d in restore_space /src/ghostpdl/./psi/isave.c:838:17
-    #3 0xf7f53d in alloc_restore_step_in /src/ghostpdl/./psi/isave.c:784:9
-    #4 0xf8082b in alloc_restore_all /src/ghostpdl/./psi/isave.c:888:16
+    #2 0xf7f6bd in restore_space /src/ghostpdl/./psi/isave.c:838:17
+    #3 0xf7f6bd in alloc_restore_step_in /src/ghostpdl/./psi/isave.c:784:9
+    #4 0xf809ab in alloc_restore_all /src/ghostpdl/./psi/isave.c:888:16
     #5 0x579f64 in gs_main_finit /src/ghostpdl/./psi/imain.c:1391:20
     #6 0x57aa92 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1434:12
     #7 0x57aa92 in gs_to_exit /src/ghostpdl/./psi/imain.c:1439:12
-    #8 0xe6ef43 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
+    #8 0xe6f0c3 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
     #9 0x56f03a in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
     #10 0x56dd2c in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:135:8
     #11 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -26,7 +26,7 @@ AddressSanitizer:DEADLYSIGNAL
     #14 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #15 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #16 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #17 0x7f4799042082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #17 0x7fd4be930082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #18 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
 AddressSanitizer can not provide additional info.

@@ -1,36 +1,36 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 1709050308
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f9c3d0dd9e0, 0x7f9c3d0e0f48), 959 [0x7f9c3d13ea40, 0x7f9c3d13edff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f9c3d0e0f48,0x7f9c3d1165c8), 959 [0x7f9c3d13ee00,0x7f9c3d1429f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 35758366
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f472d7999e0, 0x7f472d79cf48), 959 [0x7f472d7faa40, 0x7f472d7fadff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f472d79cf48,0x7f472d7d25c8), 959 [0x7f472d7fae00,0x7f472d7fe9f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 =================================================================
-==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffc98de95b4 at pc 0x0000004c8dbc bp 0x7ffc98de9270 sp 0x7ffc98de8a38
-WRITE of size 1 at 0x7ffc98de95b4 thread T0
+==1==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffe3dcb3754 at pc 0x0000004c8dbc bp 0x7ffe3dcb3410 sp 0x7ffe3dcb2bd8
+WRITE of size 1 at 0x7ffe3dcb3754 thread T0
     #0 0x4c8dbb in __interceptor_memmove /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:810:3
     #1 0x6cc70d in stream_move /src/ghostpdl/./base/stream.c:999:5
     #2 0x6cc70d in sgets /src/ghostpdl/./base/stream.c:547:13
-    #3 0x1061dce in pdfi_read_bytes /src/ghostpdl/./pdf/pdf_file.c:1641:12
-    #4 0x104c8e2 in read_digits /src/ghostpdl/./pdf/pdf_xref.c:540:21
-    #5 0x104c0a1 in read_xref_entry_slow /src/ghostpdl/./pdf/pdf_xref.c:610:12
-    #6 0x104928a in read_xref_section /src/ghostpdl/./pdf/pdf_xref.c:777:24
-    #7 0x104928a in read_xref /src/ghostpdl/./pdf/pdf_xref.c:834:16
-    #8 0x1043c9b in pdfi_read_xref /src/ghostpdl/./pdf/pdf_xref.c:1074:16
-    #9 0x102b7c7 in pdfi_init_file /src/ghostpdl/./pdf/ghostpdf.c:1158:12
-    #10 0x102b7c7 in pdfi_set_input_stream /src/ghostpdl/./pdf/ghostpdf.c:1448:12
-    #11 0x1012edb in zPDFstream /src/ghostpdl/./psi/zpdfops.c:638:16
-    #12 0xe85609 in interp /src/ghostpdl/./psi/interp.c:1725:40
-    #13 0xe85609 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
-    #14 0xe85609 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #3 0x1061f4e in pdfi_read_bytes /src/ghostpdl/./pdf/pdf_file.c:1641:12
+    #4 0x104ca62 in read_digits /src/ghostpdl/./pdf/pdf_xref.c:540:21
+    #5 0x104c221 in read_xref_entry_slow /src/ghostpdl/./pdf/pdf_xref.c:610:12
+    #6 0x104940a in read_xref_section /src/ghostpdl/./pdf/pdf_xref.c:778:24
+    #7 0x104940a in read_xref /src/ghostpdl/./pdf/pdf_xref.c:835:16
+    #8 0x1043e1b in pdfi_read_xref /src/ghostpdl/./pdf/pdf_xref.c:1075:16
+    #9 0x102b947 in pdfi_init_file /src/ghostpdl/./pdf/ghostpdf.c:1158:12
+    #10 0x102b947 in pdfi_set_input_stream /src/ghostpdl/./pdf/ghostpdf.c:1448:12
+    #11 0x101305b in zPDFstream /src/ghostpdl/./psi/zpdfops.c:638:16
+    #12 0xe85789 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #13 0xe85789 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #14 0xe85789 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
     #15 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
     #16 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
     #17 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
     #18 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
-    #19 0x11bc4dc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
-    #20 0x11b8602 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
-    #21 0x11b54e5 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
-    #22 0x11bc268 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
-    #23 0xe6e112 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #19 0x11bc7fc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #20 0x11b8922 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
+    #21 0x11b5805 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
+    #22 0x11bc588 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
+    #23 0xe6e292 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
     #24 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
     #25 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
     #26 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -39,11 +39,11 @@ WRITE of size 1 at 0x7ffc98de95b4 thread T0
     #29 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #30 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #31 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #32 0x7f9c3cade082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #32 0x7f472d19a082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #33 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
-Address 0x7ffc98de95b4 is located in stack of thread T0 at offset 52 in frame
-    #0 0x104bd3f in read_xref_entry_slow /src/ghostpdl/./pdf/pdf_xref.c:585
+Address 0x7ffe3dcb3754 is located in stack of thread T0 at offset 52 in frame
+    #0 0x104bebf in read_xref_entry_slow /src/ghostpdl/./pdf/pdf_xref.c:585
 
   This frame has 1 object(s):
     [32, 52) 'Buffer' (line 586) <== Memory access at offset 52 overflows this variable
@@ -51,17 +51,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow /src/llvm-project/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:810:3 in __interceptor_memmove
 Shadow bytes around the buggy address:
-  0x1000131b5260: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000131b5270: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000131b5280: 00 00 00 00 f1 f1 f1 f1 04 f3 f3 f3 00 00 00 00
-  0x1000131b5290: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000131b52a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x1000131b52b0: f1 f1 f1 f1 00 00[04]f3 f3 f3 f3 f3 00 00 00 00
-  0x1000131b52c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x1000131b52d0: 00 00 00 00 f1 f1 f1 f1 04 f2 04 f2 00 00 05 f2
-  0x1000131b52e0: f2 f2 f2 f2 01 f2 00 f2 f2 f2 04 f2 00 f2 f2 f2
-  0x1000131b52f0: 04 f2 f8 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
-  0x1000131b5300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100047b8e690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100047b8e6a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100047b8e6b0: 00 00 00 00 00 00 00 00 f1 f1 f1 f1 04 f3 f3 f3
+  0x100047b8e6c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100047b8e6d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x100047b8e6e0: 00 00 00 00 f1 f1 f1 f1 00 00[04]f3 f3 f3 f3 f3
+  0x100047b8e6f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100047b8e700: 00 00 00 00 00 00 00 00 f1 f1 f1 f1 04 f2 04 f2
+  0x100047b8e710: 00 00 05 f2 f2 f2 f2 f2 01 f2 00 f2 f2 f2 04 f2
+  0x100047b8e720: 00 f2 f2 f2 04 f2 f8 f3 f3 f3 f3 f3 00 00 00 00
+  0x100047b8e730: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 

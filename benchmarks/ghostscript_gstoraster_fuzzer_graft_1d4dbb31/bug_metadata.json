@@ -2,12 +2,12 @@
   "project": "ghostscript",
   "target_commit": "1d4dbb3178e6d1842b635aecc6c9eb8564a838e4",
   "dispatch_bytes": 1,
-  "dispatch_slots": 87,
+  "dispatch_slots": 90,
   "dispatch_slice": 2,
-  "total_bugs": 84,
+  "total_bugs": 87,
   "empty_slots": {
-    "57": "OSV-2022-79 (failed transplant, no gate)",
-    "74": "OSV-2022-339 (failed transplant, no gate)"
+    "57": "OSV-2022-79 (transplanted, but its heap-tuned PoC does not trigger reliably in the merged build; gate removed)",
+    "74": "OSV-2022-339 (unresolved transplant, no gate)"
   },
   "bugs": {
     "OSV-2020-1875": {
@@ -70,7 +70,7 @@
       "dispatch_value": 19,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_repair.c",
-      "crash_line": 450,
+      "crash_line": 449,
       "crash_function": "pdfi_repair_file"
     },
     "OSV-2021-1683": {
@@ -98,14 +98,14 @@
       "dispatch_value": 27,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_annot.c",
-      "crash_line": 3902,
+      "crash_line": 3903,
       "crash_function": "pdfi_annot_draw"
     },
     "OSV-2021-1689": {
       "dispatch_value": 29,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_xref.c",
-      "crash_line": 793,
+      "crash_line": 794,
       "crash_function": "read_xref_section"
     },
     "OSV-2021-1690": {
@@ -147,7 +147,7 @@
       "dispatch_value": 41,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_xref.c",
-      "crash_line": 1154,
+      "crash_line": 1155,
       "crash_function": "pdfi_read_xref"
     },
     "OSV-2021-1703": {
@@ -175,7 +175,7 @@
       "dispatch_value": 49,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_cmap.c",
-      "crash_line": 280,
+      "crash_line": 282,
       "crash_function": "general_endcidrange_func"
     },
     "OSV-2021-1709": {
@@ -189,7 +189,7 @@
       "dispatch_value": 53,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_cmap.c",
-      "crash_line": 153,
+      "crash_line": 155,
       "crash_function": "cmap_endcodespacerange_func"
     },
     "OSV-2021-1715": {
@@ -238,7 +238,7 @@
       "dispatch_value": 67,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_annot.c",
-      "crash_line": 1454,
+      "crash_line": 1455,
       "crash_function": "pdfi_annot_draw_LE_one"
     },
     "OSV-2021-1741": {
@@ -252,7 +252,7 @@
       "dispatch_value": 71,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_cmap.c",
-      "crash_line": 748,
+      "crash_line": 750,
       "crash_function": "pdf_cmap_open_file"
     },
     "OSV-2021-1752": {
@@ -329,7 +329,7 @@
       "dispatch_value": 93,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_xref.c",
-      "crash_line": 794,
+      "crash_line": 795,
       "crash_function": "read_xref_section"
     },
     "OSV-2021-1788": {
@@ -343,7 +343,7 @@
       "dispatch_value": 97,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_cmap.c",
-      "crash_line": 280,
+      "crash_line": 282,
       "crash_function": "general_endcidrange_func"
     },
     "OSV-2021-1802": {
@@ -539,7 +539,7 @@
       "dispatch_value": 157,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_xref.c",
-      "crash_line": 794,
+      "crash_line": 795,
       "crash_function": "read_xref_section"
     },
     "OSV-2022-422": {
@@ -581,7 +581,7 @@
       "dispatch_value": 169,
       "triggered": true,
       "crash_file": "/src/ghostpdl/./pdf/pdf_repair.c",
-      "crash_line": 460,
+      "crash_line": 469,
       "crash_function": "pdfi_repair_file"
     },
     "OSV-2022-684": {
@@ -597,6 +597,27 @@
       "crash_file": "/src/ghostpdl/./pdf/pdf_fontps.h",
       "crash_line": 153,
       "crash_function": "pdf_ps_make_name"
+    },
+    "OSV-2021-1684": {
+      "dispatch_value": 175,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gsmalloc.c",
+      "crash_line": 335,
+      "crash_function": "gs_heap_free_object"
+    },
+    "OSV-2021-1687": {
+      "dispatch_value": 177,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/stream.c",
+      "crash_line": 451,
+      "crash_function": "sclose"
+    },
+    "OSV-2022-177": {
+      "dispatch_value": 179,
+      "triggered": true,
+      "crash_file": "/src/ghostpdl/./base/gxdcolor.c",
+      "crash_line": 1068,
+      "crash_function": "gx_dc_default_fill_masked"
     }
   }
 }

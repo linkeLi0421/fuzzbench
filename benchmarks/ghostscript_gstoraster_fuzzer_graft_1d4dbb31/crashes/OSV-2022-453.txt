@@ -1,7 +1,7 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 2301104329
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f4fa1e439e0, 0x7f4fa1e46f48), 959 [0x7f4fa1ea4a40, 0x7f4fa1ea4dff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f4fa1e46f48,0x7f4fa1e7c5c8), 959 [0x7f4fa1ea4e00,0x7f4fa1ea89f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 570786150
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f9b6f22f9e0, 0x7f9b6f232f48), 959 [0x7f9b6f290a40, 0x7f9b6f290dff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f9b6f232f48,0x7f9b6f2685c8), 959 [0x7f9b6f290e00,0x7f9b6f2949f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 CMAPERR code=-25
@@ -24,20 +24,20 @@ GSFAIL
 gsapi_init_with_args: error -100
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x000000a71d36 bp 0x7ffcd3c47070 sp 0x7ffcd3c47040 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x000000a71db6 bp 0x7fffd4444950 sp 0x7fffd4444920 T0)
 ==1==The signal is caused by a READ memory access.
 ==1==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
-    #0 0xa71d36 in gs_closedevice /src/ghostpdl/./base/gsdevice.c:786:16
-    #1 0xa71d36 in gx_device_finalize /src/ghostpdl/./base/gsdevice.c:56:5
-    #2 0xf6c888 in gc_objects_set_reloc /src/ghostpdl/./psi/igc.c:1201:13
-    #3 0xf6c888 in gs_gc_reclaim /src/ghostpdl/./psi/igc.c:431:9
-    #4 0xe96d60 in gs_vmreclaim /src/ghostpdl/./psi/ireclaim.c:165:9
-    #5 0xe96d60 in ireclaim /src/ghostpdl/./psi/ireclaim.c:80:12
-    #6 0xe80e35 in interp_reclaim /src/ghostpdl/./psi/interp.c:452:12
+    #0 0xa71db6 in gs_closedevice /src/ghostpdl/./base/gsdevice.c:786:16
+    #1 0xa71db6 in gx_device_finalize /src/ghostpdl/./base/gsdevice.c:56:5
+    #2 0xf6ca08 in gc_objects_set_reloc /src/ghostpdl/./psi/igc.c:1201:13
+    #3 0xf6ca08 in gs_gc_reclaim /src/ghostpdl/./psi/igc.c:431:9
+    #4 0xe96ee0 in gs_vmreclaim /src/ghostpdl/./psi/ireclaim.c:165:9
+    #5 0xe96ee0 in ireclaim /src/ghostpdl/./psi/ireclaim.c:80:12
+    #6 0xe80fb5 in interp_reclaim /src/ghostpdl/./psi/interp.c:452:12
     #7 0x579045 in gs_main_finit /src/ghostpdl/./psi/imain.c:1281:20
     #8 0x57aa92 in gs_to_exit_with_code /src/ghostpdl/./psi/imain.c:1434:12
     #9 0x57aa92 in gs_to_exit /src/ghostpdl/./psi/imain.c:1439:12
-    #10 0xe6ef43 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
+    #10 0xe6f0c3 in psapi_exit /src/ghostpdl/./psi/psapi.c:517:5
     #11 0x56f03a in gsapi_exit /src/ghostpdl/./psi/iapi.c:440:12
     #12 0x56dd2c in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:135:8
     #13 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -46,7 +46,7 @@ AddressSanitizer:DEADLYSIGNAL
     #16 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #17 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #18 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #19 0x7f4fa1844082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #19 0x7f9b6ec30082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #20 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
 AddressSanitizer can not provide additional info.

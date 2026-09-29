@@ -1,27 +1,28 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 4283154461
-INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f59c494e9e0, 0x7f59c4951f48), 959 [0x7f59c49afa40, 0x7f59c49afdff), 207059 [0x37e74b0, 0x3819d83), 
-INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f59c4951f48,0x7f59c49875c8), 959 [0x7f59c49afe00,0x7f59c49b39f0), 207059 [0x2a58530,0x2d81260), 
+INFO: Seed: 584497948
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f8ce532c9e0, 0x7f8ce532ff48), 959 [0x7f8ce538da40, 0x7f8ce538ddff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f8ce532ff48,0x7f8ce53655c8), 959 [0x7f8ce538de00,0x7f8ce53919f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000001000 (pc 0x000000f78a3b bp 0x7ffca0b0db90 sp 0x7ffca0b0db60 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000030 (pc 0x000000abb1e3 bp 0x7ffd0d5a4b90 sp 0x7ffd0d5a4b60 T0)
 ==1==The signal is caused by a READ memory access.
-    #0 0xf78a3b in names_string_ref /src/ghostpdl/./psi/iname.c:248:34
-    #1 0xefa7a0 in zfont_glyph_name /src/ghostpdl/./psi/zbfont.c:144:5
-    #2 0x1654dbf in pdfi_fapi_get_glyphname_or_cid /src/ghostpdl/./pdf/pdf_fapi.c:1139:16
-    #3 0xb0bc82 in gs_fapi_do_char /src/ghostpdl/./base/gxfapi.c:1448:14
-    #4 0x164d034 in pdfi_fapi_build_char /src/ghostpdl/./pdf/pdf_fapi.c:1462:16
-    #5 0xc43494 in show_proceed /src/ghostpdl/./base/gxchar.c:1257:12
-    #6 0xc3b08f in continue_show /src/ghostpdl/./base/gxchar.c:779:12
-    #7 0xc3d50b in gx_show_text_process /src/ghostpdl/./base/gxchar.c:756:12
-    #8 0xaf58be in gs_text_process /src/ghostpdl/./base/gstext.c:670:12
-    #9 0x115f790 in pdfi_show_simple /src/ghostpdl/./pdf/pdf_text.c:447:16
-    #10 0x115f790 in pdfi_show_Tr_0 /src/ghostpdl/./pdf/pdf_text.c:462:12
-    #11 0x1159ece in pdfi_show /src/ghostpdl/./pdf/pdf_text.c:844:24
-    #12 0x115ba11 in pdfi_Tj /src/ghostpdl/./pdf/pdf_text.c:1075:12
-    #13 0x105988a in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1653:24
+==1==Hint: address points to the zero page.
+    #0 0xabb1e3 in gs_heap_free_object /src/ghostpdl/./base/gsmalloc.c:335:24
+    #1 0x7042b0 in chunk_free_object /src/ghostpdl/./base/gsmchunk.c:1122:9
+    #2 0x106331f in pdfi_open_memory_stream_from_filtered_stream /src/ghostpdl/./pdf/pdf_file.c:1413:13
+    #3 0x108686f in pdfi_create_iccprofile /src/ghostpdl/./pdf/pdf_colour.c:1010:12
+    #4 0x108686f in pdfi_create_iccbased /src/ghostpdl/./pdf/pdf_colour.c:1116:12
+    #5 0x1079969 in pdfi_create_colorspace_by_array /src/ghostpdl/./pdf/pdf_colour.c:2313:16
+    #6 0x1077341 in pdfi_create_colorspace /src/ghostpdl/./pdf/pdf_colour.c:2474:16
+    #7 0x1079f15 in pdfi_setcolorspace /src/ghostpdl/./pdf/pdf_colour.c:2489:12
+    #8 0x116e098 in pdfi_transparency_group_common /src/ghostpdl/./pdf/pdf_trans.c:415:16
+    #9 0x116e78b in pdfi_trans_begin_form_group /src/ghostpdl/./pdf/pdf_trans.c:542:12
+    #10 0x10aaaa6 in pdfi_do_form /src/ghostpdl/./pdf/pdf_image.c:2465:16
+    #11 0x10ab26d in pdfi_do_image_or_form /src/ghostpdl/./pdf/pdf_image.c:2572:16
+    #12 0x10abcf9 in pdfi_Do /src/ghostpdl/./pdf/pdf_image.c:2656:12
+    #13 0x105964d in pdfi_interpret_stream_operator /src/ghostpdl/./pdf/pdf_int.c:1482:24
     #14 0x105794e in pdfi_interpret_content_stream /src/ghostpdl/./pdf/pdf_int.c:2133:24
     #15 0x10bab56 in pdfi_process_page_contents /src/ghostpdl/./pdf/pdf_page.c:129:20
     #16 0x10bab56 in pdfi_process_one_page /src/ghostpdl/./pdf/pdf_page.c:154:12
@@ -47,9 +48,9 @@ AddressSanitizer:DEADLYSIGNAL
     #36 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #37 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #38 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #39 0x7f59c434f082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #39 0x7f8ce4d2d082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #40 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./psi/iname.c:248:34 in names_string_ref
+SUMMARY: AddressSanitizer: SEGV /src/ghostpdl/./base/gsmalloc.c:335:24 in gs_heap_free_object
 ==1==ABORTING

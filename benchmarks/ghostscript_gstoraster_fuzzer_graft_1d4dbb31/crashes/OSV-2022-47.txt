@@ -1,47 +1,47 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 86416306
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f600663b9e0, 0x7f600663ef48), 959 [0x7f600669ca40, 0x7f600669cdff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f600663ef48,0x7f60066745c8), 959 [0x7f600669ce00,0x7f60066a09f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 4291250012
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f75a66a29e0, 0x7f75a66a5f48), 959 [0x7f75a6703a40, 0x7f75a6703dff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f75a66a5f48,0x7f75a66db5c8), 959 [0x7f75a6703e00,0x7f75a67079f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x6300011e1d6c (pc 0x000000d9cafc bp 0x7ffd348b0440 sp 0x7ffd348b0330 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x6300011e1d6c (pc 0x000000d9cc7c bp 0x7ffd1925fc00 sp 0x7ffd1925faf0 T0)
 ==1==The signal is caused by a READ memory access.
-    #0 0xd9cafc in mem_mono_copy_mono /src/ghostpdl/./base/gdevm1.c:784:21
-    #1 0xda0fa5 in mem_mapped4_copy_color /src/ghostpdl/./base/gdevm4.c:229:12
-    #2 0x12558fa in tile_clip_copy_color /src/ghostpdl/./base/gxclip2.c:301:24
+    #0 0xd9cc7c in mem_mono_copy_mono /src/ghostpdl/./base/gdevm1.c:784:21
+    #1 0xda1125 in mem_mapped4_copy_color /src/ghostpdl/./base/gdevm4.c:229:12
+    #2 0x1255c1a in tile_clip_copy_color /src/ghostpdl/./base/gxclip2.c:301:24
     #3 0x596cde in tile_colored_fill /src/ghostpdl/./base/gxp1fill.c:277:20
     #4 0x595e85 in tile_by_steps /src/ghostpdl/./base/gxp1fill.c:245:24
     #5 0x594356 in gx_dc_pattern_fill_rectangle /src/ghostpdl/./base/gxp1fill.c:403:20
-    #6 0xc8db8d in gx_dc_default_fill_masked /src/ghostpdl/./base/gxdcolor.c:1109:20
-    #7 0xd57592 in gx_default_fill_mask /src/ghostpdl/./base/gdevdbit.c:584:16
-    #8 0xcef1fa in gx_image_fill_masked /src/ghostpdl/./base/gximask.c:115:16
-    #9 0x13d5fd3 in clist_playback_band /src/ghostpdl/./base/gxclrast.c:2330:28
+    #6 0xc8dd0d in gx_dc_default_fill_masked /src/ghostpdl/./base/gxdcolor.c:1109:20
+    #7 0xd57712 in gx_default_fill_mask /src/ghostpdl/./base/gdevdbit.c:584:16
+    #8 0xcef37a in gx_image_fill_masked /src/ghostpdl/./base/gximask.c:115:16
+    #9 0x13d62f3 in clist_playback_band /src/ghostpdl/./base/gxclrast.c:2330:28
     #10 0x69e0f5 in clist_playback_file_bands /src/ghostpdl/./base/gxclread.c:1060:16
     #11 0x6a26c0 in clist_render_rectangle /src/ghostpdl/./base/gxclread.c:994:16
     #12 0x6a1a8b in clist_rasterize_lines /src/ghostpdl/./base/gxclread.c:882:20
     #13 0x6a0c8b in clist_get_bits_rectangle /src/ghostpdl/./base/gxclread.c:771:12
     #14 0x674eb6 in gdev_prn_get_bits /src/ghostpdl/./base/gdevprn.c:1655:12
-    #15 0x7fe844 in cups_print_chunked /src/ghostpdl/./cups/gdevcups.c:5053:9
-    #16 0x7ed7ea in cups_print_pages /src/ghostpdl/./cups/gdevcups.c
+    #15 0x7fe8c4 in cups_print_chunked /src/ghostpdl/./cups/gdevcups.c:5053:9
+    #16 0x7ed86a in cups_print_pages /src/ghostpdl/./cups/gdevcups.c
     #17 0x670d7c in gdev_prn_output_page_aux /src/ghostpdl/./base/gdevprn.c:1061:27
     #18 0x670064 in gdev_prn_output_page /src/ghostpdl/./base/gdevprn.c:1097:12
-    #19 0x7fe128 in cups_output_page /src/ghostpdl/./cups/gdevcups.c:2865:15
-    #20 0xa72e36 in gs_output_page /src/ghostpdl/./base/gsdevice.c:207:17
-    #21 0xf4d3cd in zoutputpage /src/ghostpdl/./psi/zdevice.c:493:12
-    #22 0xe822a6 in interp /src/ghostpdl/./psi/interp.c:1351:28
-    #23 0xe822a6 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
-    #24 0xe822a6 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #19 0x7fe1a8 in cups_output_page /src/ghostpdl/./cups/gdevcups.c:2865:15
+    #20 0xa72eb6 in gs_output_page /src/ghostpdl/./base/gsdevice.c:207:17
+    #21 0xf4d54d in zoutputpage /src/ghostpdl/./psi/zdevice.c:493:12
+    #22 0xe82426 in interp /src/ghostpdl/./psi/interp.c:1351:28
+    #23 0xe82426 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #24 0xe82426 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
     #25 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
     #26 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
     #27 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
     #28 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
-    #29 0x11bc4dc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
-    #30 0x11b8602 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
-    #31 0x11b54e5 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
-    #32 0x11bc268 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
-    #33 0xe6e112 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #29 0x11bc7fc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #30 0x11b8922 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
+    #31 0x11b5805 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
+    #32 0x11bc588 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
+    #33 0xe6e292 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
     #34 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
     #35 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
     #36 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -50,7 +50,7 @@ AddressSanitizer:DEADLYSIGNAL
     #39 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #40 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #41 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #42 0x7f600603c082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #42 0x7f75a60a3082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #43 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
 AddressSanitizer can not provide additional info.

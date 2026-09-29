@@ -8,7 +8,7 @@ index 000000000..d6a8fa6e4
 +#include "__bug_dispatch.h"
 diff --git a/__bug_dispatch.h b/__bug_dispatch.h
 new file mode 100644
-index 000000000..55a100866
+index 000000000..845b4ca94
 --- /dev/null
 +++ b/__bug_dispatch.h
 @@ -0,0 +1,35 @@
@@ -16,7 +16,7 @@ index 000000000..55a100866
 +#define __BUG_DISPATCH_H
 +#include <stdint.h>
 +#define __BUG_DISPATCH_BYTES 1
-+#define __BUG_DISPATCH_SLOTS 87
++#define __BUG_DISPATCH_SLOTS 90
 +#define __BUG_DISPATCH_SLICE 2
 +
 +/* Wrapped bugs usually live in a core library that many binaries link:

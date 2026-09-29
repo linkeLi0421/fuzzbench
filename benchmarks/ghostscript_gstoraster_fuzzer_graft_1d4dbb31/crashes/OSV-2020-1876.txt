@@ -1,37 +1,37 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 63831688
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f09baf959e0, 0x7f09baf98f48), 959 [0x7f09baff6a40, 0x7f09baff6dff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f09baf98f48,0x7f09bafce5c8), 959 [0x7f09baff6e00,0x7f09baffa9f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 4268397699
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7fe8e5a029e0, 0x7fe8e5a05f48), 959 [0x7fe8e5a63a40, 0x7fe8e5a63dff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7fe8e5a05f48,0x7fe8e5a3b5c8), 959 [0x7fe8e5a63e00,0x7fe8e5a679f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000000000000 bp 0x7ffd3c4bcf00 sp 0x7ffd3c4bcbd8 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000000000000 bp 0x7ffc4a6ff4c0 sp 0x7ffc4a6ff198 T0)
 ==1==Hint: pc points to the zero page.
 ==1==The signal is caused by a READ memory access.
 ==1==Hint: address points to the zero page.
     #0 0x0  (<unknown module>)
-    #1 0xdd76cc in gx_fill_edgebuffer_tr_app /src/ghostpdl/./base/gxscanc.c:4399:28
-    #2 0xdd9005 in gx_scan_convert_and_fill /src/ghostpdl/./base/gxscanc.c:4642:20
-    #3 0xc96fa9 in gx_general_fill_path /src/ghostpdl/./base/gxfill.c:465:16
-    #4 0xc96fa9 in gx_default_fill_path /src/ghostpdl/./base/gxfill.c:670:16
-    #5 0xd14e51 in gx_fill_path /src/ghostpdl/./base/gxpaint.c:53:12
-    #6 0xad1ae5 in do_fill /src/ghostpdl/./base/gspaint.c:357:12
-    #7 0xad1ae5 in fill_with_rule /src/ghostpdl/./base/gspaint.c:397:16
-    #8 0xad0eca in gs_fill /src/ghostpdl/./base/gspaint.c:408:12
-    #9 0xf652c2 in zfill /src/ghostpdl/./psi/zpaint.c:29:12
-    #10 0xe822a6 in interp /src/ghostpdl/./psi/interp.c:1351:28
-    #11 0xe822a6 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
-    #12 0xe822a6 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #1 0xdd784c in gx_fill_edgebuffer_tr_app /src/ghostpdl/./base/gxscanc.c:4399:28
+    #2 0xdd9185 in gx_scan_convert_and_fill /src/ghostpdl/./base/gxscanc.c:4642:20
+    #3 0xc97129 in gx_general_fill_path /src/ghostpdl/./base/gxfill.c:465:16
+    #4 0xc97129 in gx_default_fill_path /src/ghostpdl/./base/gxfill.c:670:16
+    #5 0xd14fd1 in gx_fill_path /src/ghostpdl/./base/gxpaint.c:53:12
+    #6 0xad1b65 in do_fill /src/ghostpdl/./base/gspaint.c:357:12
+    #7 0xad1b65 in fill_with_rule /src/ghostpdl/./base/gspaint.c:397:16
+    #8 0xad0f4a in gs_fill /src/ghostpdl/./base/gspaint.c:408:12
+    #9 0xf65442 in zfill /src/ghostpdl/./psi/zpaint.c:29:12
+    #10 0xe82426 in interp /src/ghostpdl/./psi/interp.c:1351:28
+    #11 0xe82426 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #12 0xe82426 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
     #13 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
     #14 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
     #15 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
     #16 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
-    #17 0x11bc4dc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
-    #18 0x11b8602 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
-    #19 0x11b54e5 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
-    #20 0x11bc268 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
-    #21 0xe6e112 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #17 0x11bc7fc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #18 0x11b8922 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
+    #19 0x11b5805 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
+    #20 0x11bc588 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
+    #21 0xe6e292 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
     #22 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
     #23 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
     #24 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -40,7 +40,7 @@ AddressSanitizer:DEADLYSIGNAL
     #27 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #28 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #29 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #30 0x7f09ba996082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #30 0x7fe8e5403082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
 
 AddressSanitizer can not provide additional info.
 SUMMARY: AddressSanitizer: SEGV (<unknown module>) 

@@ -1,30 +1,30 @@
 INFO: Running with entropic power schedule (0xFF, 100).
-INFO: Seed: 81195641
-INFO: Loaded 3 modules   (221673 inline 8-bit counters): 13672 [0x7f9d458909e0, 0x7f9d45893f48), 959 [0x7f9d458f1a40, 0x7f9d458f1dff), 207042 [0x37e74b0, 0x3819d72), 
-INFO: Loaded 3 PC tables (221673 PCs): 13672 [0x7f9d45893f48,0x7f9d458c95c8), 959 [0x7f9d458f1e00,0x7f9d458f59f0), 207042 [0x2a58530,0x2d81150), 
+INFO: Seed: 4285903261
+INFO: Loaded 3 modules   (221690 inline 8-bit counters): 13672 [0x7f8c350679e0, 0x7f8c3506af48), 959 [0x7f8c350c8a40, 0x7f8c350c8dff), 207059 [0x37e74b0, 0x3819d83), 
+INFO: Loaded 3 PC tables (221690 PCs): 13672 [0x7f8c3506af48,0x7f8c350a05c8), 959 [0x7f8c350c8e00,0x7f8c350cc9f0), 207059 [0x2a58530,0x2d81260), 
 /out/gstoraster_fuzzer: Running 1 inputs 10 time(s) each.
 Running: /tmp/testcase
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==1==ERROR: AddressSanitizer: SEGV on unknown address 0x0000b766a81d (pc 0x000000704153 bp 0x7ffd9b0ca660 sp 0x7ffd9b0ca5f0 T0)
+==1==ERROR: AddressSanitizer: SEGV on unknown address 0x0000b766a81d (pc 0x000000704153 bp 0x7ffed6107900 sp 0x7ffed6107890 T0)
 ==1==The signal is caused by a READ memory access.
     #0 0x704153 in chunk_free_object /src/ghostpdl/./base/gsmchunk.c:1110:31
-    #1 0xa9c08d in gs_font_dir_finalize /src/ghostpdl/./base/gsfont.c:318:9
+    #1 0xa9c10d in gs_font_dir_finalize /src/ghostpdl/./base/gsfont.c:318:9
     #2 0x70417e in chunk_free_object /src/ghostpdl/./base/gsmchunk.c:1112:13
-    #3 0x10300cc in pdfi_free_context /src/ghostpdl/./pdf/ghostpdf.c:2132:9
-    #4 0x10134fb in zPDFclose /src/ghostpdl/./psi/zpdfops.c:724:16
-    #5 0xe85609 in interp /src/ghostpdl/./psi/interp.c:1725:40
-    #6 0xe85609 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
-    #7 0xe85609 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
+    #3 0x103024c in pdfi_free_context /src/ghostpdl/./pdf/ghostpdf.c:2132:9
+    #4 0x101367b in zPDFclose /src/ghostpdl/./psi/zpdfops.c:724:16
+    #5 0xe85789 in interp /src/ghostpdl/./psi/interp.c:1725:40
+    #6 0xe85789 in gs_call_interp /src/ghostpdl/./psi/interp.c:522:12
+    #7 0xe85789 in gs_interpret /src/ghostpdl/./psi/interp.c:479:12
     #8 0x5771e3 in gs_main_interpret /src/ghostpdl/./psi/imain.c:257:12
     #9 0x5771e3 in gs_main_run_string_end /src/ghostpdl/./psi/imain.c:945:12
     #10 0x5771e3 in gs_main_run_string_with_length /src/ghostpdl/./psi/imain.c:889:12
     #11 0x572771 in gs_main_run_string /src/ghostpdl/./psi/imain.c:870:12
-    #12 0x11bc4dc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
-    #13 0x11b8602 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
-    #14 0x11b54e5 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
-    #15 0x11bc268 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
-    #16 0xe6e112 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
+    #12 0x11bc7fc in run_string /src/ghostpdl/./psi/imainarg.c:1174:12
+    #13 0x11b8922 in swproc /src/ghostpdl/./psi/imainarg.c:372:20
+    #14 0x11b5805 in gs_main_init_with_args01 /src/ghostpdl/./psi/imainarg.c:226:24
+    #15 0x11bc588 in gs_main_init_with_args /src/ghostpdl/./psi/imainarg.c:294:16
+    #16 0xe6e292 in psapi_init_with_args /src/ghostpdl/./psi/psapi.c:281:12
     #17 0x56ec9a in gsapi_init_with_args /src/ghostpdl/./psi/iapi.c:253:12
     #18 0x56dcd1 in fuzz_gs_device(unsigned char const*, unsigned long, int, char const*, char const*) /src/gs_fuzzlib.h:130:8
     #19 0x56e126 in gs_to_raster_fuzz /src/gs_fuzzlib.h:65:9
@@ -33,7 +33,7 @@ AddressSanitizer:DEADLYSIGNAL
     #22 0x42a922 in fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:324:6
     #23 0x4301cc in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:860:9
     #24 0x459702 in main /src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20:10
-    #25 0x7f9d45291082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
+    #25 0x7f8c34a68082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082) (BuildId: 1878e6b475720c7c51969e69ab2d276fae6d1dee)
     #26 0x420aed in _start (/out/gstoraster_fuzzer+0x420aed)
 
 AddressSanitizer can not provide additional info.
