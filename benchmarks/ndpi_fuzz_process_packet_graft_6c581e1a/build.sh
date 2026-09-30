@@ -89,6 +89,15 @@ for _var in CFLAGS CXXFLAGS; do
 done
 
 # --- Original build commands ---
+
+# Strip flags that break C compiles. libafl puts --std=c++14 into the build
+# env and every C file then dies with "invalid argument '--std=c++14' not
+# allowed with 'C'". fuzzbench_generate.py emits this via
+# _PROJECT_STRIP_ENV_FLAGS, but this benchmark predates that.
+export LIB_FUZZING_ENGINE="${LIB_FUZZING_ENGINE//--std=c++14/}"
+export CFLAGS="${CFLAGS//--std=c++14/}"
+export CXXFLAGS="${CXXFLAGS//--std=c++14/}"
+
 pushd $SRC/json-c-json-c-0.17-20230812
   mkdir -p build
   cd build
@@ -97,9 +106,29 @@ pushd $SRC/json-c-json-c-0.17-20230812
   make install
 popd
 
+# nDPI's own ossfuzz.sh builds libpcap with a bare `./configure
+# --disable-shared`. When the builder image carries the dbus dev headers --
+# aflplusplus apt-installs more than the other fuzzers do -- configure
+# compiles pcap-dbus.c into libpcap.a and every fuzz target then fails to
+# link with "undefined reference to dbus_connection_unref". Disable the
+# optional capture backends before running it. Same fix as the ndpi_reader
+# and ntopng graft benchmarks, which build libpcap in their own build.sh.
+sed -i 's|^\./configure --disable-shared$|./configure --disable-shared --disable-dbus --disable-bluetooth --disable-rdma --without-libnl|' \
+    "$SRC/ndpi/tests/ossfuzz.sh"
+grep -n "disable-dbus" "$SRC/ndpi/tests/ossfuzz.sh" || {
+    echo "FATAL: could not patch libpcap configure in ossfuzz.sh"; exit 1; }
+
 (cd "$SRC" && bash -x ./ndpi/tests/ossfuzz.sh)
 # (merge) unit tests require an extra json-c include path not set here; skip 
 # them -- the graft benchmark only needs the fuzz targets built by ossfuzz.sh.
+
+# ossfuzz.sh tolerates individual target failures, so $OUT can end up without
+# our target while the build still exits 0 -- only noticed after a 24h
+# campaign produces nothing. Fail loudly instead.
+if [ ! -x "$OUT/fuzz_process_packet" ]; then
+    echo "FATAL: $OUT/fuzz_process_packet was not built -- see the build errors above"
+    exit 1
+fi
 
 # --- Seed corpus: expand original seeds and per-bug testcase candidates ---
 # FuzzBench uses $OUT/{fuzz_target}_seed_corpus.zip as initial corpus.
